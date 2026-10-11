@@ -8,10 +8,8 @@ const isProduction = process.env.NODE_ENV === "production";
 function resolveSiteUrl(): string {
   const value = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (value) return value.replace(/\/+$/, "");
-  if (isProduction && typeof window === "undefined" && process.env.ALLOW_PLACEHOLDER_ENV !== "1") {
-    throw new Error("NEXT_PUBLIC_SITE_URL is not set. Set it to your public origin (https://www.yourdomain.com) before building.");
-  }
-  return "http://localhost:3000";
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "https://castov.com";
 }
 
 export const SITE = {
@@ -24,7 +22,7 @@ export const SITE = {
   themeColor: "#0B1020",
   /** Date used as `lastModified` in the sitemap. Update when content changes meaningfully. */
   contentUpdated: "2026-09-20",
-  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() ?? "",
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "contact@castov.com",
 } as const;
 
 export function absoluteUrl(path = "/"): string {
