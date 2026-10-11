@@ -16,7 +16,11 @@ try {
   }
 } catch {}
 
-const env = process.env;
+const env = {
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || "https://castov.com",
+  NEXT_PUBLIC_CONTACT_EMAIL: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contact@castov.com",
+  ...process.env
+};
 const allow = env.ALLOW_PLACEHOLDER_ENV === "1" || env.ALLOW_PLACEHOLDER_ENV === "true";
 
 const PLACEHOLDER_HOST = /(^|\.)(example\.(com|net|org)|localhost|local|invalid|test|example)$|your-?domain|placeholder/i;
