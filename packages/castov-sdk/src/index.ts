@@ -9,6 +9,10 @@ export * from "./timestamp.js";
 export * from "./detect.js";
 export * from "./cron.js";
 export * from "./tz.js";
+export * from "./chmod.js";
+export * from "./jwt.js";
+export * from "./diff.js";
+export * from "./color.js";
 
 // ---------------------------------------------------------------------------
 // Crypto & Internals
@@ -95,6 +99,10 @@ import { unix, unixToIso, isoToUnix, ts } from "./timestamp.js";
 import { detect } from "./detect.js";
 import { cron } from "./cron.js";
 import { tz } from "./tz.js";
+import { chmod } from "./chmod.js";
+import { jwtInspect } from "./jwt.js";
+import { diff, duration } from "./diff.js";
+import { color } from "./color.js";
 
 export function base64Encode(text: string, options: Base64Options = {}): string {
   const bytes = new TextEncoder().encode(text);
@@ -175,8 +183,13 @@ export const castov = {
   detect,
   cron,
   tz,
+  chmod,
+  diff,
+  duration,
+  color,
   hash,
   jwtDecode,
+  jwtInspect,
 } as const;
 
 export default castov;

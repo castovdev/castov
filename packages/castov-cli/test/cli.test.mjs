@@ -152,8 +152,44 @@ test("castov tz: converts between zones and handles DST", () => {
   assert.match(rOverlap.stdout, /fall-back overlap/);
 });
 
+test("castov chmod: breakdown and symbolic conversion", () => {
+  const r755 = run(["chmod", "755"]);
+  assert.equal(r755.status, 0);
+  assert.match(r755.stdout, /Octal:\s+755/);
+  assert.match(r755.stdout, /Symbolic:\s+rwxr-xr-x/);
+  assert.match(r755.stdout, /Owner:\s+Read, Write, Execute/);
+
+  const rSym = run(["chmod", "rwxr-xr-x"]);
+  assert.equal(rSym.status, 0);
+  assert.match(rSym.stdout, /Octal:\s+755/);
+
+  const r777 = run(["chmod", "777"]);
+  assert.equal(r777.status, 0);
+  assert.match(r777.stdout, /Highly insecure/);
+});
+
+test("castov diff and duration", () => {
+  const rDiff = run(["diff", "2026-01-01", "2026-01-03"]);
+  assert.equal(rDiff.status, 0);
+  assert.match(rDiff.stdout, /Difference:\s+2 days/);
+  assert.match(rDiff.stdout, /Total days:\s+2/);
+
+  const rDur = run(["duration", "3661000"]);
+  assert.equal(rDur.status, 0);
+  assert.match(rDur.stdout, /1h 1m 1s/);
+});
+
+test("castov color: hex and rgb parsing with contrast", () => {
+  const rHex = run(["color", "#2563eb"]);
+  assert.equal(rHex.status, 0);
+  assert.match(rHex.stdout, /Hex:\s+#2563eb/);
+  assert.match(rHex.stdout, /RGB:\s+rgb\(37, 99, 235\)/);
+  assert.match(rHex.stdout, /Contrast:/);
+  assert.match(rHex.stdout, /Best Text:\s+#ffffff/);
+});
+
 test("per-command --help flags", () => {
-  const commands = ["ts", "detect", "cron", "tz", "uuid", "encode", "decode", "hash", "jwt"];
+  const commands = ["ts", "detect", "cron", "tz", "chmod", "diff", "duration", "color", "uuid", "encode", "decode", "hash", "jwt"];
   for (const cmd of commands) {
     const r = run([cmd, "--help"]);
     assert.equal(r.status, 0);

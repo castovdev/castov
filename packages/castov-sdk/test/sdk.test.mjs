@@ -17,6 +17,11 @@ import {
   detect,
   cron,
   tz,
+  chmod,
+  jwtInspect,
+  diff,
+  duration,
+  color,
 } from "../dist/esm/index.js";
 
 test("uuid v4 format and uniqueness", () => {
@@ -181,6 +186,97 @@ test("tz: converts between IANA zones and detects DST gaps/overlaps", () => {
   assert.throws(() => tz("2026-01-01 12:00:00", "InvalidZone", "UTC"));
 });
 
+test("chmod: octal to symbolic, reverse, and warnings", () => {
+  const c755 = chmod(755);
+  assert.equal(c755.octal, "755");
+  assert.equal(c755.symbolic, "rwxr-xr-x");
+  assert.equal(c755.owner.description, "Read, Write, Execute");
+  assert.equal(c755.group.description, "Read, Execute");
+  assert.equal(c755.others.description, "Read, Execute");
+  assert.equal(c755.command, "chmod 755 <file>");
+
+  // Symbolic to octal
+  const cSym = chmod("rwxr-xr-x");
+  assert.equal(cSym.octal, "755");
+  assert.equal(cSym.octal4, "0755");
+
+  // 777 security warning
+  const c777 = chmod("777");
+  assert.ok(c777.warning?.includes("Highly insecure"));
+
+  // Invalids
+  assert.throws(() => chmod("999"));
+  assert.throws(() => chmod("invalid"));
+});
+
+test("jwtInspect: inspects payload and calculates expiration status", () => {
+  // Token with exp in future
+  const futureSec = Math.floor(Date.now() / 1000) + 3600;
+  const headerB64 = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+  const payloadB64 = Buffer.from(JSON.stringify({ sub: "user123", exp: futureSec })).toString("base64url");
+  const validToken = `${headerB64}.${payloadB64}.fake-sig`;
+
+  const inspected = jwtInspect(validToken);
+  assert.equal(inspected.header.alg, "HS256");
+  assert.equal(inspected.payload.sub, "user123");
+  assert.equal(inspected.status, "active");
+  assert.equal(inspected.isExpired, false);
+  assert.ok(inspected.expiresAt?.relative.includes("in"));
+
+  // Expired token
+  const pastSec = Math.floor(Date.now() / 1000) - 7200;
+  const expiredPayloadB64 = Buffer.from(JSON.stringify({ sub: "user123", exp: pastSec })).toString("base64url");
+  const expiredToken = `${headerB64}.${expiredPayloadB64}.fake-sig`;
+
+  const expiredRes = jwtInspect(expiredToken);
+  assert.equal(expiredRes.status, "expired");
+  assert.equal(expiredRes.isExpired, true);
+  assert.ok(expiredRes.expiresAt?.relative.includes("ago"));
+
+  // Malformed
+  assert.throws(() => jwtInspect("not-a-jwt"));
+});
+
+test("diff & duration: computes difference between dates and formats durations", () => {
+  const d = diff("2026-01-01T00:00:00Z", "2026-01-03T12:30:00Z");
+  assert.equal(d.days, 2);
+  assert.equal(d.hours, 60);
+  assert.equal(d.isNegative, false);
+  assert.equal(d.human, "2 days, 12 hours, 30 minutes");
+
+  // Negative diff
+  const neg = diff("2026-01-03T00:00:00Z", "2026-01-01T00:00:00Z");
+  assert.equal(neg.isNegative, true);
+  assert.equal(neg.days, -2);
+  assert.ok(neg.human.startsWith("-2 days"));
+
+  // Duration helper
+  assert.equal(duration(3661000), "1h 1m 1s");
+  assert.equal(duration(90000), "1m 30s");
+  assert.equal(duration(86400000 + 3600000), "1d 1h");
+  assert.equal(duration(0), "0s");
+});
+
+test("color: converts formats and calculates WCAG contrast", () => {
+  const blue = color("#2563eb");
+  assert.equal(blue.hex, "#2563eb");
+  assert.equal(blue.rgb, "rgb(37, 99, 235)");
+  assert.ok(blue.hsl.startsWith("hsl(221,"));
+  assert.ok(blue.contrast.white > 1);
+  assert.ok(blue.contrast.black > 1);
+  assert.equal(blue.contrast.bestTextColor, "#ffffff");
+
+  // RGB input
+  const rgbCol = color("rgb(255, 255, 255)");
+  assert.equal(rgbCol.hex, "#ffffff");
+  assert.equal(rgbCol.contrast.black, 21);
+  assert.equal(rgbCol.contrast.white, 1);
+  assert.equal(rgbCol.contrast.wcagOnBlack.aaaNormal, true);
+
+  // Invalids
+  assert.throws(() => color("not-a-color"));
+});
+
 test("CommonJS build works via require()", () => {
   const require = createRequire(import.meta.url);
   const cjs = require("../dist/cjs/index.js");
@@ -189,4 +285,8 @@ test("CommonJS build works via require()", () => {
   assert.equal(cjs.detect("507f1f77bcf86cd799439011")[0].type, "mongodb-objectid");
   assert.equal(cjs.cron("@daily", "UTC").nextRuns.length, 5);
   assert.equal(cjs.tz("2026-01-01 12:00:00", "UTC", "UTC").toFormatted, "2026-01-01 12:00:00");
+  assert.equal(cjs.chmod(755).symbolic, "rwxr-xr-x");
+  assert.equal(cjs.duration(3600000), "1h");
+  assert.equal(cjs.color("#ffffff").hex, "#ffffff");
 });
+

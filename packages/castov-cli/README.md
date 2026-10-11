@@ -241,6 +241,73 @@ castov jwt "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIn0
 
 ---
 
+### 11. `castov chmod` (Linux Permissions Breakdown)
+Translates between octal codes (e.g. `755`) and symbolic notation (`rwxr-xr-x`) with verbal descriptions and security audits.
+
+```bash
+castov chmod 755
+```
+```text
+Octal:     755 (0755)
+Symbolic:  rwxr-xr-x
+Owner:     Read, Write, Execute (rwx)
+Group:     Read, Execute (r-x)
+Public:    Read, Execute (r-x)
+Command:   chmod 755 <file>
+```
+
+Also supports symbolic inputs:
+```bash
+castov chmod rwxr-xr-x
+```
+
+---
+
+### 12. `castov diff` (Date & Timestamp Difference)
+Calculates exact time difference between two dates or timestamps with human breakdown.
+
+```bash
+castov diff 2026-01-01 2026-10-11
+```
+```text
+Start:       2026-01-01T00:00:00.000Z
+End:         2026-10-11T00:00:00.000Z
+Difference:  283 days, 0 hours, 0 minutes
+Total days:  283
+Total hours: 6792
+Total ms:    24451200000
+```
+
+---
+
+### 13. `castov duration` (Human-Readable Duration)
+Converts raw milliseconds into concise, human-readable units.
+
+```bash
+castov duration 3661000
+```
+```text
+1h 1m 1s
+```
+
+---
+
+### 14. `castov color` (Color Converter & WCAG Contrast)
+Converts Hex/RGB into RGB, HSL, and evaluates WCAG AA/AAA contrast ratios against white and black.
+
+```bash
+castov color "#2563eb"
+```
+```text
+Hex:        #2563eb
+RGB:        rgb(37, 99, 235)
+HSL:        hsl(221, 83%, 53%)
+Contrast:   vs white 4.54:1 | vs black 4.62:1
+Best Text:  #ffffff
+```
+
+---
+
 ## Help & Documentation
 
 Every command features built-in help flags:

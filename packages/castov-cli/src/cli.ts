@@ -8,6 +8,11 @@ import {
   detect as detectId,
   cron as explainCron,
   tz as convertTz,
+  chmod as parseChmod,
+  jwtInspect,
+  diff as calcDiff,
+  duration as formatDuration,
+  color as parseColor,
 } from "@castov/sdk";
 
 const require = createRequire(import.meta.url);
@@ -41,6 +46,11 @@ ${bold("Commands")}
   ${cyan("detect")} <value>             Identify timestamp or ID format (ObjectId, Snowflake, UUIDv7, ULID, etc.)
   ${cyan("cron")} "<expr>" [timezone]   Plain-English cron explanation + next 5 runs
   ${cyan("tz")} "<datetime>" <from> <to> Convert between IANA time zones with DST gap & overlap handling
+  ${cyan("chmod")} <value>              Linux permissions (755 <-> rwxr-xr-x) with verbal breakdown
+  ${cyan("diff")} <date1> <date2>       Exact time difference with human breakdown
+  ${cyan("duration")} <ms>              Convert milliseconds to human duration (e.g. 1h 30m)
+  ${cyan("color")} <hex|rgb>            Color conversion (Hex, RGB, HSL) + WCAG contrast
+  ${cyan("jwt")} <token>                Inspect JWT header, payload, expiration & relative times
   ${cyan("uuid")}                       Generate UUID v4 or v7        ${dim("-n <count>  --v7  --upper")}
   ${cyan("nanoid")} [size]              Generate URL-safe ID          ${dim("-n <count>")}
   ${cyan("encode")} <text>              Base64-encode text            ${dim("--url")}
@@ -48,7 +58,6 @@ ${bold("Commands")}
   ${cyan("hash")} <text>                Hex digest                    ${dim("-a sha1|sha256|sha384|sha512")}
   ${cyan("now")}                        Current Unix timestamp + ISO
   ${cyan("unix")} <ts|iso>              Convert Unix <-> ISO 8601
-  ${cyan("jwt")} <token>                Decode a JWT locally (no verification)
 
 ${bold("Global Options")}
   -h, --help           Show help (run "castov <command> --help" for command details)
@@ -205,8 +214,53 @@ ${bold("Usage")}
   castov unix <timestamp|iso>
 `,
 
+  chmod: `
+${bold("castov chmod")} — convert between octal and symbolic Linux permissions with verbal breakdown
+
+${bold("Usage")}
+  castov chmod <octal|symbolic>
+
+${bold("Examples")}
+  castov chmod 755
+  castov chmod 644
+  castov chmod rwxr-xr-x
+`,
+
+  diff: `
+${bold("castov diff")} — compute exact time difference between two dates or timestamps
+
+${bold("Usage")}
+  castov diff <date1> <date2>
+
+${bold("Examples")}
+  castov diff 2026-01-01 2026-10-11
+  castov diff 1700000000 1700086400
+`,
+
+  duration: `
+${bold("castov duration")} — format milliseconds into concise human-readable duration
+
+${bold("Usage")}
+  castov duration <milliseconds>
+
+${bold("Examples")}
+  castov duration 3661000
+  castov duration 86400000
+`,
+
+  color: `
+${bold("castov color")} — convert color between Hex, RGB, HSL and compute WCAG contrast metrics
+
+${bold("Usage")}
+  castov color <hex|rgb>
+
+${bold("Examples")}
+  castov color "#2563eb"
+  castov color "rgb(37, 99, 235)"
+`,
+
   jwt: `
-${bold("castov jwt")} — decode JWT header and payload locally (no verification)
+${bold("castov jwt")} — inspect JWT header, payload, expiration status and relative timestamps locally
 
 ${bold("Usage")}
   castov jwt <token>
@@ -386,9 +440,70 @@ async function main(argv: string[]): Promise<void> {
       break;
     }
 
-    case "jwt":
-      out.push(JSON.stringify(castov.jwtDecode(await input(positionals, "token")), null, 2));
+    case "chmod": {
+      const val = await input(positionals, "octal (e.g. 755) or symbolic (e.g. rwxr-xr-x)");
+      const res = parseChmod(val);
+      out.push(`Octal:     ${bold(res.octal)} (${dim(res.octal4)})`);
+      out.push(`Symbolic:  ${bold(res.symbolic)}`);
+      out.push(`Owner:     ${res.owner.description} (${res.owner.symbolic})`);
+      out.push(`Group:     ${res.group.description} (${res.group.symbolic})`);
+      out.push(`Public:    ${res.others.description} (${res.others.symbolic})`);
+      out.push(`Command:   ${dim(res.command)}`);
+      if (res.warning) {
+        out.push(``);
+        out.push(`${yellow("⚠")} ${res.warning}`);
+      }
       break;
+    }
+
+    case "diff": {
+      const d1 = positionals[0];
+      const d2 = positionals[1];
+      if (!d1 || !d2) throw new UsageError(`Usage: castov diff <date1> <date2>. Run "castov diff --help".`);
+      const res = calcDiff(d1, d2);
+      out.push(`Start:       ${res.start.iso}`);
+      out.push(`End:         ${res.end.iso}`);
+      out.push(`Difference:  ${bold(res.human)}`);
+      out.push(`Total days:  ${res.days}`);
+      out.push(`Total hours: ${res.hours}`);
+      out.push(`Total ms:    ${res.milliseconds}`);
+      break;
+    }
+
+    case "duration": {
+      const val = await input(positionals, "milliseconds");
+      const num = Number(val);
+      if (isNaN(num)) throw new UsageError(`duration: "${val}" is not a valid number`);
+      out.push(bold(formatDuration(num)));
+      break;
+    }
+
+    case "color": {
+      const val = await input(positionals, "hex or rgb color (e.g. #3b82f6)");
+      const res = parseColor(val);
+      out.push(`Hex:        ${bold(res.hex)}`);
+      out.push(`RGB:        ${res.rgb}`);
+      out.push(`HSL:        ${res.hsl}`);
+      out.push(`Contrast:   vs white ${res.contrast.white}:1 | vs black ${res.contrast.black}:1`);
+      out.push(`Best Text:  ${bold(res.contrast.bestTextColor)}`);
+      break;
+    }
+
+    case "jwt": {
+      const token = await input(positionals, "token");
+      const res = jwtInspect(token);
+      out.push(bold("Header:"));
+      out.push(JSON.stringify(res.header, null, 2));
+      out.push(``);
+      out.push(bold("Payload:"));
+      out.push(JSON.stringify(res.payload, null, 2));
+      out.push(``);
+      out.push(`Status:     ${res.status === "expired" ? red("EXPIRED") : res.status === "active" ? bold("ACTIVE") : res.status}`);
+      out.push(`Details:    ${res.statusText}`);
+      if (res.issuedAt) out.push(`Issued:     ${res.issuedAt.iso} (${dim(res.issuedAt.relative)})`);
+      if (res.expiresAt) out.push(`Expires:    ${res.expiresAt.iso} (${dim(res.expiresAt.relative)})`);
+      break;
+    }
 
     default:
       throw new UsageError(`unknown command "${command}". Run "castov --help".`);

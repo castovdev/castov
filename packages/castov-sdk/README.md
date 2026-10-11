@@ -166,13 +166,64 @@ const digest = await hash('hello', 'sha256');
 
 ---
 
-### 8. `jwtDecode(token: string)`
-Decodes JWT header and payload locally without verifying signatures.
+### 8. `jwtDecode(token: string)` & `jwtInspect(token: string)`
+Decodes JWT locally and computes real-time expiration metrics.
 
 ```ts
-import { jwtDecode } from '@castov/sdk';
+import { jwtInspect } from '@castov/sdk';
 
-const { header, payload } = jwtDecode(token);
+const info = jwtInspect(token);
+console.log(info.status);     // 'active' | 'expired' | 'no_expiry'
+console.log(info.statusText); // 'Active (expires in 45m 12s)'
+console.log(info.isExpired);  // false
+```
+
+---
+
+### 9. `chmod(input: string | number)`
+Converts between octal codes and symbolic notation with verbal permissions breakdown.
+
+```ts
+import { chmod } from '@castov/sdk';
+
+const res = chmod(755);
+console.log(res.symbolic);          // 'rwxr-xr-x'
+console.log(res.owner.description); // 'Read, Write, Execute'
+console.log(res.group.description); // 'Read, Execute'
+
+// Also parses symbolic input:
+const fromSym = chmod('rwxr-xr-x');
+console.log(fromSym.octal); // '755'
+```
+
+---
+
+### 10. `diff(date1, date2)` & `duration(ms)`
+Computes exact difference between two dates/timestamps, and formats millisecond durations into human-readable strings.
+
+```ts
+import { diff, duration } from '@castov/sdk';
+
+const d = diff('2026-01-01', '2026-10-11');
+console.log(d.human); // '283 days, 0 hours, 0 minutes'
+console.log(d.days);  // 283
+
+console.log(duration(3661000)); // '1h 1m 1s'
+```
+
+---
+
+### 11. `color(input: string)`
+Parses Hex or RGB colors, converts to Hex/RGB/HSL, and evaluates WCAG contrast compliance.
+
+```ts
+import { color } from '@castov/sdk';
+
+const c = color('#2563eb');
+console.log(c.rgb);                    // 'rgb(37, 99, 235)'
+console.log(c.hsl);                    // 'hsl(221, 83%, 53%)'
+console.log(c.contrast.bestTextColor); // '#ffffff'
+console.log(c.contrast.wcagOnBlack.aaNormal); // true
 ```
 
 ---
