@@ -39,6 +39,11 @@ import { DiffCheckerTool } from "./tools/diff-checker-tool";
 import { NexusGridTool } from "./tools/nexus-grid-tool";
 import { SonicGapBridgeTool } from "./tools/sonic-gap-bridge-tool";
 import { QuantumSimulatorTool } from "./tools/quantum-simulator-tool";
+import { JsonFormatterTool } from "./tools/json-formatter-tool";
+import { Base64Tool } from "./tools/base64-tool";
+import { JwtDecoderTool } from "./tools/jwt-decoder-tool";
+import { UuidGeneratorTool } from "./tools/uuid-generator-tool";
+import { HashGeneratorTool } from "./tools/hash-generator-tool";
 
 /**
  * Maps a tool slug to its interactive interface. To add a tool: add its content to
@@ -138,5 +143,15 @@ export function ToolInterface({ slug }: { slug: ToolSlug }) {
       return <SonicGapBridgeTool />;
     case "quantum":
       return <QuantumSimulatorTool />;
+    case "json-formatter":
+      return <JsonFormatterTool />;
+    case "base64-encoder-decoder":
+      return <Base64Tool />;
+    case "jwt-decoder":
+      return <JwtDecoderTool />;
+    case "uuid-generator":
+      return <UuidGeneratorTool />;
+    case "hash-generator":
+      return <HashGeneratorTool />;
   }
 }

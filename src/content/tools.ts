@@ -47,7 +47,12 @@ export type ToolSlug =
   | "diff-checker"
   | "nexus-grid"
   | "sonic-gap"
-  | "quantum";
+  | "quantum"
+  | "json-formatter"
+  | "base64-encoder-decoder"
+  | "jwt-decoder"
+  | "uuid-generator"
+  | "hash-generator";
 
 export interface ContentSection {
   heading: string;
@@ -82,27 +87,258 @@ export const TOOLS: Tool[] = [
     slug: 'json-to-ts',
     category: 'Developer',
     name: 'JSON to TypeScript',
-    seoTitle: 'JSON to TypeScript Interfaces Converter',
-    metaDescription: 'Instantly convert JSON objects into TypeScript interfaces.',
-    intro: 'Paste your JSON and get strictly typed TypeScript interfaces.',
+    seoTitle: 'JSON to TypeScript Interfaces Converter | Castov',
+    metaDescription: 'Instantly convert JSON objects into clean, strictly typed TypeScript interfaces online with zero server uploads.',
+    intro: 'Paste your JSON data to automatically generate production-ready TypeScript type definitions and interfaces. Custom property naming, optional keys detection, and instant shareable URLs.',
     cardDescription: 'Convert JSON strings to TypeScript interfaces.',
-    faq: [],
-    related: [],
-    sections: [],
-    howTo: []
+    howTo: [
+      'Paste your raw JSON object or array into the input editor.',
+      'Review the generated TypeScript interface in the output pane.',
+      'Copy the generated TypeScript types or generate a shareable URL.'
+    ],
+    faq: [
+      { q: 'Is my JSON uploaded to a server?', a: 'No, the conversion is performed entirely client-side in your browser using JavaScript.' },
+      { q: 'How does it handle nested objects and arrays?', a: 'Nested objects are extracted into separate, strongly typed interface declarations with PascalCase names.' },
+      { q: 'Can I convert large JSON payloads?', a: 'Yes, because parsing and type inference run locally, you can convert multi-megabyte payloads in milliseconds.' },
+      { q: 'Are optional properties detected?', a: 'When arrays contain varying object structures, unified interfaces with optional fields are created.' }
+    ],
+    sections: [
+      {
+        heading: 'Type-Safe TypeScript Generation from JSON',
+        paragraphs: [
+          'TypeScript interfaces help catch runtime errors before code reaches production. Manually typing large API responses or configuration structures is tedious and error-prone.',
+          'This tool parses any valid JSON structure and recursively constructs clean, idiomatic TypeScript interfaces that can be copied directly into your codebase.'
+        ]
+      }
+    ],
+    related: ['json-formatter', 'json-viewer', 'diff-checker', 'base64-encoder-decoder']
   },
   {
     slug: 'diff-checker',
     category: 'Developer',
     name: 'Diff Checker',
-    seoTitle: 'Online Text Diff Checker',
-    metaDescription: 'Compare two pieces of text or code and see the differences.',
-    intro: 'Check differences line by line between original and modified text.',
+    seoTitle: 'Online Text & Code Diff Checker | Castov',
+    metaDescription: 'Compare two text snippets or code files line by line. View additions, deletions, and modifications with instant local diffing.',
+    intro: 'Compare two versions of code, configuration files, or prose side by side. Highlights additions, deletions, and modifications line by line without sending any data over the network.',
     cardDescription: 'Compare text or code line by line.',
-    faq: [],
-    related: [],
-    sections: [],
-    howTo: []
+    howTo: [
+      'Paste the original version of your text into the left pane.',
+      'Paste the modified version into the right pane.',
+      'Examine the highlighted line-by-line diff with color-coded additions and removals.',
+      'Copy the diff or share the comparison URL.'
+    ],
+    faq: [
+      { q: 'Is the text sent to any remote server?', a: 'No. The diff algorithm executes entirely inside your browser sandbox.' },
+      { q: 'Does this support code as well as plain text?', a: 'Yes, it works identically for code files (JavaScript, Python, JSON, YAML) and plain text documents.' },
+      { q: 'How are additions and deletions displayed?', a: 'Additions are highlighted in green, deletions in red, and unchanged lines in muted neutral tones.' },
+      { q: 'Can I share the comparison with a teammate?', a: 'Yes, click Share to encode the state into the URL hash without storing anything on a server.' }
+    ],
+    sections: [
+      {
+        heading: 'Fast In-Browser Text and Code Comparison',
+        paragraphs: [
+          'Spotting subtle changes between two versions of an API response, JSON configuration, or code snippet can be difficult with the naked eye.',
+          'Our client-side diff checker uses an optimized longest common subsequence algorithm to highlight exact line additions and deletions instantly.'
+        ]
+      }
+    ],
+    related: ['json-formatter', 'json-to-ts', 'base64-encoder-decoder', 'uuid-generator']
+  },
+  {
+    slug: 'json-formatter',
+    category: 'Developer',
+    name: 'JSON Formatter & Validator',
+    seoTitle: 'JSON Formatter & Validator | Format, Minify & Validate Online',
+    metaDescription: 'Free online JSON formatter and validator with custom indentation, minification, and key sorting. Format and validate JSON locally in your browser.',
+    intro: 'Format, validate, minify, and inspect JSON with syntax error location. Choose 2-space, 4-space, or tab indentation, sort object keys alphabetically, and copy results instantly. Runs 100% in your browser without uploading data.',
+    cardDescription: 'Format, validate, minify, and sort JSON keys in your browser.',
+    howTo: [
+      'Paste or type your raw JSON into the input editor.',
+      'Choose your preferred indentation (2 spaces, 4 spaces, or tab) or toggle Sort Keys.',
+      'Click Format & Validate to prettify your JSON, or Minify to remove all unnecessary whitespace.',
+      'Copy the formatted output to your clipboard with one click.'
+    ],
+    faq: [
+      { q: 'Does this JSON formatter upload my data to a server?', a: 'No. All parsing, validation, formatting, and key sorting happen 100% locally in your browser using standard JavaScript JSON APIs.' },
+      { q: 'How does syntax error detection work?', a: 'If your JSON has a syntax mistake (like a missing comma, unescaped quote, or trailing comma), the validator pinpoints the exact line and column number of the error.' },
+      { q: 'Can I sort JSON object keys alphabetically?', a: 'Yes. Enabling the Sort Keys option recursively arranges all object keys alphabetically, making diffing and standardizing configurations easy.' },
+      { q: 'What indentation options are supported?', a: 'You can choose between 2 spaces (standard web convention), 4 spaces (backend convention), or raw Tab characters.' },
+      { q: 'Is there a limit on how large my JSON file can be?', a: 'Because the tool runs entirely in your local browser engine without server upload limits, you can format multi-megabyte JSON payloads with native memory performance.' }
+    ],
+    sections: [
+      {
+        heading: 'Why Use a Local-First JSON Formatter?',
+        paragraphs: [
+          'JSON is the universal data interchange format for modern APIs, microservices, and web configuration files. However, unformatted minified JSON is nearly impossible for developers to read or debug.',
+          'Many online formatters transmit your data to remote web servers, creating compliance and privacy risks when working with confidential customer data, internal tokens, or database dumps.',
+          'Castov JSON Formatter & Validator executes entirely inside your browser. No network requests are made, ensuring your proprietary payloads remain strictly private.'
+        ]
+      },
+      {
+        heading: 'Syntax Validation with Precise Error Pinpointing',
+        paragraphs: [
+          'A single misplaced comma or unquoted key invalidates an entire JSON document. Our validator catches syntax violations and reports the exact line number, column offset, and token error message.',
+          'Use the Minify feature to strip all unnecessary whitespaces and line breaks, reducing payload size for network transmission and API benchmarking.'
+        ]
+      }
+    ],
+    related: ['json-to-ts', 'json-viewer', 'diff-checker', 'base64-encoder-decoder']
+  },
+  {
+    slug: 'base64-encoder-decoder',
+    category: 'Developer',
+    name: 'Base64 Encode / Decode',
+    seoTitle: 'Base64 Encoder & Decoder | UTF-8 & URL-Safe Online Tool',
+    metaDescription: 'Encode and decode text to and from Base64 with full UTF-8 Unicode support and URL-safe formatting. 100% client-side with zero data uploads.',
+    intro: 'Encode plain text to Base64 or decode Base64 strings back to readable UTF-8 text. Supports multi-byte Unicode characters, emojis, and URL-safe formatting according to RFC 4648. All conversions execute locally in your browser.',
+    cardDescription: 'Encode and decode Base64 with UTF-8 Unicode and URL-safe support.',
+    howTo: [
+      'Select either Encode or Decode mode depending on your desired operation.',
+      'Paste your text or Base64 string into the input field.',
+      'Optionally toggle URL-Safe to use RFC 4648 URL and filename safe characters (- and _).',
+      'Click Copy to copy the converted result to your clipboard.'
+    ],
+    faq: [
+      { q: 'Does this tool support emojis and international UTF-8 characters?', a: 'Yes. Unlike basic btoa/atob implementations that throw errors on multi-byte characters, our tool uses TextEncoder and TextDecoder to support full UTF-8 Unicode including emojis and Arabic.' },
+      { q: 'What is URL-Safe Base64 (RFC 4648)?', a: 'Standard Base64 uses + and / which have special meanings in URLs and file systems. URL-safe Base64 substitutes + with - and / with _, making the string safe for query parameters and JWT tokens.' },
+      { q: 'Is my data transmitted to any external server?', a: 'Never. All encoding and decoding runs 100% client-side in your browser using standard Web APIs.' },
+      { q: 'How does padding work in Base64?', a: 'Base64 strings represent data in 6-bit chunks. When the input byte length is not a multiple of 3, = characters are appended as padding. In URL-safe mode, padding characters can be safely trimmed.' },
+      { q: 'Can I swap the input and output quickly?', a: 'Yes. Click the Swap button to instantly flip the input and output values and switch between encoding and decoding modes.' }
+    ],
+    sections: [
+      {
+        heading: 'Full UTF-8 Unicode and Binary Support',
+        paragraphs: [
+          'Base64 is a binary-to-text encoding scheme that represents binary data in an ASCII string format by translating it into a radix-64 representation. It is ubiquitous in data URIs, HTTP Basic Auth, and email MIME attachments.',
+          'Legacy browser implementations using window.btoa fail on any character outside Latin-1. Castov Base64 uses the modern TextEncoder interface to ensure every Unicode symbol, emoji, and non-Latin character encodes cleanly.'
+        ]
+      },
+      {
+        heading: 'RFC 4648 URL-Safe Mode for Web Tokens and Parameters',
+        paragraphs: [
+          'Standard Base64 contains plus (+) and slash (/) characters that require percent-encoding when placed inside URLs. URL-Safe Base64 replaces these characters with minus (-) and underscore (_).',
+          'This format is essential when working with JSON Web Tokens (JWT), OAuth2 authorization codes, and file storage identifiers.'
+        ]
+      }
+    ],
+    related: ['jwt-decoder', 'hash-generator', 'json-formatter', 'uuid-generator']
+  },
+  {
+    slug: 'jwt-decoder',
+    category: 'Developer',
+    name: 'JWT Decoder',
+    seoTitle: 'JWT Decoder | Decode JSON Web Tokens Online',
+    metaDescription: 'Decode and inspect JSON Web Tokens (JWT) client-side. View header, payload, expiration timestamps, and claim status with zero server uploads.',
+    intro: 'Decode and inspect JSON Web Tokens (JWT) instantly in your browser. Inspect header and payload claims, review human-readable expiration dates, and check token validity status. Decoded 100% locally with zero server requests.',
+    cardDescription: 'Decode and inspect JSON Web Tokens (JWT) header and payload locally.',
+    howTo: [
+      'Paste your encoded JWT (header.payload.signature) into the token input box.',
+      'Inspect the decoded Header and Payload JSON structures in the side-by-side viewer.',
+      'Review token lifetime claims including iat (Issued At), nbf (Not Before), and exp (Expires At).',
+      'Copy the formatted JSON payload or header with the copy button.'
+    ],
+    faq: [
+      { q: 'Is it safe to paste JWT tokens into this decoder?', a: 'Yes. All decoding occurs 100% locally in your browser memory. However, as noted in the banner, never paste production secrets into untrusted environments.' },
+      { q: 'Does this tool verify the JWT signature?', a: 'No. This tool decodes and parses the header and payload claims only. It does not verify the cryptographic signature against a public or secret key.' },
+      { q: 'What does the token validity status indicator mean?', a: 'It checks the standard exp (Expiration Time) and nbf (Not Before) claims against your current device time to indicate if the token is currently active, expired, or not yet valid.' },
+      { q: 'What are standard JWT claims?', a: 'Standard claims defined in RFC 7519 include iss (Issuer), sub (Subject), aud (Audience), exp (Expiration Time), nbf (Not Before), and iat (Issued At).' },
+      { q: 'Why is a JWT composed of three parts separated by dots?', a: 'A standard JWT consists of Header.Payload.Signature. The Header specifies the algorithm and token type, the Payload contains the claims, and the Signature validates message integrity.' }
+    ],
+    sections: [
+      {
+        heading: 'Client-Side JWT Parsing and Token Inspection',
+        paragraphs: [
+          'JSON Web Tokens (RFC 7519) are the industry standard for stateless authentication and authorization between modern web applications and microservices.',
+          'Debugging authorization headers and token payloads requires viewing the encoded claims without exposing sensitive user tokens to remote third-party servers. Castov decodes tokens purely in browser memory.'
+        ]
+      },
+      {
+        heading: 'Automated Timestamp and Lifetime Verification',
+        paragraphs: [
+          'JWT timestamps like exp, iat, and nbf are stored as raw Unix epoch seconds. Our decoder automatically converts these numeric timestamps into human-readable UTC dates and displays relative validity badges.',
+          'This lets you instantly determine whether a token expired 5 minutes ago or remains valid for upcoming requests.'
+        ]
+      }
+    ],
+    related: ['base64-encoder-decoder', 'json-formatter', 'uuid-generator', 'hash-generator']
+  },
+  {
+    slug: 'uuid-generator',
+    category: 'Developer',
+    name: 'UUID Generator',
+    seoTitle: 'UUID Generator | Online v4 & v7 Bulk UUID Generator',
+    metaDescription: 'Generate cryptographically secure UUID v4 (random) and UUID v7 (timestamp-ordered) identifiers. Bulk generation up to 100 with uppercase and hyphen options.',
+    intro: 'Generate RFC-compliant UUID v4 (cryptographically random) and modern UUID v7 (time-ordered) identifiers directly in your browser. Generate up to 100 UUIDs at once with uppercase and hyphen-removal options. Powered by Web Crypto.',
+    cardDescription: 'Generate cryptographically secure UUID v4 and v7 identifiers in bulk.',
+    howTo: [
+      'Choose between UUID v4 (random) and UUID v7 (timestamp-ordered, RFC 9562).',
+      'Select the desired quantity from 1 to 100 using the input or quick preset buttons.',
+      'Toggle uppercase format or remove hyphens according to your database requirements.',
+      'Click Copy All to copy the entire batch or copy individual IDs with a single click.'
+    ],
+    faq: [
+      { q: 'What is the difference between UUID v4 and UUID v7?', a: 'UUID v4 is entirely random (122 random bits). UUID v7 combines a 48-bit Unix millisecond timestamp with random bits, making it sortable by time and significantly improving database B-tree indexing performance.' },
+      { q: 'Are the generated UUIDs cryptographically secure?', a: 'Yes. Both versions use the browser Web Crypto API (crypto.getRandomValues and crypto.randomUUID), providing cryptographically secure pseudo-random entropy.' },
+      { q: 'What is the format of a standard UUID?', a: 'A standard UUID is a 128-bit label formatted as 32 hexadecimal digits separated into five hyphen-delimited groups: 8-4-4-4-12 (total 36 characters).' },
+      { q: 'Can I generate UUIDs without hyphens for compact storage?', a: 'Yes. Enable the No Hyphens checkbox to generate 32-character continuous hex strings ideal for MongoDB ObjectId replacements or compact database columns.' },
+      { q: 'Can I generate up to 100 UUIDs in a single batch?', a: 'Yes. You can select presets for 1, 5, 10, 25, 50, or 100 UUIDs, and copy the whole list separated by newlines.' }
+    ],
+    sections: [
+      {
+        heading: 'Cryptographically Secure Random and Time-Ordered UUIDs',
+        paragraphs: [
+          'Universally Unique Identifiers (UUIDs) are standard 128-bit numbers used to identify information in distributed computing systems without central coordination.',
+          'UUID v4 relies on 122 bits of cryptographic randomness, providing practically zero collision probability across trillions of generated IDs.'
+        ]
+      },
+      {
+        heading: 'Why UUID v7 is the Future for Databases',
+        paragraphs: [
+          'Standard UUID v4 causes index fragmentation and performance degradation in relational databases (PostgreSQL, MySQL) and search engines due to random insertion locations.',
+          'RFC 9562 introduced UUID v7, which encodes a 48-bit Unix epoch millisecond timestamp at the beginning of the identifier. This enables chronological sorting, faster queries, and compact sequential storage.'
+        ]
+      }
+    ],
+    related: ['hash-generator', 'jwt-decoder', 'json-formatter', 'base64-encoder-decoder']
+  },
+  {
+    slug: 'hash-generator',
+    category: 'Developer',
+    name: 'Hash Generator',
+    seoTitle: 'Hash Generator | SHA-256, SHA-512, MD5 Online Checksum Tool',
+    metaDescription: 'Calculate SHA-256, SHA-512, SHA-384, SHA-1, and MD5 hashes for text and files. 100% client-side cryptographic hashing via Web Crypto.',
+    intro: 'Calculate cryptographic hashes and checksums for any text or file locally in your browser. Generates SHA-256, SHA-512, SHA-384, SHA-1, and MD5 digests using the native Web Crypto API. No files or strings are ever uploaded to any server.',
+    cardDescription: 'Generate SHA-256, SHA-512, SHA-1, and MD5 hashes for text and files.',
+    howTo: [
+      'Select Text Input to hash strings, or File Upload to compute checksums for local files.',
+      'Enter your text or select a file from your computer.',
+      'Toggle between lowercase and uppercase hexadecimal output as required.',
+      'Click Copy next to any hash algorithm (SHA-256, SHA-512, MD5) to copy the digest.'
+    ],
+    faq: [
+      { q: 'Is it safe to compute checksums of confidential files here?', a: 'Yes. Files and text strings never leave your machine. The Web Crypto API computes all digests locally in browser memory.' },
+      { q: 'Why are MD5 and SHA-1 marked as insecure for passwords?', a: 'Both MD5 and SHA-1 have known collision vulnerabilities where different inputs produce the same hash. For passwords, you should always use salted adaptive algorithms like Argon2, bcrypt, or scrypt.' },
+      { q: 'Which hash algorithm is recommended for general data integrity?', a: 'SHA-256 (part of the SHA-2 family) is the industry standard for integrity verification, digital signatures, and blockchain architectures.' },
+      { q: 'Can I hash binary files like images, archives, or binaries?', a: 'Yes. Switch to the File Upload tab and choose any file from your disk. The file is read via FileReader into an ArrayBuffer and hashed instantly.' },
+      { q: 'Can I copy the hashes in uppercase format?', a: 'Yes. Toggle the Uppercase Hex checkbox to switch all computed hashes between lowercase and uppercase representations.' }
+    ],
+    sections: [
+      {
+        heading: 'Browser-Native Cryptographic Hashing with Web Crypto',
+        paragraphs: [
+          'Cryptographic hash functions transform arbitrary data into a fixed-size string of bytes. They are one-way functions designed so that even a single bit change in the input produces an entirely different hash.',
+          'Castov uses the native window.crypto.subtle interface, leveraging hardware-accelerated CPU instructions for lightning-fast hash computation without external server dependencies.'
+        ]
+      },
+      {
+        heading: 'File Checksum Verification without Uploading',
+        paragraphs: [
+          'Verifying download integrity (such as ISO images, software binaries, or database dumps) usually requires command-line utilities like shasum or certutil.',
+          'With this tool, you can drop any file into your browser to verify its SHA-256 or MD5 checksum against the provider manifest without uploading a single byte to the web.'
+        ]
+      }
+    ],
+    related: ['uuid-generator', 'base64-encoder-decoder', 'jwt-decoder', 'json-formatter']
   },
 
 

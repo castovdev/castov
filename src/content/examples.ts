@@ -743,6 +743,156 @@ export function getExamples(slug: ToolSlug): ToolExamples {
         ],
       };
     }
+    case "json-formatter": {
+      return {
+        kind: "io",
+        intro: "Standard JSON formatting, minification, and key sorting examples.",
+        items: [
+          {
+            title: "2-Space Pretty Print",
+            input: '{"user":"alex","roles":["admin","editor"]}',
+            results: [
+              { label: "Formatted", value: '{\n  "user": "alex",\n  "roles": [\n    "admin",\n    "editor"\n  ]\n}' },
+              { label: "Indentation", value: "2 spaces" }
+            ]
+          },
+          {
+            title: "Minification",
+            input: '{\n  "status": "ok",\n  "code": 200\n}',
+            results: [
+              { label: "Minified", value: '{"status":"ok","code":200}' },
+              { label: "Size Reduction", value: "Saves ~30% whitespace bytes" }
+            ]
+          }
+        ]
+      };
+    }
+
+    case "base64-encoder-decoder": {
+      return {
+        kind: "io",
+        intro: "Base64 standard and URL-safe encoding examples.",
+        items: [
+          {
+            title: "Plain Text Encoding",
+            input: "Hello World",
+            results: [
+              { label: "Base64", value: "SGVsbG8gV29ybGQ=" },
+              { label: "URL-Safe", value: "SGVsbG8gV29ybGQ" }
+            ]
+          },
+          {
+            title: "Unicode & Emojis",
+            input: "Castov 🚀",
+            results: [
+              { label: "Base64", value: "Q2FzdG92IPCfmYA=" },
+              { label: "Decoded", value: "Castov 🚀" }
+            ]
+          }
+        ]
+      };
+    }
+
+    case "jwt-decoder": {
+      return {
+        kind: "io",
+        intro: "JWT token structure and standard claims inspection.",
+        items: [
+          {
+            title: "Decoded Claims",
+            input: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZXhwIjoxODAwMDAwMDAwfQ...",
+            results: [
+              { label: "Algorithm (alg)", value: "HS256" },
+              { label: "Subject (sub)", value: "1234567890" },
+              { label: "Expires (exp)", value: "Epoch timestamp verified locally" }
+            ]
+          }
+        ]
+      };
+    }
+
+    case "uuid-generator": {
+      return {
+        kind: "io",
+        intro: "UUID v4 random and UUID v7 time-ordered examples.",
+        items: [
+          {
+            title: "UUID v4 (Random)",
+            input: "crypto.randomUUID()",
+            results: [
+              { label: "Format", value: "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx" },
+              { label: "Entropy", value: "122 bits of cryptographic randomness" }
+            ]
+          },
+          {
+            title: "UUID v7 (Time-Ordered)",
+            input: "RFC 9562 Timestamp-ordered",
+            results: [
+              { label: "Prefix", value: "48-bit Unix epoch millisecond timestamp" },
+              { label: "Database Advantage", value: "Sequential B-Tree insert clustering" }
+            ]
+          }
+        ]
+      };
+    }
+
+    case "hash-generator": {
+      return {
+        kind: "io",
+        intro: "Standard cryptographic digest output examples.",
+        items: [
+          {
+            title: "SHA-256 Digest",
+            input: "castov",
+            results: [
+              { label: "Hex", value: "1273934d400199d30c5e7b5fbe92b67faaccd8d63806be44d9f67a57a16f6b5b" },
+              { label: "Output Length", value: "256 bits (64 hex characters)" }
+            ]
+          },
+          {
+            title: "MD5 Checksum (Legacy)",
+            input: "castov",
+            results: [
+              { label: "Hex", value: "765275812e96d92497fbba1409d9491b" },
+              { label: "Usage", value: "Legacy file integrity verification only" }
+            ]
+          }
+        ]
+      };
+    }
+
+    case "json-to-ts": {
+      return {
+        kind: "io",
+        intro: "Conversion from JSON to TypeScript interfaces.",
+        items: [
+          {
+            title: "User Profile Object",
+            input: '{"id": 1, "name": "Alex", "active": true}',
+            results: [
+              { label: "Interface", value: "export interface Root { id: number; name: string; active: boolean; }" }
+            ]
+          }
+        ]
+      };
+    }
+
+    case "diff-checker": {
+      return {
+        kind: "io",
+        intro: "Line by line code comparison.",
+        items: [
+          {
+            title: "Configuration Change",
+            input: "Original: port=3000 -> Modified: port=8080",
+            results: [
+              { label: "Change", value: "Modified port number line" }
+            ]
+          }
+        ]
+      };
+    }
+
     case "timezone-simulator":
     case "universal-config-sync":
     case "env-vault":
