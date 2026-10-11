@@ -1,6 +1,6 @@
 /**
  * @castov/sdk — zero-dependency, zero-server developer utilities.
- * Runs in Node.js >= 20, Deno, Bun, Cloudflare Workers and modern browsers.
+ * Runs in Node.js >= 18, Deno, Bun, Cloudflare Workers and modern browsers.
  * Everything relies on standard Web Crypto API and ECMAScript Intl APIs.
  */
 
@@ -18,7 +18,7 @@ function getCrypto(): Crypto {
   const c = (globalThis as { crypto?: Crypto }).crypto;
   if (!c || typeof c.getRandomValues !== "function") {
     throw new Error(
-      "@castov/sdk: Web Crypto API is not available. Use Node.js >= 20 or a modern browser."
+      "@castov/sdk: Web Crypto API is not available. Use Node.js >= 18 or a modern browser."
     );
   }
   return c;

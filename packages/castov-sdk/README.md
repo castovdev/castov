@@ -1,7 +1,7 @@
 # @castov/sdk
 
 Zero-dependency, zero-server developer utilities from [Castov](https://castov.com).
-Tree-shakeable, lightweight (~10 kB), and runs universally in **Node.js ≥ 20, Deno, Bun, Cloudflare Workers, and modern browsers**.
+Tree-shakeable, lightweight (~10 kB), and runs universally in **Node.js ≥ 18, Deno, Bun, Cloudflare Workers, and modern browsers**.
 
 Built purely on the standard Web Crypto API and ECMAScript Intl APIs.
 
