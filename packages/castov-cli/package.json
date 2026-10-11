@@ -1,8 +1,8 @@
 {
   "name": "castov-cli",
   "version": "1.0.0",
-  "description": "Castov in your terminal: Unix timestamps, ID detector (ObjectId, Snowflake, UUIDv7, ULID), cron explainer, IANA time zones, chmod permissions, date diff, duration, colors, UUIDs (v4/v7), Base64, hashes, and JWT inspection. Zero-server, zero-config.",
-  "keywords": ["cli", "castov", "unix", "timestamp", "cron", "timezone", "dst", "chmod", "diff", "duration", "color", "wcag", "detect", "snowflake", "ulid", "objectid", "uuid", "uuidv7", "base64", "hash", "jwt"],
+  "description": "Castov in your terminal & AI agents: Unix timestamps, ID detector, cron explainer, IANA time zones, chmod, date diff, duration, colors, UUIDs, hashes, and local MCP server (Model Context Protocol). Zero-server, zero-config.",
+  "keywords": ["cli", "castov", "mcp", "model-context-protocol", "cursor", "ai-tools", "unix", "timestamp", "cron", "timezone", "dst", "chmod", "diff", "duration", "color", "wcag", "detect", "snowflake", "ulid", "objectid", "uuid", "uuidv7", "base64", "hash", "jwt"],
   "homepage": "https://castov.com",
   "license": "MIT",
   "author": "Castov <https://castov.com>",
@@ -21,7 +21,7 @@
     "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
-    "@castov/sdk": "^1.0.0"
+    "castov-sdk": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.0",

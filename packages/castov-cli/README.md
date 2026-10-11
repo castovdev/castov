@@ -308,6 +308,34 @@ Best Text:  #ffffff
 
 ---
 
+### 15. `castov mcp` (Model Context Protocol Server for AI Agents)
+Turns Castov into an official **MCP Server** over stdio. Connect it to AI coding assistants (**Cursor**, **Windsurf**, **Claude Desktop**, **Cline**) so they can reliably execute timestamp parsing, cron evaluations, timezone conversions, chmod permissions, and color contrast without hallucinations.
+
+#### Add to Cursor / Windsurf / Claude Desktop MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "castov": {
+      "command": "npx",
+      "args": ["-y", "castov-cli", "mcp"]
+    }
+  }
+}
+```
+
+Now your AI assistant has native tools:
+- `castov_ts`: deterministic timestamp conversion
+- `castov_detect`: ID and timestamp format detection
+- `castov_cron`: exact cron expression schedule & next runs
+- `castov_tz`: IANA timezone converter with DST verification
+- `castov_chmod`: Linux permission breakdown & security audit
+- `castov_diff`: exact date difference & human durations
+- `castov_color`: hex/rgb to HSL & WCAG contrast compliance
+- `castov_jwt`: local JWT inspection & real-time expiry check
+
+---
+
 ## Help & Documentation
 
 Every command features built-in help flags:

@@ -1,5 +1,5 @@
 {
-  "name": "@castov/sdk",
+  "name": "castov-sdk",
   "version": "1.0.0",
   "description": "Zero-dependency developer utilities: Unix timestamps, ID detector (ObjectId, Snowflake, UUIDv7, ULID), cron explainer, IANA time zones, chmod permissions, date diff, duration, colors, UUID v4/v7, Base64, hashing, and JWT inspection. Works in Node.js, Deno, Bun, edge, and browsers.",
   "keywords": ["uuid", "uuidv7", "nanoid", "base64", "hash", "sha256", "unix", "timestamp", "cron", "timezone", "dst", "chmod", "diff", "duration", "color", "wcag", "snowflake", "ulid", "objectid", "jwt", "castov", "zero-dependency"],

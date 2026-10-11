@@ -13,7 +13,8 @@ import {
   diff as calcDiff,
   duration as formatDuration,
   color as parseColor,
-} from "@castov/sdk";
+} from "castov-sdk";
+import { startMcpServer } from "./mcp.js";
 
 const require = createRequire(import.meta.url);
 const { version } = require("../package.json") as { version: string };
@@ -58,6 +59,7 @@ ${bold("Commands")}
   ${cyan("hash")} <text>                Hex digest                    ${dim("-a sha1|sha256|sha384|sha512")}
   ${cyan("now")}                        Current Unix timestamp + ISO
   ${cyan("unix")} <ts|iso>              Convert Unix <-> ISO 8601
+  ${cyan("mcp")}                        Start Model Context Protocol (MCP) server over stdio
 
 ${bold("Global Options")}
   -h, --help           Show help (run "castov <command> --help" for command details)
@@ -264,6 +266,24 @@ ${bold("castov jwt")} — inspect JWT header, payload, expiration status and rel
 
 ${bold("Usage")}
   castov jwt <token>
+`,
+
+  mcp: `
+${bold("castov mcp")} — start Model Context Protocol (MCP) server over stdio
+
+${bold("Usage")}
+  castov mcp
+
+${bold("AI Editor Integration (Cursor, Windsurf, Claude Desktop, Cline)")}
+  Add to your MCP settings:
+  {
+    "mcpServers": {
+      "castov": {
+        "command": "npx",
+        "args": ["-y", "castov-cli", "mcp"]
+      }
+    }
+  }
 `,
 };
 
@@ -503,6 +523,11 @@ async function main(argv: string[]): Promise<void> {
       if (res.issuedAt) out.push(`Issued:     ${res.issuedAt.iso} (${dim(res.issuedAt.relative)})`);
       if (res.expiresAt) out.push(`Expires:    ${res.expiresAt.iso} (${dim(res.expiresAt.relative)})`);
       break;
+    }
+
+    case "mcp": {
+      startMcpServer(version);
+      return; // MCP server keeps running on stdio
     }
 
     default:

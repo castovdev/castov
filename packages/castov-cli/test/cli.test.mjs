@@ -189,13 +189,34 @@ test("castov color: hex and rgb parsing with contrast", () => {
 });
 
 test("per-command --help flags", () => {
-  const commands = ["ts", "detect", "cron", "tz", "chmod", "diff", "duration", "color", "uuid", "encode", "decode", "hash", "jwt"];
+  const commands = ["ts", "detect", "cron", "tz", "chmod", "diff", "duration", "color", "uuid", "encode", "decode", "hash", "jwt", "mcp"];
   for (const cmd of commands) {
     const r = run([cmd, "--help"]);
     assert.equal(r.status, 0);
     assert.match(r.stdout, new RegExp(`castov ${cmd}`, "i"));
     assert.match(r.stdout, /Usage/i);
   }
+});
+
+test("castov mcp: handles initialize and tools/list via JSON-RPC stdio", async () => {
+  const { spawn } = await import("node:child_process");
+  const p = spawn(process.execPath, [CLI, "mcp"]);
+  let output = "";
+
+  p.stdout.on("data", (d) => {
+    output += d.toString();
+  });
+
+  p.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: {} }) + "\n");
+  p.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} }) + "\n");
+
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  p.kill();
+
+  assert.match(output, /"serverInfo":\{"name":"castov"/);
+  assert.match(output, /castov_chmod/);
+  assert.match(output, /castov_cron/);
+  assert.match(output, /castov_tz/);
 });
 
 test("global --help and --version", () => {
