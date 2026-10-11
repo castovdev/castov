@@ -475,4 +475,33 @@ select.input {
   @apply inline-flex items-center px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-xs font-semibold text-fg;
 }
 
+/* Responsive Data Tables */
+.data-table {
+  width: 100%;
+  min-width: 500px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+.data-table th {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: var(--tf-muted);
+  border-bottom: 1px solid var(--tf-line);
+  background: var(--tf-hover);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--tf-line);
+  color: var(--tf-fg);
+  vertical-align: middle;
+}
+.data-table tbody tr:hover {
+  background: var(--tf-hover);
+}
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 }

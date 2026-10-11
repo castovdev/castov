@@ -40,6 +40,25 @@ export function MobileNav() {
           aria-label="Mobile"
           className="mx-auto max-w-6xl"
         >
+          <div className="mb-3">
+            <button
+              type="button"
+              className="flex w-full items-center justify-between rounded-lg bg-field px-3.5 py-2.5 text-sm text-muted border border-line hover:bg-hover hover:text-fg transition-colors"
+              onClick={() => {
+                setOpen(false);
+                window.dispatchEvent(new CustomEvent("open-command-palette"));
+              }}
+            >
+              <span className="flex items-center gap-2 font-medium">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+                Search tools &amp; conversions...
+              </span>
+              <kbd className="rounded border border-line bg-card px-1.5 py-0.5 font-mono text-[10px]">Ctrl+K</kbd>
+            </button>
+          </div>
           <ul className="space-y-1">
             {NAV_LINKS.map((l) => (
               <li key={l.href}>
