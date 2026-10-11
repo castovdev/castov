@@ -27,7 +27,7 @@ export default function AiDirectoryPage() {
           </h1>
           
           <p className="text-lg text-muted mb-10 leading-relaxed">
-            The developer workbench for AI. Generate prompts, configure MCP servers, calculate tokens, and manage models instantly.
+            The developer workbench for AI. Prototype prompts, configure MCP servers, calculate tokens, and structure model configurations.
           </p>
 
           <button 
@@ -60,7 +60,7 @@ export default function AiDirectoryPage() {
         <div className="mb-16">
           <div className="mb-6">
             <h2 className="text-2xl font-semibold tracking-tight text-fg">Flagship Tools</h2>
-            <p className="text-muted mt-1">Our most powerful AI configuration tools.</p>
+            <p className="text-muted mt-1">Our most popular AI configuration tools.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[220px]">
@@ -72,7 +72,7 @@ export default function AiDirectoryPage() {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-fg"><polygon points="12 2 2 22 22 22"></polygon></svg>
                 </div>
                 <h3 className="text-2xl font-bold text-fg mb-2">Vercel AI SDK Generator</h3>
-                <p className="text-muted leading-relaxed max-w-md">Instantly generate production-ready Route Handlers and React Client components for streaming UI, text, and objects using the newest Vercel AI SDK APIs.</p>
+                <p className="text-muted leading-relaxed max-w-md">Generate starter template Route Handlers and React Client components for streaming UI, text, and objects using Vercel AI SDK APIs.</p>
               </div>
               <div className="text-sm font-medium text-primary">
                 Launch tool &rarr;

@@ -109,13 +109,13 @@ export const GUIDES: Guide[] = [
     slug: "zero-server-ai-privacy",
     name: "The Zero-Server AI Era",
     seoTitle: "Zero-Server AI: The Ultimate Approach to Data Privacy | Castov",
-    metaDescription: "Explore why zero-server architecture is the definitive solution for enterprise AI privacy, ensuring proprietary code never leaves your local machine.",
-    summary: "Enterprise companies are terrified of pasting proprietary code into ChatGPT. Zero-Server AI solves this by bringing the LLM directly to the user's device, ensuring that sensitive data is processed 100% locally.",
+    metaDescription: "Explore why zero-server architecture is the definitive solution for developer AI privacy, ensuring proprietary code never leaves your local machine.",
+    summary: "Developers and teams are cautious about pasting proprietary code into external models. Zero-Server AI solves this by bringing the model directly to the user's device, ensuring that sensitive data is processed 100% locally.",
     readingMinutes: 5,
     tools: ["secret-scanner"],
     sections: [
       {
-        heading: "The Enterprise AI Dilemma",
+        heading: "The Developer AI Privacy Dilemma",
         paragraphs: [
           "While APIs like OpenAI are incredibly powerful, they require you to send your data over the internet. For healthcare, finance, and deep tech companies, sending proprietary algorithms or PII to a third-party server is a massive security violation."
         ]

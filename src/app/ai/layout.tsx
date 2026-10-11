@@ -18,16 +18,15 @@ export default function AiLayout({ children }: { children: React.ReactNode }) {
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0 py-8 lg:pl-10">
-            {!AI_HUB_LIVE && (
-              <div
-                role="status"
-                className="mb-6 rounded-xl border border-line bg-card px-4 py-3 text-sm text-muted"
-              >
-                <strong className="text-fg">Coming soon.</strong> The AI Hub is a preview. These tools are not live yet and
-                will run on a real model using your own API key (bring your own key). Nothing on these pages
-                generates results with AI today.
-              </div>
-            )}
+            <div
+              role="status"
+              className="mb-6 flex items-center gap-2 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning font-medium"
+            >
+              <span className="inline-block px-2 py-0.5 rounded text-xs uppercase font-bold bg-warning/20 border border-warning/30">
+                Preview
+              </span>
+              <span>Preview: UI and configuration prototype. Live AI execution is not available yet.</span>
+            </div>
             {children}
           </div>
         </div>

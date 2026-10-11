@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const name = slug.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase());
     return buildMetadata({
       title: `${name} AI Tools \u2013 Free Developer Resources | Castov`,
-      description: `A collection of enterprise-grade AI developer tools for ${name}. Optimize your prompt engineering and code generation workflows.`,
+      description: `A collection of developer-focused AI tools for ${name}. Prototype and configure your prompt engineering and code generation workflows.`,
       path: `/ai/${slug}`,
     });
   }

@@ -26,7 +26,7 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: "Is my data sent to a server?",
-    a: "Not by the converters. The timestamp and date tools run in your browser, so what you enter is not uploaded. The only thing stored on your device is your light or dark theme choice. One tool is different: Env Vault sends an encrypted copy of your .env file to our servers (hosted on Supabase) so a teammate can open it with a link. The file is encrypted in your browser with your password before it is uploaded, so we only store ciphertext and never see your password, but it is not a zero-server tool. Team Vaults and cloud sync also require an account and store data on our servers. See the Privacy Policy for details.",
+    a: "Time, date and converter tools do not upload your input to Castov servers. Some preferences, such as theme, custom time zones and selected models, are stored locally on your device. Some features use the network by design: Env Vault uploads an encrypted copy, and P2P tools use public signaling servers.",
   },
   {
     q: "What is a Unix timestamp?",

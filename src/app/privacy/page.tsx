@@ -18,7 +18,7 @@ export default function PrivacyPage() {
     >
       <h2>Transparency First</h2>
       <p>
-        At Castov, we believe developers should have absolute clarity on where their data goes. This document explicitly categorizes our features into Local, Cloud, and External API processing.
+        At Castov, we believe developers should have absolute clarity on where their data goes. Time, date and converter tools do not upload your input to Castov servers. Some preferences, such as theme, custom time zones and selected models, are stored locally on your device. Some features use the network by design: Env Vault uploads an encrypted copy, and P2P tools use public signaling servers.
       </p>
 
       <h2>1. Features That Run Entirely in the Browser (100% Local)</h2>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
         <li><strong>What is uploaded:</strong> the encrypted payload only (a random salt, an initialization vector and the AES-GCM ciphertext). It is stored in our database, hosted on Supabase.</li>
         <li><strong>What is not uploaded:</strong> your plaintext `.env` contents and your password. Encryption happens in your browser, and the key is derived from your password with PBKDF2, so neither ever leaves your device. Share the password with your recipient through a different channel than the link.</li>
         <li><strong>What we can see:</strong> that a vault exists, its size, its creation time and an expiry timestamp (set to 7 days after creation), plus the standard request logs described in section 5. We cannot decrypt it.</li>
-        <li><strong>Limits of this protection:</strong> the stored ciphertext is retrievable by anyone who has the vault link, and the database is configured to allow public reads, so you should treat the ciphertext itself as public. Its security rests entirely on your password: anyone who learns or guesses it can decrypt the vault, and a weak password can be guessed offline. Use a long, unique password and do not put secrets you cannot rotate into a vault.</li>
+        <li><strong>Limits of this protection:</strong> the stored ciphertext is retrievable only by exact ID lookup via the sharing link (direct table listing is denied). Its security rests on your client-side encryption password: use a long, unique password and share it through a different channel than the link.</li>
       </ul>
 
       <h2>5. Server Logs, Analytics, and Backups</h2>

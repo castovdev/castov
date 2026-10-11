@@ -19,7 +19,7 @@ export default function ToolsPage() {
   return (
     <StaticPage
       title="Tools"
-      intro={`${TOOLS.length} free tools for working with Unix time, dates, configurations, and developer workflows. Every tool runs instantly in your browser.`}
+      intro={`${TOOLS.length} free tools for working with Unix time, dates, configurations, and developer workflows. Most tools run instantly in your browser. Some Labs and Cloud features use peer-to-peer signaling or encrypted cloud storage.`}
       crumbs={[{ name: "Home", href: "/" }, { name: "Tools" }]}
       path="/tools"
     >

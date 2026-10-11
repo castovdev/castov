@@ -19,9 +19,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/guides`, lastModified: getLastMod('src/app/guides/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/developer`, lastModified: getLastMod('src/app/developer/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/canvas`, lastModified: getLastMod('src/app/canvas/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/nexus-grid`, lastModified: getLastMod('src/app/nexus-grid/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/env-vault`, lastModified: getLastMod('src/app/env-vault/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/sonic-gap`, lastModified: getLastMod('src/app/sonic-gap/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/extension`, lastModified: getLastMod('src/app/extension/page.tsx'), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/about`, lastModified: getLastMod('src/app/about/page.tsx'), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${baseUrl}/contact`, lastModified: getLastMod('src/app/contact/page.tsx'), changeFrequency: 'monthly', priority: 0.5 },
@@ -69,5 +66,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   }
 
-  return sitemapEntries;
+  const seen = new Set<string>();
+  return sitemapEntries.filter((entry) => {
+    if (seen.has(entry.url)) return false;
+    seen.add(entry.url);
+    return true;
+  });
 }

@@ -60,7 +60,7 @@ export default function DeveloperPage() {
   return (
     <StaticPage
       title="Developer Hub & Ecosystem"
-      intro="Discover Castov's enterprise-grade integrations: SDK, Command Line Interface, VS Code Extension, and more."
+      intro="Discover Castov's developer-focused integrations: SDK, Command Line Interface, VS Code Extension, and more."
       crumbs={[{ name: "Home", href: "/" }, { name: "Developer" }]}
       path="/developer"
     >
@@ -77,12 +77,18 @@ export default function DeveloperPage() {
           <p className="text-muted text-sm mb-4">
             Bring the power of Castov's zero-server, blazing-fast utilities directly into your own Node.js or browser applications.
           </p>
-          <pre className="code-block mt-0 text-xs overflow-x-auto border border-line">
-            <code>npm install @castov/sdk</code>
-          </pre>
-          <pre className="code-block mt-2 text-xs overflow-x-auto border border-line">
-            <code>{"import { castov } from '@castov/sdk';\n\nconst id = castov.uuid();"}</code>
-          </pre>
+          <div className="p-3 bg-field/80 border border-line rounded-lg text-sm font-medium text-muted">
+            SDK: coming soon
+          </div>
+          {/*
+            TODO: Restore after publishing to npm:
+            <pre className="code-block mt-2 text-xs overflow-x-auto border border-line">
+              <code>npm install @castov/sdk</code>
+            </pre>
+            <pre className="code-block mt-2 text-xs overflow-x-auto border border-line">
+              <code>{"import { castov } from '@castov/sdk';\n\nconst id = castov.uuid();"}</code>
+            </pre>
+          */}
         </div>
 
         {/* CLI */}
@@ -96,12 +102,18 @@ export default function DeveloperPage() {
           <p className="text-muted text-sm mb-4">
             Execute tools directly from your terminal. Generate UUIDs, encode Base64, and calculate hashes instantly in your shell.
           </p>
-          <pre className="code-block mt-0 text-xs overflow-x-auto border border-line bg-background">
-            <code>npm install -g castov-cli</code>
-          </pre>
-          <pre className="code-block mt-2 text-xs overflow-x-auto border border-line bg-background">
-            <code>{"> castov uuid\n✔ Generated UUID:\n9139702a-4ecc-4655-96a7-e9184f045c62"}</code>
-          </pre>
+          <div className="p-3 bg-field/80 border border-line rounded-lg text-sm font-medium text-muted">
+            CLI: coming soon
+          </div>
+          {/*
+            TODO: Restore after publishing to npm:
+            <pre className="code-block mt-2 text-xs overflow-x-auto border border-line bg-background">
+              <code>npm install -g castov-cli</code>
+            </pre>
+            <pre className="code-block mt-2 text-xs overflow-x-auto border border-line bg-background">
+              <code>{"> castov uuid\n✔ Generated UUID:\n9139702a-4ecc-4655-96a7-e9184f045c62"}</code>
+            </pre>
+          */}
         </div>
 
         {/* VS Code */}
@@ -115,9 +127,8 @@ export default function DeveloperPage() {
           <p className="text-muted text-sm mb-4">
             The official zero-server developer toolkit directly in your editor. Select text to encode/decode, or insert UUIDs without switching windows.
           </p>
-          <div className="mt-4 p-3 bg-field border border-line rounded-lg text-sm text-fg flex items-center gap-2">
-            <kbd className="bg-card px-2 py-1 rounded border border-line text-xs font-mono">Right Click</kbd>
-            <span>&rarr; Castov: Encode to Base64</span>
+          <div className="p-3 bg-field/80 border border-line rounded-lg text-sm font-medium text-muted">
+            VS Code Extension: coming soon
           </div>
         </div>
 

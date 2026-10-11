@@ -3,7 +3,7 @@
     "slug": "cursorrules-generator",
     "name": ".cursorrules Generator",
     "category": "prompts",
-    "description": "Professional, enterprise-grade .cursorrules Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused .cursorrules Generator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       ".cursorrules generator",
       "prompts",
@@ -34,7 +34,7 @@
     "slug": "claude-system-prompt-builder",
     "name": "Claude System Prompt Builder",
     "category": "prompts",
-    "description": "Professional, enterprise-grade Claude System Prompt Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Claude System Prompt Builder for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "claude system prompt builder",
       "prompts",
@@ -65,7 +65,7 @@
     "slug": "gpt4o-system-prompt-generator",
     "name": "GPT-4o System Prompt Generator",
     "category": "prompts",
-    "description": "Professional, enterprise-grade GPT-4o System Prompt Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused GPT-4o System Prompt Generator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "gpt-4o system prompt generator",
       "prompts",
@@ -96,7 +96,7 @@
     "slug": "copilot-instructions-generator",
     "name": "Copilot Instructions Generator",
     "category": "prompts",
-    "description": "Professional, enterprise-grade Copilot Instructions Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Copilot Instructions Generator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "copilot instructions generator",
       "prompts",
@@ -127,7 +127,7 @@
     "slug": "windsurf-rules-generator",
     "name": "Windsurf Rules Generator",
     "category": "prompts",
-    "description": "Professional, enterprise-grade Windsurf Rules Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Windsurf Rules Generator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "windsurf rules generator",
       "prompts",
@@ -158,7 +158,7 @@
     "slug": "few-shot-prompt-formatter",
     "name": "Few-Shot Prompt Formatter",
     "category": "prompts",
-    "description": "Professional, enterprise-grade Few-Shot Prompt Formatter for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Few-Shot Prompt Formatter for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "few-shot prompt formatter",
       "prompts",
@@ -189,7 +189,7 @@
     "slug": "chain-of-thought-prompt-builder",
     "name": "Chain of Thought Prompt Builder",
     "category": "prompts",
-    "description": "Professional, enterprise-grade Chain of Thought Prompt Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Chain of Thought Prompt Builder for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "chain of thought prompt builder",
       "prompts",
@@ -220,7 +220,7 @@
     "slug": "ai-agent-persona-designer",
     "name": "AI Agent Persona Designer",
     "category": "prompts",
-    "description": "Professional, enterprise-grade AI Agent Persona Designer for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused AI Agent Persona Designer for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "ai agent persona designer",
       "prompts",
@@ -251,7 +251,7 @@
     "slug": "ollama-modelfile-builder",
     "name": "Ollama Modelfile Builder",
     "category": "local-llm",
-    "description": "Professional, enterprise-grade Ollama Modelfile Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Ollama Modelfile Builder for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "ollama modelfile builder",
       "local-llm",
@@ -282,7 +282,7 @@
     "slug": "gguf-vram-estimator",
     "name": "GGUF VRAM Estimator",
     "category": "local-llm",
-    "description": "Professional, enterprise-grade GGUF VRAM Estimator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused GGUF VRAM Estimator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "gguf vram estimator",
       "local-llm",
@@ -313,7 +313,7 @@
     "slug": "vllm-config-generator",
     "name": "vLLM Config Generator",
     "category": "local-llm",
-    "description": "Professional, enterprise-grade vLLM Config Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused vLLM Config Generator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "vllm config generator",
       "local-llm",
@@ -344,7 +344,7 @@
     "slug": "context-window-memory-calculator",
     "name": "Context Window Memory Calculator",
     "category": "local-llm",
-    "description": "Professional, enterprise-grade Context Window Memory Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Context Window Memory Calculator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "context window memory calculator",
       "local-llm",
@@ -375,7 +375,7 @@
     "slug": "huggingface-modelcard-generator",
     "name": "HuggingFace Modelcard Generator",
     "category": "local-llm",
-    "description": "Professional, enterprise-grade HuggingFace Modelcard Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused HuggingFace Modelcard Generator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "huggingface modelcard generator",
       "local-llm",
@@ -406,7 +406,7 @@
     "slug": "openwebui-pipeline-configurator",
     "name": "OpenWebUI Pipeline Configurator",
     "category": "local-llm",
-    "description": "Professional, enterprise-grade OpenWebUI Pipeline Configurator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused OpenWebUI Pipeline Configurator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "openwebui pipeline configurator",
       "local-llm",
@@ -437,7 +437,7 @@
     "slug": "llm-api-cost-calculator",
     "name": "LLM API Cost Calculator",
     "category": "calculators",
-    "description": "Professional, enterprise-grade LLM API Cost Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused LLM API Cost Calculator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "llm api cost calculator",
       "calculators",
@@ -468,7 +468,7 @@
     "slug": "repo-token-estimator",
     "name": "Repo Token Estimator",
     "category": "calculators",
-    "description": "Professional, enterprise-grade Repo Token Estimator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Repo Token Estimator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "repo token estimator",
       "calculators",
@@ -499,7 +499,7 @@
     "slug": "embedding-cost-calculator",
     "name": "Embedding Cost Calculator",
     "category": "calculators",
-    "description": "Professional, enterprise-grade Embedding Cost Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Embedding Cost Calculator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "embedding cost calculator",
       "calculators",
@@ -530,7 +530,7 @@
     "slug": "fine-tuning-cost-estimator",
     "name": "Fine-Tuning Cost Estimator",
     "category": "calculators",
-    "description": "Professional, enterprise-grade Fine-Tuning Cost Estimator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Fine-Tuning Cost Estimator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "fine-tuning cost estimator",
       "calculators",
@@ -561,7 +561,7 @@
     "slug": "rag-chunk-size-calculator",
     "name": "RAG Chunk Size Calculator",
     "category": "calculators",
-    "description": "Professional, enterprise-grade RAG Chunk Size Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused RAG Chunk Size Calculator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "rag chunk size calculator",
       "calculators",
@@ -592,7 +592,7 @@
     "slug": "llm-latency-benchmark-calculator",
     "name": "LLM Latency Benchmark Calculator",
     "category": "calculators",
-    "description": "Professional, enterprise-grade LLM Latency Benchmark Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused LLM Latency Benchmark Calculator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "llm latency benchmark calculator",
       "calculators",
@@ -623,7 +623,7 @@
     "slug": "json-schema-tool-calling-generator",
     "name": "JSON Schema Tool Calling Generator",
     "category": "schemas",
-    "description": "Professional, enterprise-grade JSON Schema Tool Calling Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused JSON Schema Tool Calling Generator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "json schema tool calling generator",
       "schemas",
@@ -654,7 +654,7 @@
     "slug": "pydantic-structured-output-builder",
     "name": "Pydantic Structured Output Builder",
     "category": "schemas",
-    "description": "Professional, enterprise-grade Pydantic Structured Output Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Pydantic Structured Output Builder for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "pydantic structured output builder",
       "schemas",
@@ -685,7 +685,7 @@
     "slug": "vercel-ai-sdk-code-generator",
     "name": "Vercel AI SDK Code Generator",
     "category": "schemas",
-    "description": "Professional, enterprise-grade Vercel AI SDK Code Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Vercel AI SDK Code Generator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "vercel ai sdk code generator",
       "schemas",
@@ -716,7 +716,7 @@
     "slug": "langchain-boilerplate-builder",
     "name": "Langchain Boilerplate Builder",
     "category": "schemas",
-    "description": "Professional, enterprise-grade Langchain Boilerplate Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Langchain Boilerplate Builder for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "langchain boilerplate builder",
       "schemas",
@@ -747,7 +747,7 @@
     "slug": "mcp-config-builder",
     "name": "MCP Config Builder",
     "category": "schemas",
-    "description": "Professional, enterprise-grade MCP Config Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused MCP Config Builder for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "mcp config builder",
       "schemas",
@@ -778,7 +778,7 @@
     "slug": "rest-api-to-ai-tool-converter",
     "name": "REST API to AI Tool Converter",
     "category": "schemas",
-    "description": "Professional, enterprise-grade REST API to AI Tool Converter for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused REST API to AI Tool Converter for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "rest api to ai tool converter",
       "schemas",
@@ -809,7 +809,7 @@
     "slug": "ai-guardrails-configurator",
     "name": "AI Guardrails Configurator",
     "category": "evals",
-    "description": "Professional, enterprise-grade AI Guardrails Configurator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused AI Guardrails Configurator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "ai guardrails configurator",
       "evals",
@@ -840,7 +840,7 @@
     "slug": "prompt-markdown-json-escaper",
     "name": "Prompt Markdown JSON Escaper",
     "category": "evals",
-    "description": "Professional, enterprise-grade Prompt Markdown JSON Escaper for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused Prompt Markdown JSON Escaper for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "prompt markdown json escaper",
       "evals",
@@ -871,7 +871,7 @@
     "slug": "jsonl-dataset-formatter",
     "name": "JSONL Dataset Formatter",
     "category": "evals",
-    "description": "Professional, enterprise-grade JSONL Dataset Formatter for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused JSONL Dataset Formatter for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "jsonl dataset formatter",
       "evals",
@@ -902,7 +902,7 @@
     "slug": "llm-eval-rubric-generator",
     "name": "LLM Eval Rubric Generator",
     "category": "evals",
-    "description": "Professional, enterprise-grade LLM Eval Rubric Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Developer-focused LLM Eval Rubric Generator for AI developers. Generate, configure, and optimize seamlessly.",
     "keywords": [
       "llm eval rubric generator",
       "evals",
