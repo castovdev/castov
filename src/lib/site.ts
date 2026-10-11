@@ -8,7 +8,6 @@ const isProduction = process.env.NODE_ENV === "production";
 function resolveSiteUrl(): string {
   const value = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (value) return value.replace(/\/+$/, "");
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return "https://castov.com";
 }
 

@@ -1,6 +1,5 @@
-import { absoluteUrl } from "@/lib/site";
-
 export async function GET() {
+  const baseUrl = "https://castov.com";
   // Generate a list of significant Unix timestamps to seed Google
   // E.g., start of every month from 2020 to 2030
   const urls: string[] = [];
@@ -14,7 +13,7 @@ export async function GET() {
       
       urls.push(`
   <url>
-    <loc>${absoluteUrl(`/unix/${ts}`)}</loc>
+    <loc>${baseUrl}/unix/${ts}</loc>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>`);
@@ -23,7 +22,7 @@ export async function GET() {
       const ms = date.getTime();
       urls.push(`
   <url>
-    <loc>${absoluteUrl(`/unix/${ms}`)}</loc>
+    <loc>${baseUrl}/unix/${ms}</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>`);
@@ -45,7 +44,7 @@ export async function GET() {
   for (const ts of popular) {
     urls.push(`
   <url>
-    <loc>${absoluteUrl(`/unix/${ts}`)}</loc>
+    <loc>${baseUrl}/unix/${ts}</loc>
     <changefreq>yearly</changefreq>
     <priority>0.9</priority>
   </url>`);
