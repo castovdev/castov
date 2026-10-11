@@ -34,6 +34,11 @@ import { DockerVisualizerTool } from "./tools/docker-visualizer-tool";
 import { SqliteFiddleTool } from "./tools/sqlite-fiddle-tool";
 import { RegexExplainerTool } from "./tools/regex-explainer-dynamic";
 import { FetchMockGeneratorTool } from "./tools/fetch-mock-generator-tool";
+import { JsonToTsTool } from "./tools/json-to-ts-tool";
+import { DiffCheckerTool } from "./tools/diff-checker-tool";
+import { NexusGridTool } from "./tools/nexus-grid-tool";
+import { SonicGapBridgeTool } from "./tools/sonic-gap-bridge-tool";
+import { QuantumSimulatorTool } from "./tools/quantum-simulator-tool";
 
 /**
  * Maps a tool slug to its interactive interface. To add a tool: add its content to
@@ -123,5 +128,15 @@ export function ToolInterface({ slug }: { slug: ToolSlug }) {
       return <AstConflictTelepathyTool />;
     case "fetch-mock-generator":
       return <FetchMockGeneratorTool />;
+    case "json-to-ts":
+      return <JsonToTsTool />;
+    case "diff-checker":
+      return <DiffCheckerTool />;
+    case "nexus-grid":
+      return <NexusGridTool />;
+    case "sonic-gap":
+      return <SonicGapBridgeTool />;
+    case "quantum":
+      return <QuantumSimulatorTool />;
   }
 }

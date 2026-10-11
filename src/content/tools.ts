@@ -44,15 +44,18 @@ export type ToolSlug =
   | "regex-explainer"
   | "json-viewer"
   | "json-to-ts"
-  | "diff-checker";
+  | "diff-checker"
+  | "nexus-grid"
+  | "sonic-gap"
+  | "quantum";
 
 export interface ContentSection {
   heading: string;
   paragraphs: string[];
 }
 
-export type ToolCategory = "Timestamp" | "Date & Duration" | "Time Zones" | "Developer";
-export const TOOL_CATEGORIES: ToolCategory[] = ["Timestamp", "Date & Duration", "Time Zones", "Developer"];
+export type ToolCategory = "Timestamp" | "Date & Duration" | "Time Zones" | "Developer" | "Labs";
+export const TOOL_CATEGORIES: ToolCategory[] = ["Timestamp", "Date & Duration", "Time Zones", "Developer", "Labs"];
 
 export interface Tool {
   slug: ToolSlug;
@@ -105,7 +108,7 @@ export const TOOLS: Tool[] = [
 
   {
     slug: "fetch-mock-generator",
-    category: "Developer",
+    category: "Labs",
     name: "Service Worker API Mocker",
     seoTitle: "Local API Mock Server Generator | Castov",
     metaDescription: "Generate a zero-server fetch interceptor script to mock API endpoints directly in your browser.",
@@ -119,7 +122,7 @@ export const TOOLS: Tool[] = [
   // REVOLUTIONARY SCI-FI TOOLS
   {
     slug: "p2p-ghost-tunnel", isPro: true,
-    category: "Developer",
+    category: "Labs",
     name: "P2P Ghost Tunnel",
     seoTitle: "WebRTC P2P Ghost Tunnel | Serverless Localhost Sharing",
     metaDescription: "Share your localhost directly to another browser using Peer-to-Peer WebRTC. Zero servers, zero latency, impossible to intercept.",
@@ -139,7 +142,7 @@ export const TOOLS: Tool[] = [
   },
   {
     slug: "steganography-env-vault", isPro: true,
-    category: "Developer",
+    category: "Labs",
     name: "Steganography Env Vault",
     seoTitle: "Steganographic Env Vault | Hide Secrets in Images",
     metaDescription: "Encrypt and hide your production .env variables inside the pixels of a PNG logo. 100% local, impossible for hackers to detect.",
@@ -160,7 +163,7 @@ export const TOOLS: Tool[] = [
   },
   {
     slug: "3d-json-galaxy",
-    category: "Developer",
+    category: "Labs",
     name: "Holographic JSON Explorer",
     seoTitle: "3D JSON Galaxy | Holographic Architecture Explorer",
     metaDescription: "Visualize massive 50MB+ JSON structures as an interactive 3D universe using WebGL.",
@@ -180,7 +183,7 @@ export const TOOLS: Tool[] = [
   },
   {
     slug: "regex-genetic-evolution",
-    category: "Developer",
+    category: "Labs",
     name: "Genetic Regex Auto-Healer",
     seoTitle: "Genetic Regex Auto-Healer | AI Mutating Regex Solver",
     metaDescription: "Don't write Regex. Provide passing and failing strings, and watch our local constraint-solver mutate expressions until they match perfectly.",
@@ -199,7 +202,7 @@ export const TOOLS: Tool[] = [
   },
   {
     slug: "api-time-machine",
-    category: "Developer",
+    category: "Labs",
     name: "Chrono-Debug API Replay",
     seoTitle: "Chrono-Debug API Replay | Localhost Time Machine",
     metaDescription: "Upload a HAR file and use a timeline scrubber to locally replay past API requests directly to your frontend app without a database.",
@@ -218,7 +221,7 @@ export const TOOLS: Tool[] = [
   },
   {
     slug: "ast-conflict-telepathy",
-    category: "Developer",
+    category: "Labs",
     name: "AST Conflict Telepathy",
     seoTitle: "AST Git Conflict Telepathy | Logic-Based Merger",
     metaDescription: "Resolve Git conflicts by parsing Abstract Syntax Trees instead of text diffs to understand developer intent automatically.",
@@ -233,6 +236,71 @@ export const TOOLS: Tool[] = [
       "Paste 'Branch B' code into the right editor.",
       "The tool generates a visual AST diff.",
       "Select logical nodes to keep or discard, and export the perfectly merged file."
+    ],
+  },
+  {
+    slug: "nexus-grid",
+    category: "Labs",
+    name: "NexusGrid",
+    seoTitle: "Castov NexusGrid | Decentralized WebGPU Supercomputer",
+    metaDescription: "Pool your idle browser GPU power to train AI models locally using WebGPU and WebRTC P2P networks.",
+    intro: "A distributed browser supercomputer. Compute tensor operations and matrix multiplications directly on client GPUs.",
+    cardDescription: "Decentralized WebGPU Supercomputer running local AI workloads.",
+    faq: [
+      { q: "Is any data sent to external servers?", a: "No. Tensor computation occurs entirely inside your browser using the local WebGPU API." },
+    ],
+    related: [],
+    sections: [
+      { heading: "WebGPU Browser Compute", paragraphs: ["NexusGrid harnesses browser WebGPU compute shaders to run matrix operations locally at native hardware speeds."] }
+    ],
+    howTo: [
+      "Open the NexusGrid dashboard.",
+      "Allocate GPU memory for matrix tensors.",
+      "Execute compute kernels directly in your browser."
+    ],
+    isPro: true,
+  },
+  {
+    slug: "sonic-gap",
+    category: "Labs",
+    name: "Sonic-Gap Bridge",
+    seoTitle: "Sonic-Gap Bridge | Ultrasonic Acoustic Data Transfer",
+    metaDescription: "Air-Gapped Ultrasonic Acoustic Data Transfer Protocol.",
+    intro: "Transfer data between air-gapped devices using inaudible high-frequency acoustic sound waves and your device microphone.",
+    cardDescription: "Air-gapped ultrasonic acoustic data transfer protocol.",
+    faq: [
+      { q: "Does this require internet access?", a: "No, transmission happens strictly through acoustic audio waves between the speaker of one device and microphone of another." }
+    ],
+    related: [],
+    sections: [
+      { heading: "Acoustic Air-Gap Transfer", paragraphs: ["Sonic-Gap modulates binary data into near-ultrasonic sound frequencies (18kHz-19kHz) for physical air-gapped data transfer."] }
+    ],
+    howTo: [
+      "Set device A to Transmit mode.",
+      "Set device B to Receive mode with microphone access enabled.",
+      "Send payload and receive real-time decoded binary data."
+    ],
+    isPro: true,
+  },
+  {
+    slug: "quantum",
+    category: "Labs",
+    name: "Quantum Simulator",
+    seoTitle: "Quantum Web Simulator | Castov",
+    metaDescription: "Browser-Native Quantum Circuit execution via Matrix Tensors.",
+    intro: "Simulate multi-qubit quantum states and visualize Bloch spheres entirely in WebGL and 3D.",
+    cardDescription: "Browser-native quantum circuit execution via matrix tensors.",
+    faq: [
+      { q: "How are quantum states computed?", a: "States are represented as complex state vectors and updated using linear algebraic matrix transformations in your browser." }
+    ],
+    related: [],
+    sections: [
+      { heading: "Interactive Quantum Simulation", paragraphs: ["Visualize quantum superposition and phase angles in real-time with interactive 3D Bloch spheres."] }
+    ],
+    howTo: [
+      "Select quantum gate operations.",
+      "Observe state vector probability shifts on the Bloch sphere.",
+      "Measure qubit collapse states."
     ],
   },
   {

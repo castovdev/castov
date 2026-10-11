@@ -136,14 +136,32 @@ export default function DeveloperPage() {
       </div>
 
       {/* Developer Tools */}
-      <h2>Developer Utilities</h2>
+      <h2>Developer Utilities ({devTools.length})</h2>
       <p>
         Interactive tools for ISO 8601, RFC 3339, cron expressions, batch conversion, and validation — all run in your browser.
       </p>
-      <div className="not-prose grid gap-4 mt-4 mb-8 sm:grid-cols-2">
+      <div className="not-prose grid gap-4 mt-4 mb-12 sm:grid-cols-2">
         {devTools.map((t) => (
           <ToolCard key={t.slug} tool={t} headingLevel={3} />
         ))}
+      </div>
+
+      {/* Labs / Experimental Tools */}
+      <div className="pt-8 border-t border-line">
+        <div className="flex items-center gap-3 mb-2">
+          <h2>Labs ({TOOLS.filter((t) => t.category === "Labs").length})</h2>
+          <span className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+            Experimental tools
+          </span>
+        </div>
+        <p>
+          Experimental developer utilities: local WebRTC peer-to-peer data channels, image steganography, AST syntax parsing, and client-side computing.
+        </p>
+        <div className="not-prose grid gap-4 mt-4 mb-8 sm:grid-cols-2">
+          {TOOLS.filter((t) => t.category === "Labs").map((t) => (
+            <ToolCard key={t.slug} tool={t} headingLevel={3} />
+          ))}
+        </div>
       </div>
     </StaticPage>
   );

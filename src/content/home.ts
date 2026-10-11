@@ -2,12 +2,12 @@ import type { FaqItem } from "@/lib/seo";
 
 export const HOME_TITLE = "Castov – Free Time & Timestamp Tools";
 export const HOME_DESCRIPTION =
-  "Free Unix timestamp converter, epoch converter, ISO 8601 and time zone tools. Fast, private and no sign-up: everything runs in your browser.";
+  "Free Unix timestamp converter, epoch converter, ISO 8601 and time zone tools. Fast, private and no sign-up: the converters run in your browser.";
 
 export const WHY_ITEMS = [
   { title: "Free", text: "Every tool is free to use, with no usage limits and no paid tier." },
   { title: "Fast", text: "Small pages and almost no JavaScript, so results appear the moment you press Convert." },
-  { title: "Private", text: "What you type stays on your device. Nothing is uploaded to a server." },
+  { title: "Private", text: "The converters run in your browser, so what you type stays on your device. The few tools that use our servers, such as Env Vault, say so on their page." },
   { title: "No account", text: "No sign-up, no login and no email address needed. Open a tool and use it." },
   { title: "Browser-based", text: "Conversions use your browser's built-in date and time zone support, so they work with a slow connection." },
 ] as const;
@@ -26,7 +26,7 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: "Is my data sent to a server?",
-    a: "No. The converters run in your browser, so the timestamps and dates you enter are not uploaded. The only thing stored on your device is your light or dark theme choice.",
+    a: "Not by the converters. The timestamp and date tools run in your browser, so what you enter is not uploaded. The only thing stored on your device is your light or dark theme choice. One tool is different: Env Vault sends an encrypted copy of your .env file to our servers (hosted on Supabase) so a teammate can open it with a link. The file is encrypted in your browser with your password before it is uploaded, so we only store ciphertext and never see your password, but it is not a zero-server tool. Team Vaults and cloud sync also require an account and store data on our servers. See the Privacy Policy for details.",
   },
   {
     q: "What is a Unix timestamp?",

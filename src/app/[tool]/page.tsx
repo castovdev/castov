@@ -9,8 +9,10 @@ type Params = { tool: string };
 export const dynamicParams = false;
 
 
+const DEDICATED_ROUTES = new Set(["nexus-grid", "sonic-gap", "quantum"]);
+
 export function generateStaticParams(): Params[] {
-  return TOOLS.map((t) => ({ tool: t.slug }));
+  return TOOLS.filter((t) => !DEDICATED_ROUTES.has(t.slug)).map((t) => ({ tool: t.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {

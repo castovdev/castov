@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TOOLS, toolPath } from "@/content/tools";
 import { SITE } from "@/lib/site";
+import { AI_HUB_LIVE } from "@/lib/flags";
 import { BrandMark } from "./brand-mark";
 
 const COMPANY = [
@@ -53,7 +54,6 @@ export function SiteFooter() {
               <li><Link href="/guides" className="text-muted transition-colors hover:text-fg">Guides</Link></li>
               <li><Link href="/developer" className="text-muted transition-colors hover:text-fg">Code Snippets</Link></li>
               <li><Link href="/utc-converter" className="text-muted transition-colors hover:text-fg">UTC Time</Link></li>
-              <li><span className="text-muted cursor-default">Status</span></li>
             </ul>
           </nav>
 
@@ -68,25 +68,21 @@ export function SiteFooter() {
             </ul>
           </nav>
 
-          <nav aria-labelledby="footer-ai">
-            <h2 id="footer-ai" className="mb-4 text-sm font-semibold text-fg">AI</h2>
-            <ul className="grid gap-3 text-sm">
-              <li><Link href="/ai" className="text-muted transition-colors hover:text-fg">AI Tools</Link></li>
-              <li><Link href="/ai" className="text-muted transition-colors hover:text-fg">AI Developer Hub</Link></li>
-            </ul>
-          </nav>
+          {AI_HUB_LIVE && (
+            <nav aria-labelledby="footer-ai">
+              <h2 id="footer-ai" className="mb-4 text-sm font-semibold text-fg">AI</h2>
+              <ul className="grid gap-3 text-sm">
+                <li><Link href="/ai" className="text-muted transition-colors hover:text-fg">AI Tools</Link></li>
+                <li><Link href="/ai" className="text-muted transition-colors hover:text-fg">AI Developer Hub</Link></li>
+              </ul>
+            </nav>
+          )}
         </div>
       </div>
       
       <div className="border-t border-line">
         <div className="layout-content flex flex-col items-center justify-between gap-4 py-6 sm:flex-row">
           <p className="text-sm text-muted">&copy; {new Date().getFullYear()} {SITE.name}. All rights reserved.</p>
-          <div className="flex gap-4 text-sm text-muted">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_rgba(22,163,74,0.4)]"></span>
-              All systems operational
-            </span>
-          </div>
         </div>
       </div>
     </footer>

@@ -1,0 +1,36 @@
+{
+  "name": "castov-cli",
+  "version": "1.0.0",
+  "description": "Castov in your terminal: generate UUIDs (v4/v7), nanoids, Base64, hashes, Unix timestamps and decode JWTs. Zero-server, zero-config.",
+  "keywords": ["cli", "uuid", "uuidv7", "nanoid", "base64", "hash", "unix", "timestamp", "jwt", "castov"],
+  "homepage": "https://castov.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benidira/timeforge.git",
+    "directory": "packages/castov-cli"
+  },
+  "bugs": "https://github.com/benidira/timeforge/issues",
+  "license": "MIT",
+  "author": "Castov <https://castov.com>",
+  "type": "module",
+  "bin": {
+    "castov": "dist/cli.js"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "test": "node --test test/cli.test.mjs",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "@castov/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "^5.9.3"
+  }
+}

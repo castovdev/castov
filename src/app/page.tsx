@@ -7,12 +7,23 @@ import { HOME_FAQ } from "@/content/home";
 import { buildMetadata, faqJsonLd, websiteJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { ArrowRight, Terminal, ShieldCheck, Workflow, Database, Component, Play, Lock, Command, Zap, Code } from "lucide-react";
+import { HeroQuickConvert } from "@/components/hero-quick-convert";
 
-export const metadata: Metadata = buildMetadata({
-  title: "Castov | Developer Tools & Engineering Workspace",
-  description: "Fast, simple, privacy-friendly tools for timestamps, dates, time zones, formats, and developer workflows.",
-  path: "/",
-});
+export const metadata: Metadata = {
+  ...buildMetadata({
+    title: "Castov | Free Developer Tools: Timestamps, Time Zones, JSON & More",
+    description: "Fast, simple, privacy-friendly tools for timestamps, dates, time zones, formats, and developer workflows.",
+    path: "/",
+  }),
+  openGraph: {
+    ...buildMetadata({
+      title: "Castov | Free Developer Tools: Timestamps, Time Zones, JSON & More",
+      description: "Fast, simple, privacy-friendly tools for timestamps, dates, time zones, formats, and developer workflows.",
+      path: "/",
+    }).openGraph,
+    title: "Castov | Free Developer Tools: Timestamps, Time Zones, JSON & More",
+  },
+};
 
 export default function HomePage() {
   return (
@@ -35,12 +46,12 @@ export default function HomePage() {
           </div>
           
           <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-fg mb-8 leading-[1.15]">
-            The Ultimate Workspace for <br />
-            <span className="bg-gradient-to-r from-accent via-accent to-success bg-clip-text text-transparent">Software Engineers</span>
+            Free Developer Tools: <br />
+            <span className="bg-gradient-to-r from-accent via-accent to-success bg-clip-text text-transparent">Time, JSON, Encoding &amp; More</span>
           </h1>
           
           <p className="text-lg lg:text-xl text-muted max-w-3xl mx-auto mb-10 leading-relaxed">
-            Stop searching for scattered tools. Castov provides a unified, secure, and lightning-fast suite of developer utilities—from timestamp converters and regex explainers to local AI environments.
+            Most tools run entirely in your browser.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
@@ -51,6 +62,9 @@ export default function HomePage() {
               Read Documentation
             </Link>
           </div>
+
+          {/* Quick timestamp/date paste inspector */}
+          <HeroQuickConvert />
         </div>
       </section>
 
@@ -109,7 +123,7 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-10">
               <div>
-                <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tight mb-4 text-fg">Enterprise-Grade Capabilities</h2>
+                <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tight mb-4 text-fg">Advanced Capabilities</h2>
                 <p className="text-muted text-lg">
                   We didn't just build formatters. We built the architecture required by modern engineering teams.
                 </p>
@@ -122,7 +136,7 @@ export default function HomePage() {
                 <div>
                   <h3 className="text-xl font-bold mb-2 group-hover:text-success transition-colors text-fg">P2P Multiplayer Canvas</h3>
                   <p className="text-muted leading-relaxed">
-                    A visual node-editor for building data pipelines. Connects your team in real-time using WebRTC and CRDTs (Yjs) without backend servers.
+                    A visual node-editor for building data pipelines. Connects peers in real-time using WebRTC and CRDTs (Yjs) with direct peer-to-peer sync and zero server storage.
                   </p>
                 </div>
               </div>
@@ -202,7 +216,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to supercharge your workflow?</h2>
           <p className="text-xl text-muted mb-10">
-            Join thousands of developers who save hours every week using Castov.
+            Free developer tools that run in your browser.
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link href="/tools" className="flex items-center justify-center gap-2 bg-accent text-white dark:text-[#050505] px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-hover transition-colors shadow-sm w-full sm:w-auto">

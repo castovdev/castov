@@ -18,9 +18,6 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

@@ -90,11 +90,21 @@ export function BookIcon(props: IconProps) {
   );
 }
 
+export function FlaskIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M10 2v7.31L4.1 19.46A2 2 0 0 0 5.8 22h12.4a2 2 0 0 0 1.7-2.54L14 9.31V2" />
+      <path d="M8.5 2h7M14 9.3a6.5 6.5 0 0 0-4 0M7 16h10" />
+    </Svg>
+  );
+}
+
 const CATEGORY_ICONS: Record<ToolCategory, (props: IconProps) => React.ReactElement> = {
   Timestamp: ClockIcon,
   "Date & Duration": CalendarIcon,
   "Time Zones": GlobeIcon,
   Developer: TerminalIcon,
+  Labs: FlaskIcon,
 };
 
 export function CategoryIcon({ category, className }: { category: ToolCategory; className?: string }) {

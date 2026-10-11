@@ -29,6 +29,7 @@ export function EnvVaultTool() {
   const [encPassword, setEncPassword] = useState("");
   const [encryptedLink, setEncryptedLink] = useState("");
   const [isEncrypting, setIsEncrypting] = useState(false);
+  const [encryptError, setEncryptError] = useState("");
 
   // Decrypt State
   const [vaultId, setVaultId] = useState("");
@@ -37,8 +38,18 @@ export function EnvVaultTool() {
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptError, setDecryptError] = useState("");
 
+  const MAX_ENV_SIZE_BYTES = 64 * 1024; // 64 KB
+
   const handleEncrypt = async () => {
     if (!encPassword || !rawEnv) return;
+    setEncryptError("");
+    setEncryptedLink("");
+
+    if (new TextEncoder().encode(rawEnv).length > MAX_ENV_SIZE_BYTES) {
+      setEncryptError("Payload exceeds the maximum allowed size (64 KB). Please reduce your environment content.");
+      return;
+    }
+
     setIsEncrypting(true);
     try {
       const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -50,29 +61,55 @@ export function EnvVaultTool() {
       
       const payloadBase64 = arrayBufferToBase64(salt.buffer as ArrayBuffer) + ":" + arrayBufferToBase64(iv.buffer as ArrayBuffer) + ":" + arrayBufferToBase64(ciphertext);
       
-      // Save to Supabase (assuming table env_vaults exists)
+      // Save to Supabase (client-side UUID avoids needing SELECT which is blocked by RLS)
+      const clientVaultId = crypto.randomUUID();
       const supabase = createClient();
-      const { data, error } = await supabase.from('env_vaults').insert([{ encrypted_payload: payloadBase64 }]).select().single();
+      const { error } = await supabase.from('env_vaults').insert([{ id: clientVaultId, encrypted_payload: payloadBase64 }]);
       
       if (error) {
-        // Fallback for local testing if DB is not created yet
-        setEncryptedLink(`http://localhost:3000/tools/env-vault?id=local_mock&payload=${encodeURIComponent(payloadBase64)}`);
+        setEncryptError(`Failed to save encrypted vault to server: ${error.message || "Database request failed"}`);
       } else {
-        setEncryptedLink(`${window.location.origin}/tools/env-vault?id=${data.id}`);
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        setEncryptedLink(`${origin}/tools/env-vault?id=${clientVaultId}`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setEncryptError(e?.message || "Encryption failed. Please check your inputs.");
     }
     setIsEncrypting(false);
   };
 
   const handleDecrypt = async () => {
-    if (!decPassword) return;
+    if (!decPassword || !vaultId) return;
     setIsDecrypting(true);
     setDecryptError("");
     setDecryptedEnv("");
     try {
-      const payloadBase64 = vaultId; 
+      let payloadBase64 = vaultId.trim();
+
+      // If user pasted a URL, extract parameter or ID
+      if (payloadBase64.includes("http://") || payloadBase64.includes("https://")) {
+        try {
+          const parsed = new URL(payloadBase64);
+          const p = parsed.searchParams.get("payload");
+          const id = parsed.searchParams.get("id");
+          if (p) payloadBase64 = p;
+          else if (id) payloadBase64 = id;
+        } catch {
+          // ignore URL parse failure
+        }
+      }
+
+      // Check if input is a UUID (vault ID in Supabase)
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(payloadBase64)) {
+        const supabase = createClient();
+        const { data, error } = await supabase.rpc('get_env_vault_payload', { target_id: payloadBase64 });
+        if (error || !data) {
+          throw new Error("Vault not found or expired.");
+        }
+        payloadBase64 = data;
+      }
       
       const parts = payloadBase64.split(":");
       if (parts.length !== 3) throw new Error("Invalid payload format");
@@ -86,8 +123,8 @@ export function EnvVaultTool() {
       
       const dec = new TextDecoder();
       setDecryptedEnv(dec.decode(decryptedBuffer));
-    } catch (e) {
-      setDecryptError("Decryption failed. Wrong password or corrupted payload.");
+    } catch (e: any) {
+      setDecryptError(e?.message === "Vault not found or expired." ? e.message : "Decryption failed. Wrong password or corrupted payload.");
     }
     setIsDecrypting(false);
   };
@@ -124,7 +161,7 @@ export function EnvVaultTool() {
           {mode === "encrypt" && (
             <div className="bg-card border border-line rounded-2xl p-8 shadow-sm relative overflow-hidden group">
               <h3 className="text-xl font-bold text-fg mb-2 tracking-tight">Zero-Knowledge .env Sharer</h3>
-              <p className="text-sm text-muted mb-6">Your .env file is encrypted entirely in the browser using AES-GCM. The server never sees your raw secrets.</p>
+              <p className="text-sm text-muted mb-6">Your .env file is encrypted in the browser with AES-GCM using a key derived from your password, so the server never sees your raw secrets or your password. <strong className="text-fg">This tool is not local-only:</strong> the encrypted result is uploaded to our server (Supabase) so the link can be opened on another device. See the <a href="/privacy" className="underline">Privacy Policy</a>.</p>
               
               <textarea 
                 value={rawEnv} onChange={e => setRawEnv(e.target.value)}
@@ -141,6 +178,12 @@ export function EnvVaultTool() {
                   {isEncrypting ? "Encrypting..." : "Encrypt & Share"}
                 </button>
               </div>
+
+              {encryptError && (
+                <div className="mt-6 p-4 bg-danger/10 border border-danger/20 rounded-xl text-danger text-sm font-mono">
+                  {encryptError}
+                </div>
+              )}
 
               {encryptedLink && (
                 <div className="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center gap-4">

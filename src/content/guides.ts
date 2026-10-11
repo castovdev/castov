@@ -112,7 +112,7 @@ export const GUIDES: Guide[] = [
     metaDescription: "Explore why zero-server architecture is the definitive solution for enterprise AI privacy, ensuring proprietary code never leaves your local machine.",
     summary: "Enterprise companies are terrified of pasting proprietary code into ChatGPT. Zero-Server AI solves this by bringing the LLM directly to the user's device, ensuring that sensitive data is processed 100% locally.",
     readingMinutes: 5,
-    tools: ["env-vault"],
+    tools: ["secret-scanner"],
     sections: [
       {
         heading: "The Enterprise AI Dilemma",

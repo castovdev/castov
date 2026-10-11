@@ -8,11 +8,14 @@ import { buildMetadata } from "@/lib/seo";
 
 const TITLE = "All Developer Tools | Castov";
 const DESCRIPTION =
-  "Browse all free Castov tools: timestamp converters, date calculators, time zone tools, and developer utilities like cron and RFC 3339.";
+  "Browse all free Castov tools: timestamp converters, date calculators, time zone tools, developer utilities, and experimental labs.";
 
 export const metadata: Metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, path: "/tools" });
 
 export default function ToolsPage() {
+  const mainCategories = TOOL_CATEGORIES.filter((c) => c !== "Labs");
+  const labsTools = TOOLS.filter((t) => t.category === "Labs");
+
   return (
     <StaticPage
       title="Tools"
@@ -20,12 +23,12 @@ export default function ToolsPage() {
       crumbs={[{ name: "Home", href: "/" }, { name: "Tools" }]}
       path="/tools"
     >
-      {TOOL_CATEGORIES.map((category) => {
+      {mainCategories.map((category) => {
         const tools = TOOLS.filter((t) => t.category === category);
         return (
           <section key={category} aria-labelledby={`cat-${category}`} className="mb-10">
             <h2 id={`cat-${category}`} className="mb-4 text-xl font-bold tracking-tight">
-              {category}
+              {category} ({tools.length})
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {tools.map((t) => (
@@ -35,6 +38,27 @@ export default function ToolsPage() {
           </section>
         );
       })}
+
+      {/* Labs Section (Positioned Below Main Categories) */}
+      <section aria-labelledby="cat-Labs" className="mb-12 mt-14 pt-8 border-t border-line">
+        <div className="flex items-center gap-3 mb-4">
+          <h2 id="cat-Labs" className="text-xl font-bold tracking-tight text-fg">
+            Labs ({labsTools.length})
+          </h2>
+          <span className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+            Experimental tools
+          </span>
+        </div>
+        <p className="text-sm text-muted mb-6">
+          Advanced experiments in browser-to-browser networking, steganography, AST manipulation, and client-side computing.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {labsTools.map((t) => (
+            <ToolCard key={t.slug} tool={t} headingLevel={3} />
+          ))}
+        </div>
+      </section>
+
       <h2>Learn the background</h2>
       <p>
         Not sure which tool you need? Start with{" "}

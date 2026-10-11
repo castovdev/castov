@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { AI_TOOLS, AI_CATEGORIES } from '@/lib/ai-tools';
 import { TOOLS } from '@/content/tools';
 import { GUIDES } from '@/content/guides';
+import { AI_HUB_LIVE } from '@/lib/flags';
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 function getLastMod(_filePath: string) {
@@ -16,7 +17,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: baseUrl, lastModified: getLastMod('src/app/page.tsx'), changeFrequency: 'daily', priority: 1.0 },
     { url: `${baseUrl}/tools`, lastModified: getLastMod('src/app/tools/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/guides`, lastModified: getLastMod('src/app/guides/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/ai`, lastModified: getLastMod('src/app/ai/page.tsx'), changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/developer`, lastModified: getLastMod('src/app/developer/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/canvas`, lastModified: getLastMod('src/app/canvas/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/nexus-grid`, lastModified: getLastMod('src/app/nexus-grid/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
@@ -47,23 +47,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   });
 
-  AI_CATEGORIES.forEach((category) => {
-    sitemapEntries.push({
-      url: `${baseUrl}/ai/${category}`,
-      lastModified: getLastMod('src/lib/ai-tools.ts'),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    });
-  });
+  if (AI_HUB_LIVE) {
+    sitemapEntries.push({ url: `${baseUrl}/ai`, lastModified: getLastMod('src/app/ai/page.tsx'), changeFrequency: 'daily', priority: 0.9 });
 
-  AI_TOOLS.forEach((tool) => {
-    sitemapEntries.push({
-      url: `${baseUrl}/ai/${tool.slug}`,
-      lastModified: getLastMod('src/lib/ai-tools.ts'),
-      changeFrequency: 'weekly',
-      priority: 0.6,
+    AI_CATEGORIES.forEach((category) => {
+      sitemapEntries.push({
+        url: `${baseUrl}/ai/${category}`,
+        lastModified: getLastMod('src/lib/ai-tools.ts'),
+        changeFrequency: 'weekly',
+        priority: 0.7,
+      });
     });
-  });
+
+    AI_TOOLS.forEach((tool) => {
+      sitemapEntries.push({
+        url: `${baseUrl}/ai/${tool.slug}`,
+        lastModified: getLastMod('src/lib/ai-tools.ts'),
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      });
+    });
+  }
 
   return sitemapEntries;
 }

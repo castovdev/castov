@@ -23,7 +23,13 @@ type Params = { code: string };
 export const dynamicParams = false;
 
 export function generateStaticParams(): Params[] {
-  return [{ code: "777" }, { code: "644" }, { code: "755" }];
+  const codes: Params[] = [];
+  for (let a = 0; a <= 7; a++) {
+    for (let b = 0; b <= 7; b++) {
+      for (let c = 0; c <= 7; c++) codes.push({ code: `${a}${b}${c}` });
+    }
+  }
+  return codes;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {

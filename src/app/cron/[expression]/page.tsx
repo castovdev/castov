@@ -13,11 +13,11 @@ function parseCron(expression: string) {
 }
 
 type Params = { expression: string };
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export function generateStaticParams(): Params[] {
-  // Just a few for build-time caching to satisfy static export / SSG.
-  return [{ expression: "0_0_*_*_*" }, { expression: "*_*_*_*_*" }];
+  // Use Windows-safe expressions (avoiding * in directory names on Windows NTFS)
+  return [{ expression: "0_0_1_1_0" }, { expression: "0_12_1_1_5" }];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ expression: string }> }): Promise<Metadata> {

@@ -3,17 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SITE } from "@/lib/site";
+import { AI_HUB_LIVE } from "@/lib/flags";
 import { BrandMark } from "./brand-mark";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
 
 const DESKTOP_NAV = [
   { href: "/tools", label: "Tools" },
-  { href: "/ai", label: "AI Hub" },
+  ...(AI_HUB_LIVE ? [{ href: "/ai", label: "AI Hub" }] : []),
   { href: "/timezones", label: "Time Zones" },
   { href: "/guides", label: "Guides" },
   { href: "/developer", label: "Developer" },
-] as const;
+];
 
 export function SiteHeader() {
   const pathname = usePathname();

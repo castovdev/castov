@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import { SearchIcon, BoxIcon, CodeIcon, SettingsIcon, ClockIcon, HashIcon, TypeIcon, LinkIcon, PaletteIcon } from "lucide-react";
 import { AI_TOOLS } from "@/lib/ai-tools";
+import { AI_HUB_LIVE } from "@/lib/flags";
 import { TOOLS } from "@/content/tools";
 import { parseTimestamp } from "@/lib/time/timestamp";
 import { toIsoUtc } from "@/lib/time/format";
@@ -177,12 +178,14 @@ export function CommandPalette() {
             >
               <BoxIcon className="w-4 h-4" /> Home
             </Command.Item>
-            <Command.Item
-              onSelect={() => runCommand(() => router.push("/ai"))}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
-            >
-              <CodeIcon className="w-4 h-4" /> AI Developer Directory
-            </Command.Item>
+            {AI_HUB_LIVE && (
+              <Command.Item
+                onSelect={() => runCommand(() => router.push("/ai"))}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+              >
+                <CodeIcon className="w-4 h-4" /> AI Developer Directory
+              </Command.Item>
+            )}
             <Command.Item
               onSelect={() => runCommand(() => router.push("/tools"))}
               className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
@@ -207,21 +210,23 @@ export function CommandPalette() {
             ))}
           </Command.Group>
 
-          <Command.Group heading="AI Tools" className="text-xs font-medium text-muted/60 px-2 py-1 mt-2">
-            {AI_TOOLS.map((tool) => (
-              <Command.Item
-                key={tool.slug}
-                value={tool.name}
-                onSelect={() => runCommand(() => router.push(`/ai/${tool.slug}`))}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors mt-1"
-              >
-                <div className="flex flex-col">
-                  <span className="font-semibold">{tool.name}</span>
-                  <span className="text-xs text-muted font-normal">{tool.category}</span>
-                </div>
-              </Command.Item>
-            ))}
-          </Command.Group>
+          {AI_HUB_LIVE && (
+            <Command.Group heading="AI Tools" className="text-xs font-medium text-muted/60 px-2 py-1 mt-2">
+              {AI_TOOLS.map((tool) => (
+                <Command.Item
+                  key={tool.slug}
+                  value={tool.name}
+                  onSelect={() => runCommand(() => router.push(`/ai/${tool.slug}`))}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors mt-1"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-semibold">{tool.name}</span>
+                    <span className="text-xs text-muted font-normal">{tool.category}</span>
+                  </div>
+                </Command.Item>
+              ))}
+            </Command.Group>
+          )}
         </Command.List>
       </Command>
     </div>

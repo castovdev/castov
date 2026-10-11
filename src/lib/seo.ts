@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { OG_ALT, OG_SIZE } from "./og-constants";
 import { SITE, absoluteUrl } from "./site";
+import { AI_HUB_LIVE, isAiHubPath } from "./flags";
 
 export interface PageSeo {
   /** Full <title>. Used as-is (no template) so every page can have its own exact title. */
@@ -16,7 +17,7 @@ export function buildMetadata({ title, description, path }: PageSeo): Metadata {
     title: { absolute: title },
     description,
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots: !AI_HUB_LIVE && isAiHubPath(path) ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
       type: "website",
       url,

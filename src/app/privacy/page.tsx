@@ -28,9 +28,9 @@ export default function PrivacyPage() {
       <ul>
         <li><strong>Data Visualization:</strong> JSON Viewer (3D Galaxy) and AST Conflict Telepathy.</li>
         <li><strong>Time & Utility:</strong> All Timestamp Converters, World Clocks, and Date tools.</li>
-        <li><strong>Steganography & Crypto:</strong> Env Vault processing (AES-GCM encryption and image encoding).</li>
+        <li><strong>Steganography & Crypto:</strong> Steganography Env Vault (AES-GCM encryption and hiding the result inside a PNG image) and the Secret Scanner. <em>Not</em> the Env Vault sharing tool: see section 4.</li>
         <li><strong>Compute & Web APIs:</strong> NexusGrid WebGPU Engine, Sonic-Gap Audio Bridge, and Quantum Simulator.</li>
-        <li><strong>P2P Tools:</strong> P2P Ghost Tunnel establishes direct WebRTC connections between peers. Castov only facilitates the initial STUN/TURN handshake; the payload is completely end-to-end encrypted and bypasses our servers.</li>
+        <li><strong>P2P Tools &amp; Canvas:</strong> P2P Ghost Tunnel and Developer Canvas establish direct peer-to-peer connections using WebRTC and CRDTs (Yjs). Data is synchronized directly between browser peers over WebRTC data channels using public signaling servers. Workflow graphs and nodes are never stored on Castov servers or in any database.</li>
       </ul>
 
       <h2>2. Features That Store Data Locally</h2>
@@ -54,17 +54,28 @@ export default function PrivacyPage() {
 
       <h2>4. Features That Send Data to Castov Servers (Account Required)</h2>
       <p>
-        Features like <strong>Cloud Sync, Personal Workspace, Canvas, and Team Vaults</strong> require creating a Castov Account.
+        Features like <strong>Team Vaults</strong> require a Castov account:
       </p>
       <ul>
-        <li><strong>What is uploaded:</strong> Authentication details (email, provider ID) and cloud-synced workflows (Canvas graphs).</li>
+        <li><strong>What is uploaded:</strong> Authentication details (email, provider ID) and encrypted team vault records.</li>
         <li><strong>How synced data is protected:</strong> For Team Vaults, your `.env` variables are encrypted <strong>client-side</strong> before transmission. Castov servers store only the ciphertext. We cannot read your secrets.</li>
+      </ul>
+
+      <h3>Env Vault (secure .env sharing) is not a local tool</h3>
+      <p>
+        The <strong>Env Vault</strong> tool is the one tool on this site that is <strong>not</strong> zero-server. To let someone else open your file with a link, it uploads data to our servers:
+      </p>
+      <ul>
+        <li><strong>What is uploaded:</strong> the encrypted payload only (a random salt, an initialization vector and the AES-GCM ciphertext). It is stored in our database, hosted on Supabase.</li>
+        <li><strong>What is not uploaded:</strong> your plaintext `.env` contents and your password. Encryption happens in your browser, and the key is derived from your password with PBKDF2, so neither ever leaves your device. Share the password with your recipient through a different channel than the link.</li>
+        <li><strong>What we can see:</strong> that a vault exists, its size, its creation time and an expiry timestamp (set to 7 days after creation), plus the standard request logs described in section 5. We cannot decrypt it.</li>
+        <li><strong>Limits of this protection:</strong> the stored ciphertext is retrievable by anyone who has the vault link, and the database is configured to allow public reads, so you should treat the ciphertext itself as public. Its security rests entirely on your password: anyone who learns or guesses it can decrypt the vault, and a weak password can be guessed offline. Use a long, unique password and do not put secrets you cannot rotate into a vault.</li>
       </ul>
 
       <h2>5. Server Logs, Analytics, and Backups</h2>
       <ul>
         <li><strong>Server Logs:</strong> Our infrastructure providers (Vercel, Supabase) log standard request metadata (IP address, user-agent, timestamp, URL path) for DDoS protection and debugging. These logs <strong>do not</strong> contain the payload data of your tools (e.g., the JSON you parse or the Regex you test).</li>
-        <li><strong>Analytics & Error Tracking:</strong> We use privacy-friendly analytics for page views. We do not use session-recording tools (like Hotjar or LogRocket) to capture your screen, ensuring your proprietary code and JSON payloads remain private.</li>
+        <li><strong>Analytics & Error Tracking:</strong> We use Vercel Web Analytics for aggregate page-view statistics. We do not use session-recording tools (like Hotjar or LogRocket) to capture your screen, ensuring your proprietary code and JSON payloads remain private.</li>
         <li><strong>Backups:</strong> Cloud-synced user data is backed up automatically. If you delete your account, backups are purged within 30 days.</li>
       </ul>
 

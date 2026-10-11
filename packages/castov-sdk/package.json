@@ -1,13 +1,49 @@
 {
   "name": "@castov/sdk",
   "version": "1.0.0",
-  "description": "The official Castov Developer SDK",
-  "main": "./index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "description": "Zero-dependency, zero-server developer utilities: UUID v4/v7, nanoid, Base64, hashing, Unix time and JWT decoding. Works in Node.js, Deno, Bun, edge runtimes and browsers.",
+  "keywords": ["uuid", "uuidv7", "nanoid", "base64", "hash", "sha256", "unix", "timestamp", "jwt", "castov", "zero-dependency"],
+  "homepage": "https://castov.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benidira/timeforge.git",
+    "directory": "packages/castov-sdk"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module"
+  "bugs": "https://github.com/benidira/timeforge/issues",
+  "license": "MIT",
+  "author": "Castov <https://castov.com>",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node -e \"require('fs').writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
+    "test": "node --test test/sdk.test.mjs",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
 }
