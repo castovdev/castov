@@ -1,8 +1,8 @@
 {
   "name": "@castov/sdk",
   "version": "1.0.0",
-  "description": "Zero-dependency, zero-server developer utilities: UUID v4/v7, nanoid, Base64, hashing, Unix time and JWT decoding. Works in Node.js, Deno, Bun, edge runtimes and browsers.",
-  "keywords": ["uuid", "uuidv7", "nanoid", "base64", "hash", "sha256", "unix", "timestamp", "jwt", "castov", "zero-dependency"],
+  "description": "Zero-dependency, zero-server developer utilities: Unix timestamps, ID detector (ObjectId, Snowflake, UUIDv7, ULID), cron explainer, IANA time zone converter with DST handling, UUID v4/v7, Base64, hashing, and JWT decoding. Works in Node.js, Deno, Bun, edge runtimes, and browsers.",
+  "keywords": ["uuid", "uuidv7", "nanoid", "base64", "hash", "sha256", "unix", "timestamp", "cron", "timezone", "dst", "snowflake", "ulid", "objectid", "jwt", "castov", "zero-dependency"],
   "homepage": "https://castov.com",
   "repository": {
     "type": "git",

@@ -1,18 +1,24 @@
 /**
  * @castov/sdk — zero-dependency, zero-server developer utilities.
  * Runs in Node.js >= 20, Deno, Bun, Cloudflare Workers and modern browsers.
- * Everything relies on the standard Web Crypto API (globalThis.crypto).
+ * Everything relies on standard Web Crypto API and ECMAScript Intl APIs.
  */
 
+export * from "./types.js";
+export * from "./timestamp.js";
+export * from "./detect.js";
+export * from "./cron.js";
+export * from "./tz.js";
+
 // ---------------------------------------------------------------------------
-// Internals
+// Crypto & Internals
 // ---------------------------------------------------------------------------
 
 function getCrypto(): Crypto {
   const c = (globalThis as { crypto?: Crypto }).crypto;
   if (!c || typeof c.getRandomValues !== "function") {
     throw new Error(
-      "@castov/sdk: Web Crypto API is not available. Use Node.js >= 20 or a modern browser.",
+      "@castov/sdk: Web Crypto API is not available. Use Node.js >= 20 or a modern browser."
     );
   }
   return c;
@@ -71,7 +77,9 @@ const URL_ALPHABET = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvw
 
 /** URL-safe random ID (nanoid-compatible alphabet). Default length: 21. */
 export function nanoid(size = 21): string {
-  if (!Number.isInteger(size) || size <= 0) throw new RangeError("nanoid: size must be a positive integer");
+  if (!Number.isInteger(size) || size <= 0) {
+    throw new RangeError("nanoid: size must be a positive integer");
+  }
   const bytes = getCrypto().getRandomValues(new Uint8Array(size));
   let id = "";
   for (let i = 0; i < size; i++) id += URL_ALPHABET[bytes[i] & 63];
@@ -82,10 +90,11 @@ export function nanoid(size = 21): string {
 // Base64 (UTF-8 safe)
 // ---------------------------------------------------------------------------
 
-export interface Base64Options {
-  /** Use the URL-safe alphabet (`-`/`_`) without padding. */
-  url?: boolean;
-}
+import type { Base64Options, DecodedJwt, HashAlgorithm } from "./types.js";
+import { unix, unixToIso, isoToUnix, ts } from "./timestamp.js";
+import { detect } from "./detect.js";
+import { cron } from "./cron.js";
+import { tz } from "./tz.js";
 
 export function base64Encode(text: string, options: Base64Options = {}): string {
   const bytes = new TextEncoder().encode(text);
@@ -107,34 +116,8 @@ export function base64Decode(input: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Time
-// ---------------------------------------------------------------------------
-
-/** Current Unix timestamp in seconds. */
-export function unix(): number {
-  return Math.floor(Date.now() / 1000);
-}
-
-/** Converts a Unix timestamp to ISO 8601. Auto-detects milliseconds (values > 1e11). */
-export function unixToIso(timestamp: number): string {
-  const ms = Math.abs(timestamp) > 1e11 ? timestamp : timestamp * 1000;
-  const d = new Date(ms);
-  if (Number.isNaN(d.getTime())) throw new RangeError(`unixToIso: invalid timestamp ${timestamp}`);
-  return d.toISOString();
-}
-
-/** Parses any Date-compatible string (e.g. ISO 8601) to Unix seconds. */
-export function isoToUnix(iso: string): number {
-  const t = Date.parse(iso);
-  if (Number.isNaN(t)) throw new RangeError(`isoToUnix: invalid date "${iso}"`);
-  return Math.floor(t / 1000);
-}
-
-// ---------------------------------------------------------------------------
 // Hashing
 // ---------------------------------------------------------------------------
-
-export type HashAlgorithm = "sha1" | "sha256" | "sha384" | "sha512";
 
 const SUBTLE_NAMES: Record<HashAlgorithm, string> = {
   sha1: "SHA-1",
@@ -146,7 +129,9 @@ const SUBTLE_NAMES: Record<HashAlgorithm, string> = {
 /** Hex digest of `text` using Web Crypto. Async because SubtleCrypto is async. */
 export async function hash(text: string, algorithm: HashAlgorithm = "sha256"): Promise<string> {
   const name = SUBTLE_NAMES[algorithm];
-  if (!name) throw new Error(`hash: unsupported algorithm "${algorithm}". Use sha1, sha256, sha384 or sha512.`);
+  if (!name) {
+    throw new Error(`hash: unsupported algorithm "${algorithm}". Use sha1, sha256, sha384 or sha512.`);
+  }
   const digest = await getCrypto().subtle.digest(name, new TextEncoder().encode(text));
   const b = new Uint8Array(digest);
   let hex = "";
@@ -157,12 +142,6 @@ export async function hash(text: string, algorithm: HashAlgorithm = "sha256"): P
 // ---------------------------------------------------------------------------
 // JWT (decode only — never verifies signatures)
 // ---------------------------------------------------------------------------
-
-export interface DecodedJwt {
-  header: Record<string, unknown>;
-  payload: Record<string, unknown>;
-  signature: string;
-}
 
 /** Decodes a JWT locally. Does NOT verify the signature. */
 export function jwtDecode(token: string): DecodedJwt {
@@ -192,6 +171,10 @@ export const castov = {
   unix,
   unixToIso,
   isoToUnix,
+  ts,
+  detect,
+  cron,
+  tz,
   hash,
   jwtDecode,
 } as const;
