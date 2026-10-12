@@ -4,6 +4,7 @@ import { FaqSection } from "@/components/faq-section";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { ShareButton } from "@/components/share-button";
 
 function getPermissions(digit: string) {
   const val = parseInt(digit, 10);
@@ -77,6 +78,12 @@ export default async function ChmodPage({ params }: { params: Promise<{ code: st
       />
 
       <div className="mt-8 mb-12">
+        <div className="flex items-center justify-between mb-3">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent">
+            LINUX FILE PERMISSIONS
+          </span>
+          <ShareButton title={`Chmod ${code} Permissions`} />
+        </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-fg mb-6">
           Chmod <span className="text-primary font-mono">{code}</span>
         </h1>

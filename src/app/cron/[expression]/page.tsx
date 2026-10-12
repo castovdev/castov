@@ -4,6 +4,7 @@ import { FaqSection } from "@/components/faq-section";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { ShareButton } from "@/components/share-button";
 
 // Basic parser for unique prose
 function parseCron(expression: string) {
@@ -63,6 +64,12 @@ export default async function CronPage({ params }: { params: Promise<{ expressio
       />
 
       <div className="mt-8 mb-12">
+        <div className="flex items-center justify-between mb-3">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent">
+            CRONTAB SCHEDULE
+          </span>
+          <ShareButton title={`Cron Expression: ${decoded}`} />
+        </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-fg mb-6">
           Cron Schedule:<br/> <span className="text-primary font-mono">{decoded}</span>
         </h1>

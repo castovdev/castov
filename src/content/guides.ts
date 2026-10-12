@@ -12,7 +12,11 @@ export type GuideSlug =
   | "utc-vs-gmt"
   | "cron-expressions-explained"
   | "understanding-regex-ast"
-  | "mastering-docker-compose";
+  | "mastering-docker-compose"
+  | "linux-file-permissions-chmod-guide"
+  | "jwt-security-best-practices"
+  | "unix-timestamp-in-code"
+  | "mastering-text-diff-algorithms";
 
 export interface GuideSection {
   heading: string;
@@ -461,6 +465,174 @@ export const GUIDES: Guide[] = [
       },
     ],
     tools: ["cron-generator", "current-unix-timestamp"],
+  },
+  {
+    slug: "linux-file-permissions-chmod-guide",
+    name: "Linux File Permissions & Chmod Guide",
+    seoTitle: "Linux Permissions & Chmod Explained: 777 vs 755 vs 644 | Castov",
+    metaDescription:
+      "A complete guide to Linux file permissions, octal notation (777, 755, 644), owner/group/other access rights, and production security rules.",
+    summary: "How Linux file permissions work, why octal numbers like 755 and 644 are calculated, and why chmod 777 is a dangerous anti-pattern.",
+    readingMinutes: 6,
+    tools: ["chmod-calculator", "cron-generator"],
+    sections: [
+      {
+        heading: "The Permission Triad: Owner, Group, and Others",
+        paragraphs: [
+          "Every file and directory in Linux has three distinct classes of users who can interact with it: the Owner (the user who created it), the Group (a team of users sharing permissions), and Others (everyone else with access to the system).",
+          "Each of these three classes can have up to three distinct rights: Read (r), Write (w), and Execute (x). When viewing permissions in terminal via `ls -l`, you see a 9-character string such as `-rwxr-xr--` reflecting these three groups.",
+        ],
+      },
+      {
+        heading: "The Octal Math: Read (4), Write (2), Execute (1)",
+        paragraphs: [
+          "Instead of writing out symbolic strings, Linux allows numeric shorthand called octal notation. Each permission is assigned a specific binary power of two:",
+          "Read = 4, Write = 2, Execute = 1. Combining them gives a unique sum between 0 and 7. For example: 4 + 2 + 1 = 7 (Read, Write, and Execute). 4 + 2 = 6 (Read and Write). 4 + 1 = 5 (Read and Execute). 4 = 4 (Read only).",
+          "A three-digit code like 755 simply concatenates the sum for each class: Owner gets 7 (rwx), Group gets 5 (r-x), and Others get 5 (r-x).",
+        ],
+      },
+      {
+        heading: "Why chmod 777 is a Severe Production Risk",
+        paragraphs: [
+          "Developers frequently run `chmod 777` when facing a 'Permission denied' error because it immediately solves the roadblock. However, 777 grants universal write access, meaning any compromised process or malicious local user can modify, replace, or execute arbitrary code inside that file.",
+          "In web servers (like Nginx or Apache), public writable files can allow attackers to inject web shells or overwrite environment secrets. Never deploy files with 777 in production.",
+        ],
+      },
+      {
+        heading: "Recommended Safe Permissions",
+        paragraphs: [
+          "For static web assets, configuration files, and scripts, the golden rule of least privilege applies:",
+          "Standard files: 644 (Owner can read/write; Group and Others can only read).",
+          "Standard directories: 755 (Owner has full control; Group and Others can traverse and read contents).",
+          "Private keys & credentials (.env, id_rsa): 600 or 400 (Only Owner can read/write, zero access for Group and Others).",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "jwt-security-best-practices",
+    name: "JSON Web Tokens (JWT) Security Best Practices",
+    seoTitle: "JWT Security Best Practices: Claims, Expiration & Pitfalls | Castov",
+    metaDescription:
+      "Understand JSON Web Tokens (JWT) architecture: header, payload, signature, exp/iat claims, algorithm-none attacks, and secure token verification.",
+    summary: "How JSON Web Tokens work under the hood, how to properly handle exp/iat expiration claims, and critical vulnerabilities to avoid in production.",
+    readingMinutes: 5,
+    tools: ["jwt-debugger", "base64-encoder-decoder"],
+    sections: [
+      {
+        heading: "Anatomy of a JWT: Three Base64Url Segments",
+        paragraphs: [
+          "A JSON Web Token (RFC 7519) is a compact, URL-safe representation of claims between two parties. It consists of three parts separated by dots (`.`): Header, Payload, and Signature.",
+          "The Header specifies the token type and cryptographic algorithm (e.g. HS256, RS256). The Payload contains the claims (user ID, roles, timestamps). The Signature is computed by hashing the header and payload with a secret or private key, preventing tampering.",
+        ],
+      },
+      {
+        heading: "The Crucial Standard Claims: exp, iat, and nbf",
+        paragraphs: [
+          "JWTs are stateless; once issued, the backend cannot easily revoke them without a blacklist or short expiry. Always enforce standard temporal claims:",
+          "`exp` (Expiration Time): The Unix timestamp after which the token is strictly invalid.",
+          "`iat` (Issued At): The Unix timestamp when the token was generated, useful for age calculation.",
+          "`nbf` (Not Before): The Unix timestamp before which the token must not be accepted.",
+        ],
+      },
+      {
+        heading: "The Infamous 'alg: none' Vulnerability",
+        paragraphs: [
+          "In early JWT library implementations, the specification allowed an algorithm value of `none` for unsecured tokens. Attackers could modify the payload, set `alg: 'none'`, strip the signature, and bypass authentication completely.",
+          "Modern verification libraries require explicitly whitelisting acceptable algorithms (e.g., only allowing `['HS256']` or `['RS256']`) to completely prevent downgrade attacks.",
+        ],
+      },
+      {
+        heading: "Secure Storage: HttpOnly Cookies vs LocalStorage",
+        paragraphs: [
+          "Storing access tokens in browser `localStorage` exposes them to any Cross-Site Scripting (XSS) vulnerability. If malicious JavaScript executes on your page, your user's tokens can be stolen immediately.",
+          "For web applications, the most secure approach is storing JWT session tokens in `HttpOnly, Secure, SameSite=Lax` cookies, preventing JavaScript access entirely while safeguarding against CSRF attacks.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "unix-timestamp-in-code",
+    name: "Unix Timestamps in Python, JavaScript, and Go",
+    seoTitle: "How to Work with Unix Timestamps in Python, JavaScript, and Go | Castov",
+    metaDescription:
+      "Practical code recipes to get, parse, and format Unix epoch timestamps in JavaScript (Node.js), Python 3, Go, and Rust without timezone bugs.",
+    summary: "How to generate and format Unix timestamps across JavaScript, Python, and Go, plus common pitfalls like milliseconds vs seconds.",
+    readingMinutes: 5,
+    tools: ["unix-timestamp-converter", "epoch-converter", "timestamp-to-date"],
+    sections: [
+      {
+        heading: "The Milliseconds Trap in JavaScript",
+        paragraphs: [
+          "In JavaScript and Node.js, `Date.now()` and `new Date().getTime()` return timestamps in milliseconds (13 digits), whereas Unix standard counts seconds (10 digits).",
+          "To get a standard 10-digit Unix timestamp in JavaScript: `const timestamp = Math.floor(Date.now() / 1000);`.",
+          "Passing a 10-digit second timestamp directly to `new Date(ts)` causes JavaScript to treat it as milliseconds, resulting in a date in January 1970. Always multiply by 1000 first: `new Date(ts * 1000)`.",
+        ],
+      },
+      {
+        heading: "Python 3: time.time() vs datetime.fromtimestamp()",
+        paragraphs: [
+          "In Python, obtaining the current timestamp in seconds is straightforward with `time.time()`, which returns a float:",
+          "`import time; ts = int(time.time())`",
+          "When parsing timestamps back to datetimes, always use timezone-aware methods to prevent naive local time bugs: `from datetime import datetime, timezone; dt = datetime.fromtimestamp(ts, tz=timezone.utc)`.",
+        ],
+      },
+      {
+        heading: "Go (Golang): time.Now().Unix()",
+        paragraphs: [
+          "Go provides explicit, type-safe standard library helpers for Unix time:",
+          "Get current seconds: `nowSeconds := time.Now().Unix()`",
+          "Get current milliseconds: `nowMillis := time.Now().UnixMilli()`",
+          "Convert timestamp to time.Time: `t := time.Unix(sec, nsec)`.",
+        ],
+      },
+      {
+        heading: "Safe Database Storage & 64-Bit Integers",
+        paragraphs: [
+          "Always store Unix timestamps in signed 64-bit integers (`BIGINT` in PostgreSQL/MySQL). Storing timestamps in 32-bit integers will overflow on January 19, 2038 (the Year 2038 Problem).",
+          "64-bit integer timestamps guarantee your database will handle timestamps accurately for hundreds of billions of years.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "mastering-text-diff-algorithms",
+    name: "Understanding Diff Algorithms and Patch Workflows",
+    seoTitle: "How Diff Algorithms Work: Myers Algorithm, Unified Diffs & Patches | Castov",
+    metaDescription:
+      "Learn how text comparison algorithms work under the hood, how Myers algorithm computes minimal edit scripts, and how unified diffs power Git.",
+    summary: "The math and mechanics of calculating text differences: Longest Common Subsequences, Myers algorithm, and unified diff syntax.",
+    readingMinutes: 5,
+    tools: ["diff-checker", "json-formatter"],
+    sections: [
+      {
+        heading: "The Longest Common Subsequence (LCS) Problem",
+        paragraphs: [
+          "At the core of any diff tool is finding what remained unchanged between two versions of a document. This is mathematically formulated as the Longest Common Subsequence (LCS) problem.",
+          "By identifying the elements that both versions share in order, the differences can be represented as a minimal sequence of insertions and deletions.",
+        ],
+      },
+      {
+        heading: "The Myers Diff Algorithm",
+        paragraphs: [
+          "Published by Eugene Myers in 1986, the Myers algorithm is the default engine behind `git diff` and standard Unix `diff`. It treats difference calculation as finding the shortest path on an edit graph.",
+          "Myers operates in O((N+M)D) time, where N and M are line counts and D is the number of edits. For typical code files where edits are small compared to total file length, it executes almost instantaneously.",
+        ],
+      },
+      {
+        heading: "Anatomy of a Unified Diff",
+        paragraphs: [
+          "Unified format combines differences into a single stream with context lines. It starts with file headers (`--- original` and `+++ modified`), followed by hunk headers like `@@ -1,5 +1,6 @@`.",
+          "Lines prefixed with ` ` (space) are unchanged context. Lines prefixed with `-` are deleted, and lines prefixed with `+` are inserted.",
+        ],
+      },
+      {
+        heading: "Applications Beyond Code Reviews",
+        paragraphs: [
+          "Diff algorithms are not limited to Git commits. Modern software uses diffing for API payload drift detection, database schema migrations, collaborative real-time editing (Operational Transformation / CRDTs), and client-side form change tracking.",
+        ],
+      },
+    ],
   },
 ];
 

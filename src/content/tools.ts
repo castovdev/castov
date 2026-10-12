@@ -142,7 +142,8 @@ export const TOOLS: Tool[] = [
         ]
       }
     ],
-    related: ['json-formatter', 'json-to-ts', 'base64-encoder-decoder', 'uuid-generator']
+    related: ['json-formatter', 'json-to-ts', 'base64-encoder-decoder', 'uuid-generator'],
+    guide: 'mastering-text-diff-algorithms',
   },
   {
     slug: 'json-formatter',
@@ -260,7 +261,8 @@ export const TOOLS: Tool[] = [
         ]
       }
     ],
-    related: ['base64-encoder-decoder', 'json-formatter', 'uuid-generator', 'hash-generator']
+    related: ['base64-encoder-decoder', 'json-formatter', 'uuid-generator', 'hash-generator'],
+    guide: 'jwt-security-best-practices',
   },
   {
     slug: 'uuid-generator',

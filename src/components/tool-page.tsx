@@ -10,6 +10,7 @@ import { JsonLd } from "./json-ld";
 import { RelatedTools } from "./related-tools";
 import { ToolInterface } from "./tool-interface";
 import { PinButton } from "./pinned-tools";
+import { ShareButton } from "./share-button";
 
 /** Shared layout for every tool page: breadcrumb, H1, tool, then explanation, examples, FAQ, links. */
 export function ToolPage({ tool }: { tool: Tool }) {
@@ -33,7 +34,10 @@ export function ToolPage({ tool }: { tool: Tool }) {
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent">
             {tool.category.replace("-", " ").toUpperCase()}
           </span>
-          <PinButton slug={tool.slug} />
+          <div className="flex items-center gap-2">
+            <ShareButton title={tool.name} />
+            <PinButton slug={tool.slug} />
+          </div>
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-fg">{tool.name}</h1>
         <p className="mt-3 max-w-2xl text-lg text-muted">{tool.intro}</p>
