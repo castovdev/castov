@@ -175,64 +175,115 @@ export function SonicGapBridgeTool() {
   };
 
   return (
-    <div className="space-y-6 text-white max-w-6xl mx-auto">
-      <div className="bg-black/60 border border-[#a855f7]/30 p-8 rounded-2xl shadow-[0_0_40px_rgba(168,85,247,0.15)] relative overflow-hidden">
-        <div className="absolute -right-10 -top-10 opacity-10 pointer-events-none">
-          <WifiOff className="w-96 h-96 text-[#a855f7]" />
-        </div>
-        
-        <div className="relative z-10 flex items-center gap-4 mb-4">
-          <ShieldAlert className="w-10 h-10 text-[#a855f7]" />
-          <div>
-            <h2 className="text-3xl font-black uppercase tracking-widest text-[#a855f7]">Sonic-Gap Bridge</h2>
-            <p className="text-muted font-mono text-sm mt-1">Air-Gapped Ultrasonic Acoustic Data Transfer Protocol (FSK 18kHz-19kHz)</p>
+    <div className="space-y-8 max-w-5xl mx-auto">
+      {/* Header Banner */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-field border border-line relative overflow-hidden shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-bold text-accent uppercase tracking-wider mb-1">
+                Air-Gapped Audio Bridge
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-fg tracking-tight">Sonic-Gap Bridge</h2>
+              <p className="text-muted text-xs sm:text-sm mt-0.5">Ultrasonic acoustic data transfer protocol (FSK 18kHz - 19kHz)</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold border ${
+              mode === "tx" 
+                ? "bg-blue-500/10 text-blue-500 border-blue-500/30" 
+                : mode === "rx" 
+                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30" 
+                : "bg-bg text-muted border-line"
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${mode === "tx" ? "bg-blue-500 animate-pulse" : mode === "rx" ? "bg-emerald-500 animate-ping" : "bg-muted"}`} />
+              {mode === "tx" ? "TRANSMITTING" : mode === "rx" ? "LISTENING" : "READY / IDLE"}
+            </span>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mt-8">
+        {/* Dual Panels: TX & RX */}
+        <div className="grid md:grid-cols-2 gap-6 mt-8">
           {/* TRANSMITTER */}
-          <div className="bg-[#050510] border border-[#00f0FF]/20 rounded-xl p-6">
-            <h3 className="text-lg font-bold text-[#00f0FF] uppercase flex items-center gap-2 mb-4"><Volume2 className="w-5 h-5"/> Transmitter (Tx)</h3>
-            <div className="space-y-4">
+          <div className="bg-bg border border-line rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-2">
+                  <Volume2 className="w-4 h-4 text-accent" /> Transmitter (Tx)
+                </span>
+                <span className="text-[10px] font-mono text-muted">Speaker Output</span>
+              </div>
+              <label className="text-xs font-medium text-muted block mb-1">Payload to Transmit (Max 10 chars)</label>
               <input 
-                type="text" maxLength={10} value={payload} onChange={e => setPayload(e.target.value.toUpperCase())} disabled={mode !== "idle"}
-                className="w-full bg-black border border-[#00f0FF]/50 rounded-lg p-4 font-mono text-[#00f0FF] outline-none uppercase"
-                placeholder="DATA PAYLOAD (MAX 10 CHARS)"
+                type="text" 
+                maxLength={10} 
+                value={payload} 
+                onChange={e => setPayload(e.target.value.toUpperCase())} 
+                disabled={mode !== "idle"}
+                className="w-full bg-field border border-line rounded-xl px-4 py-3 font-mono text-sm text-fg outline-none uppercase focus:ring-2 focus:ring-accent/40"
+                placeholder="CASTOV"
               />
-              <button 
-                onClick={transmit} disabled={mode !== "idle" || !payload}
-                className="w-full bg-[#00f0FF]/20 hover:bg-[#00f0FF]/40 text-[#00f0FF] border border-[#00f0FF]/50 p-4 rounded-lg font-bold uppercase tracking-widest transition-all disabled:opacity-50"
-              >
-                {mode === "tx" ? "Broadcasting Ultrasonic Frequencies..." : "Transmit Data via Audio"}
-              </button>
             </div>
+
+            <button 
+              type="button"
+              onClick={transmit} 
+              disabled={mode !== "idle" || !payload}
+              className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 shadow-md shadow-blue-500/20 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Volume2 className="w-4 h-4 text-white" />
+              {mode === "tx" ? "Broadcasting Frequencies..." : "Transmit via Audio"}
+            </button>
           </div>
 
           {/* RECEIVER */}
-          <div className="bg-[#050510] border border-[#10B981]/20 rounded-xl p-6">
-            <h3 className="text-lg font-bold text-[#10B981] uppercase flex items-center gap-2 mb-4"><Mic className="w-5 h-5"/> Receiver (Rx)</h3>
-            <div className="space-y-4">
-              <div className="w-full h-[58px] bg-black border border-[#10B981]/50 rounded-lg p-4 font-mono text-[#10B981] shadow-inner flex items-center justify-between">
-                <span>{receivedText || "// AWAITING SONIC SIGNAL"}</span>
-                {receivedBits && <span className="text-[10px] opacity-50">{receivedBits.slice(-16)}</span>}
+          <div className="bg-bg border border-line rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-2">
+                  <Mic className="w-4 h-4 text-emerald-500" /> Receiver (Rx)
+                </span>
+                <span className="text-[10px] font-mono text-muted">Microphone FFT</span>
               </div>
-              <button 
-                onClick={mode === "rx" ? stopReceive : receive} disabled={mode === "tx"}
-                className={`w-full p-4 rounded-lg font-bold uppercase tracking-widest transition-all disabled:opacity-50 border ${mode === "rx" ? "bg-red-500/20 text-red-500 border-red-500/50" : "bg-[#10B981]/20 hover:bg-[#10B981]/40 text-[#10B981] border-[#10B981]/50"}`}
-              >
-                {mode === "rx" ? "Stop Listening" : "Listen for Ultrasonic Data"}
-              </button>
+              <label className="text-xs font-medium text-muted block mb-1">Decoded Acoustic Data</label>
+              <div className="w-full min-h-[46px] bg-field border border-line rounded-xl px-4 py-3 font-mono text-sm text-emerald-500 flex items-center justify-between">
+                <span className="font-bold">{receivedText || "// AWAITING SONIC SIGNAL"}</span>
+                {receivedBits && <span className="text-[10px] text-muted">{receivedBits.slice(-16)}</span>}
+              </div>
             </div>
+
+            <button 
+              type="button"
+              onClick={mode === "rx" ? stopReceive : receive} 
+              disabled={mode === "tx"}
+              className={`w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 border cursor-pointer flex items-center justify-center gap-2 shadow-sm ${
+                mode === "rx" 
+                  ? "bg-rose-500/15 text-rose-500 border-rose-500/30 hover:bg-rose-500/20" 
+                  : "bg-emerald-600 hover:bg-emerald-500 text-white border-transparent"
+              }`}
+            >
+              <Mic className="w-4 h-4" />
+              {mode === "rx" ? "Stop Listening" : "Listen for Ultrasonic Data"}
+            </button>
           </div>
         </div>
 
-        {/* VISUALIZER */}
-        <div className="mt-8 border border-white/10 rounded-xl bg-black h-48 relative overflow-hidden">
-          <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#a855f7]" />
-            <span className="text-xs font-bold text-[#a855f7] uppercase tracking-widest">Real-Time FFT Spectrogram</span>
+        {/* FFT SPECTROGRAM */}
+        <div className="mt-8 border border-line rounded-2xl bg-bg p-4 relative overflow-hidden shadow-inner">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 text-muted">
+              <Activity className="w-4 h-4 text-accent" />
+              <span className="text-xs font-bold uppercase tracking-wider">Real-Time FFT Spectrogram</span>
+            </div>
+            <span className="text-[10px] font-mono text-muted">Acoustic spectrum 16kHz - 20kHz</span>
           </div>
-          <canvas ref={canvasRef} className="w-full h-full" />
+          <div className="h-44 w-full bg-field rounded-xl overflow-hidden relative border border-line/60">
+            <canvas ref={canvasRef} className="w-full h-full" />
+          </div>
         </div>
       </div>
     </div>

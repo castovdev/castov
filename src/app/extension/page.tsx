@@ -62,7 +62,7 @@ export default function ExtensionPage() {
             <span>Download .vsix Offline Package</span>
           </a>
           <a
-            href="/castov-extension.zip"
+            href="/api/download/browser-extension"
             download="castov-extension.zip"
             className="btn bg-card border border-line text-fg hover:bg-hover font-bold text-base px-6 py-3.5 shadow-sm transition-all flex items-center gap-2"
           >
@@ -201,9 +201,9 @@ export default function ExtensionPage() {
 
           <div className="flex flex-wrap items-center gap-4">
             <a
-              href="/castov-extension.zip"
+              href="/api/download/browser-extension"
               download="castov-extension.zip"
-              className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold px-6 py-3"
+              className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold px-6 py-3 flex items-center"
             >
               <Download className="w-4 h-4 mr-2 text-white" /> Download Extension ZIP
             </a>

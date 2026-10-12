@@ -31,6 +31,34 @@ export function SiteFooter() {
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">
             Developer tools that just work. Fast, simple, privacy-friendly utilities for everyday workflows.
           </p>
+
+          {/* Social Links */}
+          <div className="mt-6 flex items-center gap-3">
+            <a
+              href="https://x.com/castovdev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 rounded-xl bg-field border border-line flex items-center justify-center text-muted hover:text-fg hover:border-muted/50 transition-colors"
+              aria-label="Follow Castov on X / Twitter"
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+            <a
+              href="https://instagram.com/castovdev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 rounded-xl bg-field border border-line flex items-center justify-center text-muted hover:text-fg hover:border-muted/50 transition-colors"
+              aria-label="Follow Castov on Instagram"
+            >
+              <svg className="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+              </svg>
+            </a>
+          </div>
         </div>
 
         {/* Footer Links Grid */}
@@ -85,6 +113,11 @@ export function SiteFooter() {
       <div className="border-t border-line">
         <div className="layout-content flex flex-col items-center justify-between gap-4 py-6 sm:flex-row">
           <p className="text-sm text-muted">&copy; {new Date().getFullYear()} {SITE.name}. All rights reserved.</p>
+          <div className="flex items-center gap-4 text-sm text-muted">
+            <a href="https://x.com/castovdev" target="_blank" rel="noopener noreferrer" className="hover:text-fg transition-colors">@castovdev</a>
+            <span>•</span>
+            <Link href="/sponsor" className="hover:text-fg transition-colors">Sponsor</Link>
+          </div>
         </div>
       </div>
     </footer>

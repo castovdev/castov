@@ -117,18 +117,33 @@ export default function DeveloperPage() {
         </div>
 
         {/* VS Code */}
-        <div className="bg-card border border-line hover:border-[#007ACC]/50 transition-colors p-6 rounded-2xl shadow-md">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-[#007ACC]/10 text-[#007ACC] rounded-lg">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z"/></svg>
+        <div className="bg-card border border-line hover:border-[#007ACC]/50 transition-colors p-6 rounded-2xl shadow-md flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-[#007ACC]/10 text-[#007ACC] rounded-lg">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z"/></svg>
+              </div>
+              <h3 className="text-xl font-bold text-fg">VS Code Extension</h3>
             </div>
-            <h3 className="text-xl font-bold text-fg">VS Code Extension</h3>
+            <p className="text-muted text-sm mb-4">
+              The official zero-server developer toolkit directly in your editor. Select text to encode/decode, or insert UUIDs without switching windows.
+            </p>
           </div>
-          <p className="text-muted text-sm mb-4">
-            The official zero-server developer toolkit directly in your editor. Select text to encode/decode, or insert UUIDs without switching windows.
-          </p>
-          <div className="p-3 bg-field/80 border border-line rounded-lg text-sm font-medium text-muted">
-            VS Code Extension: coming soon
+          <div className="mt-2 flex flex-col sm:flex-row gap-2">
+            <a
+              href="https://marketplace.visualstudio.com/items?itemName=castov.castov-vscode"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-4 py-2 text-center"
+            >
+              Install from Marketplace
+            </a>
+            <Link
+              href="/extension"
+              className="btn bg-field border border-line text-muted hover:text-fg text-xs font-medium px-4 py-2 text-center"
+            >
+              Download VSIX
+            </Link>
           </div>
         </div>
 
