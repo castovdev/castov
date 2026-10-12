@@ -1,0 +1,114 @@
+{
+  "name": "castov-vscode",
+  "displayName": "Castov – Fast Developer Utilities",
+  "description": "Instant Unix timestamps, UUID v4/v7 generation, JWT decoding, Base64 converter, and timestamp hover tooltips right inside VS Code.",
+  "version": "1.0.0",
+  "publisher": "castov",
+  "author": "Castov <https://castov.com>",
+  "license": "MIT",
+  "homepage": "https://castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benidira/timeforge"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "unix",
+    "timestamp",
+    "uuid",
+    "uuidv7",
+    "jwt",
+    "base64",
+    "epoch",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "castov.insertUuidV4",
+        "title": "Castov: Insert UUID v4",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.insertUuidV7",
+        "title": "Castov: Insert UUID v7 (Time-Ordered)",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.insertUnixTimestamp",
+        "title": "Castov: Insert Current Unix Timestamp",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.convertTimestamp",
+        "title": "Castov: Convert Selected Timestamp to Date",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.decodeJwt",
+        "title": "Castov: Decode Selected JWT Token",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.base64Encode",
+        "title": "Castov: Base64 Encode Selection",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.base64Decode",
+        "title": "Castov: Base64 Decode Selection",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.openCastov",
+        "title": "Castov: Open castov.com in Browser",
+        "category": "Castov"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "castov.convertTimestamp",
+          "when": "editorHasSelection",
+          "group": "castov@1"
+        },
+        {
+          "command": "castov.decodeJwt",
+          "when": "editorHasSelection",
+          "group": "castov@2"
+        },
+        {
+          "command": "castov.base64Encode",
+          "when": "editorHasSelection",
+          "group": "castov@3"
+        },
+        {
+          "command": "castov.base64Decode",
+          "when": "editorHasSelection",
+          "group": "castov@4"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}

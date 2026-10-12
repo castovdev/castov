@@ -74,6 +74,42 @@ export default function ExtensionPage() {
           </div>
         </div>
       </div>
+
+      {/* VS Code Extension Showcase */}
+      <div className="border-t border-line/60 pt-16 mt-8">
+        <div className="flex items-center gap-3 mb-4">
+          <span className="px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent uppercase tracking-wider">
+            IDE Extension
+          </span>
+        </div>
+        <h2 className="text-3xl font-extrabold tracking-tight text-fg mb-4">
+          Castov for <span className="text-accent">Visual Studio Code</span>
+        </h2>
+        <p className="text-lg text-muted max-w-2xl mb-8">
+          Hover tooltips for Unix timestamps, UUID v4/v7 generation at your cursor, JWT inspection, and Base64 conversion without ever leaving your editor.
+        </p>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="p-6 bg-card border border-line rounded-xl shadow-sm">
+            <h3 className="font-bold text-fg mb-2">⏱️ Timestamp Hover Tooltip</h3>
+            <p className="text-sm text-muted">
+              Hover over any 10-digit or 13-digit number in any source file or log to view UTC, Local time, and ISO dates instantly.
+            </p>
+          </div>
+          <div className="p-6 bg-card border border-line rounded-xl shadow-sm">
+            <h3 className="font-bold text-fg mb-2">🆔 UUID v4 & v7 at Cursor</h3>
+            <p className="text-sm text-muted">
+              Generate random UUID v4 or chronological time-ordered UUID v7 directly inside your code with Ctrl+Shift+P.
+            </p>
+          </div>
+          <div className="p-6 bg-card border border-line rounded-xl shadow-sm">
+            <h3 className="font-bold text-fg mb-2">🔐 In-Editor JWT Inspector</h3>
+            <p className="text-sm text-muted">
+              Right-click any JWT token to parse header, payload claims, and token expiration status in an output channel.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
