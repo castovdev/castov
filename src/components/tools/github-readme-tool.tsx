@@ -1,14 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Copy, Check, Sparkles, RefreshCw, Eye, Code, Terminal, Heart } from "lucide-react";
+import { Copy, Check, Eye, Code2, Sparkles, Wand2 } from "lucide-react";
 
-interface SocialLink {
-  platform: string;
-  url: string;
-}
-
-const TECH_BADGES: { name: string; slug: string; color: string; logo: string }[] = [
+const TECH_BADGES = [
   { name: "TypeScript", slug: "typescript", color: "3178C6", logo: "typescript" },
   { name: "JavaScript", slug: "javascript", color: "F7DF1E", logo: "javascript" },
   { name: "React", slug: "react", color: "20232A", logo: "react" },
@@ -27,7 +22,7 @@ const TECH_BADGES: { name: string; slug: string; color: string; logo: string }[]
 
 export function GithubReadmeTool() {
   const [name, setName] = useState("Alex Rivers");
-  const [title, setTitle] = useState("Full-Stack Software Engineer & Open Source Enthusiast");
+  const [title, setTitle] = useState("Full-Stack Software Engineer & Open Source Builder");
   const [about, setAbout] = useState(
     "Building high-performance web applications, developer tooling, and distributed systems. Passionate about TypeScript, Rust, and modern web architectures."
   );
@@ -47,7 +42,7 @@ export function GithubReadmeTool() {
   const [statsTheme, setStatsTheme] = useState("tokyonight");
   const [includeStreaks, setIncludeStreaks] = useState(true);
   const [includeWatermark, setIncludeWatermark] = useState(true);
-  const [activeTab, setActiveTab] = useState<"preview" | "code">("code");
+  const [activeTab, setActiveTab] = useState<"code" | "preview">("code");
   const [copied, setCopied] = useState(false);
 
   const toggleTech = (slug: string) => {
@@ -116,133 +111,137 @@ ${
   };
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 backdrop-blur-md">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Code className="w-6 h-6 text-emerald-400" />
-            GitHub Profile & Repo README Builder
-          </h2>
-          <p className="text-xs text-zinc-400 mt-1">
-            Build stunning, viral GitHub profiles with dynamic badges, live stats, and tech stacks in seconds.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex bg-zinc-800/80 p-1 rounded-xl border border-zinc-700">
+    <div className="space-y-8">
+      {/* Top Action Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-field border border-line">
+        <div className="flex items-center gap-2">
+          <div className="flex p-1 rounded-lg bg-bg border border-line">
             <button
+              type="button"
               onClick={() => setActiveTab("code")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition ${
                 activeTab === "code"
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-field text-fg shadow-sm"
+                  : "text-muted hover:text-fg"
               }`}
             >
-              <Code className="w-3.5 h-3.5" /> Markdown
+              <Code2 className="w-3.5 h-3.5" /> Markdown Source
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab("preview")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition ${
                 activeTab === "preview"
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-field text-fg shadow-sm"
+                  : "text-muted hover:text-fg"
               }`}
             >
-              <Eye className="w-3.5 h-3.5" /> Preview
+              <Eye className="w-3.5 h-3.5" /> Live Preview
             </button>
           </div>
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-lg shadow-emerald-500/20"
-          >
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            {copied ? "Copied!" : "Copy README.md"}
-          </button>
         </div>
+
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-4 py-2 shadow-md shadow-blue-500/20 cursor-pointer flex items-center gap-2"
+        >
+          {copied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4 text-white" />}
+          {copied ? "Copied Markdown!" : "Copy README.md"}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Form Controls */}
-        <div className="lg:col-span-5 space-y-5">
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Profile Information</h3>
-            <div className="space-y-3">
+      {/* Main Grid Workspace */}
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
+        {/* Left Form Editor */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-accent" /> Profile Identity
+            </h3>
+            <div className="space-y-4">
               <div>
-                <label className="text-xs text-zinc-300 font-medium">Your Name</label>
+                <label className="text-xs font-medium text-muted block mb-1">Full Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
                 />
               </div>
+
               <div>
-                <label className="text-xs text-zinc-300 font-medium">Headline / Title</label>
+                <label className="text-xs font-medium text-muted block mb-1">Headline / Role</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
                 />
               </div>
+
               <div>
-                <label className="text-xs text-zinc-300 font-medium">About Bio</label>
+                <label className="text-xs font-medium text-muted block mb-1">Bio Summary</label>
                 <textarea
                   rows={3}
                   value={about}
                   onChange={(e) => setAbout(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-zinc-100 focus:outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40 resize-none leading-relaxed"
                 />
               </div>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">GitHub & Socials</h3>
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+              <Wand2 className="w-3.5 h-3.5 text-accent" /> Socials & Work
+            </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-zinc-300 font-medium">GitHub Username</label>
+                <label className="text-xs font-medium text-muted block mb-1">GitHub Username</label>
                 <input
                   type="text"
                   value={githubUser}
                   onChange={(e) => setGithubUser(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                  className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
                 />
               </div>
               <div>
-                <label className="text-xs text-zinc-300 font-medium">Twitter / X Handle</label>
+                <label className="text-xs font-medium text-muted block mb-1">Twitter / X Handle</label>
                 <input
                   type="text"
                   value={twitterUser}
                   onChange={(e) => setTwitterUser(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                  className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-xs text-zinc-300 font-medium">Website / Portfolio</label>
+                <label className="text-xs font-medium text-muted block mb-1">Portfolio Website</label>
                 <input
                   type="text"
                   value={portfolioUrl}
                   onChange={(e) => setPortfolioUrl(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 focus:outline-none focus:border-emerald-500/50"
+                  className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
                 />
               </div>
             </div>
           </div>
 
-          {/* Tech Badges Picker */}
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Skills & Tech Stack Badges</h3>
-            <div className="flex flex-wrap gap-2 pt-1">
+          {/* Tech Badges Selector */}
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Tech Stack Badges</h3>
+            <div className="flex flex-wrap gap-2">
               {TECH_BADGES.map((b) => {
                 const active = selectedTechs.includes(b.slug);
                 return (
                   <button
                     key={b.slug}
+                    type="button"
                     onClick={() => toggleTech(b.slug)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition cursor-pointer ${
                       active
-                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm shadow-emerald-500/10"
-                        : "bg-zinc-950/70 text-zinc-400 border-zinc-800 hover:border-zinc-700"
+                        ? "bg-[#2563eb] text-white border-[#2563eb] shadow-sm"
+                        : "bg-bg text-muted border-line hover:text-fg hover:border-muted/50"
                     }`}
                   >
                     {b.name}
@@ -253,39 +252,40 @@ ${
           </div>
 
           {/* Widget Options */}
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Card Theme & Options</h3>
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Card Theme & Options</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-zinc-300 font-medium">Stats Theme</label>
+                <label className="text-xs font-medium text-muted block mb-1">Stats Theme</label>
                 <select
                   value={statsTheme}
                   onChange={(e) => setStatsTheme(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-zinc-100 focus:outline-none"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-bg border border-line text-fg focus:outline-none"
                 >
                   <option value="tokyonight">Tokyo Night</option>
                   <option value="radical">Radical</option>
                   <option value="dracula">Dracula</option>
-                  <option value="dark">Classic Dark</option>
-                  <option value="merko">Merko</option>
+                  <option value="dark">Dark Theme</option>
+                  <option value="merko">Merko Green</option>
                 </select>
               </div>
+
               <div className="flex flex-col justify-end gap-2 pb-1">
-                <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                   <input
                     type="checkbox"
                     checked={includeStreaks}
                     onChange={(e) => setIncludeStreaks(e.target.checked)}
-                    className="rounded border-zinc-700 text-emerald-600 focus:ring-0"
+                    className="accent-accent"
                   />
                   Streak Counter Card
                 </label>
-                <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                   <input
                     type="checkbox"
                     checked={includeWatermark}
                     onChange={(e) => setIncludeWatermark(e.target.checked)}
-                    className="rounded border-zinc-700 text-emerald-600 focus:ring-0"
+                    className="accent-accent"
                   />
                   Castov Backlink (Free)
                 </label>
@@ -294,58 +294,51 @@ ${
           </div>
         </div>
 
-        {/* Right Preview / Output */}
-        <div className="lg:col-span-7 flex flex-col">
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 flex-1 flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 mb-4">
-              <span className="text-xs font-bold tracking-wide text-zinc-400 uppercase">
-                {activeTab === "code" ? "README.md (Raw Markdown)" : "Live Markdown Preview"}
-              </span>
-              <span className="text-[11px] text-zinc-500 font-mono">Ready to paste in GitHub</span>
-            </div>
+        {/* Right Output Panel */}
+        <div className="lg:col-span-7 flex flex-col space-y-2">
+          <label className="text-xs font-semibold text-muted uppercase tracking-wider">
+            {activeTab === "code" ? "Generated Markdown" : "Profile Render View"}
+          </label>
 
-            {activeTab === "code" ? (
-              <textarea
-                readOnly
-                value={generateMarkdown()}
-                className="w-full flex-1 min-h-[500px] p-4 bg-zinc-950 border border-zinc-800/80 rounded-xl font-mono text-xs text-emerald-400 focus:outline-none leading-relaxed select-all"
-              />
-            ) : (
-              <div className="w-full flex-1 min-h-[500px] p-6 bg-zinc-950 border border-zinc-800/80 rounded-xl text-zinc-200 space-y-4 overflow-y-auto">
-                <h1 className="text-2xl font-bold text-white border-b border-zinc-800 pb-2">
-                  Hi there, I'm {name} 👋
-                </h1>
-                <h3 className="text-lg font-semibold text-zinc-300">{title}</h3>
-                <p className="text-sm text-zinc-400">{about}</p>
-                <hr className="border-zinc-800" />
-                <h4 className="text-md font-bold text-zinc-200">🛠️ Tech Stack & Skills</h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedTechs.map((t) => {
-                    const item = TECH_BADGES.find((b) => b.slug === t);
-                    return item ? (
-                      <span
-                        key={t}
-                        className="px-2.5 py-1 text-xs rounded font-bold uppercase"
-                        style={{ backgroundColor: `#${item.color}`, color: "#fff" }}
-                      >
-                        {item.name}
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-                <hr className="border-zinc-800" />
-                <h4 className="text-md font-bold text-zinc-200">📊 GitHub Stats</h4>
-                <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 flex flex-col items-center justify-center gap-3 text-center">
-                  <div className="text-xs font-mono text-zinc-400">
-                    Live dynamic SVG card will render on GitHub:
-                  </div>
-                  <div className="text-xs text-emerald-400 font-mono">
-                    https://github-readme-stats.vercel.app/api?username={githubUser}&theme={statsTheme}
-                  </div>
-                </div>
+          {activeTab === "code" ? (
+            <textarea
+              readOnly
+              value={generateMarkdown()}
+              className="w-full min-h-[580px] p-5 font-mono text-xs leading-relaxed rounded-2xl bg-field border border-line text-fg focus:outline-none select-all resize-y"
+            />
+          ) : (
+            <div className="w-full min-h-[580px] p-6 rounded-2xl bg-field border border-line text-fg space-y-5 overflow-y-auto">
+              <h1 className="text-2xl font-bold border-b border-line pb-2">
+                Hi there, I'm {name} 👋
+              </h1>
+              <h3 className="text-base font-semibold text-muted">{title}</h3>
+              <p className="text-sm text-fg/80 leading-relaxed">{about}</p>
+              <hr className="border-line" />
+              <h4 className="text-sm font-bold uppercase tracking-wider text-muted">🛠️ Tech Stack & Skills</h4>
+              <div className="flex flex-wrap gap-2">
+                {selectedTechs.map((t) => {
+                  const item = TECH_BADGES.find((b) => b.slug === t);
+                  return item ? (
+                    <span
+                      key={t}
+                      className="px-2.5 py-1 text-xs rounded-md font-bold uppercase shadow-sm"
+                      style={{ backgroundColor: `#${item.color}`, color: "#fff" }}
+                    >
+                      {item.name}
+                    </span>
+                  ) : null;
+                })}
               </div>
-            )}
-          </div>
+              <hr className="border-line" />
+              <h4 className="text-sm font-bold uppercase tracking-wider text-muted">📊 GitHub Stats</h4>
+              <div className="p-4 rounded-xl bg-bg border border-line flex flex-col items-center justify-center gap-2 text-center">
+                <span className="text-xs text-muted">Dynamic SVG Cards live on GitHub:</span>
+                <span className="text-xs text-accent font-mono">
+                  https://github-readme-stats.vercel.app/api?username={githubUser}&theme={statsTheme}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

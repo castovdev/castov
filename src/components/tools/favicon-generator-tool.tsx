@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Download, Upload, Copy, Check, Globe, Sparkles, Image as ImageIcon } from "lucide-react";
+import { Download, Upload, Copy, Check, Sparkles, Image as ImageIcon } from "lucide-react";
 
 interface IconSize {
   name: string;
@@ -19,7 +19,6 @@ const FAVICON_SIZES: IconSize[] = [
 
 export function FaviconGeneratorTool() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [borderRadius, setBorderRadius] = useState<number>(0);
   const [padding, setPadding] = useState<number>(0);
   const [bgColor, setBgColor] = useState<string>("transparent");
   const [copiedHtml, setCopiedHtml] = useState(false);
@@ -77,17 +76,9 @@ export function FaviconGeneratorTool() {
   };
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 backdrop-blur-md">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Globe className="w-6 h-6 text-amber-400" />
-            Favicon & App Icon Generator
-          </h2>
-          <p className="text-xs text-zinc-400 mt-1">
-            Convert any logo or picture into full favicon packages (16x16, 32x32, 180x180 Apple, 512x512 PWA) 100% in-browser.
-          </p>
-        </div>
+    <div className="space-y-8">
+      {/* Top Header Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-field border border-line">
         <div className="flex items-center gap-3">
           <input
             type="file"
@@ -97,35 +88,48 @@ export function FaviconGeneratorTool() {
             className="hidden"
           />
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-zinc-950 transition shadow-lg shadow-amber-500/20 font-bold"
+            className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-4 py-2 shadow-md shadow-blue-500/20 cursor-pointer flex items-center gap-2"
           >
-            <Upload className="w-4 h-4" /> Upload Image / Logo
+            <Upload className="w-4 h-4 text-white" />
+            Upload Brand Logo / Icon
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={copySnippet}
+          className="btn bg-bg border border-line text-muted hover:text-fg text-xs font-semibold px-3 py-1.5 cursor-pointer flex items-center gap-1.5"
+        >
+          {copiedHtml ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+          {copiedHtml ? "HTML Tags Copied!" : "Copy HTML <head> Tags"}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Controls */}
-        <div className="lg:col-span-5 space-y-5">
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Styling & Background</h3>
-            <div className="space-y-3">
+      {/* Main Grid */}
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
+        {/* Left Options Panel */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Styling & Background</h3>
+            <div className="space-y-4">
               <div>
-                <label className="text-xs text-zinc-300 font-medium">Background Color</label>
-                <div className="flex items-center gap-3 mt-1">
+                <label className="text-xs font-medium text-muted block mb-1">Background Color</label>
+                <div className="flex items-center gap-3">
                   <input
                     type="color"
                     value={bgColor === "transparent" ? "#ffffff" : bgColor}
                     onChange={(e) => setBgColor(e.target.value)}
-                    className="w-10 h-10 rounded-xl bg-transparent border border-zinc-700 cursor-pointer"
+                    className="w-9 h-9 rounded-lg bg-transparent border border-line cursor-pointer"
                   />
                   <button
+                    type="button"
                     onClick={() => setBgColor("transparent")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border cursor-pointer transition ${
                       bgColor === "transparent"
-                        ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
-                        : "border-zinc-800 text-zinc-400"
+                        ? "bg-[#2563eb] text-white border-[#2563eb]"
+                        : "bg-bg text-muted border-line hover:text-fg"
                     }`}
                   >
                     Transparent
@@ -134,9 +138,9 @@ export function FaviconGeneratorTool() {
               </div>
 
               <div>
-                <div className="flex justify-between text-xs text-zinc-300 mb-1">
-                  <span>Icon Padding</span>
-                  <span>{padding}%</span>
+                <div className="flex justify-between text-xs text-muted mb-1.5">
+                  <span>Icon Inset Padding</span>
+                  <span className="font-mono text-fg">{padding}%</span>
                 </div>
                 <input
                   type="range"
@@ -144,43 +148,37 @@ export function FaviconGeneratorTool() {
                   max="40"
                   value={padding}
                   onChange={(e) => setPadding(Number(e.target.value))}
-                  className="w-full accent-amber-500"
+                  className="w-full accent-accent cursor-pointer"
                 />
               </div>
             </div>
           </div>
 
-          {/* HTML Meta Tag Export */}
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">HTML &lt;head&gt; Code</h3>
-              <button
-                onClick={copySnippet}
-                className="flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 font-medium"
-              >
-                {copiedHtml ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                {copiedHtml ? "Copied" : "Copy Code"}
-              </button>
-            </div>
-            <pre className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl text-[11px] font-mono text-zinc-300 overflow-x-auto leading-relaxed">
+          {/* HTML Snippet Box */}
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">HTML Header Markup</h3>
+            <pre className="p-4 bg-bg border border-line rounded-xl text-xs font-mono text-fg leading-relaxed overflow-x-auto select-all">
               {htmlHeadSnippet}
             </pre>
           </div>
         </div>
 
-        {/* Live Export Sizes */}
-        <div className="lg:col-span-7 space-y-4">
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Generated Icon Package</h3>
+        {/* Right Generated Icon Package */}
+        <div className="lg:col-span-7 flex flex-col space-y-2">
+          <label className="text-xs font-semibold text-muted uppercase tracking-wider">
+            Generated Multi-Size Icon Package
+          </label>
+
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {FAVICON_SIZES.map((icon) => (
                 <div
                   key={icon.name}
-                  className="p-4 rounded-xl bg-zinc-950 border border-zinc-800/80 flex items-center justify-between hover:border-zinc-700 transition"
+                  className="p-3.5 rounded-xl bg-bg border border-line flex items-center justify-between hover:border-muted/50 transition"
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center border border-zinc-800 overflow-hidden bg-zinc-900"
+                      className="w-11 h-11 rounded-lg flex items-center justify-center border border-line overflow-hidden bg-field"
                       style={{ background: bgColor }}
                     >
                       {imageSrc ? (
@@ -191,20 +189,22 @@ export function FaviconGeneratorTool() {
                           style={{ padding: `${padding}%` }}
                         />
                       ) : (
-                        <ImageIcon className="w-5 h-5 text-zinc-600" />
+                        <ImageIcon className="w-5 h-5 text-muted" />
                       )}
                     </div>
                     <div>
-                      <div className="text-xs font-semibold text-zinc-200">{icon.name}</div>
-                      <div className="text-[10px] text-zinc-500 font-mono">
-                        {icon.size} × {icon.size} px • {icon.format.toUpperCase()}
+                      <div className="text-xs font-semibold text-fg">{icon.name}</div>
+                      <div className="text-[10px] text-muted font-mono">
+                        {icon.size} × {icon.size} px
                       </div>
                     </div>
                   </div>
+
                   <button
+                    type="button"
                     disabled={!imageSrc}
                     onClick={() => downloadSize(icon)}
-                    className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition disabled:opacity-40"
+                    className="p-2 rounded-lg bg-field hover:bg-hover text-muted hover:text-fg border border-line transition cursor-pointer disabled:opacity-40"
                     title={`Download ${icon.name}`}
                   >
                     <Download className="w-4 h-4" />

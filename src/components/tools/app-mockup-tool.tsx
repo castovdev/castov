@@ -1,29 +1,27 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Download, Copy, Check, Upload, Smartphone, Laptop, Monitor, Sparkles } from "lucide-react";
+import { Download, Upload, Monitor, Laptop, Smartphone, Sparkles } from "lucide-react";
 
-type DeviceType = "iphone" | "macbook" | "browser";
+type DeviceType = "browser" | "macbook" | "iphone";
 
 const GRADIENTS = [
-  { name: "Cosmic Purple", bg: "linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)" },
-  { name: "Cyberpunk Glow", bg: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #9333ea 100%)" },
-  { name: "Sunset Horizon", bg: "linear-gradient(135deg, #f97316 0%, #ef4444 50%, #ec4899 100%)" },
-  { name: "Emerald Forest", bg: "linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)" },
-  { name: "Obsidian Dark", bg: "linear-gradient(135deg, #18181b 0%, #09090b 100%)" },
+  { name: "Cosmic Glow", bg: "from-blue-600 via-indigo-600 to-purple-800", c1: "#2563eb", c2: "#4f46e5", c3: "#581c87" },
+  { name: "Cyberpunk", bg: "from-pink-500 via-purple-600 to-cyan-500", c1: "#ec4899", c2: "#9333ea", c3: "#06b6d4" },
+  { name: "Hyper Sunset", bg: "from-amber-500 via-rose-600 to-purple-700", c1: "#f59e0b", c2: "#e11d48", c3: "#6b21a8" },
+  { name: "Emerald Matrix", bg: "from-emerald-500 via-teal-700 to-slate-900", c1: "#10b981", c2: "#0f766e", c3: "#0f172a" },
+  { name: "Pure Carbon", bg: "from-zinc-900 via-neutral-900 to-black", c1: "#18181b", c2: "#171717", c3: "#09090b" },
 ];
 
 export function AppMockupTool() {
   const [device, setDevice] = useState<DeviceType>("browser");
-  const [gradient, setGradient] = useState(GRADIENTS[0].bg);
+  const [selectedGrad, setSelectedGrad] = useState(GRADIENTS[0]);
   const [padding, setPadding] = useState(48);
   const [shadow, setShadow] = useState(true);
   const [watermark, setWatermark] = useState(true);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,68 +46,52 @@ export function AppMockupTool() {
     canvas.height = height * 2;
     ctx.scale(2, 2);
 
-    // Render gradient background
+    // Gradient background
     const grad = ctx.createLinearGradient(0, 0, width, height);
-    if (gradient.includes("#6366f1")) {
-      grad.addColorStop(0, "#6366f1");
-      grad.addColorStop(0.5, "#a855f7");
-      grad.addColorStop(1, "#ec4899");
-    } else if (gradient.includes("#06b6d4")) {
-      grad.addColorStop(0, "#06b6d4");
-      grad.addColorStop(0.5, "#3b82f6");
-      grad.addColorStop(1, "#9333ea");
-    } else if (gradient.includes("#f97316")) {
-      grad.addColorStop(0, "#f97316");
-      grad.addColorStop(0.5, "#ef4444");
-      grad.addColorStop(1, "#ec4899");
-    } else if (gradient.includes("#10b981")) {
-      grad.addColorStop(0, "#10b981");
-      grad.addColorStop(1, "#047857");
-    } else {
-      grad.addColorStop(0, "#18181b");
-      grad.addColorStop(1, "#09090b");
-    }
+    grad.addColorStop(0, selectedGrad.c1);
+    grad.addColorStop(0.5, selectedGrad.c2);
+    grad.addColorStop(1, selectedGrad.c3);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, width, height);
 
-    // Frame Mockup
+    // Mockup Card
     const frameX = padding;
     const frameY = padding;
     const frameW = width - padding * 2;
     const frameH = height - padding * 2;
 
     if (shadow) {
-      ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
-      ctx.shadowBlur = 35;
-      ctx.shadowOffsetY = 15;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 20;
     }
 
-    ctx.fillStyle = "#09090b";
+    ctx.fillStyle = "#0c0d12";
     ctx.beginPath();
     ctx.roundRect(frameX, frameY, frameW, frameH, 16);
     ctx.fill();
     ctx.shadowColor = "transparent";
 
-    // Header dots for browser/mac
+    // Browser Chrome dots
     if (device === "browser" || device === "macbook") {
-      ctx.fillStyle = "#18181b";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
       ctx.beginPath();
-      ctx.roundRect(frameX, frameY, frameW, 40, [16, 16, 0, 0]);
+      ctx.roundRect(frameX, frameY, frameW, 42, [16, 16, 0, 0]);
       ctx.fill();
 
-      ctx.fillStyle = "#ef4444";
+      ctx.fillStyle = "#ff5f56";
       ctx.beginPath();
-      ctx.arc(frameX + 24, frameY + 20, 6, 0, Math.PI * 2);
+      ctx.arc(frameX + 24, frameY + 21, 6, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = "#eab308";
+      ctx.fillStyle = "#ffbd2e";
       ctx.beginPath();
-      ctx.arc(frameX + 44, frameY + 20, 6, 0, Math.PI * 2);
+      ctx.arc(frameX + 44, frameY + 21, 6, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = "#22c55e";
+      ctx.fillStyle = "#27c93f";
       ctx.beginPath();
-      ctx.arc(frameX + 64, frameY + 20, 6, 0, Math.PI * 2);
+      ctx.arc(frameX + 64, frameY + 21, 6, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -117,7 +99,7 @@ export function AppMockupTool() {
       const img = new Image();
       img.src = imageSrc;
       img.onload = () => {
-        const topOffset = device === "iphone" ? 0 : 40;
+        const topOffset = device === "iphone" ? 0 : 42;
         ctx.drawImage(img, frameX, frameY + topOffset, frameW, frameH - topOffset);
 
         if (watermark) {
@@ -134,7 +116,7 @@ export function AppMockupTool() {
       };
     } else {
       ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-      ctx.font = "20px sans-serif";
+      ctx.font = "18px sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("Upload your screenshot to generate", width / 2, height / 2);
 
@@ -153,18 +135,68 @@ export function AppMockupTool() {
   };
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 backdrop-blur-md">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-indigo-400" />
-            Device & Screenshot Mockup Studio
-          </h2>
-          <p className="text-xs text-zinc-400 mt-1">
-            Turn ordinary app screenshots into viral, high-converting product mockups for Twitter, Product Hunt & stores.
-          </p>
+    <div className="space-y-8">
+      {/* Top Header Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-field border border-line">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-xs font-semibold text-muted">Device:</label>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setDevice("browser")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition ${
+                device === "browser"
+                  ? "bg-[#2563eb] text-white shadow-sm"
+                  : "bg-bg text-muted border border-line hover:text-fg"
+              }`}
+            >
+              <Monitor className="w-3.5 h-3.5" /> Browser
+            </button>
+            <button
+              type="button"
+              onClick={() => setDevice("macbook")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition ${
+                device === "macbook"
+                  ? "bg-[#2563eb] text-white shadow-sm"
+                  : "bg-bg text-muted border border-line hover:text-fg"
+              }`}
+            >
+              <Laptop className="w-3.5 h-3.5" /> Laptop
+            </button>
+            <button
+              type="button"
+              onClick={() => setDevice("iphone")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition ${
+                device === "iphone"
+                  ? "bg-[#2563eb] text-white shadow-sm"
+                  : "bg-bg text-muted border border-line hover:text-fg"
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" /> Mobile
+            </button>
+          </div>
+
+          <div className="h-4 w-[1px] bg-line hidden sm:block mx-1" />
+
+          <label className="text-xs font-semibold text-muted">Theme:</label>
+          <div className="flex items-center gap-1.5">
+            {GRADIENTS.map((g) => (
+              <button
+                key={g.name}
+                type="button"
+                onClick={() => setSelectedGrad(g)}
+                className={`w-7 h-7 rounded-full bg-gradient-to-tr ${g.bg} border-2 transition-transform cursor-pointer ${
+                  selectedGrad.name === g.name
+                    ? "scale-110 border-white shadow-md ring-2 ring-accent"
+                    : "border-transparent opacity-80 hover:opacity-100"
+                }`}
+                title={g.name}
+              />
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-3">
+
+        <div className="flex items-center gap-2">
           <input
             type="file"
             ref={fileInputRef}
@@ -173,167 +205,117 @@ export function AppMockupTool() {
             className="hidden"
           />
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-100 transition border border-zinc-700"
+            className="btn bg-bg border border-line text-muted hover:text-fg text-xs font-semibold px-3 py-1.5 cursor-pointer flex items-center gap-1.5"
           >
-            <Upload className="w-4 h-4" /> Upload Screenshot
+            <Upload className="w-3.5 h-3.5" /> Upload Screenshot
           </button>
+
           <button
+            type="button"
             onClick={handleDownload}
             disabled={downloading}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+            className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-4 py-1.5 shadow-md shadow-blue-500/20 cursor-pointer flex items-center gap-1.5"
           >
-            <Download className="w-4 h-4" /> {downloading ? "Rendering..." : "Export High-Res PNG"}
+            <Download className="w-3.5 h-3.5 text-white" />
+            {downloading ? "Exporting..." : "Download High-Res PNG"}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Controls */}
-        <div className="lg:col-span-4 space-y-5">
-          {/* Device Selector */}
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Device Frame</h3>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => setDevice("browser")}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl border text-xs font-semibold transition ${
-                  device === "browser"
-                    ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/40"
-                    : "bg-zinc-950/60 text-zinc-400 border-zinc-800 hover:border-zinc-700"
-                }`}
-              >
-                <Monitor className="w-5 h-5" /> Browser
-              </button>
-              <button
-                onClick={() => setDevice("macbook")}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl border text-xs font-semibold transition ${
-                  device === "macbook"
-                    ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/40"
-                    : "bg-zinc-950/60 text-zinc-400 border-zinc-800 hover:border-zinc-700"
-                }`}
-              >
-                <Laptop className="w-5 h-5" /> Laptop
-              </button>
-              <button
-                onClick={() => setDevice("iphone")}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl border text-xs font-semibold transition ${
-                  device === "iphone"
-                    ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/40"
-                    : "bg-zinc-950/60 text-zinc-400 border-zinc-800 hover:border-zinc-700"
-                }`}
-              >
-                <Smartphone className="w-5 h-5" /> Phone
-              </button>
-            </div>
-          </div>
-
-          {/* Gradients */}
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Background Atmosphere</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {GRADIENTS.map((g) => (
-                <button
-                  key={g.name}
-                  onClick={() => setGradient(g.bg)}
-                  className={`p-2.5 rounded-xl border text-xs text-left font-medium transition flex items-center gap-2 ${
-                    gradient === g.bg ? "border-indigo-400 text-white" : "border-zinc-800 text-zinc-400"
-                  }`}
-                >
-                  <span className="w-4 h-4 rounded-full border border-white/20" style={{ background: g.bg }} />
-                  <span className="truncate">{g.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Spacing & Options */}
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Frame Layout</h3>
+      {/* Workspace Grid */}
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
+        {/* Controls Column */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Layout & Dimensions</h3>
             <div>
-              <div className="flex justify-between text-xs text-zinc-300 mb-1">
+              <div className="flex justify-between text-xs text-muted mb-1.5">
                 <span>Canvas Padding</span>
-                <span>{padding}px</span>
+                <span className="font-mono text-fg">{padding}px</span>
               </div>
               <input
                 type="range"
                 min="24"
-                max="96"
+                max="80"
                 value={padding}
                 onChange={(e) => setPadding(Number(e.target.value))}
-                className="w-full accent-indigo-500"
+                className="w-full accent-accent cursor-pointer"
               />
             </div>
-            <div className="flex items-center justify-between pt-2">
-              <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+
+            <div className="space-y-3 pt-2 border-t border-line">
+              <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                 <input
                   type="checkbox"
                   checked={shadow}
                   onChange={(e) => setShadow(e.target.checked)}
-                  className="rounded border-zinc-700 text-indigo-600 focus:ring-0"
+                  className="accent-accent"
                 />
                 Realistic 3D Drop Shadow
               </label>
-              <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+
+              <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                 <input
                   type="checkbox"
                   checked={watermark}
                   onChange={(e) => setWatermark(e.target.checked)}
-                  className="rounded border-zinc-700 text-indigo-600 focus:ring-0"
+                  className="accent-accent"
                 />
-                Castov Badge
+                Castov Discreet Badge
               </label>
             </div>
           </div>
         </div>
 
-        {/* Live Canvas Mockup Canvas */}
-        <div className="lg:col-span-8 flex flex-col">
+        {/* Live Canvas Mockup */}
+        <div className="lg:col-span-8 flex flex-col space-y-2">
+          <label className="text-xs font-semibold text-muted uppercase tracking-wider">
+            Real-Time Mockup Preview
+          </label>
+
           <div
-            ref={previewRef}
-            className="w-full flex-1 min-h-[500px] rounded-2xl flex items-center justify-center p-8 transition-all overflow-hidden relative"
-            style={{ background: gradient }}
+            className={`rounded-2xl bg-gradient-to-tr ${selectedGrad.bg} shadow-2xl flex items-center justify-center transition-all min-h-[460px] relative overflow-hidden`}
+            style={{ padding: `${padding}px` }}
           >
-            {/* The Mockup Box */}
+            {/* Device Box */}
             <div
-              className={`w-full max-w-2xl bg-zinc-950 rounded-2xl overflow-hidden transition-all ${
-                shadow ? "shadow-2xl shadow-black/60 border border-zinc-800/80" : ""
+              className={`w-full max-w-xl bg-[#0c0d12] rounded-xl overflow-hidden border border-white/10 ${
+                shadow ? "shadow-2xl shadow-black/70" : ""
               }`}
-              style={{
-                padding: device === "iphone" ? "0" : "",
-              }}
             >
-              {/* Header Chrome */}
+              {/* Chrome Header */}
               {device !== "iphone" && (
-                <div className="h-9 bg-zinc-900/90 border-b border-zinc-800/80 px-4 flex items-center justify-between">
+                <div className="h-9 px-4 flex items-center justify-between border-b border-white/10 bg-[#0c0d12]/80 backdrop-blur">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
                   </div>
-                  <div className="text-[10px] text-zinc-500 font-mono">
-                    {device === "browser" ? "https://your-app.com" : "Terminal / Preview"}
+                  <div className="text-[10px] text-white/40 font-mono">
+                    {device === "browser" ? "https://castov.com" : "workspace"}
                   </div>
-                  <div className="w-10" />
+                  <div className="w-8" />
                 </div>
               )}
 
-              {/* Mockup Content Area */}
-              <div className="min-h-[320px] bg-zinc-950 flex items-center justify-center relative">
+              {/* Screenshot Area */}
+              <div className="min-h-[260px] flex items-center justify-center bg-[#090a0f]">
                 {imageSrc ? (
                   <img
                     src={imageSrc}
                     alt="App Preview"
-                    className="w-full h-auto max-h-[480px] object-cover"
+                    className="w-full h-auto max-h-[400px] object-cover"
                   />
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
                     className="p-8 text-center cursor-pointer hover:opacity-80 transition"
                   >
-                    <Upload className="w-10 h-10 text-zinc-500 mx-auto mb-3" />
-                    <p className="text-sm font-semibold text-zinc-300">Click to upload your app screenshot</p>
-                    <p className="text-xs text-zinc-500 mt-1">Supports PNG, JPG, WebP</p>
+                    <Upload className="w-8 h-8 text-white/30 mx-auto mb-2" />
+                    <p className="text-xs font-semibold text-white/70">Click to upload your screenshot</p>
+                    <p className="text-[10px] text-white/40 mt-0.5">PNG, JPG, WebP supported</p>
                   </div>
                 )}
               </div>
@@ -341,7 +323,7 @@ export function AppMockupTool() {
 
             {/* Bottom Watermark */}
             {watermark && (
-              <div className="absolute bottom-3 right-4 text-[10px] text-white/50 font-mono">
+              <div className="absolute bottom-3 right-4 text-[10px] text-white/40 font-mono">
                 castov.com/app-mockup
               </div>
             )}

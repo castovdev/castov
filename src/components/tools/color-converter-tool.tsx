@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Copy, Check, Palette, Sparkles, RefreshCw } from "lucide-react";
+import { Copy, Check, RefreshCw, Sparkles, Sliders } from "lucide-react";
 
 interface ColorFormat {
   label: string;
@@ -12,7 +12,6 @@ export function ColorConverterTool() {
   const [hex, setHex] = useState("#6366f1");
   const [copiedLabel, setCopiedLabel] = useState<string | null>(null);
 
-  // Helper conversions
   const hexToRgb = (hexStr: string) => {
     let cleanHex = hexStr.replace("#", "");
     if (cleanHex.length === 3) {
@@ -72,11 +71,9 @@ export function ColorConverterTool() {
     { label: "RGB", value: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` },
     { label: "RGBA", value: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)` },
     { label: "HSL", value: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)` },
-    { label: "CSS Variable", value: `--primary-color: ${hex};` },
+    { label: "CSS Variable", value: `--color-accent: ${hex};` },
     { label: "Tailwind Arbitrary", value: `bg-[${hex}]` },
   ];
-
-  const shades = [0.1, 0.3, 0.5, 0.7, 0.9, 1, 1.2, 1.4, 1.6];
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -94,86 +91,83 @@ export function ColorConverterTool() {
   };
 
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 backdrop-blur-md">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Palette className="w-6 h-6 text-fuchsia-400" />
-            Color Converter & Palette Studio
-          </h2>
-          <p className="text-xs text-zinc-400 mt-1">
-            Convert HEX, RGB, HSL, RGBA instantly with contrast analysis, shades & tints, and Tailwind tokens.
-          </p>
-        </div>
+    <div className="space-y-8">
+      {/* Top Header Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-field border border-line">
         <div className="flex items-center gap-3">
-          <button
-            onClick={randomColor}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition border border-zinc-700"
-          >
-            <RefreshCw className="w-4 h-4" /> Random Color
-          </button>
+          <input
+            type="color"
+            value={hex}
+            onChange={(e) => setHex(e.target.value)}
+            className="w-9 h-9 rounded-lg bg-transparent border border-line cursor-pointer"
+          />
+          <input
+            type="text"
+            value={hex}
+            onChange={(e) => setHex(e.target.value)}
+            placeholder="#6366F1"
+            className="px-3 py-1.5 text-xs font-mono uppercase rounded-lg bg-bg border border-line text-fg max-w-[140px] focus:outline-none focus:ring-2 focus:ring-accent/40"
+          />
         </div>
+
+        <button
+          type="button"
+          onClick={randomColor}
+          className="btn bg-bg border border-line text-muted hover:text-fg text-xs font-semibold px-3 py-1.5 cursor-pointer flex items-center gap-1.5"
+        >
+          <RefreshCw className="w-3.5 h-3.5" /> Random Palette Color
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Color preview and picker */}
-        <div className="lg:col-span-5 space-y-5">
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
+      {/* Main Grid */}
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
+        {/* Left Color Swatch Card */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Color Swatch</h3>
             <div
-              className="w-full h-40 rounded-xl shadow-inner border border-white/10 flex items-end p-4 transition-colors"
+              className="w-full h-44 rounded-xl shadow-inner border border-line flex items-end p-4 transition-all"
               style={{ backgroundColor: hex }}
             >
-              <div className="bg-zinc-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono font-bold text-white">
+              <div className="bg-bg/90 backdrop-blur px-3 py-1.5 rounded-lg border border-line text-xs font-mono font-bold text-fg shadow-lg">
                 {hex.toUpperCase()}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={hex}
-                onChange={(e) => setHex(e.target.value)}
-                className="w-12 h-12 rounded-xl bg-transparent border border-zinc-700 cursor-pointer"
-              />
-              <div className="flex-1">
-                <input
-                  type="text"
-                  value={hex}
-                  onChange={(e) => setHex(e.target.value)}
-                  placeholder="#000000"
-                  className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-mono text-zinc-100 focus:outline-none focus:border-fuchsia-500/50 uppercase"
-                />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Format Conversions */}
-        <div className="lg:col-span-7 space-y-3">
-          <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Color Code Formats</h3>
+        {/* Right Format Conversions Grid */}
+        <div className="lg:col-span-7 flex flex-col space-y-2">
+          <label className="text-xs font-semibold text-muted uppercase tracking-wider">
+            Copyable Formats & Tokens
+          </label>
+
+          <div className="p-6 rounded-2xl bg-field border border-line space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {formats.map((f) => (
                 <div
                   key={f.label}
-                  className="p-3.5 bg-zinc-950 border border-zinc-800/80 rounded-xl flex items-center justify-between group hover:border-zinc-700 transition"
+                  className="p-3.5 bg-bg border border-line rounded-xl flex items-center justify-between group hover:border-muted/50 transition"
                 >
                   <div>
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">
                       {f.label}
                     </span>
-                    <span className="text-xs font-mono font-medium text-zinc-200 mt-0.5 block truncate max-w-[200px]">
+                    <span className="text-xs font-mono font-medium text-fg mt-0.5 block truncate max-w-[200px]">
                       {f.value}
                     </span>
                   </div>
+
                   <button
+                    type="button"
                     onClick={() => copyToClipboard(f.value, f.label)}
-                    className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+                    className="p-2 rounded-lg bg-field hover:bg-hover text-muted hover:text-fg border border-line transition cursor-pointer"
+                    title={`Copy ${f.label}`}
                   >
                     {copiedLabel === f.label ? (
-                      <Check className="w-4 h-4 text-emerald-400" />
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
                     ) : (
-                      <Copy className="w-4 h-4" />
+                      <Copy className="w-3.5 h-3.5" />
                     )}
                   </button>
                 </div>
