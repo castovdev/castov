@@ -67,53 +67,71 @@ export default function DeveloperPage() {
       {/* Ecosystem Showcase */}
       <div className="not-prose grid gap-6 mt-8 mb-16 lg:grid-cols-2">
         {/* SDK */}
-        <div className="bg-card border-2 border-primary/20 hover:border-primary/50 transition-colors p-6 rounded-2xl shadow-lg shadow-primary/5">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 text-primary rounded-lg">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <div className="bg-card border-2 border-primary/20 hover:border-primary/50 transition-colors p-6 rounded-2xl shadow-lg shadow-primary/5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-bold text-fg">castov-sdk</h3>
+                <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-mono font-semibold">v1.0.0</span>
+              </div>
             </div>
-            <h3 className="text-xl font-bold text-fg">@castov/sdk</h3>
-          </div>
-          <p className="text-muted text-sm mb-4">
-            Bring the power of Castov's zero-server, blazing-fast utilities directly into your own Node.js or browser applications.
-          </p>
-          <div className="p-3 bg-field/80 border border-line rounded-lg text-sm font-medium text-muted">
-            SDK: coming soon
-          </div>
-          {/*
-            TODO: Restore after publishing to npm:
-            <pre className="code-block mt-2 text-xs overflow-x-auto border border-line">
-              <code>npm install @castov/sdk</code>
+            <p className="text-muted text-sm mb-4">
+              Zero-dependency TypeScript &amp; JavaScript utilities: UUIDs v4/v7, Unix timestamps, ID detector (ObjectId, Snowflake), Cron parser, and JWT decoder.
+            </p>
+            <pre className="code-block text-xs overflow-x-auto border border-line bg-field/50 p-3 rounded-lg font-mono text-fg mb-3">
+              <code>npm install castov-sdk</code>
             </pre>
-            <pre className="code-block mt-2 text-xs overflow-x-auto border border-line">
-              <code>{"import { castov } from '@castov/sdk';\n\nconst id = castov.uuid();"}</code>
-            </pre>
-          */}
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <a
+              href="https://www.npmjs.com/package/castov-sdk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn bg-primary text-white hover:bg-primary/90 text-xs font-bold px-4 py-2 text-center flex-1"
+            >
+              View on npm
+            </a>
+          </div>
         </div>
 
         {/* CLI */}
-        <div className="bg-card border border-line hover:border-accent/50 transition-colors p-6 rounded-2xl shadow-md">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-accent/10 text-accent rounded-lg">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 17l6-6-6-6m12 14h-6" /></svg>
+        <div className="bg-card border border-line hover:border-accent/50 transition-colors p-6 rounded-2xl shadow-md flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-accent/10 text-accent rounded-lg">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 17l6-6-6-6m12 14h-6" /></svg>
+              </div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-bold text-fg">Castov CLI</h3>
+                <span className="text-xs bg-accent/15 text-accent px-2 py-0.5 rounded-full font-mono font-semibold">v1.0.0</span>
+              </div>
             </div>
-            <h3 className="text-xl font-bold text-fg">Castov CLI</h3>
-          </div>
-          <p className="text-muted text-sm mb-4">
-            Execute tools directly from your terminal. Generate UUIDs, encode Base64, and calculate hashes instantly in your shell.
-          </p>
-          <div className="p-3 bg-field/80 border border-line rounded-lg text-sm font-medium text-muted">
-            CLI: coming soon
-          </div>
-          {/*
-            TODO: Restore after publishing to npm:
-            <pre className="code-block mt-2 text-xs overflow-x-auto border border-line bg-background">
-              <code>npm install -g castov-cli</code>
+            <p className="text-muted text-sm mb-4">
+              Instant zero-server developer toolkit in your terminal. Run standalone via npx or install globally with zero configuration.
+            </p>
+            <pre className="code-block text-xs overflow-x-auto border border-line bg-field/50 p-3 rounded-lg font-mono text-fg mb-3">
+              <code>npx castov --help</code>
             </pre>
-            <pre className="code-block mt-2 text-xs overflow-x-auto border border-line bg-background">
-              <code>{"> castov uuid\n✔ Generated UUID:\n9139702a-4ecc-4655-96a7-e9184f045c62"}</code>
-            </pre>
-          */}
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <a
+              href="https://www.npmjs.com/package/castov"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-4 py-2 text-center flex-1"
+            >
+              View on npm
+            </a>
+            <Link
+              href="/cli"
+              className="btn bg-field border border-line text-muted hover:text-fg text-xs font-medium px-4 py-2 text-center"
+            >
+              CLI Docs
+            </Link>
+          </div>
         </div>
 
         {/* VS Code */}

@@ -92,25 +92,61 @@ export default function HomePage() {
             </div>
 
             {/* SDK & CLI */}
-            <div className="bg-bg border border-line p-8 rounded-3xl hover:border-primary/50 transition-colors shadow-sm group">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Terminal className="text-primary w-7 h-7" />
+            <div className="bg-bg border border-line p-8 rounded-3xl hover:border-primary/50 transition-colors shadow-sm group flex flex-col justify-between">
+              <div>
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Terminal className="text-primary w-7 h-7" />
+                </div>
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-2xl font-bold text-fg">Castov CLI &amp; SDK</h3>
+                  <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-mono font-semibold">npm v1.0.0</span>
+                </div>
+                <p className="text-muted leading-relaxed mb-6">
+                  Execute zero-server developer utilities directly in terminal (<code className="text-fg bg-field px-1 rounded">npx castov</code>) or import into TypeScript applications with <code className="text-fg bg-field px-1 rounded">castov-sdk</code>.
+                </p>
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-fg">@castov/sdk & CLI</h3>
-              <p className="text-muted leading-relaxed">
-                Bring zero-server utilities directly to your CI/CD pipelines and backend code. Generate secure hashes and process data locally via NPM.
-              </p>
+              <div className="flex items-center gap-3 pt-4 border-t border-line">
+                <Link href="/cli" className="text-sm font-semibold text-primary hover:underline">
+                  CLI Guide &rarr;
+                </Link>
+                <a
+                  href="https://www.npmjs.com/package/castov"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-muted hover:text-fg"
+                >
+                  npm package &rarr;
+                </a>
+              </div>
             </div>
 
             {/* VS Code */}
-            <div className="bg-bg border border-line p-8 rounded-3xl hover:border-[#007ACC]/50 transition-colors shadow-sm group md:col-span-2 lg:col-span-1">
-              <div className="w-14 h-14 rounded-2xl bg-[#007ACC]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Code className="text-[#007ACC] w-7 h-7" />
+            <div className="bg-bg border border-line p-8 rounded-3xl hover:border-[#007ACC]/50 transition-colors shadow-sm group md:col-span-2 lg:col-span-1 flex flex-col justify-between">
+              <div>
+                <div className="w-14 h-14 rounded-2xl bg-[#007ACC]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Code className="text-[#007ACC] w-7 h-7" />
+                </div>
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-2xl font-bold text-fg">VS Code Extension</h3>
+                  <span className="text-xs bg-[#007ACC]/15 text-[#007ACC] px-2 py-0.5 rounded-full font-mono font-semibold">Official</span>
+                </div>
+                <p className="text-muted leading-relaxed mb-6">
+                  Never context-switch again. Highlight text in your editor to instantly decode Base64, parse JWTs, inspect timestamps, or generate UUIDs.
+                </p>
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-fg">VS Code Extension</h3>
-              <p className="text-muted leading-relaxed">
-                Never context-switch again. Highlight text in your editor to instantly decode Base64, parse JWTs, or format complex JSON blocks.
-              </p>
+              <div className="flex items-center gap-3 pt-4 border-t border-line">
+                <a
+                  href="https://marketplace.visualstudio.com/items?itemName=castov.castov-vscode"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-[#007ACC] hover:underline"
+                >
+                  Marketplace &rarr;
+                </a>
+                <Link href="/extension" className="text-sm font-semibold text-muted hover:text-fg">
+                  Downloads &rarr;
+                </Link>
+              </div>
             </div>
           </div>
         </div>
