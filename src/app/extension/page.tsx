@@ -44,11 +44,11 @@ export default function ExtensionPage() {
           <a
             href="/api/download/extension"
             download="castov-vscode-0.1.0.vsix"
-            className="btn bg-accent text-white hover:bg-accent-hover font-bold text-base px-6 py-3.5 shadow-lg shadow-accent/20 transition-all hover:scale-[1.02] flex items-center gap-2"
+            className="btn bg-accent text-accent-fg hover:opacity-90 font-bold text-base px-6 py-3.5 shadow-lg shadow-accent/20 transition-all hover:scale-[1.02] flex items-center gap-2"
           >
-            <Download className="w-5 h-5" />
+            <Download className="w-5 h-5 text-accent-fg" />
             <span>Download VS Code (.vsix)</span>
-            <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-mono">v0.1.0</span>
+            <span className="text-xs bg-accent-fg/15 text-accent-fg px-2 py-0.5 rounded font-mono font-bold">v0.1.0</span>
           </a>
           <a
             href="/castov-extension.zip"
@@ -142,9 +142,9 @@ export default function ExtensionPage() {
                 <a
                   href="/api/download/extension"
                   download="castov-vscode-0.1.0.vsix"
-                  className="btn w-full justify-center bg-accent text-white hover:bg-accent-hover font-semibold py-3"
+                  className="btn w-full justify-center bg-accent text-accent-fg hover:opacity-90 font-bold py-3"
                 >
-                  <Download className="w-4 h-4 mr-2" /> Download .vsix File
+                  <Download className="w-4 h-4 mr-2 text-accent-fg" /> Download .vsix File
                 </a>
               </div>
             </div>
@@ -192,9 +192,9 @@ export default function ExtensionPage() {
             <a
               href="/castov-extension.zip"
               download="castov-extension.zip"
-              className="btn bg-fg text-bg hover:opacity-90 font-semibold px-6 py-3"
+              className="btn bg-accent text-accent-fg hover:opacity-90 font-bold px-6 py-3"
             >
-              <Download className="w-4 h-4 mr-2" /> Download Extension ZIP
+              <Download className="w-4 h-4 mr-2 text-accent-fg" /> Download Extension ZIP
             </a>
             <Link href="/tools" className="btn bg-field border border-line text-muted hover:text-fg font-medium px-5 py-3">
               Explore All 55+ Online Tools <ArrowRight className="w-4 h-4 ml-2" />
