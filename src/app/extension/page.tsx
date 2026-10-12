@@ -41,24 +41,33 @@ export default function ExtensionPage() {
           Bring the speed of Castov directly into Visual Studio Code and your browser. Inspect timestamps, generate UUIDs, and decode JWTs without leaving your code.
         </p>
 
-        {/* Quick Download CTA Buttons */}
+        {/* Quick Download & Marketplace CTA Buttons */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="https://marketplace.visualstudio.com/items?itemName=castov.castov-vscode"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold text-base px-6 py-3.5 shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2.5"
+          >
+            <Code2 className="w-5 h-5 text-white" />
+            <span>Install on Visual Studio Marketplace</span>
+            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">Official</span>
+          </a>
           <a
             href="/api/download/extension"
             download="castov-vscode-0.1.0.vsix"
-            className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold text-base px-6 py-3.5 shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2"
+            className="btn bg-card border border-line text-fg hover:bg-hover font-bold text-base px-6 py-3.5 shadow-sm transition-all flex items-center gap-2"
           >
-            <Download className="w-5 h-5 text-white" />
-            <span>Download VS Code (.vsix)</span>
-            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">v0.1.0</span>
+            <Download className="w-5 h-5 text-muted" />
+            <span>Download .vsix Offline Package</span>
           </a>
           <a
             href="/castov-extension.zip"
             download="castov-extension.zip"
-            className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold text-base px-6 py-3.5 shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2"
+            className="btn bg-card border border-line text-fg hover:bg-hover font-bold text-base px-6 py-3.5 shadow-sm transition-all flex items-center gap-2"
           >
-            <Download className="w-5 h-5 text-white" />
-            <span>Download Browser Extension (.zip)</span>
+            <Download className="w-5 h-5 text-muted" />
+            <span>Browser Extension (.zip)</span>
           </a>
         </div>
       </div>
@@ -105,12 +114,12 @@ export default function ExtensionPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-field border border-line">
-                <div className="flex items-center justify-between text-xs font-mono text-muted mb-2">
-                  <span>INSTALL VIA TERMINAL (CLI)</span>
+              <div className="p-4 rounded-xl bg-field border border-line space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono text-muted">
+                  <span>INSTALL VIA VS CODE CLI</span>
                 </div>
                 <div className="flex items-center justify-between bg-bg p-3 rounded-lg border border-line font-mono text-xs text-accent">
-                  <code>code --install-extension castov-vscode-0.1.0.vsix</code>
+                  <code>code --install-extension castov.castov-vscode</code>
                 </div>
               </div>
             </div>

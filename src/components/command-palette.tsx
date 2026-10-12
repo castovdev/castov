@@ -187,10 +187,16 @@ export function CommandPalette() {
               </Command.Item>
             )}
             <Command.Item
-              onSelect={() => runCommand(() => router.push("/tools"))}
+              onSelect={() => runCommand(() => router.push("/cheatsheets"))}
               className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
             >
-              <SettingsIcon className="w-4 h-4" /> Time & Date Tools
+              <CodeIcon className="w-4 h-4" /> Developer Cheat Sheets
+            </Command.Item>
+            <Command.Item
+              onSelect={() => runCommand(() => router.push("/sponsor"))}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+            >
+              <SettingsIcon className="w-4 h-4" /> Sponsor & Advertise
             </Command.Item>
           </Command.Group>
           
