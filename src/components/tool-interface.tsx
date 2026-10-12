@@ -46,6 +46,10 @@ import { UuidGeneratorTool } from "./tools/uuid-generator-tool";
 import { HashGeneratorTool } from "./tools/hash-generator-tool";
 import { CodeToImageTool } from "./tools/code-to-image-tool";
 import { GlassmorphismTool } from "./tools/glassmorphism-tool";
+import { GithubReadmeTool } from "./tools/github-readme-tool";
+import { AppMockupTool } from "./tools/app-mockup-tool";
+import { FaviconGeneratorTool } from "./tools/favicon-generator-tool";
+import { ColorConverterTool } from "./tools/color-converter-tool";
 
 /**
  * Maps a tool slug to its interactive interface. To add a tool: add its content to
@@ -159,5 +163,13 @@ export function ToolInterface({ slug }: { slug: ToolSlug }) {
       return <CodeToImageTool />;
     case "glassmorphism-generator":
       return <GlassmorphismTool />;
+    case "github-readme-generator":
+      return <GithubReadmeTool />;
+    case "app-mockup":
+      return <AppMockupTool />;
+    case "favicon-generator":
+      return <FaviconGeneratorTool />;
+    case "color-converter":
+      return <ColorConverterTool />;
   }
 }

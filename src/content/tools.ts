@@ -54,7 +54,11 @@ export type ToolSlug =
   | "uuid-generator"
   | "hash-generator"
   | "code-to-image"
-  | "glassmorphism-generator";
+  | "glassmorphism-generator"
+  | "github-readme-generator"
+  | "app-mockup"
+  | "favicon-generator"
+  | "color-converter";
 
 export interface ContentSection {
   heading: string;
@@ -2088,6 +2092,113 @@ export const TOOLS: Tool[] = [
       { q: "Can I use this with Tailwind CSS?", a: "Yes, our generator provides copyable Tailwind utility classes including arbitrary value syntax for exact blur and opacity matching." }
     ],
     related: ["code-to-image", "universal-config-sync"]
+  },
+  {
+    slug: "github-readme-generator",
+    category: "Developer",
+    name: "GitHub README Builder",
+    seoTitle: "GitHub Profile & Repo README Builder | Castov",
+    metaDescription: "Generate viral, dynamic GitHub profile READMEs with skill badges, animated stats, and tech stacks.",
+    intro: "Create viral, eye-catching GitHub profile READMEs with live shields.io badges, dynamic stat cards, streaks, and custom Markdown in seconds.",
+    cardDescription: "Build dynamic GitHub profile READMEs with badges and live stats.",
+    sections: [
+      {
+        heading: "Crafting Standout GitHub Profiles",
+        paragraphs: [
+          "Your GitHub profile is your open-source resume. Having a well-structured README with verified tech stack badges, GitHub streaks, and clean markdown boosts credibility with recruiters and collaborators."
+        ]
+      }
+    ],
+    howTo: [
+      "Fill in your name, bio, and social handles.",
+      "Select your technologies to generate shields.io badges.",
+      "Pick your preferred theme for GitHub stats widgets.",
+      "Click 'Copy README.md' and paste into your special GitHub repo."
+    ],
+    faq: [
+      { q: "How do I create a GitHub Profile README?", a: "Create a new public repository with the exact same name as your GitHub username, initialize it with a README.md file, and paste your generated markdown." }
+    ],
+    related: ["code-to-image", "app-mockup", "diff-checker"]
+  },
+  {
+    slug: "app-mockup",
+    category: "Developer",
+    name: "App & Screenshot Mockup Studio",
+    seoTitle: "Device & Screenshot Mockup Studio: Mac, iPhone, Chrome | Castov",
+    metaDescription: "Turn ordinary UI screenshots into 3D framed device mockups for Mac, iPhone, and Chrome in seconds.",
+    intro: "Transform ordinary UI screenshots into stunning, high-converting product mockups inside browser, laptop, and phone frames with rich 3D gradients and realistic drop shadows.",
+    cardDescription: "Turn screenshots into 3D framed device mockups for Mac and iPhone.",
+    sections: [
+      {
+        heading: "High-Converting Screenshot Mockups",
+        paragraphs: [
+          "Present your software and web designs in realistic device frames with custom gradients and natural shadows, perfect for Product Hunt and Twitter announcements."
+        ]
+      }
+    ],
+    howTo: [
+      "Upload your app screenshot.",
+      "Select a device frame (Browser, Laptop, or Phone).",
+      "Pick a gradient atmosphere and adjust canvas padding.",
+      "Click Export High-Res PNG to download your graphic."
+    ],
+    faq: [
+      { q: "Are images uploaded to any server?", a: "No, all mockup rendering happens 100% locally on your computer inside your browser via HTML5 Canvas." }
+    ],
+    related: ["code-to-image", "github-readme-generator", "glassmorphism-generator"]
+  },
+  {
+    slug: "favicon-generator",
+    category: "Developer",
+    name: "Favicon & App Icon Generator",
+    seoTitle: "Favicon & App Icon Generator: Full Multi-Size Icon Sets | Castov",
+    metaDescription: "Create complete web and mobile favicon packages (16x16, 32x32, 180x180, PWA) from any image or logo.",
+    intro: "Convert any image or brand logo into complete favicon packages for modern browsers, Apple iOS devices, and Android PWAs with HTML meta tags.",
+    cardDescription: "Generate multi-size favicon packages and HTML head tags.",
+    sections: [
+      {
+        heading: "Complete Browser & Mobile Icon Sets",
+        paragraphs: [
+          "Generate perfectly formatted favicons for Google search results, Safari bookmarks, Apple home screens, and Android PWAs with zero quality loss."
+        ]
+      }
+    ],
+    howTo: [
+      "Upload your brand logo or icon.",
+      "Customize padding and background transparency.",
+      "Download individual icon sizes or copy the HTML header tags.",
+      "Drop the generated files into your project public directory."
+    ],
+    faq: [
+      { q: "What sizes are required for modern websites?", a: "Modern websites need 16x16 and 32x32 PNGs for tabs, 180x180 for iOS Apple Touch Icons, and 192x192/512x512 for Progressive Web Apps." }
+    ],
+    related: ["app-mockup", "color-converter", "code-to-image"]
+  },
+  {
+    slug: "color-converter",
+    category: "Developer",
+    name: "Color Code Converter & Palette Studio",
+    seoTitle: "Color Code Converter: HEX, RGB, HSL, RGBA, Tailwind | Castov",
+    metaDescription: "Convert HEX, RGB, HSL, RGBA, and CSS variables instantly with live previews and Tailwind tokens.",
+    intro: "Fast, accurate color converter between HEX, RGB, RGBA, HSL, and Tailwind CSS arbitrary classes with real-time contrast feedback.",
+    cardDescription: "Convert colors between HEX, RGB, HSL, and Tailwind CSS tokens.",
+    sections: [
+      {
+        heading: "Precision Color Code Conversion",
+        paragraphs: [
+          "Effortlessly convert design system colors between HEX, RGB, HSL, and Tailwind CSS arbitrary values with instant clipboard copying."
+        ]
+      }
+    ],
+    howTo: [
+      "Pick a color with the picker or type any valid HEX code.",
+      "View instant synchronized conversions across HEX, RGB, HSL, and Tailwind.",
+      "Click the copy icon on any format to copy to your clipboard."
+    ],
+    faq: [
+      { q: "Can I convert directly to Tailwind CSS?", a: "Yes, the tool outputs Tailwind arbitrary value classes like bg-[#6366f1] ready to paste into JSX." }
+    ],
+    related: ["glassmorphism-generator", "favicon-generator", "code-to-image"]
   }
 ];
 
