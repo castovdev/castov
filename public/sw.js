@@ -1,4 +1,4 @@
-const CACHE_NAME = 'castov-cache-v1';
+const CACHE_NAME = 'castov-cache-v2';
 
 // Add core paths to cache immediately
 const PRECACHE_URLS = [
@@ -33,7 +33,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests for navigation and static assets
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
@@ -42,11 +41,27 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network First, falling back to cache (Stale-While-Revalidate pattern)
+  // For HTML navigation requests, ALWAYS fetch fresh network response first
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        if (networkResponse.ok) {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return networkResponse;
+      }).catch(async () => {
+        const cached = await caches.match(event.request);
+        return cached || new Response("You are offline and this page is not cached.", { status: 503, statusText: "Offline" });
+      })
+    );
+    return;
+  }
+
+  // Stale-While-Revalidate for static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Cache successful responses for future offline use
         if (networkResponse.ok && event.request.url.startsWith('http')) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -55,11 +70,9 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
-        // If network fails, return cached response if available
-        return cachedResponse || new Response("You are offline and this page is not cached.", { status: 503, statusText: "Offline" });
+        return cachedResponse || new Response("Asset unavailable offline.", { status: 503 });
       });
 
-      // Return cached response immediately if we have it, but fetch in background to update cache
       return cachedResponse || fetchPromise;
     })
   );

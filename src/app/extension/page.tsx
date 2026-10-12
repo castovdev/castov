@@ -23,6 +23,8 @@ export const metadata: Metadata = {
   })
 };
 
+export const dynamic = "force-dynamic";
+
 export default function ExtensionPage() {
   return (
     <div className="layout-content max-w-5xl py-12 sm:py-20">
@@ -44,18 +46,18 @@ export default function ExtensionPage() {
           <a
             href="/api/download/extension"
             download="castov-vscode-0.1.0.vsix"
-            className="btn bg-accent text-accent-fg hover:opacity-90 font-bold text-base px-6 py-3.5 shadow-lg shadow-accent/20 transition-all hover:scale-[1.02] flex items-center gap-2"
+            className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold text-base px-6 py-3.5 shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2"
           >
-            <Download className="w-5 h-5 text-accent-fg" />
+            <Download className="w-5 h-5 text-white" />
             <span>Download VS Code (.vsix)</span>
-            <span className="text-xs bg-accent-fg/15 text-accent-fg px-2 py-0.5 rounded font-mono font-bold">v0.1.0</span>
+            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">v0.1.0</span>
           </a>
           <a
             href="/castov-extension.zip"
             download="castov-extension.zip"
-            className="btn bg-field border border-line text-fg hover:bg-hover font-semibold text-base px-6 py-3.5 transition-all flex items-center gap-2"
+            className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold text-base px-6 py-3.5 shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2"
           >
-            <Download className="w-5 h-5 text-muted" />
+            <Download className="w-5 h-5 text-white" />
             <span>Download Browser Extension (.zip)</span>
           </a>
         </div>
@@ -142,9 +144,9 @@ export default function ExtensionPage() {
                 <a
                   href="/api/download/extension"
                   download="castov-vscode-0.1.0.vsix"
-                  className="btn w-full justify-center bg-accent text-accent-fg hover:opacity-90 font-bold py-3"
+                  className="btn w-full justify-center bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold py-3"
                 >
-                  <Download className="w-4 h-4 mr-2 text-accent-fg" /> Download .vsix File
+                  <Download className="w-4 h-4 mr-2 text-white" /> Download .vsix File
                 </a>
               </div>
             </div>
@@ -192,9 +194,9 @@ export default function ExtensionPage() {
             <a
               href="/castov-extension.zip"
               download="castov-extension.zip"
-              className="btn bg-accent text-accent-fg hover:opacity-90 font-bold px-6 py-3"
+              className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold px-6 py-3"
             >
-              <Download className="w-4 h-4 mr-2 text-accent-fg" /> Download Extension ZIP
+              <Download className="w-4 h-4 mr-2 text-white" /> Download Extension ZIP
             </a>
             <Link href="/tools" className="btn bg-field border border-line text-muted hover:text-fg font-medium px-5 py-3">
               Explore All 55+ Online Tools <ArrowRight className="w-4 h-4 ml-2" />
