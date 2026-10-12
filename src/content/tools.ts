@@ -52,7 +52,9 @@ export type ToolSlug =
   | "base64-encoder-decoder"
   | "jwt-decoder"
   | "uuid-generator"
-  | "hash-generator";
+  | "hash-generator"
+  | "code-to-image"
+  | "glassmorphism-generator";
 
 export interface ContentSection {
   heading: string;
@@ -2028,6 +2030,64 @@ export const TOOLS: Tool[] = [
       { q: "Can I load an existing database?", a: "Yes, use the Import DB feature to load an existing .sqlite file into the WASM engine." }
     ],
     related: ["universal-config-sync"],
+  },
+  {
+    slug: "code-to-image",
+    category: "Developer",
+    name: "Code to Image Generator",
+    seoTitle: "Code to Image Generator: Create Beautiful Code Snippets | Castov",
+    metaDescription: "Transform code snippets into gorgeous images with Mac OS window frames, custom gradient backgrounds, and instant PNG downloads for Twitter and presentations.",
+    intro: "Turn your source code into beautiful, presentation-ready images with custom gradient backgrounds, Mac-style window controls, and syntax styling. 100% private and in-browser.",
+    cardDescription: "Convert code snippets into beautiful images with gradients.",
+    sections: [
+      {
+        heading: "Why Share Code as Images?",
+        paragraphs: [
+          "Posting plain text snippets on social networks like X (Twitter), LinkedIn, or Discord often destroys code indentation and syntax highlighting.",
+          "Our in-browser canvas renderer converts any code into high-DPI retina PNG screenshots styled with modern frosted backgrounds and terminal headers."
+        ]
+      }
+    ],
+    howTo: [
+      "Paste your code into the editor pane.",
+      "Choose a background gradient theme (Midnight, Cyberpunk, Sunset, Matrix, or Carbon).",
+      "Set your file title and padding.",
+      "Click Download PNG or Copy Image to Clipboard."
+    ],
+    faq: [
+      { q: "Is my code uploaded to any external server?", a: "Never. All image rendering is calculated directly on an HTML5 Canvas inside your browser." },
+      { q: "What format does it export?", a: "It exports high-resolution 2x Retina PNG images suitable for retina screens and print." }
+    ],
+    related: ["diff-checker", "json-to-ts", "universal-config-sync"]
+  },
+  {
+    slug: "glassmorphism-generator",
+    category: "Developer",
+    name: "CSS Glassmorphism Generator",
+    seoTitle: "CSS Glassmorphism & Frosted Glass Generator | Castov",
+    metaDescription: "Generate modern CSS and Tailwind frosted glass UI effects with customizable blur, opacity, border, and shadows in real-time.",
+    intro: "Design stunning frosted glass UI components in real time. Customize blur, background opacity, border styling, and copy ready-to-use Tailwind CSS or Pure CSS with one click.",
+    cardDescription: "Generate frosted glass UI styles in CSS & Tailwind.",
+    sections: [
+      {
+        heading: "The Power of Modern Glassmorphism",
+        paragraphs: [
+          "Glassmorphism relies on the CSS backdrop-filter property to blur the layers beneath an element, mimicking translucent frosted glass.",
+          "It adds depth, hierarchy, and modern aesthetics to dark and light dashboard interfaces, modals, and landing page cards."
+        ]
+      }
+    ],
+    howTo: [
+      "Adjust the blur intensity, background opacity, and border radius using the sliders.",
+      "Observe the real-time preview over dynamic vibrant gradients.",
+      "Select your output format (Tailwind CSS or Pure CSS).",
+      "Click Copy Code and paste into your project."
+    ],
+    faq: [
+      { q: "Does backdrop-filter work in all modern browsers?", a: "Yes, backdrop-filter is fully supported in Chromium browsers, Safari, Firefox, and Edge with hardware acceleration." },
+      { q: "Can I use this with Tailwind CSS?", a: "Yes, our generator provides copyable Tailwind utility classes including arbitrary value syntax for exact blur and opacity matching." }
+    ],
+    related: ["code-to-image", "universal-config-sync"]
   }
 ];
 

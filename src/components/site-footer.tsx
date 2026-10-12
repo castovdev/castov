@@ -6,6 +6,7 @@ import { BrandMark } from "./brand-mark";
 
 const COMPANY = [
   { href: "/about", label: "About" },
+  { href: "/sponsor", label: "Sponsor & Advertise" },
   { href: "/contact", label: "Contact" },
   { href: "/privacy", label: "Privacy Policy" },
   { href: "/terms", label: "Terms of Use" },
@@ -51,9 +52,10 @@ export function SiteFooter() {
           <nav aria-labelledby="footer-resources">
             <h2 id="footer-resources" className="mb-4 text-sm font-semibold text-fg">Resources</h2>
             <ul className="grid gap-3 text-sm">
+              <li><Link href="/cheatsheets" className="text-muted transition-colors hover:text-fg font-semibold text-accent">Cheat Sheets</Link></li>
               <li><Link href="/guides" className="text-muted transition-colors hover:text-fg">Guides</Link></li>
               <li><Link href="/developer" className="text-muted transition-colors hover:text-fg">Code Snippets</Link></li>
-              <li><Link href="/utc-converter" className="text-muted transition-colors hover:text-fg">UTC Time</Link></li>
+              <li><Link href="/extension" className="text-muted transition-colors hover:text-fg">VS Code Extension</Link></li>
             </ul>
           </nav>
 

@@ -20,6 +20,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/developer`, lastModified: getLastMod('src/app/developer/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/canvas`, lastModified: getLastMod('src/app/canvas/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/extension`, lastModified: getLastMod('src/app/extension/page.tsx'), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/cheatsheets`, lastModified: getLastMod('src/app/cheatsheets/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${baseUrl}/sponsor`, lastModified: getLastMod('src/app/sponsor/page.tsx'), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/timezones`, lastModified: getLastMod('src/app/timezones/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/timestamps`, lastModified: getLastMod('src/app/timestamps/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/cron`, lastModified: getLastMod('src/app/cron/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },

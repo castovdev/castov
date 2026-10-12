@@ -44,6 +44,8 @@ import { Base64Tool } from "./tools/base64-tool";
 import { JwtDecoderTool } from "./tools/jwt-decoder-tool";
 import { UuidGeneratorTool } from "./tools/uuid-generator-tool";
 import { HashGeneratorTool } from "./tools/hash-generator-tool";
+import { CodeToImageTool } from "./tools/code-to-image-tool";
+import { GlassmorphismTool } from "./tools/glassmorphism-tool";
 
 /**
  * Maps a tool slug to its interactive interface. To add a tool: add its content to
@@ -153,5 +155,9 @@ export function ToolInterface({ slug }: { slug: ToolSlug }) {
       return <UuidGeneratorTool />;
     case "hash-generator":
       return <HashGeneratorTool />;
+    case "code-to-image":
+      return <CodeToImageTool />;
+    case "glassmorphism-generator":
+      return <GlassmorphismTool />;
   }
 }

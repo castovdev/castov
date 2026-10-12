@@ -12,9 +12,9 @@ import { Search } from "lucide-react";
 const DESKTOP_NAV = [
   { href: "/tools", label: "Tools" },
   ...(AI_HUB_LIVE ? [{ href: "/ai", label: "AI Hub" }] : []),
-  { href: "/timezones", label: "Time Zones" },
+  { href: "/cheatsheets", label: "Cheat Sheets" },
   { href: "/guides", label: "Guides" },
-  { href: "/developer", label: "Developer" },
+  { href: "/extension", label: "Extension" },
 ];
 
 export function SiteHeader() {
