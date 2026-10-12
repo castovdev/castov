@@ -58,7 +58,11 @@ export type ToolSlug =
   | "github-readme-generator"
   | "app-mockup"
   | "favicon-generator"
-  | "color-converter";
+  | "color-converter"
+  | "token-visualizer"
+  | "git-time-traveler"
+  | "svg-animator"
+  | "mock-data-studio";
 
 export interface ContentSection {
   heading: string;
@@ -2199,6 +2203,117 @@ export const TOOLS: Tool[] = [
       { q: "Can I convert directly to Tailwind CSS?", a: "Yes, the tool outputs Tailwind arbitrary value classes like bg-[#6366f1] ready to paste into JSX." }
     ],
     related: ["glassmorphism-generator", "favicon-generator", "code-to-image"]
+  },
+  {
+    slug: "token-visualizer",
+    category: "Developer",
+    name: "LLM Token & Cost Visualizer",
+    seoTitle: "LLM Token & Cost Visualizer: OpenAI, Claude, Gemini | Castov",
+    metaDescription: "Estimate BPE tokenization and calculate real-time API costs across OpenAI, Anthropic, Google, and DeepSeek models instantly.",
+    intro: "Understand and visualize how large language models segment text into tokens. Compare real-time API pricing across GPT-4o, Claude 3.5 Sonnet, Gemini 1.5, and DeepSeek V3 in seconds.",
+    cardDescription: "Visualize BPE tokens and calculate real-time LLM API costs.",
+    sections: [
+      {
+        heading: "Mastering LLM Tokenization and API Budgeting",
+        paragraphs: [
+          "Every modern AI model processes text as tokens rather than whole words. Punctuation, whitespace, and programming code fragments can inflate your token usage unexpectedly.",
+          "Our visualizer breaks your prompt down into discrete segments and computes exact input and response costs for single queries and scaled production workloads."
+        ]
+      }
+    ],
+    howTo: [
+      "Paste your prompt, system instructions, or code snippet into the editor.",
+      "Select your target model (OpenAI, Anthropic, Google Gemini, or DeepSeek).",
+      "Inspect the live BPE token breakdown and per-token character count.",
+      "View estimated production costs and copy the formatted prompt."
+    ],
+    faq: [
+      { q: "Is this tokenizer 100% accurate?", a: "It provides an accurate close-approximation of Byte-Pair Encoding (BPE) used across contemporary transformer models with zero network latency." }
+    ],
+    related: ["diff-checker", "json-to-ts", "code-to-image"]
+  },
+  {
+    slug: "git-time-traveler",
+    category: "Developer",
+    name: "Git Disaster Recovery & Time-Traveler",
+    seoTitle: "Git Disaster Recovery & Emergency Time-Traveler | Castov",
+    metaDescription: "Recover lost commits, undo hard resets, purge leaked secrets, and fix Git merge conflicts safely with instant interactive commands.",
+    intro: "Step-by-step interactive command generator to rescue your codebase from common Git disasters: accidental hard resets, committed API keys, wrong branches, and messy merge conflicts.",
+    cardDescription: "Rescue lost commits, undo hard resets, and escape Git merge disasters.",
+    sections: [
+      {
+        heading: "Never Panic in Git Again",
+        paragraphs: [
+          "Git's object database almost never deletes your work immediately. Using git reflog and commit pointer manipulation, you can rescue virtually any destroyed state without risking project history.",
+          "Select your emergency and follow verified step-by-step commands tailored to get you back to a clean working state safely."
+        ]
+      }
+    ],
+    howTo: [
+      "Select your specific Git disaster scenario from the cards above.",
+      "Review the explanations to understand how Git handles the rescue under the hood.",
+      "Copy individual terminal commands or click 'Copy Rescue Script'.",
+      "Run the commands in your local project root."
+    ],
+    faq: [
+      { q: "Does 'git reset --hard' truly delete uncommitted files?", a: "Uncommitted untracked files cannot be retrieved, but any commit that was ever created can be fully restored via 'git reflog' within 30 days." }
+    ],
+    related: ["diff-checker", "github-readme-generator", "universal-config-sync"]
+  },
+  {
+    slug: "svg-animator",
+    category: "Developer",
+    name: "SVG Keyframe Animator & Studio",
+    seoTitle: "SVG Keyframe Animator & CSS Motion Studio | Castov",
+    metaDescription: "Generate hypnotic CSS keyframe stroke animations and Framer Motion code from raw SVG icons and logos with instant live previews.",
+    intro: "Turn static SVG logos and icons into cinematic animations with stroke drawing, glowing pulses, and 3D hover effects. Export directly to Pure CSS or Framer Motion.",
+    cardDescription: "Turn static SVG icons into animated CSS & Framer Motion vectors.",
+    sections: [
+      {
+        heading: "Cinematic Vector Animation Made Effortless",
+        paragraphs: [
+          "Complex vector animations traditionally require heavy libraries or video exports. By leveraging CSS stroke-dasharray and keyframe filters, you achieve 60fps animations with zero overhead."
+        ]
+      }
+    ],
+    howTo: [
+      "Paste your SVG markup or select a sample geometric logo.",
+      "Choose an animation preset (Stroke Draw, Pulse Glow, Morph Spin, or Float).",
+      "Adjust cycle duration and accent color in real time.",
+      "Copy the generated CSS Keyframes or Framer Motion React code."
+    ],
+    faq: [
+      { q: "Does this require external animation libraries?", a: "No, the output works with standard Pure CSS and Tailwind without any third-party dependencies." }
+    ],
+    related: ["code-to-image", "glassmorphism-generator", "favicon-generator"]
+  },
+  {
+    slug: "mock-data-studio",
+    category: "Developer",
+    name: "Synthetic Mock Data Studio",
+    seoTitle: "Synthetic Mock Data Studio: JSON, TypeScript, SQL | Castov",
+    metaDescription: "Generate realistic synthetic seed data for users, e-commerce orders, SaaS metrics, and crypto transactions in JSON, TypeScript, and SQL.",
+    intro: "Instant, realistic synthetic datasets for frontend prototyping and database seeding. Generate authentic user profiles, orders, SaaS metrics, and SQL insert statements in milliseconds.",
+    cardDescription: "Generate realistic synthetic datasets in JSON, TypeScript, and SQL.",
+    sections: [
+      {
+        heading: "Rapid Prototyping with Authentic Synthetic Data",
+        paragraphs: [
+          "Building frontend prototypes while waiting for backend APIs shouldn't stall your development velocity.",
+          "Our client-side synthetic data studio produces rich, structured datasets with realistic timestamps, statuses, and relational IDs."
+        ]
+      }
+    ],
+    howTo: [
+      "Pick your domain schema (Users, E-Commerce, SaaS Metrics, or Crypto Transactions).",
+      "Select your record count from 5 up to 100 entries.",
+      "Choose your export format (JSON, TypeScript types, or SQL Insert statements).",
+      "Copy the payload or download the generated file."
+    ],
+    faq: [
+      { q: "Is my data generated on a remote server?", a: "No, all synthetic data generation is executed client-side in your browser." }
+    ],
+    related: ["json-to-ts", "json-formatter", "diff-checker"]
   }
 ];
 

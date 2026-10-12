@@ -50,6 +50,10 @@ import { GithubReadmeTool } from "./tools/github-readme-tool";
 import { AppMockupTool } from "./tools/app-mockup-tool";
 import { FaviconGeneratorTool } from "./tools/favicon-generator-tool";
 import { ColorConverterTool } from "./tools/color-converter-tool";
+import { TokenCostVisualizerTool } from "./tools/token-visualizer-tool";
+import { GitTimeTravelerTool } from "./tools/git-time-traveler-tool";
+import { SvgKeyframeAnimatorTool } from "./tools/svg-animator-tool";
+import { MockDataStudioTool } from "./tools/mock-data-studio-tool";
 
 /**
  * Maps a tool slug to its interactive interface. To add a tool: add its content to
@@ -171,5 +175,13 @@ export function ToolInterface({ slug }: { slug: ToolSlug }) {
       return <FaviconGeneratorTool />;
     case "color-converter":
       return <ColorConverterTool />;
+    case "token-visualizer":
+      return <TokenCostVisualizerTool />;
+    case "git-time-traveler":
+      return <GitTimeTravelerTool />;
+    case "svg-animator":
+      return <SvgKeyframeAnimatorTool />;
+    case "mock-data-studio":
+      return <MockDataStudioTool />;
   }
 }
