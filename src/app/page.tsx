@@ -8,6 +8,7 @@ import { buildMetadata, faqJsonLd, websiteJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { ArrowRight, Terminal, ShieldCheck, Workflow, Database, Component, Play, Lock, Command, Zap, Code } from "lucide-react";
 import { HeroQuickConvert } from "@/components/hero-quick-convert";
+import { PinnedToolsTray } from "@/components/pinned-tools";
 
 export const metadata: Metadata = {
   ...buildMetadata({
@@ -194,6 +195,7 @@ export default function HomePage() {
               From time manipulation to cryptography, everything is beautifully structured and instantly accessible.
             </p>
           </div>
+          <PinnedToolsTray />
           <CategorySection />
         </div>
       </section>

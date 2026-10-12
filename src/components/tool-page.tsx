@@ -9,6 +9,7 @@ import { FaqSection } from "./faq-section";
 import { JsonLd } from "./json-ld";
 import { RelatedTools } from "./related-tools";
 import { ToolInterface } from "./tool-interface";
+import { PinButton } from "./pinned-tools";
 
 /** Shared layout for every tool page: breadcrumb, H1, tool, then explanation, examples, FAQ, links. */
 export function ToolPage({ tool }: { tool: Tool }) {
@@ -28,9 +29,12 @@ export function ToolPage({ tool }: { tool: Tool }) {
       />
 
       <div className="mt-6 mb-8">
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent mb-4">
-          {tool.category.replace("-", " ").toUpperCase()}
-        </span>
+        <div className="flex items-center justify-between mb-4">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent">
+            {tool.category.replace("-", " ").toUpperCase()}
+          </span>
+          <PinButton slug={tool.slug} />
+        </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-fg">{tool.name}</h1>
         <p className="mt-3 max-w-2xl text-lg text-muted">{tool.intro}</p>
       </div>
@@ -74,8 +78,6 @@ export function ToolPage({ tool }: { tool: Tool }) {
         </div>
 
         <aside className="sticky top-24 flex flex-col gap-6">
-          <RelatedTools slugs={tool.related} />
-          
           {/* High-RPM AdSense Placement */}
           <div className="w-full min-h-[400px] bg-card border border-line rounded-xl flex flex-col items-center justify-center text-muted text-sm shadow-sm opacity-80 overflow-hidden relative group">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px]" />
@@ -85,6 +87,11 @@ export function ToolPage({ tool }: { tool: Tool }) {
             </span>
           </div>
         </aside>
+      </div>
+
+      {/* Full-width Related Tools section for strong internal SEO & lower bounce rate */}
+      <div className="mt-16 border-t border-line/60 pt-10">
+        <RelatedTools slugs={tool.related} />
       </div>
 
       <JsonLd data={faqJsonLd(tool.faq)} />

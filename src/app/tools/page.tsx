@@ -4,6 +4,7 @@ import { GUIDES } from "@/content/guides";
 import { TOOL_CATEGORIES, TOOLS } from "@/content/tools";
 import { StaticPage } from "@/components/static-page";
 import { ToolCard } from "@/components/tool-card";
+import { PinnedToolsTray } from "@/components/pinned-tools";
 import { buildMetadata } from "@/lib/seo";
 
 const TITLE = "All Developer Tools | Castov";
@@ -23,6 +24,7 @@ export default function ToolsPage() {
       crumbs={[{ name: "Home", href: "/" }, { name: "Tools" }]}
       path="/tools"
     >
+      <PinnedToolsTray />
       {mainCategories.map((category) => {
         const tools = TOOLS.filter((t) => t.category === category);
         return (
