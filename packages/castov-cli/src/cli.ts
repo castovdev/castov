@@ -8,7 +8,7 @@ import {
   detect as detectId,
   cron as explainCron,
   tz as convertTz,
-} from "@castov/sdk";
+} from "castov-sdk";
 
 const require = createRequire(import.meta.url);
 const { version } = require("../package.json") as { version: string };

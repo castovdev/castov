@@ -1,5 +1,5 @@
 {
-  "name": "castov-cli",
+  "name": "castov",
   "version": "1.0.0",
   "description": "Castov in your terminal: Unix timestamps, ID detector (ObjectId, Snowflake, UUIDv7, ULID), cron explainer, IANA time zone converter with DST handling, UUIDs (v4/v7), Base64, hashes, and JWT decoding. Zero-server, zero-config.",
   "keywords": ["cli", "castov", "unix", "timestamp", "cron", "timezone", "dst", "detect", "snowflake", "ulid", "objectid", "uuid", "uuidv7", "base64", "hash", "jwt"],
@@ -21,7 +21,7 @@
     "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
-    "@castov/sdk": "^1.0.0"
+    "castov-sdk": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.0",
