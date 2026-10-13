@@ -3,7 +3,8 @@ import { TOOLS, toolPath } from "@/content/tools";
 import { SITE } from "@/lib/site";
 import { AI_HUB_LIVE } from "@/lib/flags";
 import { BrandMark } from "./brand-mark";
-import { ArrowUp, Terminal, ShieldCheck, Sparkles, Heart } from "lucide-react";
+import { Terminal, ShieldCheck, Sparkles, Heart, Wrench, Cpu, BookOpen, Building2 } from "lucide-react";
+import { FooterLiveTicker, BackToTopButton } from "./footer-client";
 
 const COMPANY = [
   { href: "/about", label: "About Castov" },
@@ -52,8 +53,8 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-line/80 bg-card relative before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-accent/30 before:to-transparent">
       {/* Upper Status & Highlights Bar */}
       <div className="border-b border-line/60">
-        <div className="layout-content py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs">
+        <div className="layout-content py-5 flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 text-xs">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-field border border-line">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -61,20 +62,32 @@ export function SiteFooter() {
               </span>
               <span className="font-semibold text-fg">All Systems Operational</span>
             </div>
+
+            <FooterLiveTicker />
+
             <div className="inline-flex items-center gap-1.5 text-muted px-2 py-1">
               <ShieldCheck className="w-3.5 h-3.5 text-accent" />
-              <span>100% Client-Side Execution</span>
+              <span>100% Client-Side</span>
             </div>
-            <span className="hidden lg:inline text-line">•</span>
-            <span className="hidden lg:inline text-muted">Zero tracking, zero analytics tracking on tools</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted font-mono hidden sm:inline">Official CLI:</span>
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-field border border-line text-xs font-mono">
               <span className="text-accent select-none font-bold">$</span>
               <span className="text-fg">npm i -g castov</span>
             </div>
+
+            <a
+              href="https://github.com/benidira/timeforge"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-field hover:bg-hover border border-line text-xs font-medium text-fg transition-colors"
+            >
+              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+              </svg>
+              <span>Star on GitHub</span>
+            </a>
           </div>
         </div>
       </div>
@@ -161,8 +174,9 @@ export function SiteFooter() {
         <div className="lg:col-span-8 grid grid-cols-2 gap-8 sm:grid-cols-4">
           {/* Top Tools */}
           <nav aria-labelledby="footer-tools">
-            <h2 id="footer-tools" className="mb-4 text-xs font-bold uppercase tracking-wider text-fg">
-              Core Utilities
+            <h2 id="footer-tools" className="mb-4 text-xs font-bold uppercase tracking-wider text-fg flex items-center gap-1.5">
+              <Wrench className="w-3.5 h-3.5 text-accent" />
+              <span>Core Utilities</span>
             </h2>
             <ul className="grid gap-2.5 text-sm">
               <li>
@@ -190,8 +204,9 @@ export function SiteFooter() {
 
           {/* Ecosystem & Labs */}
           <nav aria-labelledby="footer-ecosystem">
-            <h2 id="footer-ecosystem" className="mb-4 text-xs font-bold uppercase tracking-wider text-fg">
-              Ecosystem
+            <h2 id="footer-ecosystem" className="mb-4 text-xs font-bold uppercase tracking-wider text-fg flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5 text-accent" />
+              <span>Ecosystem</span>
             </h2>
             <ul className="grid gap-2.5 text-sm">
               {ECOSYSTEM.map((item) => (
@@ -214,8 +229,9 @@ export function SiteFooter() {
 
           {/* Resources & Hubs */}
           <nav aria-labelledby="footer-resources">
-            <h2 id="footer-resources" className="mb-4 text-xs font-bold uppercase tracking-wider text-fg">
-              Resources
+            <h2 id="footer-resources" className="mb-4 text-xs font-bold uppercase tracking-wider text-fg flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5 text-accent" />
+              <span>Resources</span>
             </h2>
             <ul className="grid gap-2.5 text-sm">
               {RESOURCES.map((item) => (
@@ -243,8 +259,9 @@ export function SiteFooter() {
 
           {/* Company & Legal */}
           <nav aria-labelledby="footer-company">
-            <h2 id="footer-company" className="mb-4 text-xs font-bold uppercase tracking-wider text-fg">
-              Company
+            <h2 id="footer-company" className="mb-4 text-xs font-bold uppercase tracking-wider text-fg flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5 text-accent" />
+              <span>Company</span>
             </h2>
             <ul className="grid gap-2.5 text-sm">
               {COMPANY.map((item) => (
@@ -290,14 +307,7 @@ export function SiteFooter() {
               <Heart className="w-3 h-3 fill-accent/20" /> Sponsor
             </Link>
             <span className="text-line">•</span>
-            <a
-              href="#top"
-              className="inline-flex items-center gap-1 hover:text-fg transition-colors"
-              aria-label="Back to top of page"
-            >
-              <span>Back to top</span>
-              <ArrowUp className="w-3 h-3" />
-            </a>
+            <BackToTopButton />
           </div>
         </div>
       </div>
