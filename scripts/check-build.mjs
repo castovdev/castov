@@ -190,7 +190,7 @@ if (existsSync(staticDir)) {
   }
 }
 const allowedHosts = new RegExp(
-  `^(www\\.w3\\.org|schema\\.org|nextjs\\.org|react\\.dev|reactjs\\.org|github\\.com|localhost|developer\\.mozilla\\.org|tc39\\.es|.*\\.googlesyndication\\.com|.*\\.google\\.com|.*\\.svgjs\\.dev|facebook\\.github\\.io|.*\\.nextjs\\.org|.*\\.supabase\\.co|supabase\\.com|va\\.vercel-scripts\\.com|vercel\\.com|cdn\\.jsdelivr\\.net|.*\\.reactflow\\.dev|reactflow\\.dev|redux\\.js\\.org|redux-toolkit\\.js\\.org|stripe\\.com|.*\\.shields\\.io|x\\.com|.*\\.herokuapp\\.com|github-readme-stats\\.vercel\\.app|jcgt\\.org|docs\\.pmnd\\.rs|bit\\.ly|pokeapi\\.co|api\\.example\\.com|${new URL(origin).hostname.replace(/\\./g, "\\\\.")})$`,
+  `^(www\\.w3\\.org|schema\\.org|nextjs\\.org|react\\.dev|reactjs\\.org|github\\.com|localhost|developer\\.mozilla\\.org|tc39\\.es|.*\\.googlesyndication\\.com|.*\\.google\\.com|.*\\.svgjs\\.dev|facebook\\.github\\.io|.*\\.nextjs\\.org|.*\\.supabase\\.co|supabase\\.com|va\\.vercel-scripts\\.com|vercel\\.com|cdn\\.jsdelivr\\.net|.*\\.reactflow\\.dev|reactflow\\.dev|redux\\.js\\.org|redux-toolkit\\.js\\.org|stripe\\.com|.*\\.shields\\.io|x\\.com|.*\\.herokuapp\\.com|github-readme-stats\\.vercel\\.app|jcgt\\.org|docs\\.pmnd\\.rs|bit\\.ly|pokeapi\\.co|api\\.example\\.com|.*\\.npmjs\\.com|npmjs\\.com|.*\\.instagram\\.com|instagram\\.com|${new URL(origin).hostname.replace(/\\./g, "\\\\.")})$`,
 );
 const unexpected = [...hosts].filter((h) => !allowedHosts.test(h));
 if (unexpected.length) warn("client bundle", `unexpected external hosts referenced: ${unexpected.join(", ")}`);
