@@ -13,7 +13,7 @@ import { TASKS, TASK_IDS } from "@/data/tasks";
 export const metadata: Metadata = buildMetadata({
   title: "Unix Timestamp & Time Code Examples by Language | Castov",
   description:
-    "Working code snippets for Unix timestamps, ISO 8601 and dates in 14 programming languages. Browse the quick reference grid for the top 10 languages and dive into full developer guides.",
+    "Working code snippets for Unix timestamps, ISO 8601, and dates in 14 languages. Browse the quick reference grid and developer guides.",
   path: "/code",
 });
 
@@ -159,9 +159,9 @@ export default function CodeHubPage() {
                     </div>
                   </div>
                   <Link
-                    href={`/code/${slug}`}
+                    href="/unix-timestamp-converter"
                     className="btn btn-secondary btn-sm"
-                    aria-label={`View all ${meta.name} examples`}
+                    aria-label={`View ${meta.name} tools`}
                   >
                     Open
                   </Link>
@@ -169,10 +169,11 @@ export default function CodeHubPage() {
                 <ul className="space-y-2">
                   {TOP_TASK_IDS.map((tid) => {
                     const task = TASKS.find((t) => t.id === tid);
+                    const targetTool = tid === "get-current-timestamp" ? "/current-unix-timestamp" : `/${tid}`;
                     return (
                       <li key={tid}>
                         <Link
-                          href={`/code/${slug}/${tid}`}
+                          href={targetTool}
                           className="flex items-center justify-between gap-2 rounded-md p-2 hover:bg-hover transition-colors no-underline"
                         >
                           <span className="text-sm text-fg">
@@ -201,15 +202,14 @@ export default function CodeHubPage() {
             const meta = LANGUAGE_META[slug];
             return (
               <li key={slug}>
-                <Link
-                  href={`/code/${slug}`}
-                  className="card block h-full p-4 no-underline hover:border-accent transition-colors"
+                <div
+                  className="card block h-full p-4 hover:border-accent transition-colors"
                 >
                   <span className="block font-semibold text-fg">{meta.name}</span>
                   <span className="mt-1 block text-xs text-muted">
                     {TASK_IDS.length} examples · precision {meta.precision}
                   </span>
-                </Link>
+                </div>
               </li>
             );
           })}
@@ -318,8 +318,8 @@ export default function CodeHubPage() {
           <Link href="/unix-timestamp-converter" className="btn btn-primary">
             Unix Timestamp Converter
           </Link>
-          <Link href="/code/javascript" className="btn btn-secondary">
-            JavaScript Examples
+          <Link href="/cheatsheets" className="btn btn-secondary">
+            Developer Cheat Sheets
           </Link>
         </div>
       </section>

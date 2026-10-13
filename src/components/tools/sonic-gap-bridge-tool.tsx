@@ -220,6 +220,7 @@ export function SonicGapBridgeTool() {
               <label className="text-xs font-medium text-muted block mb-1">Payload to Transmit (Max 10 chars)</label>
               <input 
                 type="text" 
+                aria-label="Payload to Transmit"
                 maxLength={10} 
                 value={payload} 
                 onChange={e => setPayload(e.target.value.toUpperCase())} 

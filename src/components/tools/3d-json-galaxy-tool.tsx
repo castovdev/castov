@@ -198,7 +198,7 @@ export function ThreeJsonGalaxyTool({ providedJson = null }: { providedJson?: an
           <div className="flex justify-center gap-4">
             <label className="btn bg-[#00f0FF]/10 text-[#00f0FF] hover:bg-[#00f0FF]/20 border border-[#00f0FF]/50 cursor-pointer gap-2 transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]">
               <UploadCloudIcon className="w-5 h-5" /> UPLOAD JSON MATRIX
-              <input type="file" accept="application/json" onChange={handleUpload} className="hidden" />
+              <input type="file" aria-label="Upload JSON file" accept="application/json" onChange={handleUpload} className="hidden" />
             </label>
           </div>
         </div>

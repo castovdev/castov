@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
 
+import { Breadcrumb } from "@/components/breadcrumb";
+
 export const metadata: Metadata = {
   ...buildMetadata({
     title: "Castov Extensions – VS Code & Browser Utilities",
@@ -23,11 +25,13 @@ export const metadata: Metadata = {
   })
 };
 
-export const dynamic = "force-dynamic";
-
 export default function ExtensionPage() {
   return (
     <div className="layout-content max-w-5xl py-12 sm:py-20">
+      <Breadcrumb
+        path="/extension"
+        crumbs={[{ name: "Home", href: "/" }, { name: "Tools", href: "/tools" }, { name: "Extension" }]}
+      />
       {/* Hero Section */}
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-xs font-semibold text-accent mb-6">

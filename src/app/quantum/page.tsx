@@ -1,14 +1,17 @@
-import { QuantumSimulatorTool } from "@/components/tools/quantum-simulator-tool";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { ToolPage } from "@/components/tool-page";
+import { getTool, toolPath } from "@/content/tools";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Quantum Web Simulator | Castov",
-  description: "Browser-Native Quantum Circuit execution via Matrix Tensors.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tool = getTool("quantum");
+  if (!tool) return {};
+  return buildMetadata({ title: tool.seoTitle, description: tool.metaDescription, path: toolPath(tool.slug) });
+}
 
 export default function QuantumPage() {
-  return (
-    <div className="min-h-screen pt-24 pb-12 px-4">
-      <QuantumSimulatorTool />
-    </div>
-  );
+  const tool = getTool("quantum");
+  if (!tool) notFound();
+  return <ToolPage tool={tool} />;
 }

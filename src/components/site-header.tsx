@@ -37,7 +37,7 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 className={`transition-colors hover:text-fg ${
-                  pathname.startsWith(item.href) ? "text-fg font-semibold" : "text-muted"
+                  pathname?.startsWith(item.href) ? "text-fg font-semibold" : "text-muted"
                 }`}
               >
                 {item.label}

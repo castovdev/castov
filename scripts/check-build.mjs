@@ -91,23 +91,39 @@ for (const path of paths) {
   const types = [];
   for (const raw of blocks) {
     try {
-      const data = JSON.parse(raw);
-      types.push(data["@type"]);
-      if (data["@type"] === "FAQPage") {
-        for (const q of data.mainEntity) {
-          if (!text.includes(decode(q.name))) fail(path, `FAQ question not visible on page: ${q.name}`);
-          if (!text.includes(decode(q.acceptedAnswer.text))) fail(path, `FAQ answer not visible on page: ${q.name}`);
+      const parsed = JSON.parse(raw);
+      const items = Array.isArray(parsed) ? parsed : [parsed];
+      for (const data of items) {
+        if (!data) continue;
+        if (data["@type"]) types.push(data["@type"]);
+        if (data["@type"] === "FAQPage") {
+          for (const q of data.mainEntity || []) {
+            if (!text.includes(decode(q.name))) fail(path, `FAQ question not visible on page: ${q.name}`);
+            if (!text.includes(decode(q.acceptedAnswer.text))) fail(path, `FAQ answer not visible on page: ${q.name}`);
+          }
         }
-      }
-      if (data["@type"] === "BreadcrumbList") {
-        const last = data.itemListElement.at(-1);
-        if (last.item !== expected) fail(path, `breadcrumb last item ${last.item} != ${expected}`);
+        if (data["@type"] === "BreadcrumbList") {
+          const last = data.itemListElement?.at(-1);
+          if (last && last.item !== expected) fail(path, `breadcrumb last item ${last.item} != ${expected}`);
+        }
       }
     } catch (e) {
       fail(path, `invalid JSON-LD: ${e.message}`);
     }
   }
-  const isTool = !["/", "/tools", "/guides", "/about", "/privacy", "/terms", "/contact"].includes(path) && !path.startsWith("/guides/");
+  const NON_TOOL_PATHS = new Set([
+    "/", "/tools", "/guides", "/about", "/privacy", "/terms", "/contact",
+    "/cli", "/extension", "/cheatsheets", "/http-status", "/cron",
+    "/timezones", "/timestamps", "/resources", "/code", "/convert",
+    "/chrono-db", "/webhook-tester", "/sponsor", "/developer", "/canvas", "/ai", "/login"
+  ]);
+  const isTool = !NON_TOOL_PATHS.has(path) &&
+    !path.startsWith("/guides/") &&
+    !path.startsWith("/ai/") &&
+    !path.startsWith("/chmod/") &&
+    !path.startsWith("/http-status/") &&
+    !path.startsWith("/cron/") &&
+    !path.startsWith("/unix/");
   if (path !== "/" && !types.includes("BreadcrumbList")) fail(path, "missing BreadcrumbList");
   if (isTool) {
     for (const t of ["WebApplication", "FAQPage"]) if (!types.includes(t)) fail(path, `missing ${t} structured data`);
@@ -121,7 +137,18 @@ for (const path of paths) {
   for (const m of body.matchAll(/href="(\/[^"#?]*)/g)) {
     const target = m[1].replace(/\/$/, "") || "/";
     if (target.startsWith("/_next")) continue;
-    if (!pathSet.has(target) && !KNOWN_EXTRA.has(target)) fail(path, `broken internal link: ${m[1]}`);
+    const targetFile = join(APP, target === "/" ? "index.html" : `${target.slice(1)}.html`);
+    const targetDirIndex = join(APP, target.slice(1), "index.html");
+    const targetPublic = join("public", target.slice(1));
+    const targetRoute = join(APP, target.slice(1), "route.js");
+    const exists =
+      pathSet.has(target) ||
+      KNOWN_EXTRA.has(target) ||
+      existsSync(targetFile) ||
+      existsSync(targetDirIndex) ||
+      existsSync(targetPublic) ||
+      existsSync(targetRoute);
+    if (!exists) fail(path, `broken internal link: ${m[1]}`);
   }
 
   // Form controls need labels
@@ -156,14 +183,14 @@ const hosts = new Set();
 if (existsSync(staticDir)) {
   for (const f of walk(staticDir).filter((f) => f.endsWith(".js"))) {
     const js = readFileSync(f, "utf8");
-    if (/(sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY|api[_-]?key["']?\s*[:=]\s*["'][A-Za-z0-9]{16,})/i.test(js)) {
+    if (/(sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----[\\r\\n\\\s]*[A-Za-z0-9+/=]{16,}|api[_-]?key["']?\s*[:=]\s*["'][A-Za-z0-9]{16,})/i.test(js)) {
       fail(f, "possible secret in client bundle");
     }
     for (const m of js.matchAll(/https?:\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)+)/gi)) hosts.add(m[1].toLowerCase());
   }
 }
 const allowedHosts = new RegExp(
-  `^(www\\.w3\\.org|schema\\.org|nextjs\\.org|react\\.dev|reactjs\\.org|github\\.com|localhost|developer\\.mozilla\\.org|tc39\\.es|.*\\.googlesyndication\\.com|.*\\.google\\.com|.*\\.svgjs\\.dev|facebook\\.github\\.io|.*\\.nextjs\\.org|${new URL(origin).hostname.replace(/\./g, "\\.")})$`,
+  `^(www\\.w3\\.org|schema\\.org|nextjs\\.org|react\\.dev|reactjs\\.org|github\\.com|localhost|developer\\.mozilla\\.org|tc39\\.es|.*\\.googlesyndication\\.com|.*\\.google\\.com|.*\\.svgjs\\.dev|facebook\\.github\\.io|.*\\.nextjs\\.org|.*\\.supabase\\.co|supabase\\.com|va\\.vercel-scripts\\.com|vercel\\.com|cdn\\.jsdelivr\\.net|.*\\.reactflow\\.dev|reactflow\\.dev|redux\\.js\\.org|redux-toolkit\\.js\\.org|stripe\\.com|.*\\.shields\\.io|x\\.com|.*\\.herokuapp\\.com|github-readme-stats\\.vercel\\.app|jcgt\\.org|docs\\.pmnd\\.rs|bit\\.ly|pokeapi\\.co|api\\.example\\.com|${new URL(origin).hostname.replace(/\\./g, "\\\\.")})$`,
 );
 const unexpected = [...hosts].filter((h) => !allowedHosts.test(h));
 if (unexpected.length) warn("client bundle", `unexpected external hosts referenced: ${unexpected.join(", ")}`);

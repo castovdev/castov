@@ -5,12 +5,7 @@ import { JsonLd } from '@/components/json-ld';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { FaqSection } from '@/components/faq-section';
 import Link from 'next/link';
-
-// HTTP status data (same as before)
-const HTTP_STATUS_CODES: Record<string, { title: string; type: string; description: string; why: string; fix: string }> = {
-  // ... (populate with existing data, trimmed for brevity) 
-  // The full object should be copied from the original file.
-};
+import { HTTP_STATUS_CODES } from '@/lib/http-statuses';
 
 type Params = { code: string };
 export const dynamicParams = false;
@@ -19,10 +14,10 @@ export function generateStaticParams(): Params[] {
   return Object.keys(HTTP_STATUS_CODES).map((code) => ({ code }));
 }
 
-export function generateMetadata({ params }: { params: Params }): Metadata {
-  const { code } = params;
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const { code } = await params;
   const status = HTTP_STATUS_CODES[code];
-  if (!status) return {} as any;
+  if (!status) return {};
   return {
     title: `HTTP Status Code ${code}: ${status.title.replace(code + ' ', '')} - Developer Guide | Castov`,
     description: `Learn exactly what HTTP Status ${code} (${status.title}) means, why it happens, and how to fix it in your application.`,
@@ -32,8 +27,8 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
   };
 }
 
-export default function HttpStatusPage({ params }: { params: Params }) {
-  const { code } = params;
+export default async function HttpStatusPage({ params }: { params: Promise<Params> }) {
+  const { code } = await params;
   const status = HTTP_STATUS_CODES[code];
   if (!status) notFound();
 
@@ -41,7 +36,7 @@ export default function HttpStatusPage({ params }: { params: Params }) {
   const statusName = status.title.replace(`${code} `, '');
 
   const faqs = [
-    { q: `What does HTTP Error ${code} mean?`, a: status.description },
+    { q: `What does HTTP Status ${code} mean?`, a: status.description },
     { q: `Why am I getting a ${code} status code?`, a: status.why },
     { q: `How do I fix a ${code} ${statusName} error?`, a: status.fix },
   ];
@@ -65,7 +60,7 @@ export default function HttpStatusPage({ params }: { params: Params }) {
       <div className="mt-8 mb-12">
         <div className="inline-flex items-center gap-2 mb-6">
           <span className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-sm font-mono font-bold text-accent">
-            HTTP/{status.type}
+            HTTP/{status.type} ({status.category})
           </span>
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-fg mb-6">
@@ -95,7 +90,11 @@ export default function HttpStatusPage({ params }: { params: Params }) {
                 <Link
                   key={c}
                   href={`/http-status/${c}`}
-                  className={`px-4 py-2 rounded-lg border font-mono font-bold transition-colors ${c === code ? 'bg-primary text-white border-primary' : 'bg-card border-line hover:border-primary/50 text-fg'}`}
+                  className={`px-4 py-2 rounded-lg border font-mono font-bold transition-colors ${
+                    c === code
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-card border-line hover:border-primary/50 text-fg'
+                  }`}
                 >
                   {c}
                 </Link>
@@ -107,10 +106,9 @@ export default function HttpStatusPage({ params }: { params: Params }) {
           <div className="bg-card border border-line rounded-xl p-6 shadow-sm">
             <h3 className="font-bold text-fg mb-2">Did you know?</h3>
             <p className="text-sm text-muted">
-              HTTP status codes are divided into 5 categories: 1xx (Info), 2xx (Success), 3xx (Redirect), 4xx (Client Error), and 5xx (Server Error).
+              HTTP status codes are divided into 5 categories: 1xx (Informational), 2xx (Success), 3xx (Redirection), 4xx (Client Error), and 5xx (Server Error).
             </p>
           </div>
-          {/* AdSense Placeholder */}
           <div className="w-full min-h-[400px] bg-card border border-line rounded-xl flex flex-col items-center justify-center text-muted text-sm shadow-sm opacity-80 overflow-hidden relative group">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px]" />
             <span className="relative z-10 font-mono text-xs mb-2">Advertisement</span>

@@ -16,6 +16,7 @@ const TOP_TOOLS = [
   "unix-timestamp-converter",
   "timezone-converter",
   "world-clock",
+  "date-difference",
 ];
 
 export function SiteFooter() {

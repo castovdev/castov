@@ -97,12 +97,14 @@ export function ColorConverterTool() {
         <div className="flex items-center gap-3">
           <input
             type="color"
+            aria-label="Color Picker"
             value={hex}
             onChange={(e) => setHex(e.target.value)}
             className="w-9 h-9 rounded-lg bg-transparent border border-line cursor-pointer"
           />
           <input
             type="text"
+            aria-label="Hex Color Code"
             value={hex}
             onChange={(e) => setHex(e.target.value)}
             placeholder="#6366F1"
@@ -124,7 +126,7 @@ export function ColorConverterTool() {
         {/* Left Color Swatch Card */}
         <div className="lg:col-span-5 space-y-6">
           <div className="p-6 rounded-2xl bg-field border border-line space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Color Swatch</h3>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted">Color Swatch</h2>
             <div
               className="w-full h-44 rounded-xl shadow-inner border border-line flex items-end p-4 transition-all"
               style={{ backgroundColor: hex }}
@@ -163,6 +165,7 @@ export function ColorConverterTool() {
                     onClick={() => copyToClipboard(f.value, f.label)}
                     className="p-2 rounded-lg bg-field hover:bg-hover text-muted hover:text-fg border border-line transition cursor-pointer"
                     title={`Copy ${f.label}`}
+                    aria-label={`Copy ${f.label}`}
                   >
                     {copiedLabel === f.label ? (
                       <Check className="w-3.5 h-3.5 text-emerald-500" />

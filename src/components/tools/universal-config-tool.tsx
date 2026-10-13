@@ -77,6 +77,7 @@ export function UniversalConfigTool() {
         value={texts[format]}
         onChange={(e) => handleChange(format, e.target.value)}
         onFocus={() => setActiveEditor(format)}
+        aria-label={`${label} configuration editor`}
         className={`w-full h-64 p-4 text-sm font-mono bg-transparent resize-none focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors ${errors[format] ? 'text-red-400' : 'text-fg'}`}
         spellCheck={false}
       />

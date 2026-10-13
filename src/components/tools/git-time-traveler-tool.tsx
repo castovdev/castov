@@ -184,7 +184,7 @@ export function GitTimeTravelerTool() {
                     </span>
                   )}
                 </div>
-                <h4 className="text-xs font-bold text-fg leading-snug">{s.title}</h4>
+                <div className="text-xs font-bold text-fg leading-snug">{s.title}</div>
               </div>
               <p className="text-[11px] text-muted mt-2 line-clamp-2">{s.description}</p>
             </button>
@@ -198,10 +198,10 @@ export function GitTimeTravelerTool() {
         <div className="lg:col-span-7 space-y-4">
           <div className="p-6 rounded-2xl bg-field border border-line space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-accent" />
                 Step-by-Step Terminal Commands
-              </h3>
+              </h2>
               <span className="text-[11px] font-mono text-muted">Run in project root</span>
             </div>
 
@@ -224,6 +224,7 @@ export function GitTimeTravelerTool() {
                         onClick={() => copyCommand(cmd, idx)}
                         className="p-1.5 rounded-lg bg-field hover:bg-hover text-muted hover:text-fg border border-line transition cursor-pointer"
                         title="Copy command"
+                        aria-label="Copy command"
                       >
                         {copiedIndex === idx ? (
                           <Check className="w-3.5 h-3.5 text-emerald-500" />
@@ -242,10 +243,10 @@ export function GitTimeTravelerTool() {
         {/* Right Explanations & Safety Tips */}
         <div className="lg:col-span-5 space-y-4">
           <div className="p-6 rounded-2xl bg-field border border-line space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-500" />
               Why This Works (Under The Hood)
-            </h3>
+            </h2>
 
             <div className="space-y-3">
               {selectedScenario.explanation.map((exp, i) => (

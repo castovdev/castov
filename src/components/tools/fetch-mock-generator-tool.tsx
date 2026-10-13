@@ -70,13 +70,14 @@ export function FetchMockGeneratorTool() {
       <div className="space-y-4">
         {routes.map((route, i) => (
           <div key={i} className="card p-4 border border-line bg-card relative">
-            <button onClick={() => removeRoute(i)} className="absolute top-4 right-4 text-muted hover:text-danger">
+            <button onClick={() => removeRoute(i)} aria-label="Remove mock route" className="absolute top-4 right-4 text-muted hover:text-danger">
               <Trash2 className="w-5 h-5" />
             </button>
             <div className="grid grid-cols-[100px_1fr_120px] gap-4 mb-4 pr-8">
               <div>
                 <label className="block text-xs font-semibold mb-1 text-muted">Method</label>
                 <select 
+                  aria-label="HTTP Method"
                   value={route.method} 
                   onChange={(e) => updateRoute(i, 'method', e.target.value)}
                   className="w-full bg-field border border-line rounded-lg px-3 py-2 text-sm"
@@ -88,6 +89,7 @@ export function FetchMockGeneratorTool() {
                 <label className="block text-xs font-semibold mb-1 text-muted">Path (Partial Match)</label>
                 <input 
                   type="text" 
+                  aria-label="Path (Partial Match)"
                   value={route.path} 
                   onChange={(e) => updateRoute(i, 'path', e.target.value)}
                   className="w-full bg-field border border-line rounded-lg px-3 py-2 text-sm font-mono"
@@ -98,6 +100,7 @@ export function FetchMockGeneratorTool() {
                 <label className="block text-xs font-semibold mb-1 text-muted">Delay (ms)</label>
                 <input 
                   type="number" 
+                  aria-label="Delay (ms)"
                   value={route.delay} 
                   onChange={(e) => updateRoute(i, 'delay', parseInt(e.target.value) || 0)}
                   className="w-full bg-field border border-line rounded-lg px-3 py-2 text-sm font-mono"
@@ -107,6 +110,7 @@ export function FetchMockGeneratorTool() {
             <div>
               <label className="block text-xs font-semibold mb-1 text-muted">JSON Response</label>
               <textarea 
+                aria-label="JSON Response"
                 value={route.response}
                 onChange={(e) => updateRoute(i, 'response', e.target.value)}
                 className="w-full bg-[#050505] border border-line rounded-lg px-4 py-3 text-sm font-mono h-32 resize-none"
@@ -122,7 +126,7 @@ export function FetchMockGeneratorTool() {
 
       <div className="mt-8 pt-8 border-t border-line">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg text-fg">Generated Injection Script</h3>
+          <h2 className="font-bold text-lg text-fg">Generated Injection Script</h2>
           <button onClick={handleCopy} className="btn bg-accent text-white hover:bg-accent-hover text-sm">
             {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
             {copied ? "Copied!" : "Copy Script"}

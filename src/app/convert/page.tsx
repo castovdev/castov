@@ -39,6 +39,21 @@ const POPULAR_PAIRS: { from: (typeof FORMATS)[number]["id"]; to: (typeof FORMATS
   { from: "utc", to: "unix-seconds" },
 ];
 
+const PAIR_TOOL_MAP: Record<string, string> = {
+  "unix-seconds-iso-8601": "/unix-to-iso-8601",
+  "unix-seconds-utc": "/utc-converter",
+  "unix-seconds-rfc-3339": "/rfc-3339-converter",
+  "unix-seconds-local-date": "/timestamp-to-date",
+  "unix-milliseconds-iso-8601": "/epoch-milliseconds",
+  "unix-milliseconds-utc": "/utc-converter",
+  "iso-8601-unix-seconds": "/iso-8601-to-unix",
+  "iso-8601-rfc-3339": "/iso-8601-converter",
+  "iso-8601-utc": "/utc-converter",
+  "rfc-3339-iso-8601": "/rfc-3339-converter",
+  "rfc-3339-unix-seconds": "/iso-8601-to-unix",
+  "utc-unix-seconds": "/date-to-timestamp",
+};
+
 function formatById(id: (typeof FORMATS)[number]["id"]) {
   return FORMATS.find((f) => f.id === id)!;
 }
@@ -100,10 +115,11 @@ export default function ConvertHubPage() {
           {POPULAR_PAIRS.map((pair) => {
             const from = formatById(pair.from);
             const to = formatById(pair.to);
+            const targetUrl = PAIR_TOOL_MAP[`${pair.from}-${pair.to}`] || "/tools";
             return (
               <li key={`${pair.from}-${pair.to}`}>
                 <Link
-                  href={`/convert/${from.slug}/to/${to.slug}`}
+                  href={targetUrl}
                   className="card block h-full p-4 no-underline hover:border-accent transition-colors"
                   aria-label={`Convert ${pairLabel(pair.from, pair.to)}`}
                 >

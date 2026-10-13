@@ -78,10 +78,10 @@ export function ApiLoadTesterTool() {
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col gap-6">
       <div className="bg-card border border-line rounded-xl p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-fg mb-4">Shadow API Load Tester</h3>
+        <h2 className="text-lg font-bold text-fg mb-4">Shadow API Load Tester</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 mb-4">
-          <select value={method} onChange={e => setMethod(e.target.value)} className="bg-field border border-line rounded-lg px-4 py-2 font-semibold">
+          <select value={method} onChange={e => setMethod(e.target.value)} aria-label="HTTP Method" className="bg-field border border-line rounded-lg px-4 py-2 font-semibold">
             <option>GET</option>
             <option>POST</option>
             <option>PUT</option>
@@ -89,6 +89,7 @@ export function ApiLoadTesterTool() {
           </select>
           <input 
             type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://api.example.com/v1/health"
+            aria-label="Target API URL"
             className="w-full bg-field border border-line rounded-lg px-4 py-2 font-mono text-sm"
           />
         </div>
@@ -96,11 +97,11 @@ export function ApiLoadTesterTool() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-muted/5 p-3 rounded-lg border border-line">
             <label className="text-xs text-muted block mb-1">Requests / Second</label>
-            <input type="number" min="1" max="100" value={rps} onChange={e => setRps(Number(e.target.value))} className="w-full bg-transparent font-mono text-lg outline-none" />
+            <input type="number" min="1" max="100" value={rps} onChange={e => setRps(Number(e.target.value))} aria-label="Requests per second" className="w-full bg-transparent font-mono text-lg outline-none" />
           </div>
           <div className="bg-muted/5 p-3 rounded-lg border border-line">
             <label className="text-xs text-muted block mb-1">Duration (Seconds)</label>
-            <input type="number" min="1" max="60" value={durationSecs} onChange={e => setDurationSecs(Number(e.target.value))} className="w-full bg-transparent font-mono text-lg outline-none" />
+            <input type="number" min="1" max="60" value={durationSecs} onChange={e => setDurationSecs(Number(e.target.value))} aria-label="Duration in seconds" className="w-full bg-transparent font-mono text-lg outline-none" />
           </div>
           <div className="col-span-2 flex items-end">
             {!isRunning ? (

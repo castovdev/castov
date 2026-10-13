@@ -35,15 +35,7 @@ const SCHEMA_JSON_LD = {
       "@type": "WebSite",
       "@id": `${SITE.url}/#website`,
       "url": SITE.url,
-      "name": SITE.name,
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": `${SITE.url}/search?q={search_term_string}`
-        },
-        "query-input": "required name=search_term_string"
-      }
+      "name": SITE.name
     },
     {
       "@type": "SiteNavigationElement",

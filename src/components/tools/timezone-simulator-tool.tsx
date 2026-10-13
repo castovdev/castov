@@ -44,7 +44,7 @@ export function TimezoneSimulatorTool() {
         <div key={tz} className={`relative overflow-hidden rounded-xl border p-4 transition-colors duration-300 ${isNight ? 'bg-zinc-900 border-zinc-700 text-zinc-100' : 'bg-blue-50 border-blue-200 text-blue-950'}`}>
           <div className="flex justify-between items-start mb-2 relative z-10">
             <span className="font-semibold text-sm opacity-80">{tz}</span>
-            <button onClick={() => removeTimezone(tz)} className="opacity-50 hover:opacity-100">
+            <button onClick={() => removeTimezone(tz)} aria-label={`Remove ${tz}`} className="opacity-50 hover:opacity-100">
               <XIcon size={14} />
             </button>
           </div>
@@ -82,6 +82,7 @@ export function TimezoneSimulatorTool() {
         </label>
         <input 
           type="range" 
+          aria-label="Timeline UTC Time"
           min="0" max="23.99" step="0.25" 
           value={utcOffsetHours} 
           onChange={(e) => setUtcOffsetHours(parseFloat(e.target.value))}
@@ -98,19 +99,20 @@ export function TimezoneSimulatorTool() {
 
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg text-fg flex items-center gap-2">
+          <h2 className="font-bold text-lg text-fg flex items-center gap-2">
             <GlobeIcon size={18} className="text-primary" /> Tracking Timezones
-          </h3>
+          </h2>
           <div className="flex gap-2">
             <input 
               type="text" 
+              aria-label="Timezone name"
               placeholder="e.g. Europe/Paris" 
               value={newTz}
               onChange={e => setNewTz(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addTimezone()}
               className="bg-field border border-line rounded-lg px-3 py-1.5 text-sm w-48"
             />
-            <button onClick={addTimezone} className="btn btn-primary btn-sm px-3">
+            <button onClick={addTimezone} aria-label="Add timezone" className="btn btn-primary btn-sm px-3">
               <PlusIcon size={16} />
             </button>
           </div>

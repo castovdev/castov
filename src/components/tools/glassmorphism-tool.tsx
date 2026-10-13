@@ -54,6 +54,7 @@ box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);`;
               </div>
               <input
                 type="range"
+                aria-label="Blur Intensity"
                 min={0}
                 max={40}
                 value={blur}
@@ -69,6 +70,7 @@ box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);`;
               </div>
               <input
                 type="range"
+                aria-label="Background Opacity"
                 min={0}
                 max={80}
                 value={opacity}
@@ -84,6 +86,7 @@ box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);`;
               </div>
               <input
                 type="range"
+                aria-label="Border Opacity"
                 min={0}
                 max={100}
                 value={borderOpacity}
@@ -99,6 +102,7 @@ box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);`;
               </div>
               <input
                 type="range"
+                aria-label="Border Radius"
                 min={0}
                 max={48}
                 value={radius}
@@ -132,7 +136,7 @@ box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);`;
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-white text-base">Glassmorphism Card</h3>
+                <div className="font-bold text-white text-base">Glassmorphism Card</div>
                 <p className="text-white/70 text-xs">Frosted Glass UI Effect</p>
               </div>
             </div>

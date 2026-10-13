@@ -5,74 +5,140 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ShareButton } from "@/components/share-button";
-
-// Basic parser for unique prose
-function parseCron(expression: string) {
-  const parts = expression.split("_");
-  if (parts.length !== 5) return null;
-  return `This cron expression (${parts.join(" ")}) executes based on the specified minute, hour, day of month, month, and day of week schedule. It is widely used in crontab systems for scheduling automated background tasks.`;
-}
+import { parseCron, describeCron, nextRuns, formatCompact } from "@/lib/time";
+import { CRON_PRESETS, getPresetBySlug } from "@/lib/time/cron-presets";
 
 type Params = { expression: string };
 export const dynamicParams = true;
 
-export function generateStaticParams(): Params[] {
-  // Use Windows-safe expressions (avoiding * in directory names on Windows NTFS)
-  return [{ expression: "0_0_1_1_0" }, { expression: "0_12_1_1_5" }];
+function resolveCronInput(input: string): { expression: string; title?: string; intent?: string } | null {
+  const decoded = decodeURIComponent(input).trim();
+  const preset = getPresetBySlug(decoded);
+  if (preset) {
+    return { expression: preset.expression, title: preset.title, intent: preset.intent };
+  }
+
+  // Handle underscore-separated format e.g. "0_0_*_*_*"
+  const expression = decoded.replace(/_/g, " ");
+  const parsed = parseCron(expression);
+  if (!parsed.ok) return null;
+
+  return { expression };
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ expression: string }> }): Promise<Metadata> {
-  const { expression } = await params;
-  const decoded = decodeURIComponent(expression).replace(/_/g, " ");
+export function generateStaticParams(): Params[] {
+  // Pre-render all 12 preset slugs and Windows-safe schedules (avoiding * in directory names on Windows NTFS)
+  const presetParams = CRON_PRESETS.map((p) => ({ expression: p.slug }));
+  const expressionParams = [
+    { expression: "0_0_1_1_0" },
+    { expression: "0_12_1_1_5" },
+  ];
+  return [...presetParams, ...expressionParams];
+}
+
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const { expression: rawExpression } = await params;
+  const resolved = resolveCronInput(rawExpression);
+
+  if (!resolved) {
+    return buildMetadata({
+      title: "Cron Expression - Castov",
+      description: "Explain and translate cron expressions into human-readable schedules.",
+      path: `/cron/${rawExpression}`,
+    });
+  }
+
+  const title = resolved.title
+    ? `${resolved.title} Cron Schedule (${resolved.expression}) | Castov`
+    : `Cron Expression: ${resolved.expression} - Explained & Translated | Castov`;
+
+  const description = resolved.intent
+    ? `${resolved.intent} Complete schedule breakdown, human translation, and crontab syntax for ${resolved.expression}.`
+    : `Understand the exact schedule and meaning for the cron expression "${resolved.expression}". Learn how it runs on Linux crontab and server systems.`;
+
   return buildMetadata({
-    title: `Cron Expression: ${decoded} - Explained & Translated`,
-    description: `Understand the exact schedule and meaning for the cron expression "${decoded}". Learn how it runs on Linux crontab and server systems.`,
-    path: `/cron/${expression}`,
+    title,
+    description,
+    path: `/cron/${rawExpression}`,
   });
 }
 
-export default async function CronPage({ params }: { params: Promise<{ expression: string }> }) {
-  const { expression } = await params;
-  const decoded = decodeURIComponent(expression).replace(/_/g, " ");
-  const prose = parseCron(expression);
-  const path = `/cron/${expression}`;
+export default async function CronPage({ params }: { params: Promise<Params> }) {
+  const { expression: rawExpression } = await params;
+  const resolved = resolveCronInput(rawExpression);
 
-  if (!prose) {
+  if (!resolved) {
     return notFound();
   }
 
+  const { expression, title: presetTitle, intent } = resolved;
+  const parsed = parseCron(expression);
+  if (!parsed.ok) {
+    return notFound();
+  }
+
+  const humanDesc = describeCron(parsed.value);
+  const nextRunTimes = nextRuns(parsed.value, Date.now(), 3).map((ms) =>
+    formatCompact(ms, "UTC")
+  );
+
+  const prose = intent
+    ? `${intent} In crontab syntax, ${expression} translates to: "${humanDesc}".`
+    : `This cron expression (${expression}) translates to: "${humanDesc}". It executes based on the specified minute, hour, day of month, month, and day of week schedule.`;
+
+  const path = `/cron/${rawExpression}`;
+  const displayTitle = presetTitle ? `${presetTitle} (${expression})` : expression;
+
   const faqItems = [
-    { q: `What does the cron expression ${decoded} mean?`, a: prose },
-    { q: "How do I format a cron expression?", a: "A standard cron expression consists of 5 fields: minute, hour, day of month, month, and day of week. You can use numbers, asterisks (*), commas, and slashes to define execution times." },
-    { q: "Where is cron used?", a: "Cron is a time-based job scheduler in Unix-like operating systems. Developers use it to set up maintenance scripts, backups, and regular email dispatches." },
+    { q: `What does the cron schedule ${expression} mean?`, a: prose },
+    {
+      q: "When are the upcoming execution runs?",
+      a: nextRunTimes.length > 0
+        ? `The next 3 scheduled run times (UTC) are: ${nextRunTimes.join(", ")}.`
+        : "No upcoming runs within the search horizon.",
+    },
+    {
+      q: "How do I format a standard cron expression?",
+      a: "A standard cron expression consists of 5 fields: minute, hour, day of month, month, and day of week. You can use numbers, asterisks (*), commas, and slashes to define execution times.",
+    },
+    {
+      q: "Where is cron used?",
+      a: "Cron is a time-based job scheduler in Unix-like operating systems. Developers use it to set up maintenance scripts, backups, CI/CD jobs, and scheduled background workers.",
+    },
   ];
 
   return (
     <div className="layout-content max-w-5xl py-8 sm:py-12">
-      <JsonLd data={[
-        webPageJsonLd({ name: `Cron Expression ${decoded}`, description: prose, path }),
-        faqJsonLd(faqItems)
-      ]} />
-      
+      <JsonLd
+        data={[
+          webPageJsonLd({ name: `Cron Schedule ${displayTitle}`, description: prose, path }),
+          faqJsonLd(faqItems),
+        ]}
+      />
+
       <Breadcrumb
         path={path}
         crumbs={[
           { name: "Home", href: "/" },
-          { name: "Cron Expressions", href: "/tools" },
-          { name: decoded }
+          { name: "Cron Expressions", href: "/cron" },
+          { name: displayTitle },
         ]}
       />
 
       <div className="mt-8 mb-12">
         <div className="flex items-center justify-between mb-3">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent">
-            CRONTAB SCHEDULE
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent uppercase">
+            {presetTitle ? "POPULAR PRESET" : "CRONTAB SCHEDULE"}
           </span>
-          <ShareButton title={`Cron Expression: ${decoded}`} />
+          <ShareButton title={`Cron Schedule: ${displayTitle}`} />
         </div>
-        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-fg mb-6">
-          Cron Schedule:<br/> <span className="text-primary font-mono">{decoded}</span>
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-fg mb-4">
+          Cron Schedule:<br />
+          <span className="text-primary font-mono">{expression}</span>
         </h1>
+        {presetTitle && (
+          <p className="text-lg font-semibold text-fg mb-3">{presetTitle}</p>
+        )}
         <p className="text-xl text-muted leading-relaxed max-w-3xl">
           {prose}
         </p>
@@ -83,17 +149,27 @@ export default async function CronPage({ params }: { params: Promise<{ expressio
           <section className="bg-card border border-line rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
             <h2 className="text-2xl font-bold mb-6">Understanding the Schedule</h2>
             <div className="font-mono text-lg flex flex-wrap gap-4 mb-4">
-              {decoded.split(" ").map((part, i) => (
-                <div key={i} className="flex flex-col items-center bg-field p-3 rounded border border-line">
+              {expression.split(" ").map((part, i) => (
+                <div key={i} className="flex flex-col items-center bg-field p-3 rounded border border-line min-w-[70px]">
                   <span className="font-bold text-accent mb-1">{part}</span>
                   <span className="text-xs text-muted uppercase">
-                    {['Minute', 'Hour', 'Day(M)', 'Month', 'Day(W)'][i]}
+                    {["Minute", "Hour", "Day(M)", "Month", "Day(W)"][i]}
                   </span>
                 </div>
               ))}
             </div>
+            {nextRunTimes.length > 0 && (
+              <div className="mt-6 p-4 rounded-xl bg-field border border-line">
+                <h3 className="text-sm font-bold text-fg mb-2">Upcoming Execution Times (UTC)</h3>
+                <ul className="text-xs font-mono text-muted space-y-1 list-disc pl-5">
+                  {nextRunTimes.map((run, idx) => (
+                    <li key={idx}>{run}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <p className="text-muted leading-relaxed mt-4">
-              This visualizer breaks down the 5 segments of your cron schedule. Adjust the fields in your server's crontab file to change execution frequency.
+              This visualizer breaks down the 5 segments of your cron schedule. Adjust the fields in your server&apos;s crontab file to change execution frequency.
             </p>
           </section>
 
@@ -107,7 +183,7 @@ export default async function CronPage({ params }: { params: Promise<{ expressio
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px]" />
             <span className="relative z-10 font-mono text-xs mb-2">Advertisement</span>
             <span className="relative z-10 text-center max-w-[200px] leading-relaxed">
-              AdSense space reserved.<br/>Sticky placement for high RPM.
+              AdSense space reserved.<br />Sticky placement for high RPM.
             </span>
           </div>
         </aside>

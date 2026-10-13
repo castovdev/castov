@@ -69,7 +69,7 @@ export async function updateSession(request: NextRequest) {
   // Basic CSP to prevent malicious script injection
   supabaseResponse.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagmanager.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' wss: https:; frame-src 'self' https://googleads.g.doubleclick.net https://www.youtube.com; worker-src 'self' blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagmanager.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' wss: https: https://va.vercel-scripts.com; frame-src 'self' https://googleads.g.doubleclick.net https://www.youtube.com; worker-src 'self' blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;"
   );
 
   return supabaseResponse;

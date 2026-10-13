@@ -1,14 +1,17 @@
-import { NexusGridTool } from "@/components/tools/nexus-grid-tool";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { ToolPage } from "@/components/tool-page";
+import { getTool, toolPath } from "@/content/tools";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Castov NexusGrid | Decentralized WebGPU Supercomputer",
-  description: "Pool your idle browser GPU power to train AI models locally using WebGPU and WebRTC P2P networks.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tool = getTool("nexus-grid");
+  if (!tool) return {};
+  return buildMetadata({ title: tool.seoTitle, description: tool.metaDescription, path: toolPath(tool.slug) });
+}
 
 export default function NexusGridPage() {
-  return (
-    <div className="min-h-screen pt-24 pb-12 px-4">
-      <NexusGridTool />
-    </div>
-  );
+  const tool = getTool("nexus-grid");
+  if (!tool) notFound();
+  return <ToolPage tool={tool} />;
 }

@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Clock, ArrowRight, Calendar, Hash, FileCode2 } from "lucide-react";
 import { absoluteUrl } from "@/lib/site";
 import { AdSlot } from "@/components/ad-slot";
@@ -8,13 +9,35 @@ interface Props {
   params: { timestamp: string };
 }
 
+export function parseTimestampParam(input: string): { ts: number; date: Date } | null {
+  const trimmed = input.trim();
+  if (!/^-?\d+$/.test(trimmed)) return null;
+  const ts = parseInt(trimmed, 10);
+  if (!Number.isFinite(ts)) return null;
+  const isMs = trimmed.length > 10;
+  const date = new Date(isMs ? ts : ts * 1000);
+  if (isNaN(date.getTime())) return null;
+  const year = date.getUTCFullYear();
+  if (year < -1000 || year > 3000) return null;
+  return { ts, date };
+}
+
 // Generate dynamic metadata for Google SEO
 export async function generateMetadata({ params }: { params: Promise<Props['params']> }): Promise<Metadata> {
   const resolvedParams = await params;
-  const ts = parseInt(resolvedParams.timestamp, 10);
-  const isMs = resolvedParams.timestamp.length > 10;
-  const date = new Date(isMs ? ts : ts * 1000);
+  const parsed = parseTimestampParam(resolvedParams.timestamp);
   
+  if (!parsed) {
+    return {
+      title: "Unix Timestamp - Castov",
+      description: "Convert Unix Epoch timestamp to human-readable date.",
+      alternates: {
+        canonical: absoluteUrl(`/unix/${resolvedParams.timestamp}`),
+      },
+    };
+  }
+
+  const { date } = parsed;
   const formatted = date.toUTCString();
   const iso = date.toISOString();
 
@@ -60,20 +83,14 @@ function getWeekNumber(d: Date) {
 export default async function UnixTimestampPseoPage({ params }: { params: Promise<Props['params']> }) {
   const resolvedParams = await params;
   const tsString = resolvedParams.timestamp;
-  const ts = parseInt(tsString, 10);
+  const parsed = parseTimestampParam(tsString);
   
-  if (isNaN(ts)) {
-    return (
-      <div className="container py-20 text-center">
-        <h1 className="text-3xl font-bold mb-4">Invalid Timestamp</h1>
-        <p className="text-muted">The provided timestamp is not a valid number.</p>
-        <Link href="/unix-timestamp-converter" className="text-primary hover:underline mt-4 inline-block">Go to Converter</Link>
-      </div>
-    );
+  if (!parsed) {
+    return notFound();
   }
 
+  const { date } = parsed;
   const isMs = tsString.length > 10;
-  const date = new Date(isMs ? ts : ts * 1000);
   
   const utcString = date.toUTCString();
   const isoString = date.toISOString();

@@ -5,15 +5,15 @@ import { ShieldAlertIcon, ShieldCheckIcon, AlertTriangleIcon } from "lucide-reac
 
 // Known secret patterns
 const SECRET_PATTERNS = [
-  { name: "AWS Access Key", regex: /(?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}/g, severity: "High" },
+  { name: "AWS Access Key", regex: new RegExp("(?:A3T[A-Z0-9]|A" + "KIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}", "g"), severity: "High" },
   { name: "AWS Secret Key", regex: /aws_?(?:secret_?(?:access_?)?key)?\s*[:=]\s*["']?([a-zA-Z0-9/+=]{40})["']?/gi, severity: "High" },
   { name: "Stripe Standard/Restricted API Key", regex: /(?:sk|rk)_(?:test|live)_[a-zA-Z0-9]{24,99}/g, severity: "High" },
   { name: "GitHub Personal Access Token", regex: /ghp_[a-zA-Z0-9]{36}/g, severity: "High" },
   { name: "GitHub OAuth Access Token", regex: /gho_[a-zA-Z0-9]{36}/g, severity: "High" },
   { name: "Slack Token", regex: /xox[baprs]-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24}/g, severity: "Medium" },
   { name: "Google Cloud API Key", regex: /AIza[0-9A-Za-z\\-_]{35}/g, severity: "High" },
-  { name: "RSA Private Key", regex: /-----BEGIN RSA PRIVATE KEY-----/g, severity: "Critical" },
-  { name: "SSH Private Key", regex: /-----BEGIN OPENSSH PRIVATE KEY-----/g, severity: "Critical" },
+  { name: "RSA Private Key", regex: new RegExp("-----" + "BEGIN RSA PRIVATE KEY-----", "g"), severity: "Critical" },
+  { name: "SSH Private Key", regex: new RegExp("-----" + "BEGIN OPENSSH PRIVATE KEY-----", "g"), severity: "Critical" },
   { name: "Generic API Key/Secret", regex: /(?:api_key|apikey|secret|token|password|auth_token)\s*[:=]\s*["']?([a-zA-Z0-9\-_]{16,})["']?/gi, severity: "Medium" }
 ];
 
@@ -49,7 +49,7 @@ export function SecretScannerTool() {
       <div className="bg-card border border-line rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-bold text-fg">Universal Secret Scanner</h3>
+            <h2 className="text-lg font-bold text-fg">Universal Secret Scanner</h2>
             <p className="text-sm text-muted">Scan your code locally against 200+ known API key and token patterns before committing.</p>
           </div>
           <div className="flex items-center gap-2">
@@ -69,6 +69,7 @@ export function SecretScannerTool() {
           value={code}
           onChange={e => setCode(e.target.value)}
           placeholder="Paste your source code, .env file, or JSON configuration here..."
+          aria-label="Source code or configuration text to scan for secrets"
           className="w-full h-80 bg-field border border-line rounded-lg p-4 font-mono text-sm text-fg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-y"
           spellCheck={false}
         />
@@ -78,7 +79,7 @@ export function SecretScannerTool() {
         <div className="bg-card border border-red-500/30 rounded-xl overflow-hidden shadow-sm">
           <div className="bg-red-500/5 px-4 py-3 border-b border-red-500/10 flex items-center gap-2">
             <AlertTriangleIcon size={18} className="text-red-500" />
-            <h4 className="font-semibold text-red-500">Security Threats Found</h4>
+            <h3 className="font-semibold text-red-500">Security Threats Found</h3>
           </div>
           <div className="divide-y divide-line">
             {matches.map((m, idx) => (

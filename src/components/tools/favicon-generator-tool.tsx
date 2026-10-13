@@ -82,6 +82,7 @@ export function FaviconGeneratorTool() {
         <div className="flex items-center gap-3">
           <input
             type="file"
+            aria-label="Upload Brand Logo / Icon"
             ref={fileInputRef}
             onChange={handleImageUpload}
             accept="image/*"
@@ -112,13 +113,14 @@ export function FaviconGeneratorTool() {
         {/* Left Options Panel */}
         <div className="lg:col-span-5 space-y-6">
           <div className="p-6 rounded-2xl bg-field border border-line space-y-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Styling & Background</h3>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted">Styling & Background</h2>
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-medium text-muted block mb-1">Background Color</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="color"
+                    aria-label="Background Color"
                     value={bgColor === "transparent" ? "#ffffff" : bgColor}
                     onChange={(e) => setBgColor(e.target.value)}
                     className="w-9 h-9 rounded-lg bg-transparent border border-line cursor-pointer"
@@ -144,6 +146,7 @@ export function FaviconGeneratorTool() {
                 </div>
                 <input
                   type="range"
+                  aria-label="Icon Inset Padding"
                   min="0"
                   max="40"
                   value={padding}
@@ -156,7 +159,7 @@ export function FaviconGeneratorTool() {
 
           {/* HTML Snippet Box */}
           <div className="p-6 rounded-2xl bg-field border border-line space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">HTML Header Markup</h3>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted">HTML Header Markup</h2>
             <pre className="p-4 bg-bg border border-line rounded-xl text-xs font-mono text-fg leading-relaxed overflow-x-auto select-all">
               {htmlHeadSnippet}
             </pre>
@@ -206,6 +209,7 @@ export function FaviconGeneratorTool() {
                     onClick={() => downloadSize(icon)}
                     className="p-2 rounded-lg bg-field hover:bg-hover text-muted hover:text-fg border border-line transition cursor-pointer disabled:opacity-40"
                     title={`Download ${icon.name}`}
+                    aria-label={`Download ${icon.name}`}
                   >
                     <Download className="w-4 h-4" />
                   </button>

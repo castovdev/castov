@@ -156,14 +156,15 @@ ${
         {/* Left Form Editor */}
         <div className="lg:col-span-5 space-y-6">
           <div className="p-6 rounded-2xl bg-field border border-line space-y-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-accent" /> Profile Identity
-            </h3>
+            </h2>
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-medium text-muted block mb-1">Full Name</label>
                 <input
                   type="text"
+                  aria-label="Full Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
@@ -174,6 +175,7 @@ ${
                 <label className="text-xs font-medium text-muted block mb-1">Headline / Role</label>
                 <input
                   type="text"
+                  aria-label="Headline / Role"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
@@ -184,6 +186,7 @@ ${
                 <label className="text-xs font-medium text-muted block mb-1">Bio Summary</label>
                 <textarea
                   rows={3}
+                  aria-label="Bio Summary"
                   value={about}
                   onChange={(e) => setAbout(e.target.value)}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40 resize-none leading-relaxed"
@@ -193,14 +196,15 @@ ${
           </div>
 
           <div className="p-6 rounded-2xl bg-field border border-line space-y-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
               <Wand2 className="w-3.5 h-3.5 text-accent" /> Socials & Work
-            </h3>
+            </h2>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-muted block mb-1">GitHub Username</label>
                 <input
                   type="text"
+                  aria-label="GitHub Username"
                   value={githubUser}
                   onChange={(e) => setGithubUser(e.target.value)}
                   className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
@@ -210,6 +214,7 @@ ${
                 <label className="text-xs font-medium text-muted block mb-1">Twitter / X Handle</label>
                 <input
                   type="text"
+                  aria-label="Twitter / X Handle"
                   value={twitterUser}
                   onChange={(e) => setTwitterUser(e.target.value)}
                   className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
@@ -219,6 +224,7 @@ ${
                 <label className="text-xs font-medium text-muted block mb-1">Portfolio Website</label>
                 <input
                   type="text"
+                  aria-label="Portfolio Website"
                   value={portfolioUrl}
                   onChange={(e) => setPortfolioUrl(e.target.value)}
                   className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-bg border border-line text-fg focus:outline-none focus:ring-2 focus:ring-accent/40"
@@ -229,7 +235,7 @@ ${
 
           {/* Tech Badges Selector */}
           <div className="p-6 rounded-2xl bg-field border border-line space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Tech Stack Badges</h3>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted">Tech Stack Badges</h2>
             <div className="flex flex-wrap gap-2">
               {TECH_BADGES.map((b) => {
                 const active = selectedTechs.includes(b.slug);
@@ -253,11 +259,12 @@ ${
 
           {/* Widget Options */}
           <div className="p-6 rounded-2xl bg-field border border-line space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Card Theme & Options</h3>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted">Card Theme & Options</h2>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-muted block mb-1">Stats Theme</label>
                 <select
+                  aria-label="Stats Theme"
                   value={statsTheme}
                   onChange={(e) => setStatsTheme(e.target.value)}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-bg border border-line text-fg focus:outline-none"
@@ -274,6 +281,7 @@ ${
                 <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                   <input
                     type="checkbox"
+                    aria-label="Streak Counter Card"
                     checked={includeStreaks}
                     onChange={(e) => setIncludeStreaks(e.target.checked)}
                     className="accent-accent"
@@ -283,6 +291,7 @@ ${
                 <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                   <input
                     type="checkbox"
+                    aria-label="Castov Backlink (Free)"
                     checked={includeWatermark}
                     onChange={(e) => setIncludeWatermark(e.target.checked)}
                     className="accent-accent"
@@ -303,6 +312,7 @@ ${
           {activeTab === "code" ? (
             <textarea
               readOnly
+              aria-label="Generated Markdown"
               value={generateMarkdown()}
               className="w-full min-h-[580px] p-5 font-mono text-xs leading-relaxed rounded-2xl bg-field border border-line text-fg focus:outline-none select-all resize-y"
             />

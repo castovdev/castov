@@ -13,7 +13,7 @@ import { formatOffset } from "@/lib/time";
 export const metadata: Metadata = buildMetadata({
   title: "Time Zone Converter & World Time Zones | Castov",
   description:
-    "Convert between 400+ IANA time zones. Browse popular city converters, see current offsets for major world cities, and use the free online time zone converter tool.",
+    "Convert between 400+ IANA time zones. Browse popular city converters, check current offsets for major world cities, and use our free online converter tool.",
   path: "/timezones",
 });
 
@@ -134,7 +134,7 @@ export default function TimezonesHubPage() {
           {POPULAR_ZONE_PAIRS.map((pair, i) => (
             <li key={`${pair.from}-${pair.to}-${i}`}>
               <Link
-                href={`/timezones/${pair.from}/to/${pair.to}`}
+                href="/timezone-converter"
                 className="card block h-full p-4 no-underline hover:border-accent transition-colors"
                 aria-label={`Convert ${pair.fromLabel} to ${pair.toLabel}`}
               >
@@ -158,11 +158,9 @@ export default function TimezonesHubPage() {
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {HUB_CITIES.map((city) => (
-            <Link
+            <div
               key={city.slug}
-              href={`/timezones/${city.iana}`}
-              className="card block p-5 no-underline hover:border-accent transition-colors"
-              aria-label={`Time in ${city.name}, ${city.country}`}
+              className="card block p-5"
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div>
@@ -184,7 +182,7 @@ export default function TimezonesHubPage() {
               <div className="mt-3 text-xs text-muted">
                 {city.population.toLocaleString("en-US")} metro
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </section>

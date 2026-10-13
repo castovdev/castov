@@ -232,7 +232,7 @@ export function SteganographyEnvVaultTool() {
               <ImageIcon className="w-4 h-4" /> Carrier Matrix (PNG)
             </label>
             <div className="w-full h-56 border-2 border-dashed border-[#00f0FF]/30 rounded-xl flex flex-col items-center justify-center relative bg-black/50 hover:bg-[#00f0FF]/5 hover:border-[#00f0FF]/60 transition-all overflow-hidden shadow-inner">
-              <input type="file" accept="image/png" onChange={handleUpload} className="absolute inset-0 opacity-0 cursor-pointer z-20" disabled={isProcessing} />
+              <input type="file" aria-label="Upload carrier PNG image" accept="image/png" onChange={handleUpload} className="absolute inset-0 opacity-0 cursor-pointer z-20" disabled={isProcessing} />
               
               <HolographicScanner active={isProcessing} />
 
@@ -255,6 +255,7 @@ export function SteganographyEnvVaultTool() {
             </label>
             {mode === "encode" ? (
               <textarea 
+                aria-label="Payload Data (.env)"
                 value={envText} onChange={e => setEnvText(e.target.value)} disabled={isProcessing}
                 className="w-full h-56 bg-black/50 border border-[#10B981]/30 rounded-xl p-4 font-mono text-xs resize-none focus:border-[#10B981] outline-none shadow-inner text-[#10B981]/90"
               />
@@ -289,7 +290,7 @@ export function SteganographyEnvVaultTool() {
             <div className="flex-1 relative">
               <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00f0FF]/50" />
               <input 
-                type="password" placeholder="ENTER MASTER AES-256 KEY" value={password} onChange={e => setPassword(e.target.value)} disabled={isProcessing}
+                type="password" aria-label="Master AES-256 Key" placeholder="ENTER MASTER AES-256 KEY" value={password} onChange={e => setPassword(e.target.value)} disabled={isProcessing}
                 className="w-full pl-12 pr-4 py-4 bg-black/50 border border-[#00f0FF]/30 rounded-xl outline-none focus:border-[#00f0FF] font-mono text-sm shadow-inner transition-colors"
               />
             </div>

@@ -82,6 +82,7 @@ export function TokenCostVisualizerTool() {
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-xs font-semibold text-muted">Target Model:</label>
           <select
+            aria-label="Target Model"
             value={selectedModel.id}
             onChange={(e) => {
               const m = MODELS.find((mod) => mod.id === e.target.value);
@@ -164,6 +165,7 @@ export function TokenCostVisualizerTool() {
           </div>
 
           <textarea
+            aria-label="Input Prompt Text"
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={15}
@@ -178,6 +180,7 @@ export function TokenCostVisualizerTool() {
             </div>
             <input
               type="range"
+              aria-label="Expected Output Tokens"
               min="100"
               max="4000"
               step="50"

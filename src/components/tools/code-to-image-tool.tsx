@@ -209,6 +209,7 @@ export function CodeToImageTool() {
                   theme.id === t.id ? "scale-110 border-white shadow-md ring-2 ring-accent" : "border-transparent opacity-80 hover:opacity-100"
                 }`}
                 title={t.name}
+                aria-label={`Select ${t.name} theme`}
               />
             ))}
           </div>
@@ -218,6 +219,7 @@ export function CodeToImageTool() {
           <label className="text-xs font-semibold text-muted">File Title:</label>
           <input
             type="text"
+            aria-label="File Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="px-2.5 py-1 text-xs font-mono rounded-md bg-bg border border-line text-fg max-w-[140px]"
@@ -226,6 +228,7 @@ export function CodeToImageTool() {
 
           <label className="text-xs font-semibold text-muted ml-2">Padding:</label>
           <select
+            aria-label="Padding"
             value={padding}
             onChange={(e) => setPadding(Number(e.target.value))}
             className="px-2.5 py-1 text-xs rounded-md bg-bg border border-line text-fg"
@@ -268,6 +271,7 @@ export function CodeToImageTool() {
             Paste Your Code
           </label>
           <textarea
+            aria-label="Paste Your Code"
             value={code}
             onChange={(e) => setCode(e.target.value)}
             rows={14}

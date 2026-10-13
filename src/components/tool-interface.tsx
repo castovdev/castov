@@ -1,8 +1,22 @@
+"use client";
+
 import type { ToolSlug } from "@/content/tools";
+import dynamic from "next/dynamic";
 import { JsonViewerTool } from "./tools/json-viewer-tool";
 import { P2pGhostTunnelTool } from "./tools/p2p-ghost-tunnel-tool";
 import { SteganographyEnvVaultTool } from "./tools/steganography-env-vault-tool";
-import { ThreeJsonGalaxyTool } from "./tools/3d-json-galaxy-tool";
+
+const ThreeJsonGalaxyTool = dynamic(
+  () => import("./tools/3d-json-galaxy-tool").then((m) => m.ThreeJsonGalaxyTool),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="card p-12 text-center text-muted font-mono text-sm">
+        Loading 3D Galaxy Canvas...
+      </div>
+    ),
+  }
+);
 import { RegexGeneticEvolutionTool } from "./tools/regex-genetic-evolution-tool";
 import { ApiTimeMachineTool } from "./tools/api-time-machine-tool";
 import { AstConflictTelepathyTool } from "./tools/ast-conflict-telepathy-tool";
@@ -38,7 +52,17 @@ import { JsonToTsTool } from "./tools/json-to-ts-tool";
 import { DiffCheckerTool } from "./tools/diff-checker-tool";
 import { NexusGridTool } from "./tools/nexus-grid-tool";
 import { SonicGapBridgeTool } from "./tools/sonic-gap-bridge-tool";
-import { QuantumSimulatorTool } from "./tools/quantum-simulator-tool";
+const QuantumSimulatorTool = dynamic(
+  () => import("./tools/quantum-simulator-tool").then((m) => m.QuantumSimulatorTool),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="card p-12 text-center text-muted font-mono text-sm">
+        Initializing Quantum Simulator...
+      </div>
+    ),
+  }
+);
 import { JsonFormatterTool } from "./tools/json-formatter-tool";
 import { Base64Tool } from "./tools/base64-tool";
 import { JwtDecoderTool } from "./tools/jwt-decoder-tool";

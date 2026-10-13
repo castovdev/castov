@@ -118,6 +118,7 @@ export function JsonViewerTool() {
           >
             {jsonText ? (
               <textarea
+                aria-label="Input JSON"
                 value={jsonText}
                 onChange={(e) => { setJsonText(e.target.value); tryParse(e.target.value); }}
                 className="absolute inset-0 w-full h-full p-4 bg-transparent resize-none font-mono text-xs outline-none focus:ring-2 focus:ring-accent/50"
@@ -130,7 +131,7 @@ export function JsonViewerTool() {
                 <div className="pointer-events-auto mt-2">
                   <label className="cursor-pointer btn btn-primary btn-sm rounded-full px-6 shadow-md hover:scale-105 transition-transform">
                     Select JSON File
-                    <input type="file" accept=".json,application/json" className="hidden" onChange={(e) => {
+                    <input type="file" aria-label="Select JSON File" accept=".json,application/json" className="hidden" onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
                       setLoading(true);

@@ -1,14 +1,17 @@
-import { SonicGapBridgeTool } from "@/components/tools/sonic-gap-bridge-tool";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { ToolPage } from "@/components/tool-page";
+import { getTool, toolPath } from "@/content/tools";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Sonic-Gap Bridge | Castov",
-  description: "Air-Gapped Ultrasonic Acoustic Data Transfer Protocol.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tool = getTool("sonic-gap");
+  if (!tool) return {};
+  return buildMetadata({ title: tool.seoTitle, description: tool.metaDescription, path: toolPath(tool.slug) });
+}
 
 export default function SonicGapPage() {
-  return (
-    <div className="min-h-screen pt-24 pb-12 px-4">
-      <SonicGapBridgeTool />
-    </div>
-  );
+  const tool = getTool("sonic-gap");
+  if (!tool) notFound();
+  return <ToolPage tool={tool} />;
 }

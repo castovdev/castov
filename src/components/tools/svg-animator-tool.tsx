@@ -201,6 +201,7 @@ export function AnimatedIcon() {
           <div className="flex items-center gap-2">
             <input
               type="color"
+              aria-label="Stroke Color"
               value={strokeColor}
               onChange={(e) => setStrokeColor(e.target.value)}
               className="w-7 h-7 rounded bg-transparent border border-line cursor-pointer"
@@ -227,7 +228,7 @@ export function AnimatedIcon() {
         <div className="lg:col-span-5 space-y-5">
           <div className="p-6 rounded-2xl bg-field border border-line space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Input SVG Code</h3>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted">Input SVG Code</h2>
               <div className="flex gap-2">
                 {SAMPLE_SVGS.map((sample) => (
                   <button
@@ -243,6 +244,7 @@ export function AnimatedIcon() {
             </div>
 
             <textarea
+              aria-label="Raw SVG Code"
               value={svgCode}
               onChange={(e) => setSvgCode(e.target.value)}
               rows={10}
@@ -257,6 +259,7 @@ export function AnimatedIcon() {
               </div>
               <input
                 type="range"
+                aria-label="Cycle Duration"
                 min="0.5"
                 max="6"
                 step="0.1"
@@ -270,7 +273,7 @@ export function AnimatedIcon() {
           {/* Export Code Options */}
           <div className="p-6 rounded-2xl bg-field border border-line space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Export Animation</h3>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted">Export Animation</h2>
               <div className="flex gap-2">
                 <button
                   type="button"

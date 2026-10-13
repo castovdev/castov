@@ -160,10 +160,11 @@ export function EnvVaultTool() {
 
           {mode === "encrypt" && (
             <div className="bg-card border border-line rounded-2xl p-8 shadow-sm relative overflow-hidden group">
-              <h3 className="text-xl font-bold text-fg mb-2 tracking-tight">Zero-Knowledge .env Sharer</h3>
+              <h2 className="text-xl font-bold text-fg mb-2 tracking-tight">Zero-Knowledge .env Sharer</h2>
               <p className="text-sm text-muted mb-6">Your .env file is encrypted in the browser with AES-GCM using a key derived from your password, so the server never sees your raw secrets or your password. <strong className="text-fg">This tool is not local-only:</strong> the encrypted result is uploaded to our server (Supabase) so the link can be opened on another device. See the <a href="/privacy" className="underline">Privacy Policy</a>.</p>
               
               <textarea 
+                aria-label="Environment Variables Content"
                 value={rawEnv} onChange={e => setRawEnv(e.target.value)}
                 className="w-full bg-field border border-line rounded-xl p-4 font-mono text-sm h-48 mb-6 focus:ring-1 focus:ring-primary/50 focus:outline-none transition-all text-fg placeholder:text-muted"
                 placeholder="PASTE .ENV CONTENTS HERE..."
@@ -171,7 +172,11 @@ export function EnvVaultTool() {
               
               <div className="flex gap-4">
                 <input 
-                  type="password" placeholder="Encryption Password" value={encPassword} onChange={e => setEncPassword(e.target.value)}
+                  type="password" 
+                  aria-label="Encryption Password"
+                  placeholder="Encryption Password" 
+                  value={encPassword} 
+                  onChange={e => setEncPassword(e.target.value)}
                   className="flex-1 bg-field border border-line rounded-xl px-4 py-3 font-mono text-sm text-fg focus:outline-none focus:border-primary/50"
                 />
                 <button onClick={handleEncrypt} disabled={!encPassword || isEncrypting} className="bg-primary text-white dark:text-[#050505] hover:bg-primary/90 font-bold px-6 rounded-xl transition-colors disabled:opacity-50 shadow-sm">
@@ -188,7 +193,7 @@ export function EnvVaultTool() {
               {encryptedLink && (
                 <div className="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center gap-4">
                   <LinkIcon className="text-primary shrink-0" />
-                  <input readOnly value={encryptedLink} className="w-full bg-transparent border-none text-xs font-mono text-primary focus:outline-none" />
+                  <input readOnly aria-label="Encrypted Vault Link" value={encryptedLink} className="w-full bg-transparent border-none text-xs font-mono text-primary focus:outline-none" />
                   <button className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 font-semibold px-4 py-2 rounded-lg text-xs transition-colors shrink-0 flex items-center gap-2" onClick={() => navigator.clipboard.writeText(encryptedLink)}>
                     <CopyIcon size={14} /> Copy
                   </button>
@@ -199,17 +204,25 @@ export function EnvVaultTool() {
 
           {mode === "decrypt" && (
             <div className="bg-card border border-success/30 rounded-2xl p-8 shadow-sm relative overflow-hidden">
-              <h3 className="text-xl font-bold text-fg mb-2 tracking-tight">Unlock .env Vault</h3>
+              <h2 className="text-xl font-bold text-fg mb-2 tracking-tight">Unlock .env Vault</h2>
               <p className="text-sm text-muted mb-6">Enter the encrypted payload and the password to decrypt your secrets locally.</p>
               
               <input 
-                type="text" placeholder="Paste Encrypted Payload or Vault ID..." value={vaultId} onChange={e => setVaultId(e.target.value)}
+                type="text" 
+                aria-label="Encrypted Payload or Vault ID"
+                placeholder="Paste Encrypted Payload or Vault ID..." 
+                value={vaultId} 
+                onChange={e => setVaultId(e.target.value)}
                 className="w-full bg-field border border-line rounded-xl px-4 py-3 mb-6 font-mono text-xs text-fg focus:outline-none focus:border-success/50"
               />
               
               <div className="flex gap-4">
                 <input 
-                  type="password" placeholder="Decryption Password" value={decPassword} onChange={e => setDecPassword(e.target.value)}
+                  type="password" 
+                  aria-label="Decryption Password"
+                  placeholder="Decryption Password" 
+                  value={decPassword} 
+                  onChange={e => setDecPassword(e.target.value)}
                   className="flex-1 bg-field border border-line rounded-xl px-4 py-3 font-mono text-sm text-fg focus:outline-none focus:border-success/50"
                 />
                 <button onClick={handleDecrypt} disabled={!decPassword || !vaultId || isDecrypting} className="bg-success text-white hover:bg-success/90 font-bold px-8 rounded-xl transition-colors disabled:opacity-50 shadow-sm">
@@ -245,7 +258,7 @@ export function EnvVaultTool() {
           <div className="w-16 h-16 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <LockIcon className="text-primary" size={32} />
           </div>
-          <h3 className="text-2xl font-bold text-fg mb-3">Team Shared Vaults</h3>
+          <h2 className="text-2xl font-bold text-fg mb-3">Team Shared Vaults</h2>
           <p className="text-muted max-w-md mx-auto mb-8">Share encrypted .env files securely with your team using zero-knowledge RSA-OAEP + AES-GCM cryptography.</p>
           <a href="/env-vault/team" className="inline-flex bg-primary text-white dark:text-[#050505] hover:bg-primary/90 font-bold px-8 py-3 rounded-xl transition-all shadow-sm">
             Open Workspace

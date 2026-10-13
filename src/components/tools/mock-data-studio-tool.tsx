@@ -170,6 +170,7 @@ export const MOCK_${typeName.toUpperCase()}_DATA: ${typeName}[] = ${JSON.stringi
 
           <label className="text-xs font-semibold text-muted">Count:</label>
           <select
+            aria-label="Record Count"
             value={recordCount}
             onChange={(e) => setRecordCount(Number(e.target.value))}
             className="px-2.5 py-1 text-xs rounded-lg bg-bg border border-line text-fg focus:outline-none"
@@ -241,6 +242,7 @@ export const MOCK_${typeName.toUpperCase()}_DATA: ${typeName}[] = ${JSON.stringi
 
         <textarea
           readOnly
+          aria-label="Generated Synthetic Payload"
           value={outputString}
           className="w-full min-h-[480px] p-5 font-mono text-xs leading-relaxed rounded-2xl bg-field border border-line text-fg focus:outline-none select-all resize-y"
         />

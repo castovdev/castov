@@ -20,10 +20,7 @@ export function ToolPage({ tool }: { tool: Tool }) {
 
   return (
     <div className="layout-content max-w-5xl py-8 sm:py-12">
-      <JsonLd data={[
-        webApplicationJsonLd({ name: tool.name, description: tool.metaDescription, path }),
-        breadcrumbJsonLd([{ name: "Home", href: "/" }, { name: "Tools", href: "/tools" }, { name: tool.name }], path)
-      ]} />
+      <JsonLd data={webApplicationJsonLd({ name: tool.name, description: tool.metaDescription, path })} />
       <Breadcrumb
         path={path}
         crumbs={[{ name: "Home", href: "/" }, { name: "Tools", href: "/tools" }, { name: tool.name }]}

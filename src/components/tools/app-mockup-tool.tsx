@@ -191,6 +191,7 @@ export function AppMockupTool() {
                     : "border-transparent opacity-80 hover:opacity-100"
                 }`}
                 title={g.name}
+                aria-label={`Select ${g.name} theme`}
               />
             ))}
           </div>
@@ -199,6 +200,7 @@ export function AppMockupTool() {
         <div className="flex items-center gap-2">
           <input
             type="file"
+            aria-label="Upload Screenshot"
             ref={fileInputRef}
             onChange={handleImageUpload}
             accept="image/*"
@@ -229,7 +231,7 @@ export function AppMockupTool() {
         {/* Controls Column */}
         <div className="lg:col-span-4 space-y-6">
           <div className="p-6 rounded-2xl bg-field border border-line space-y-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Layout & Dimensions</h3>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted">Layout & Dimensions</h2>
             <div>
               <div className="flex justify-between text-xs text-muted mb-1.5">
                 <span>Canvas Padding</span>
@@ -237,6 +239,7 @@ export function AppMockupTool() {
               </div>
               <input
                 type="range"
+                aria-label="Canvas Padding"
                 min="24"
                 max="80"
                 value={padding}
@@ -249,6 +252,7 @@ export function AppMockupTool() {
               <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label="Realistic 3D Drop Shadow"
                   checked={shadow}
                   onChange={(e) => setShadow(e.target.checked)}
                   className="accent-accent"
@@ -259,6 +263,7 @@ export function AppMockupTool() {
               <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label="Castov Discreet Badge"
                   checked={watermark}
                   onChange={(e) => setWatermark(e.target.checked)}
                   className="accent-accent"

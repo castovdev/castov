@@ -513,7 +513,7 @@ export const TOOLS: Tool[] = [
     category: "Labs",
     name: "Sonic-Gap Bridge",
     seoTitle: "Sonic-Gap Bridge | Ultrasonic Acoustic Data Transfer",
-    metaDescription: "Air-Gapped Ultrasonic Acoustic Data Transfer Protocol.",
+    metaDescription: "Air-gapped ultrasonic acoustic data transfer protocol using inaudible sound waves between devices.",
     intro: "Transfer data between air-gapped devices using inaudible high-frequency acoustic sound waves and your device microphone.",
     cardDescription: "Air-gapped ultrasonic acoustic data transfer protocol.",
     faq: [
@@ -535,13 +535,13 @@ export const TOOLS: Tool[] = [
     category: "Labs",
     name: "Quantum Simulator",
     seoTitle: "Quantum Web Simulator | Castov",
-    metaDescription: "Browser-Native Quantum Circuit execution via Matrix Tensors.",
+    metaDescription: "Browser-native quantum circuit execution and interactive 3D Bloch sphere simulation via matrix tensors.",
     intro: "Simulate multi-qubit quantum states and visualize Bloch spheres entirely in WebGL and 3D.",
     cardDescription: "Browser-native quantum circuit execution via matrix tensors.",
     faq: [
       { q: "How are quantum states computed?", a: "States are represented as complex state vectors and updated using linear algebraic matrix transformations in your browser." }
     ],
-    related: [],
+    related: ["sonic-gap", "p2p-ghost-tunnel", "3d-json-galaxy", "nexus-grid"],
     sections: [
       { heading: "Interactive Quantum Simulation", paragraphs: ["Visualize quantum superposition and phase angles in real-time with interactive 3D Bloch spheres."] }
     ],

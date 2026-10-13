@@ -93,15 +93,17 @@ describe("ThemeToggle", () => {
     localStorage.clear();
   });
 
-  it("switches between dark and light and remembers the choice", () => {
+  it("switches between themes and remembers the choice", () => {
     render(<ThemeToggle />);
     const button = screen.getByRole("button", { name: /theme/i });
     fireEvent.click(button);
-    expect(document.documentElement.dataset.theme).toBe("light");
-    expect(localStorage.getItem("timeforge-theme")).toBe("light");
-    fireEvent.click(button);
     expect(document.documentElement.dataset.theme).toBe("dark");
-    expect(localStorage.getItem("timeforge-theme")).toBe("dark");
+    expect(localStorage.getItem("castov-theme")).toBe("dark");
+    fireEvent.click(button);
+    expect(localStorage.getItem("castov-theme")).toBe("system");
+    fireEvent.click(button);
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(localStorage.getItem("castov-theme")).toBe("light");
   });
 
   it("still switches when storage is blocked", () => {
@@ -110,7 +112,7 @@ describe("ThemeToggle", () => {
     });
     render(<ThemeToggle />);
     fireEvent.click(screen.getByRole("button", { name: /theme/i }));
-    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(document.documentElement.dataset.theme).toBe("dark");
   });
 });
 

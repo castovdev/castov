@@ -78,6 +78,7 @@ export function DiffCheckerTool() {
             <h3 className="font-medium text-foreground">Original Text</h3>
           </div>
           <textarea
+            aria-label="Original text"
             className="w-full h-[300px] p-4 bg-card text-card-fg border border-line rounded-lg font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary"
             value={text1}
             onChange={(e) => setText1(e.target.value)}
@@ -90,6 +91,7 @@ export function DiffCheckerTool() {
             <h3 className="font-medium text-foreground">Modified Text</h3>
           </div>
           <textarea
+            aria-label="Modified text"
             className="w-full h-[300px] p-4 bg-card text-card-fg border border-line rounded-lg font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary"
             value={text2}
             onChange={(e) => setText2(e.target.value)}

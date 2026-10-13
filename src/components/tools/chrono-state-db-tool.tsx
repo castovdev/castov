@@ -70,6 +70,7 @@ export function ChronoStateDbTool() {
           <div className="space-y-4">
             <h3 className="font-bold text-[#00f0FF] uppercase tracking-widest flex items-center gap-2 mb-2"><FileJson className="w-4 h-4"/> Live Data Editor</h3>
             <textarea 
+              aria-label="Live JSON Data Editor"
               value={currentData}
               onChange={e => setCurrentData(e.target.value)}
               className="w-full h-64 bg-black/50 border border-[#00f0FF]/30 rounded-xl p-4 font-mono text-[#00f0FF] outline-none focus:border-[#00f0FF] shadow-inner resize-none"
@@ -77,7 +78,7 @@ export function ChronoStateDbTool() {
             
             <div className="flex gap-2">
               <input 
-                type="text" value={commitMsg} onChange={e => setCommitMsg(e.target.value)}
+                type="text" aria-label="Commit Message" value={commitMsg} onChange={e => setCommitMsg(e.target.value)}
                 placeholder="COMMIT MESSAGE (e.g., Added user Alice)"
                 className="flex-1 bg-black border border-white/20 rounded-lg px-4 font-mono text-sm outline-none"
               />

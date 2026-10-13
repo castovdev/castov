@@ -112,9 +112,9 @@ INSERT INTO employees (name, department, salary) VALUES
         {/* Sidebar */}
         <div className="w-full md:w-64 flex flex-col gap-4">
           <div className="bg-card border border-line rounded-xl p-4 shadow-sm">
-            <h3 className="font-bold flex items-center gap-2 mb-4">
+            <h2 className="font-bold flex items-center gap-2 mb-4">
               <DatabaseIcon size={18} className="text-primary" /> Database
-            </h3>
+            </h2>
             {isInitializing ? (
               <div className="text-sm text-muted animate-pulse">Loading WASM engine...</div>
             ) : error && !db ? (
@@ -174,6 +174,7 @@ INSERT INTO employees (name, department, salary) VALUES
               </button>
             </div>
             <textarea
+              aria-label="SQL Query Editor"
               value={query}
               onChange={e => setQuery(e.target.value)}
               className="w-full h-48 bg-field p-4 font-mono text-sm text-fg resize-none focus:outline-none focus:ring-1 focus:ring-primary"

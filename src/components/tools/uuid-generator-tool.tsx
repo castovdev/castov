@@ -163,6 +163,7 @@ export function UuidGeneratorTool() {
             <label className="inline-flex items-center gap-2 text-sm text-fg cursor-pointer select-none">
               <input
                 type="checkbox"
+                aria-label="Uppercase (A-F)"
                 checked={uppercase}
                 onChange={(e) => handleUppercaseChange(e.target.checked)}
                 className="rounded border-line text-accent focus:ring-accent"
@@ -173,6 +174,7 @@ export function UuidGeneratorTool() {
             <label className="inline-flex items-center gap-2 text-sm text-fg cursor-pointer select-none">
               <input
                 type="checkbox"
+                aria-label="No Hyphens (32 chars)"
                 checked={noHyphens}
                 onChange={(e) => handleNoHyphensChange(e.target.checked)}
                 className="rounded border-line text-accent focus:ring-accent"

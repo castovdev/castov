@@ -167,6 +167,7 @@ export function Base64Tool() {
           <label className="inline-flex items-center gap-2 text-sm text-fg cursor-pointer select-none ml-2">
             <input
               type="checkbox"
+              aria-label="URL-Safe (RFC 4648)"
               checked={urlSafe}
               onChange={handleUrlSafeToggle}
               className="rounded border-line text-accent focus:ring-accent"

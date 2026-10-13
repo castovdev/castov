@@ -157,6 +157,7 @@ export function CheatSheetsView() {
           <Search className="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
+            aria-label={`Search ${currentCategory.name}`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search ${currentCategory.name}...`}

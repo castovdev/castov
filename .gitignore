@@ -10,3 +10,10 @@ next-env.d.ts
 .vercel
 supabase/.temp
 .env*
+
+# Local tokens and credentials
+npm code.txt
+npm token.png
+*.token*
+*.key
+*.pem

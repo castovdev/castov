@@ -2,16 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Terminal, Shield, Lock, Zap } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
-import { websiteJsonLd } from "@/lib/seo";
+import { Breadcrumb } from "@/components/breadcrumb";
+import { websiteJsonLd, buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: "Castov CLI & Env Vault | Secure Local Secrets",
   description: "Pull your encrypted environment variables securely into your local development server using the Castov CLI.",
-};
+  path: "/cli",
+});
 
 export default function CliPage() {
   return (
     <div className="layout-content max-w-4xl py-12">
+      <Breadcrumb
+        path="/cli"
+        crumbs={[{ name: "Home", href: "/" }, { name: "Tools", href: "/tools" }, { name: "CLI" }]}
+      />
       <JsonLd data={[websiteJsonLd()]} />
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-xs font-semibold text-accent mb-6">
@@ -105,7 +111,7 @@ export default function CliPage() {
           <li className="flex items-start gap-3">
             <Lock className="w-5 h-5 text-accent shrink-0 mt-0.5" />
             <div>
-              <strong>Secure Vault Integration:</strong> Sync encrypted team secrets locally using <code className="bg-field px-1.5 py-0.5 rounded text-fg">castov env pull</code>.
+              <strong>Developer-First Workflows:</strong> Generate time-ordered UUIDv7 identifiers (<code className="bg-field px-1.5 py-0.5 rounded text-fg">castov uuid --v7</code>), inspect JWT claims, and convert IANA timezones instantly without network dependencies.
             </div>
           </li>
         </ul>

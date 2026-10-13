@@ -189,9 +189,9 @@ export function DockerVisualizerTool() {
       {/* Editor Panel */}
       <div className="w-full md:w-1/3 flex flex-col bg-card border border-line rounded-xl shadow-sm overflow-hidden">
         <div className="bg-muted/5 border-b border-line px-4 py-3 flex justify-between items-center">
-          <h3 className="font-bold text-fg flex items-center gap-2">
+          <h2 className="font-bold text-fg flex items-center gap-2">
             <BoxIcon size={16} /> docker-compose.yml
-          </h3>
+          </h2>
           {error ? (
             <span className="text-[10px] text-red-500 font-bold max-w-[120px] truncate" title={error}>Error</span>
           ) : (
@@ -201,6 +201,7 @@ export function DockerVisualizerTool() {
         <textarea
           value={yamlInput}
           onChange={(e) => setYamlInput(e.target.value)}
+          aria-label="Docker Compose YAML"
           className="flex-1 w-full bg-transparent p-4 font-mono text-xs focus:outline-none resize-none"
           spellCheck={false}
           placeholder="Paste docker-compose.yml here..."
