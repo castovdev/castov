@@ -13,6 +13,7 @@ export function SqliteFiddleTool() {
   const [error, setError] = useState<string | null>(null);
   
   const [tables, setTables] = useState<string[]>([]);
+  const sqlModuleRef = useRef<any>(null);
 
   useEffect(() => {
     let active = true;
@@ -27,13 +28,22 @@ export function SqliteFiddleTool() {
         // We ensure we give it the exact absolute URL to the WASM file.
         const wasmUrl = typeof window !== 'undefined' ? window.location.origin + '/sql-wasm.wasm' : '/sql-wasm.wasm';
 
-        const sqlPromise = initSqlJs({
-          locateFile: (file) => wasmUrl
+        const initFn = typeof initSqlJs === "function" ? initSqlJs : (initSqlJs as any)?.default;
+        if (typeof initFn !== "function") {
+          throw new Error("Failed to load SQLite module: initSqlJs is not a function.");
+        }
+
+        const sqlPromise = initFn({
+          locateFile: () => wasmUrl
         });
 
         const SQL: any = await Promise.race([sqlPromise, timeoutPromise]);
+        if (!SQL || typeof SQL.Database !== "function") {
+          throw new Error("SQLite engine loaded, but Database constructor was not found.");
+        }
         
         if (active) {
+          sqlModuleRef.current = SQL;
           const newDb = new SQL.Database();
           setDb(newDb);
           setIsInitializing(false);
@@ -151,9 +161,25 @@ INSERT INTO employees (name, department, salary) VALUES
               <PlusIcon size={14} /> Load Demo Data
             </button>
             <button 
-              onClick={() => { if(db) { db.close(); setDb(new (window as any).SQL.Database()); setTables([]); setResults([]); setQuery(""); } }}
+              onClick={() => {
+                if (db) {
+                  try {
+                    db.close();
+                  } catch {
+                    /* best-effort cleanup of previous db instance */
+                  }
+                  const SQL = sqlModuleRef.current;
+                  if (SQL && typeof SQL.Database === "function") {
+                    setDb(new SQL.Database());
+                  }
+                  setTables([]);
+                  setResults([]);
+                  setQuery("");
+                  setError(null);
+                }
+              }}
               className="w-full btn btn-secondary btn-sm !bg-red-500/10 !text-red-500 hover:!bg-red-500/20"
-              disabled={isInitializing}
+              disabled={isInitializing || !db}
             >
               <TrashIcon size={14} /> Reset Database
             </button>

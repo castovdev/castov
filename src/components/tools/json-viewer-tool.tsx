@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { FileJsonIcon, UploadCloudIcon, ChevronRightIcon, ChevronDownIcon, BoxIcon } from "lucide-react";
 import { ThreeJsonGalaxyTool } from "./3d-json-galaxy-tool";
 // Simple recursive JSON Node viewer
@@ -53,17 +53,31 @@ export function JsonViewerTool() {
   const [jsonText, setJsonText] = useState("");
   const [parsed, setParsed] = useState<any>(null);
   const [error, setError] = useState("");
+  const [clipboardNotice, setClipboardNotice] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [is3DMode, setIs3DMode] = useState(false);
+  const [isManualInput, setIsManualInput] = useState(false);
 
   const handlePaste = async () => {
+    setClipboardNotice(null);
     try {
+      if (typeof navigator === "undefined" || !navigator.clipboard || typeof navigator.clipboard.readText !== "function") {
+        throw new Error("Clipboard reading is not supported by your browser or environment. You can paste directly into the editor.");
+      }
       const text = await navigator.clipboard.readText();
+      if (!text || !text.trim()) {
+        setClipboardNotice("Clipboard is empty.");
+        setIsManualInput(true);
+        return;
+      }
       setJsonText(text);
       tryParse(text);
-    } catch (e) {
-      console.error(e);
+      setClipboardNotice(null);
+    } catch (e: any) {
+      console.warn("Clipboard paste unavailable:", e);
+      setClipboardNotice(e?.message || "Clipboard access denied. Please paste your JSON directly into the editor.");
+      setIsManualInput(true);
     }
   };
 
@@ -109,6 +123,19 @@ export function JsonViewerTool() {
             <label className="text-sm font-semibold text-fg">Input JSON</label>
             <button onClick={handlePaste} className="btn btn-secondary btn-sm">Paste from Clipboard</button>
           </div>
+
+          {clipboardNotice && (
+            <div role="status" className="p-2.5 text-xs rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-500 flex items-center justify-between">
+              <span>{clipboardNotice}</span>
+              <button
+                type="button"
+                onClick={() => setClipboardNotice(null)}
+                className="ml-2 underline font-semibold cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           
           <div 
             className={`relative w-full h-[600px] border-2 border-dashed rounded-xl overflow-hidden transition-colors ${isDragging ? 'border-accent bg-accent/5' : 'border-line bg-card'}`}
@@ -116,13 +143,14 @@ export function JsonViewerTool() {
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleFileDrop}
           >
-            {jsonText ? (
+            {jsonText || isManualInput ? (
               <textarea
                 aria-label="Input JSON"
                 value={jsonText}
                 onChange={(e) => { setJsonText(e.target.value); tryParse(e.target.value); }}
                 className="absolute inset-0 w-full h-full p-4 bg-transparent resize-none font-mono text-xs outline-none focus:ring-2 focus:ring-accent/50"
                 spellCheck={false}
+                placeholder="Paste or type JSON here..."
               />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-muted pointer-events-none">
@@ -147,6 +175,13 @@ export function JsonViewerTool() {
                   </label>
                 </div>
                 <p className="text-sm mt-4">or click Paste from Clipboard</p>
+                <button
+                  type="button"
+                  onClick={() => setIsManualInput(true)}
+                  className="text-xs text-accent hover:underline mt-2 cursor-pointer pointer-events-auto"
+                >
+                  Open text editor directly
+                </button>
                 <p className="text-xs mt-4 opacity-50 max-w-xs text-center">
                   Parsing happens entirely locally. Massive files up to 50MB are supported without crashing your browser.
                 </p>
