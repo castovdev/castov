@@ -11,11 +11,12 @@ import { Search } from "lucide-react";
 
 const DESKTOP_NAV = [
   { href: "/tools", label: "Tools" },
+  { href: "/convert", label: "Converters" },
+  { href: "/regex-patterns", label: "Regex" },
+  { href: "/error-fixes", label: "Error Fixes" },
   { href: "/tech-trends", label: "Tech Radar" },
   ...(AI_HUB_LIVE ? [{ href: "/ai", label: "AI Hub" }] : []),
-  { href: "/cheatsheets", label: "Cheat Sheets" },
   { href: "/guides", label: "Guides" },
-  { href: "/extension", label: "Extension" },
 ];
 
 export function SiteHeader() {

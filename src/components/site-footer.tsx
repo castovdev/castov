@@ -29,6 +29,8 @@ const ECOSYSTEM = [
   { href: "/cli", label: "Castov CLI", badge: "npm" },
   { href: "/extension", label: "VS Code Extension", badge: "v0.1" },
   { href: "/tech-trends", label: "Tech Pulse Radar", badge: "Live" },
+  { href: "/regex-patterns", label: "Regex Patterns Lab", badge: "40" },
+  { href: "/error-fixes", label: "Error Fix Encyclopedia", badge: "35" },
   { href: "/cheatsheets", label: "Interactive Cheat Sheets", badge: "Popular" },
   { href: "/http-status", label: "HTTP Status Guide" },
   { href: "/chmod/755", label: "Chmod Permissions" },
@@ -39,9 +41,11 @@ const ECOSYSTEM = [
 
 const RESOURCES = [
   { href: "/tools", label: "All Tools Directory" },
+  { href: "/convert", label: "Code & Schema Converters" },
+  { href: "/regex-patterns", label: "Regex Patterns Library" },
+  { href: "/error-fixes", label: "Developer Error Fixes" },
   { href: "/guides", label: "Developer Guides" },
   { href: "/code", label: "Code Hub & Snippets" },
-  { href: "/convert", label: "Format Converters" },
   { href: "/timezones", label: "Time Zones Hub" },
   { href: "/timestamps", label: "Epoch Timestamps" },
   { href: "/chrono-db", label: "Chrono State DB" },

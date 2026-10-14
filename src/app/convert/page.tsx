@@ -13,7 +13,7 @@ import { ArrowRight, Code2, Database, Network, FileCode2, Clock } from "lucide-r
 export const metadata: Metadata = buildMetadata({
   title: "Online Developer Code, Schema & Time Converters | Castov",
   description:
-    "Free instant browser converters: JSON to Zod, Prisma, Drizzle, Rust, Go, Python, cURL to Fetch/Python/Axios, Docker Run to Compose, SQL to Prisma, plus Unix timestamp & time format translators.",
+    "Free browser converters: JSON to Zod, Prisma, Drizzle, Rust, Go, cURL to Fetch/Python, Docker to Compose, SQL, Unix timestamps, and date format translators.",
   path: "/convert",
 });
 

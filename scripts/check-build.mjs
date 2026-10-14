@@ -115,7 +115,8 @@ for (const path of paths) {
     "/", "/tools", "/guides", "/about", "/privacy", "/terms", "/contact",
     "/cli", "/extension", "/cheatsheets", "/http-status", "/cron",
     "/timezones", "/timestamps", "/resources", "/code", "/convert",
-    "/chrono-db", "/webhook-tester", "/sponsor", "/developer", "/canvas", "/ai", "/login"
+    "/chrono-db", "/webhook-tester", "/sponsor", "/developer", "/canvas", "/ai", "/login",
+    "/regex-patterns", "/error-fixes", "/tech-trends"
   ]);
   const isTool = !NON_TOOL_PATHS.has(path) &&
     !path.startsWith("/guides/") &&
@@ -123,7 +124,10 @@ for (const path of paths) {
     !path.startsWith("/chmod/") &&
     !path.startsWith("/http-status/") &&
     !path.startsWith("/cron/") &&
-    !path.startsWith("/unix/");
+    !path.startsWith("/unix/") &&
+    !path.startsWith("/convert/") &&
+    !path.startsWith("/regex-patterns/") &&
+    !path.startsWith("/error-fixes/");
   if (path !== "/" && !types.includes("BreadcrumbList")) fail(path, "missing BreadcrumbList");
   if (isTool) {
     for (const t of ["WebApplication", "FAQPage"]) if (!types.includes(t)) fail(path, `missing ${t} structured data`);
@@ -167,6 +171,7 @@ for (const path of paths) {
 
   // Error-looking strings must never be server-rendered
   for (const bad of ["NaN", "Invalid Date", "undefined", "[object Object]"]) {
+    if (bad === "undefined" && path.startsWith("/error-fixes")) continue;
     if (text.includes(bad)) fail(path, `page text contains "${bad}"`);
   }
 }

@@ -4,6 +4,8 @@ import { TOOLS } from '@/content/tools';
 import { GUIDES } from '@/content/guides';
 import { AI_HUB_LIVE } from '@/lib/flags';
 import { CODE_CONVERTERS } from '@/lib/code-converters-registry';
+import { REGEX_PATTERNS } from '@/lib/regex-patterns-registry';
+import { ERROR_FIXES } from '@/lib/error-fixes-registry';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -64,6 +66,38 @@ export default function sitemap(): MetadataRoute.Sitemap {
     sitemapEntries.push({
       url: `${baseUrl}/convert/${converter.slug}`,
       lastModified: getLastMod('src/lib/code-converters-registry.ts'),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+  });
+
+  sitemapEntries.push({
+    url: `${baseUrl}/regex-patterns`,
+    lastModified: getLastMod('src/app/regex-patterns/page.tsx'),
+    changeFrequency: 'weekly',
+    priority: 0.9,
+  });
+
+  REGEX_PATTERNS.forEach((pattern) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/regex-patterns/${pattern.slug}`,
+      lastModified: getLastMod('src/lib/regex-patterns-registry.ts'),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+  });
+
+  sitemapEntries.push({
+    url: `${baseUrl}/error-fixes`,
+    lastModified: getLastMod('src/app/error-fixes/page.tsx'),
+    changeFrequency: 'weekly',
+    priority: 0.9,
+  });
+
+  ERROR_FIXES.forEach((err) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/error-fixes/${err.slug}`,
+      lastModified: getLastMod('src/lib/error-fixes-registry.ts'),
       changeFrequency: 'weekly',
       priority: 0.8,
     });
