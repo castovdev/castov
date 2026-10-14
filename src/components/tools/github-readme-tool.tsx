@@ -29,8 +29,8 @@ export function GithubReadmeTool() {
   const [githubUser, setGithubUser] = useState("alexrivers");
   const [twitterUser, setTwitterUser] = useState("alexrivers");
   const [portfolioUrl, setPortfolioUrl] = useState("https://castov.com");
-  const [currentWork, setCurrentWork] = useState("building next-gen developer tools");
-  const [learning, setLearning] = useState("Distributed consensus & WebGPU");
+  const currentWork = "building next-gen developer tools";
+  const learning = "Distributed consensus & WebGPU";
   const [selectedTechs, setSelectedTechs] = useState<string[]>([
     "typescript",
     "react",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { PlayIcon, SquareIcon, ActivityIcon } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -45,7 +45,7 @@ export function ApiLoadTesterTool() {
         // For real testing, CORS must be enabled by target server.
         const duration = performance.now() - startTime;
         setLogs(prev => [...prev, { timestamp: Date.now(), duration, status: res.type === 'opaque' ? 200 : res.status }]);
-      } catch (err) {
+      } catch {
         const duration = performance.now() - startTime;
         setLogs(prev => [...prev, { timestamp: Date.now(), duration, status: "error" }]);
       }

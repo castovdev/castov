@@ -2,7 +2,7 @@
 
 import { useState, useId } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
-import { ArrowLeftRight, Trash2, Clipboard, CheckCircle2, AlertCircle, FileText } from "lucide-react";
+import { ArrowLeftRight, Trash2, Clipboard, CheckCircle2, AlertCircle } from "lucide-react";
 
 type Mode = "encode" | "decode";
 

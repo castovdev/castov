@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect } from "react";
 import * as yaml from "js-yaml";
 import {
   ReactFlow,
@@ -16,7 +16,7 @@ import {
   BackgroundVariant
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { BoxIcon, NetworkIcon, LinkIcon, HardDriveIcon } from "lucide-react";
+import { BoxIcon, NetworkIcon, HardDriveIcon } from "lucide-react";
 
 // Custom Service Node for React Flow
 const ServiceNode = ({ data }: any) => {
@@ -130,7 +130,7 @@ export function DockerVisualizerTool() {
       let col = 0;
       const maxCols = 3;
 
-      serviceNames.forEach((name, index) => {
+      serviceNames.forEach((name) => {
         const s = services[name];
         
         newNodes.push({

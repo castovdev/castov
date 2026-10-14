@@ -46,7 +46,7 @@ function activate(context) {
                     try {
                         const decoded = Buffer.from(text, 'base64').toString('utf8');
                         editBuilder.replace(selection, decoded);
-                    } catch (e) {
+                    } catch {
                         vscode.window.showErrorMessage('Invalid Base64 string ❌');
                     }
                 }

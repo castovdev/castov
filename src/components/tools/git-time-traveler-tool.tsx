@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Copy, Check, AlertTriangle, ShieldCheck, Terminal, ArrowRight, RefreshCw, GitBranch } from "lucide-react";
+import { Copy, Check, AlertTriangle, ShieldCheck, Terminal, GitBranch } from "lucide-react";
 
 interface DisasterScenario {
   id: string;

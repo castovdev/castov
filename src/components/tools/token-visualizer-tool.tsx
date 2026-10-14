@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Copy, Check, Sparkles, Coins, Zap, Layers, RefreshCw } from "lucide-react";
+import { Copy, Check, RefreshCw } from "lucide-react";
 
 interface ModelPricing {
   id: string;

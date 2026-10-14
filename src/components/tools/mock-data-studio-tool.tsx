@@ -1,21 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
-import { Copy, Check, Download, RefreshCw, Database, Terminal, Code2, Server } from "lucide-react";
+import { Copy, Check, Download } from "lucide-react";
 
 type DataTemplate = "users" | "ecommerce" | "saas-metrics" | "crypto";
+
+const FIRST_NAMES = ["Alex", "Sarah", "Jordan", "Elena", "Liam", "Maya", "Noah", "Olivia", "David", "Emma"];
+const LAST_NAMES = ["Smith", "Chen", "Dubois", "Al-Mansoor", "Vance", "Rossi", "Müller", "Tanaka", "Silva", "Taylor"];
+const CITIES = ["San Francisco", "Tokyo", "Berlin", "London", "Algiers", "Toronto", "Sydney", "Paris", "Singapore", "New York"];
+const ROLES = ["admin", "member", "editor", "viewer", "billing_manager"];
+const PRODUCTS = ["Mechanical Keyboard", "Ultra-Wide Monitor", "Ergonomic Chair", "Noise-Cancelling Headphones", "USB-C Hub"];
 
 export function MockDataStudioTool() {
   const [template, setTemplate] = useState<DataTemplate>("users");
   const [recordCount, setRecordCount] = useState(10);
   const [format, setFormat] = useState<"json" | "typescript" | "sql">("json");
   const [copied, setCopied] = useState(false);
+  // Reference time captured once on mount (lazy initializer), so render stays pure.
+  const [baseTime] = useState(() => Date.now());
 
-  const FIRST_NAMES = ["Alex", "Sarah", "Jordan", "Elena", "Liam", "Maya", "Noah", "Olivia", "David", "Emma"];
-  const LAST_NAMES = ["Smith", "Chen", "Dubois", "Al-Mansoor", "Vance", "Rossi", "Müller", "Tanaka", "Silva", "Taylor"];
-  const CITIES = ["San Francisco", "Tokyo", "Berlin", "London", "Algiers", "Toronto", "Sydney", "Paris", "Singapore", "New York"];
-  const ROLES = ["admin", "member", "editor", "viewer", "billing_manager"];
-  const PRODUCTS = ["Mechanical Keyboard", "Ultra-Wide Monitor", "Ergonomic Chair", "Noise-Cancelling Headphones", "USB-C Hub"];
 
   const generateData = React.useMemo(() => {
     const list: any[] = [];
@@ -32,7 +35,7 @@ export function MockDataStudioTool() {
           role: ROLES[i % ROLES.length],
           isActive: i % 4 !== 0,
           location: CITIES[i % CITIES.length],
-          createdAt: new Date(Date.now() - i * 86400000 * 3).toISOString(),
+          createdAt: new Date(baseTime - i * 86400000 * 3).toISOString(),
         });
       } else if (template === "ecommerce") {
         list.push({
@@ -44,31 +47,31 @@ export function MockDataStudioTool() {
           totalPrice: parseFloat(((i % 5 + 1) * 79.99).toFixed(2)),
           status: i % 3 === 0 ? "shipped" : i % 3 === 1 ? "delivered" : "processing",
           paymentMethod: i % 2 === 0 ? "credit_card" : "apple_pay",
-          timestamp: new Date(Date.now() - i * 3600000 * 12).toISOString(),
+          timestamp: new Date(baseTime - i * 3600000 * 12).toISOString(),
         });
       } else if (template === "saas-metrics") {
         list.push({
-          timestamp: new Date(Date.now() - (recordCount - i) * 86400000).toISOString().split("T")[0],
+          timestamp: new Date(baseTime - (recordCount - i) * 86400000).toISOString().split("T")[0],
           mrr: 12500 + i * 450,
           activeUsers: 840 + i * 35,
           churnRate: parseFloat((1.2 + (i % 5) * 0.1).toFixed(2)),
-          apiLatencyMs: Math.floor(45 + Math.random() * 30),
+          apiLatencyMs: 45 + ((i * 7919) % 30),
           serverUptimePercent: 99.98,
         });
       } else {
         list.push({
-          txHash: `0x${Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}...`,
+          txHash: `0x${Array.from({ length: 16 }, (_, j) => ((i * 2654435761 + j * 40503) >>> 0) % 16).map((n) => n.toString(16)).join("")}...`,
           from: `0x${fName.slice(0, 4)}...${i}`,
           to: `0x${lName.slice(0, 4)}...${i + 5}`,
           amountEth: parseFloat(((i * 0.35) % 4.5 + 0.1).toFixed(4)),
-          gasFeeGwei: Math.floor(18 + Math.random() * 12),
+          gasFeeGwei: 18 + ((i * 104729) % 12),
           status: "confirmed",
           blockNumber: 18450200 + i,
         });
       }
     }
     return list;
-  }, [template, recordCount]);
+  }, [template, recordCount, baseTime]);
 
   const outputString = React.useMemo(() => {
     if (format === "json") {

@@ -2,7 +2,7 @@
 
 import { useState, useId, useEffect, useRef } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
-import { ShieldAlert, Upload, Trash2, Clipboard, FileText, CheckCircle2 } from "lucide-react";
+import { ShieldAlert, Upload, Trash2, Clipboard, CheckCircle2 } from "lucide-react";
 
 // Audited pure JavaScript MD5 (RFC 1321)
 function md5(input: Uint8Array): string {

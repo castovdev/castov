@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 /**
  * A hook that syncs a string state with the URL hash.
@@ -20,7 +20,7 @@ export function useUrlState(key: string, defaultValue: string): [string, (val: s
           return decodeURIComponent(escape(atob(urlVal)));
         }
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
     return defaultValue;

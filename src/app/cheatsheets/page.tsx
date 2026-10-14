@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { BookOpen, Sparkles, Copy, ShieldCheck } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
 import { CheatSheetsView } from "@/components/cheatsheets-view";
 import { Breadcrumb } from "@/components/breadcrumb";

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
-import { RefreshCw, Check, Copy } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 type UuidVersion = "v4" | "v7";
 

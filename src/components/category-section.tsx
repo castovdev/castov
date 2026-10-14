@@ -15,7 +15,6 @@ const MAIN_CATEGORIES = TOOL_CATEGORIES.filter((c) => c !== "Labs");
 /** Grouped tool listing used on the homepage and the /tools page, for visual consistency. */
 export function CategorySection({ headingLevel = 2 }: { headingLevel?: 2 | 3 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
-  const SubHeading = headingLevel === 2 ? "h3" : "h4";
   const labsTools = TOOLS.filter((t) => t.category === "Labs");
 
   return (

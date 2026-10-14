@@ -3,7 +3,6 @@ import Link from "next/link";
 import { 
   Download, 
   Terminal, 
-  CheckCircle2, 
   Code2, 
   Zap, 
   ShieldCheck, 

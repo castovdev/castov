@@ -28,6 +28,19 @@ export function toBase64(str: string, urlSafe = false): string {
 
 export function fromBase64(str: string): string {
   let clean = str.trim().replace(/-/g, "+").replace(/_/g, "/");
+  if (!clean) return "";
+
+  // Validate that clean string contains only valid Base64 characters and padding
+  if (!/^[A-Za-z0-9+/=]+$/.test(clean)) {
+    throw new Error("Invalid Base64 character: input contains non-Base64 characters.");
+  }
+
+  // Strip trailing padding to validate structure
+  const unpadded = clean.replace(/=+$/, "");
+  if (unpadded.length === 0 || clean.slice(unpadded.length).length > 2 || unpadded.length % 4 === 1) {
+    throw new Error("Invalid Base64: malformed padding or invalid payload length.");
+  }
+
   while (clean.length % 4 !== 0) {
     clean += "=";
   }
@@ -39,7 +52,7 @@ export function fromBase64(str: string): string {
   for (let i = 0; i < bin.length; i++) {
     bytes[i] = bin.charCodeAt(i);
   }
-  return new TextDecoder().decode(bytes);
+  return new TextDecoder("utf-8", { fatal: false }).decode(bytes);
 }
 
 // ---------------------------------------------------------------------------
@@ -296,10 +309,12 @@ for (let i = 0; i < 256; i++) {
 
 export function calculateEntropy(str: string): number {
   if (!str) return 0;
-  const len = str.length;
+  // Sample up to 65,536 characters for statistical entropy to prevent main-thread freezing on massive payloads
+  const sample = str.length > 65536 ? str.slice(0, 65536) : str;
+  const len = sample.length;
   const frequencies = new Map<string, number>();
   for (let i = 0; i < len; i++) {
-    const ch = str[i];
+    const ch = sample[i];
     frequencies.set(ch, (frequencies.get(ch) || 0) + 1);
   }
 
@@ -412,9 +427,11 @@ export interface BruteForceCandidate {
 }
 
 export function caesarBruteForce(str: string): BruteForceCandidate[] {
+  // Sample up to 4096 characters to prevent CPU exhaustion and main-thread freeze
+  const sampleText = str.length > 4096 ? str.slice(0, 4096) : str;
   const results: BruteForceCandidate[] = [];
   for (let shift = 1; shift < 26; shift++) {
-    const decoded = caesarCipher(str, shift);
+    const decoded = caesarCipher(sampleText, shift);
     const words = decoded.toLowerCase().split(/[^a-z0-9]+/);
     let score = 0;
     for (const w of words) {
@@ -455,7 +472,9 @@ export function xorCipher(str: string, key: string): string {
 }
 
 export function xorBruteForce(str: string): BruteForceCandidate[] {
-  const bytes = new TextEncoder().encode(str);
+  // Sample up to 4096 characters to prevent memory exhaustion (256 * 4KB = 1MB max memory)
+  const sampleText = str.length > 4096 ? str.slice(0, 4096) : str;
+  const bytes = new TextEncoder().encode(sampleText);
   const results: BruteForceCandidate[] = [];
 
   for (let key = 1; key < 256; key++) {
@@ -627,24 +646,48 @@ export function unicodeUnescape(str: string): string {
 // ---------------------------------------------------------------------------
 
 export function decodeJwtFormatted(token: string): string {
+  if (token.length > 65536) {
+    throw new Error("Invalid JWT: token length exceeds maximum allowed limit of 64KB.");
+  }
   const parts = token.trim().split(".");
-  if (parts.length < 2) throw new Error("Invalid JWT: expected at least header and payload separated by '.'");
+  if (parts.length < 2) {
+    throw new Error("Invalid JWT: expected at least header and payload separated by '.'");
+  }
 
-  const header = JSON.parse(fromBase64(parts[0]));
-  const payload = JSON.parse(fromBase64(parts[1]));
+  let header: any;
+  let payload: any;
+
+  try {
+    header = JSON.parse(fromBase64(parts[0]));
+  } catch (err: any) {
+    throw new Error(`Invalid JWT header: unable to parse JSON payload (${err.message})`);
+  }
+
+  try {
+    payload = JSON.parse(fromBase64(parts[1]));
+  } catch (err: any) {
+    throw new Error(`Invalid JWT payload: unable to parse JSON claims (${err.message})`);
+  }
+
+  const isExpired =
+    payload && typeof payload.exp === "number" ? Date.now() > payload.exp * 1000 : false;
 
   const analysis: Record<string, any> = {
-    _status: "Parsed successfully",
+    _securityNotice:
+      "UNVERIFIED CLAIMS: Cryptographic signature has NOT been verified. Claims are decoded for client-side inspection only. Never make authorization decisions based on unverified tokens.",
+    _signatureVerified: false,
+    _status: "Parsed successfully (Signature Unverified)",
     header,
     payload,
   };
 
-  if (payload.exp && typeof payload.exp === "number") {
+  if (payload && typeof payload.exp === "number") {
     const expDate = new Date(payload.exp * 1000);
     analysis._expiration = {
       timestamp: payload.exp,
       iso: expDate.toISOString(),
-      expired: Date.now() > expDate.getTime(),
+      expired: isExpired,
+      status: isExpired ? "Expired" : "Within timestamp validity window (Signature Unverified)",
     };
   }
 
@@ -665,7 +708,10 @@ export interface MagicDetection {
 }
 
 export function detectMagic(input: string): MagicDetection[] {
-  const trimmed = input.trim();
+  if (!input) return [];
+  // Sample up to 32KB to prevent ReDoS or thread freeze on huge payloads
+  const scanTarget = input.length > 32768 ? input.slice(0, 32768) : input;
+  const trimmed = scanTarget.trim();
   if (!trimmed) return [];
   const findings: MagicDetection[] = [];
 
@@ -1054,35 +1100,35 @@ export const OPERATIONS: OperationDef[] = [
   },
   {
     id: "jwt_decode",
-    name: "JWT Token Inspector",
+    name: "JWT Claims Inspector (Unverified)",
     category: "Encoding",
-    description: "Inspect JSON Web Token header, claims payload and expiration.",
+    description: "Inspect JSON Web Token claims and expiration. Note: Does not verify cryptographic signatures.",
     params: [],
     run: (input) => decodeJwtFormatted(input),
   },
 
-  // --- CIPHERS ---
+  // --- CIPHERS & OBFUSCATION ---
   {
     id: "rot13",
-    name: "ROT13 Cipher",
+    name: "ROT13 Obfuscation",
     category: "Ciphers",
-    description: "Shift alphabetical characters by 13 positions.",
+    description: "Classical alphabet shift by 13 positions. Note: Reversible obfuscation, not encryption.",
     params: [],
     run: (input) => rot13(input),
   },
   {
     id: "rot47",
-    name: "ROT47 Cipher",
+    name: "ROT47 Obfuscation",
     category: "Ciphers",
-    description: "Shift printable ASCII characters (33-126) by 47 positions.",
+    description: "Printable ASCII 33-126 rotation. Note: Reversible obfuscation, not encryption.",
     params: [],
     run: (input) => rot47(input),
   },
   {
     id: "caesar",
-    name: "Caesar Cipher",
+    name: "Caesar Cipher (Classical)",
     category: "Ciphers",
-    description: "Shift alphabetical letters by N positions.",
+    description: "Shift alphabetical letters by N positions. Note: Historical substitution cipher, not secure encryption.",
     params: [
       { id: "shift", label: "Shift amount (1-25)", type: "number", default: 3 },
     ],
@@ -1090,17 +1136,17 @@ export const OPERATIONS: OperationDef[] = [
   },
   {
     id: "atbash",
-    name: "Atbash Cipher",
+    name: "Atbash Cipher (Classical)",
     category: "Ciphers",
-    description: "Reverse alphabet substitution cipher (A <-> Z, B <-> Y).",
+    description: "Reverse alphabet substitution cipher (A <-> Z, B <-> Y). Note: Historical cipher, not secure encryption.",
     params: [],
     run: (input) => atbash(input),
   },
   {
     id: "xor",
-    name: "XOR Cipher",
+    name: "XOR Obfuscation",
     category: "Ciphers",
-    description: "XOR bitwise encryption/decryption with key (string or 0x hex).",
+    description: "Bitwise XOR with key or hex byte. Note: Classical obfuscation for CTF and malware analysis, not secure modern encryption.",
     params: [
       { id: "key", label: "Key (e.g. 'secret' or '0xAA')", type: "text", default: "0x5A" },
     ],
@@ -1108,9 +1154,9 @@ export const OPERATIONS: OperationDef[] = [
   },
   {
     id: "vigenere_decode",
-    name: "Vigenère Decrypt",
+    name: "Vigenère Decrypt (Classical)",
     category: "Ciphers",
-    description: "Decrypt polyalphabetic Vigenère cipher using passphrase.",
+    description: "Decrypt polyalphabetic Vigenère cipher with passphrase. Note: Historical cipher, not secure modern encryption.",
     params: [
       { id: "key", label: "Passphrase Key", type: "text", default: "KEY" },
     ],
@@ -1118,9 +1164,9 @@ export const OPERATIONS: OperationDef[] = [
   },
   {
     id: "vigenere_encode",
-    name: "Vigenère Encrypt",
+    name: "Vigenère Encrypt (Classical)",
     category: "Ciphers",
-    description: "Encrypt text with polyalphabetic Vigenère cipher using key.",
+    description: "Encrypt text with polyalphabetic Vigenère cipher using key. Note: Historical cipher, not secure modern encryption.",
     params: [
       { id: "key", label: "Passphrase Key", type: "text", default: "KEY" },
     ],
@@ -1130,25 +1176,25 @@ export const OPERATIONS: OperationDef[] = [
   // --- HASHING ---
   {
     id: "hash_md5",
-    name: "MD5 Hash",
+    name: "MD5 Hash (Legacy Checksum)",
     category: "Hashing",
-    description: "Generate 128-bit MD5 digest checksum (32 hex characters).",
+    description: "Generate 128-bit MD5 digest. Warning: Cryptographically broken (collision vulnerable); do not use for passwords or digital signatures.",
     params: [],
     run: (input) => md5(input),
   },
   {
     id: "hash_sha256",
-    name: "SHA-256 Hash",
+    name: "SHA-256 Hash (Cryptographic)",
     category: "Hashing",
-    description: "Generate 256-bit secure SHA-256 cryptographic digest.",
+    description: "Generate 256-bit secure SHA-256 cryptographic digest (FIPS 180-4 standard).",
     params: [],
     run: (input) => sha256(input),
   },
   {
     id: "hash_crc32",
-    name: "CRC-32 Checksum",
+    name: "CRC-32 Checksum (Error-Detecting)",
     category: "Hashing",
-    description: "Compute 32-bit cyclic redundancy check checksum.",
+    description: "Compute 32-bit cyclic redundancy check checksum. Note: For data integrity/error detection only; not a cryptographic hash.",
     params: [],
     run: (input) => crc32(input),
   },
@@ -1173,9 +1219,16 @@ export const OPERATIONS: OperationDef[] = [
       },
     ],
     run: (input, p) => {
-      const parsed = JSON.parse(input);
-      const indent = p.indent === "\t" ? "\t" : Number(p.indent) || 2;
-      return JSON.stringify(parsed, null, indent);
+      if (input.length > 2 * 1024 * 1024) {
+        throw new Error("JSON input exceeds 2MB limit for in-browser formatting.");
+      }
+      try {
+        const parsed = JSON.parse(input);
+        const indent = p.indent === "\t" ? "\t" : Number(p.indent) || 2;
+        return JSON.stringify(parsed, null, indent);
+      } catch (err: any) {
+        throw new Error(`JSON Beautify failed: ${err.message}`);
+      }
     },
   },
   {
@@ -1184,7 +1237,16 @@ export const OPERATIONS: OperationDef[] = [
     category: "Formatting",
     description: "Compact JSON by stripping all whitespace and newlines.",
     params: [],
-    run: (input) => JSON.stringify(JSON.parse(input)),
+    run: (input) => {
+      if (input.length > 2 * 1024 * 1024) {
+        throw new Error("JSON input exceeds 2MB limit for in-browser minification.");
+      }
+      try {
+        return JSON.stringify(JSON.parse(input));
+      } catch (err: any) {
+        throw new Error(`JSON Minify failed: ${err.message}`);
+      }
+    },
   },
   {
     id: "extract_urls",
@@ -1336,10 +1398,24 @@ export interface RecipeExecutionResult {
   errorMessage?: string;
 }
 
+const MAX_INPUT_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_OUTPUT_BYTES = 10 * 1024 * 1024; // 10 MB
+
 export function executeRecipe(input: string, steps: RecipeStep[]): RecipeExecutionResult {
   const startTime = performance.now();
-  let current = input;
   const stepResults: StepExecutionResult[] = [];
+
+  if (input && input.length > MAX_INPUT_BYTES) {
+    return {
+      output: input.slice(0, 1024),
+      totalDurationMs: 0,
+      stepResults,
+      errorStepIndex: 0,
+      errorMessage: "Input exceeds maximum safe in-browser size limit (5MB). Please reduce input size to preserve performance.",
+    };
+  }
+
+  let current = input;
 
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
@@ -1359,6 +1435,25 @@ export function executeRecipe(input: string, steps: RecipeStep[]): RecipeExecuti
     const stepStart = performance.now();
     try {
       current = op.run(current, step.params);
+
+      if (current.length > MAX_OUTPUT_BYTES) {
+        stepResults.push({
+          stepIndex: i,
+          opId: step.opId,
+          opName: op.name,
+          outputPreview: current.slice(0, 60),
+          durationMs: Math.round((performance.now() - stepStart) * 100) / 100,
+          error: "Output exceeded 10MB memory threshold",
+        });
+        return {
+          output: current.slice(0, 1024),
+          totalDurationMs: Math.round((performance.now() - startTime) * 100) / 100,
+          stepResults,
+          errorStepIndex: i,
+          errorMessage: `Step ${i + 1} (${op.name}) output exceeded maximum safe memory threshold (10MB). Pipeline halted.`,
+        };
+      }
+
       stepResults.push({
         stepIndex: i,
         opId: step.opId,
@@ -1390,6 +1485,145 @@ export function executeRecipe(input: string, steps: RecipeStep[]): RecipeExecuti
     totalDurationMs: Math.round((performance.now() - startTime) * 100) / 100,
     stepResults,
   };
+}
+
+// ---------------------------------------------------------------------------
+// 10.1 Safe Recipe Sharing & Deserialization
+// ---------------------------------------------------------------------------
+
+export interface SerializedRecipePayload {
+  v: 1;
+  steps: Array<{
+    opId: OperationId;
+    params?: Record<string, any>;
+    enabled?: boolean;
+  }>;
+  input?: string;
+}
+
+const MAX_SHARE_HASH_LENGTH = 16384;
+const MAX_SHARED_INPUT_LENGTH = 16384;
+
+/**
+ * Serializes recipe steps into a compact URL-safe hash.
+ * By default, `includeInput` is false to prevent accidental secret/credential leakage.
+ */
+export function serializeSharePayload(
+  steps: RecipeStep[],
+  input?: string,
+  includeInput = false
+): string {
+  const payload: SerializedRecipePayload = {
+    v: 1,
+    steps: steps.map((s) => ({
+      opId: s.opId,
+      params: s.params,
+      enabled: s.enabled,
+    })),
+  };
+
+  if (includeInput && input) {
+    payload.input = input.slice(0, MAX_SHARED_INPUT_LENGTH);
+  }
+
+  const jsonStr = JSON.stringify(payload);
+  const bytes = new TextEncoder().encode(jsonStr);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/**
+ * Safely parses and validates a shared recipe hash from the URL.
+ * Strictly validates against the OPERATIONS whitelist and sanitizes all parameters.
+ */
+export function deserializeSharePayload(hash: string): {
+  steps: RecipeStep[];
+  input?: string;
+  hasInput: boolean;
+} | null {
+  if (!hash || typeof hash !== "string") return null;
+  const clean = hash.trim().replace(/^#/, "");
+  if (!clean || clean.length > MAX_SHARE_HASH_LENGTH) return null;
+
+  try {
+    let standard = clean.replace(/-/g, "+").replace(/_/g, "/");
+    while (standard.length % 4 !== 0) standard += "=";
+
+    if (!/^[A-Za-z0-9+/=]+$/.test(standard)) return null;
+
+    const bin = atob(standard);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const jsonStr = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    const parsed = JSON.parse(jsonStr);
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    if (
+      Object.prototype.hasOwnProperty.call(parsed, "__proto__") ||
+      Object.prototype.hasOwnProperty.call(parsed, "constructor") ||
+      Object.prototype.hasOwnProperty.call(parsed, "prototype")
+    ) {
+      return null;
+    }
+    if (!Array.isArray(parsed.steps) || parsed.steps.length > 50) return null;
+
+    const validatedSteps: RecipeStep[] = [];
+    for (let i = 0; i < parsed.steps.length; i++) {
+      const item = parsed.steps[i];
+      if (!item || typeof item !== "object") continue;
+      if (
+        Object.prototype.hasOwnProperty.call(item, "__proto__") ||
+        Object.prototype.hasOwnProperty.call(item, "constructor") ||
+        Object.prototype.hasOwnProperty.call(item, "prototype")
+      ) {
+        continue;
+      }
+
+      const op = getOperation(item.opId);
+      if (!op) continue;
+
+      const safeParams: Record<string, any> = {};
+      for (const p of op.params) {
+        const val = item.params?.[p.id];
+        if (val === undefined) {
+          safeParams[p.id] = p.default;
+        } else if (p.type === "boolean") {
+          safeParams[p.id] = Boolean(val);
+        } else if (p.type === "number") {
+          const num = Number(val);
+          safeParams[p.id] = isNaN(num) ? p.default : num;
+        } else if (p.type === "select") {
+          const isValid = p.options?.some((o) => o.value === String(val));
+          safeParams[p.id] = isValid ? String(val) : p.default;
+        } else {
+          safeParams[p.id] = typeof val === "string" ? val.slice(0, 500) : String(val).slice(0, 500);
+        }
+      }
+
+      validatedSteps.push({
+        id: `step-loaded-${i}-${Date.now()}`,
+        opId: op.id,
+        params: safeParams,
+        enabled: item.enabled !== false,
+      });
+    }
+
+    let safeInput: string | undefined = undefined;
+    if (typeof parsed.input === "string" && parsed.input.length > 0) {
+      safeInput = parsed.input.slice(0, MAX_SHARED_INPUT_LENGTH);
+    }
+
+    return {
+      steps: validatedSteps,
+      input: safeInput,
+      hasInput: safeInput !== undefined,
+    };
+  } catch {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------

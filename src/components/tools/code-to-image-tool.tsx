@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Copy, Download, Check, Sparkles, Image as ImageIcon } from "lucide-react";
 
 const THEMES = [
@@ -29,7 +29,6 @@ export function CodeToImageTool() {
   const [padding, setPadding] = useState(32);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const drawToCanvas = (): HTMLCanvasElement | null => {
     const canvas = document.createElement("canvas");
@@ -38,7 +37,6 @@ export function CodeToImageTool() {
 
     const lines = code.split("\n");
     const lineHeight = 22;
-    const fontSize = 14;
     const font = "14px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
 
     ctx.font = font;

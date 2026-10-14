@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TOOLS } from "@/content/tools";
-import { GUIDES } from "@/content/guides";
 import { StaticPage } from "@/components/static-page";
 import { ToolCard } from "@/components/tool-card";
 import { buildMetadata } from "@/lib/seo";
@@ -22,36 +21,6 @@ const DEV_TOOL_SLUGS = [
   "business-hours-converter",
   "unix-timestamp-batch-converter",
   "unix-timestamp-validator",
-];
-
-const CODE_SNIPPETS = [
-  {
-    lang: "JavaScript",
-    label: "Get current Unix timestamp",
-    code: "Math.floor(Date.now() / 1000)            // seconds\nDate.now()                              // milliseconds",
-  },
-  {
-    lang: "Python",
-    label: "Convert timestamp to ISO 8601",
-    code: "import datetime\ndt = datetime.datetime.utcfromtimestamp(1700000000)\ndt.isoformat() + 'Z'  # '2023-11-14T22:13:20Z'",
-  },
-  {
-    lang: "Go",
-    label: "Parse ISO 8601 string",
-    code: 'import "time"\nt, _ := time.Parse(time.RFC3339, "2023-11-14T22:13:20Z")\nt.Unix() // 1700000000',
-  },
-  {
-    lang: "SQL",
-    label: "Extract Unix timestamp",
-    code: "-- PostgreSQL\nEXTRACT(EPOCH FROM NOW())::BIGINT\n-- MySQL\nUNIX_TIMESTAMP(NOW())",
-  },
-];
-
-const DEV_GUIDE_SLUGS = [
-  "iso-8601-date-format-guide",
-  "cron-expressions-explained",
-  "time-zones-and-dst-for-developers",
-  "seconds-vs-milliseconds-timestamps",
 ];
 
 export default function DeveloperPage() {

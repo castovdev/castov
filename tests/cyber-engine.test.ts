@@ -29,6 +29,8 @@ import {
   decodeJwtFormatted,
   detectMagic,
   executeRecipe,
+  serializeSharePayload,
+  deserializeSharePayload,
   OPERATIONS,
   type RecipeStep,
 } from "@/lib/cyber-engine";
@@ -95,6 +97,8 @@ describe("CyberEngine - Encodings", () => {
     expect(parsed.header.alg).toBe("HS256");
     expect(parsed.payload.name).toBe("John Doe");
     expect(parsed._expiration.timestamp).toBe(1800000000);
+    expect(parsed._signatureVerified).toBe(false);
+    expect(parsed._securityNotice).toContain("UNVERIFIED");
   });
 });
 
@@ -286,5 +290,146 @@ describe("CyberEngine - Recipe Execution Pipeline", () => {
       expect(op.name).toBeDefined();
       expect(typeof op.run).toBe("function");
     }
+  });
+});
+
+describe("CyberEngine - Security, Privacy & DoS Hardening", () => {
+  it("serializeSharePayload defaults to excluding input data to prevent credential leaks", () => {
+    const sensitiveInput = "AIzaSyD-dummy-api-key-secret-12345";
+    const steps: RecipeStep[] = [{ id: "1", opId: "base64_decode", params: {}, enabled: true }];
+
+    // By default: includeInput is false
+    const hashDefault = serializeSharePayload(steps, sensitiveInput);
+    const parsedDefault = deserializeSharePayload(hashDefault);
+
+    expect(parsedDefault).not.toBeNull();
+    expect(parsedDefault?.hasInput).toBe(false);
+    expect(parsedDefault?.input).toBeUndefined();
+    expect(parsedDefault?.steps).toHaveLength(1);
+    expect(parsedDefault?.steps[0].opId).toBe("base64_decode");
+  });
+
+  it("serializeSharePayload with explicit opt-in includes safely truncated input", () => {
+    const sampleInput = "public-ctf-sample-flag{123}";
+    const steps: RecipeStep[] = [{ id: "1", opId: "rot13", params: {}, enabled: true }];
+
+    const hashWithInput = serializeSharePayload(steps, sampleInput, true);
+    const parsed = deserializeSharePayload(hashWithInput);
+
+    expect(parsed).not.toBeNull();
+    expect(parsed?.hasInput).toBe(true);
+    expect(parsed?.input).toBe(sampleInput);
+    expect(parsed?.steps[0].opId).toBe("rot13");
+  });
+
+  it("deserializeSharePayload rejects malformed or oversized hashes safely", () => {
+    expect(deserializeSharePayload("")).toBeNull();
+    expect(deserializeSharePayload("invalid-non-base64-!@#$%^&*()")).toBeNull();
+
+    // Oversized hash (> 16KB)
+    const giantHash = "A".repeat(20000);
+    expect(deserializeSharePayload(giantHash)).toBeNull();
+  });
+
+  it("deserializeSharePayload rejects prototype pollution and unknown operations", () => {
+    // Malicious payload trying to inject __proto__ or unknown operations
+    const malicious = JSON.stringify({
+      v: 1,
+      ["__proto__"]: { polluted: true },
+      steps: [
+        { opId: "malicious_eval_op", params: { code: "alert(1)" } },
+        { opId: "base64_decode", params: {} },
+      ],
+    });
+    const bytes = new TextEncoder().encode(malicious);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    const hash = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_");
+
+    const result = deserializeSharePayload(hash);
+    expect(result).toBeNull(); // Reject prototype pollution
+    expect(({} as any).polluted).toBeUndefined();
+  });
+
+  it("deserializeSharePayload drops unknown operations and sanitizes parameters", () => {
+    const payload = JSON.stringify({
+      v: 1,
+      steps: [
+        { opId: "unknown_hack_tool", params: { foo: "bar" } },
+        { opId: "caesar", params: { shift: "25", injectedProp: "bad" } },
+      ],
+    });
+    const bytes = new TextEncoder().encode(payload);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    const hash = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_");
+
+    const result = deserializeSharePayload(hash);
+    expect(result).not.toBeNull();
+    // Unknown operation was dropped
+    expect(result?.steps).toHaveLength(1);
+    expect(result?.steps[0].opId).toBe("caesar");
+    // Parameter was coerced and injected property was dropped
+    expect(result?.steps[0].params.shift).toBe(25);
+    expect(result?.steps[0].params.injectedProp).toBeUndefined();
+  });
+
+  it("fromBase64 strictly rejects non-Base64 characters without crashing", () => {
+    expect(() => fromBase64("this is definitely not base64!!")).toThrow(/Invalid Base64/);
+    expect(() => fromBase64("====")).toThrow(/Invalid Base64/);
+  });
+
+  it("decodeJwtFormatted rejects oversized tokens and malformed JSON safely", () => {
+    const hugeToken = "a".repeat(70000);
+    expect(() => decodeJwtFormatted(hugeToken)).toThrow(/maximum allowed limit/);
+
+    const badJsonToken = "bm90LWpzb24.bm90LWpzb24";
+    expect(() => decodeJwtFormatted(badJsonToken)).toThrow(/unable to parse JSON/);
+  });
+
+  it("executeRecipe enforces 5MB input safety bound", () => {
+    const hugeInput = "X".repeat(6 * 1024 * 1024); // 6MB
+    const steps: RecipeStep[] = [{ id: "1", opId: "uppercase", params: {}, enabled: true }];
+    const result = executeRecipe(hugeInput, steps);
+    expect(result.errorMessage).toContain("exceeds maximum safe in-browser size limit");
+  });
+
+  it("caesarBruteForce and xorBruteForce handle large inputs within milliseconds", () => {
+    const largeText = "The quick brown fox jumps over the lazy dog. ".repeat(2000); // ~90KB
+    const start = performance.now();
+    const caesarCandidates = caesarBruteForce(largeText);
+    const xorCandidates = xorBruteForce(largeText);
+    const duration = performance.now() - start;
+
+    expect(caesarCandidates.length).toBe(25);
+    expect(xorCandidates.length).toBeGreaterThan(0);
+    // Must execute fast without freezing the thread
+    expect(duration).toBeLessThan(200);
+  });
+
+  it("calculateEntropy samples large inputs without CPU lockup", () => {
+    const largePayload = "A".repeat(500000);
+    const start = performance.now();
+    const entropy = calculateEntropy(largePayload);
+    const duration = performance.now() - start;
+
+    expect(entropy).toBe(0);
+    expect(duration).toBeLessThan(50);
+  });
+
+  it("extract_urls does not extract or execute javascript: URIs", () => {
+    const attackText = 'Check out javascript:alert("XSS") and https://castov.com/tools';
+    const op = OPERATIONS.find((o) => o.id === "extract_urls")!;
+    const res = op.run(attackText, {});
+    expect(res).not.toContain("javascript:");
+    expect(res).toContain("https://castov.com/tools");
+  });
+
+  it("htmlEscape neutralizes executable XSS script tags", () => {
+    const xss = '<img src=x onerror="alert(document.cookie)">';
+    const escaped = htmlEscape(xss);
+    expect(escaped).not.toContain("<img");
+    expect(escaped).not.toContain(">");
+    expect(escaped).toContain("&lt;img");
   });
 });

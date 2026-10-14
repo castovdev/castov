@@ -15,7 +15,7 @@ export async function GET() {
         },
       });
     }
-  } catch {}
+  } catch { /* local file unavailable: fall back to redirect below */ }
 
   // Fallback direct URL redirect
   return NextResponse.redirect("https://castov.com/castov-vscode-0.1.0.vsix", 307);

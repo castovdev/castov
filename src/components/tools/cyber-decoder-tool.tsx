@@ -24,6 +24,9 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  AlertTriangle,
+  X,
+  Lock,
 } from "lucide-react";
 import {
   executeRecipe,
@@ -33,6 +36,8 @@ import {
   generateHexDump,
   caesarBruteForce,
   xorBruteForce,
+  serializeSharePayload,
+  deserializeSharePayload,
   OPERATIONS,
   PRESET_RECIPES,
   SAMPLE_INPUTS,
@@ -53,28 +58,38 @@ export function CyberDecoderTool() {
   const [activeTab, setActiveTab] = useState<"output" | "diagnostics" | "hexdump" | "bruteforce">("output");
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpSelectorOpen, setIsOpSelectorOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [includeInputInShare, setIncludeInputInShare] = useState(false);
+  const [loadedFromHashNotice, setLoadedFromHashNotice] = useState<string | null>(null);
+  const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const [shareToast, setShareToast] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const inputId = useId();
   const searchInputId = useId();
+  const includeInputCheckboxId = useId();
 
-  // Load from URL hash if present
+  // Load from URL hash if present using safe deserializer
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       const hash = window.location.hash.slice(1);
       if (hash) {
-        const decoded = JSON.parse(decodeURIComponent(escape(atob(hash))));
-        if (decoded.input && typeof decoded.input === "string") {
-          setInput(decoded.input);
-        }
-        if (Array.isArray(decoded.steps)) {
-          setSteps(decoded.steps);
+        const payload = deserializeSharePayload(hash);
+        if (payload) {
+          if (payload.steps.length > 0) {
+            setSteps(payload.steps);
+          }
+          if (payload.hasInput && payload.input) {
+            setInput(payload.input);
+            setLoadedFromHashNotice("Recipe and sample input loaded from shared link.");
+          } else {
+            setLoadedFromHashNotice(`Recipe loaded from shared link (${payload.steps.length} operations).`);
+          }
         }
       }
     } catch {
-      // Ignore hash parse errors
+      // Ignore hash parse errors safely
     }
   }, []);
 
@@ -178,14 +193,26 @@ export function CyberDecoderTool() {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileUploadError(null);
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Enforce 5MB upload limit to prevent browser memory exhaustion
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      setFileUploadError("File exceeds 5MB size limit. Please upload files under 5MB to preserve browser performance.");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result;
       if (typeof content === "string") {
         setInput(content);
       }
+    };
+    reader.onerror = () => {
+      setFileUploadError("Failed to read file.");
     };
     reader.readAsText(file);
   };
@@ -200,15 +227,15 @@ export function CyberDecoderTool() {
     URL.revokeObjectURL(url);
   };
 
-  const shareRecipe = () => {
+  const copyShareLink = () => {
     if (typeof window === "undefined") return;
     try {
-      const payload = { input, steps };
-      const hash = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      const hash = serializeSharePayload(steps, input, includeInputInShare);
       const shareUrl = `${window.location.origin}${window.location.pathname}#${hash}`;
       navigator.clipboard.writeText(shareUrl);
       setShareToast(true);
       setTimeout(() => setShareToast(false), 3000);
+      setIsShareModalOpen(false);
     } catch {
       // Fallback
     }
@@ -241,12 +268,12 @@ export function CyberDecoderTool() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 relative">
           <button
             type="button"
-            onClick={shareRecipe}
+            onClick={() => setIsShareModalOpen((v) => !v)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors cursor-pointer"
-            aria-label="Share recipe and data link"
+            aria-label="Open share recipe settings"
           >
             {shareToast ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Share2 className="w-3.5 h-3.5" />}
             {shareToast ? "Copied Share Link!" : "Share Recipe"}
@@ -262,8 +289,133 @@ export function CyberDecoderTool() {
           >
             <RotateCcw className="w-3.5 h-3.5" /> Reset
           </button>
+
+          {/* Secure Share Recipe Modal / Popover */}
+          {isShareModalOpen && (
+            <div className="absolute right-0 top-11 z-50 w-80 sm:w-96 p-4 rounded-xl bg-card border border-line shadow-xl text-xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-line">
+                <span className="font-semibold text-fg flex items-center gap-1.5">
+                  <Share2 className="w-3.5 h-3.5 text-accent" /> Share Recipe Link
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsShareModalOpen(false)}
+                  className="p-1 text-muted hover:text-fg rounded-sm"
+                  aria-label="Close share options"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <p className="text-muted text-[11px] leading-relaxed">
+                Generates a reproducible URL with your recipe pipeline encoded directly into the link.
+              </p>
+
+              {/* Explicit Opt-in Checkbox for Input Data */}
+              <div className="p-2.5 rounded-lg bg-hover/40 border border-line space-y-2">
+                <label htmlFor={includeInputCheckboxId} className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    id={includeInputCheckboxId}
+                    type="checkbox"
+                    checked={includeInputInShare}
+                    onChange={(e) => setIncludeInputInShare(e.target.checked)}
+                    className="mt-0.5 rounded-sm accent-accent"
+                    aria-label="Include input payload in shareable URL"
+                  />
+                  <div>
+                    <span className="font-medium text-fg block">Include input data in link</span>
+                    <span className="text-[10px] text-muted block">
+                      Default: Off. Sharing only the recipe operations prevents credential leakage.
+                    </span>
+                  </div>
+                </label>
+
+                {includeInputInShare ? (
+                  <div className="p-2 rounded bg-amber-500/10 border border-amber-500/25 text-amber-400 text-[11px] flex items-start gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Warning:</strong> Ensure your input does <em>not</em> contain private API keys, passwords, JWT secrets, or customer PII. Anyone with the link will see the payload.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[11px] flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 shrink-0" />
+                    <span>Privacy-Safe: Only the transformation steps will be shared.</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setIsShareModalOpen(false)}
+                  className="px-2.5 py-1 rounded-md text-muted hover:text-fg hover:bg-hover"
+                  aria-label="Cancel sharing"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={copyShareLink}
+                  className="px-3 py-1 rounded-md bg-accent text-accent-fg font-medium hover:opacity-90 flex items-center gap-1 shadow-xs"
+                  aria-label="Copy generated share URL"
+                >
+                  <Check className="w-3.5 h-3.5" /> Copy Share Link
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Dismissible Notice: Loaded from Shared Hash */}
+      {loadedFromHashNotice && (
+        <div className="p-3 bg-accent/10 border border-accent/20 rounded-xl text-xs text-accent flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Info className="w-4 h-4 shrink-0" />
+            <span>{loadedFromHashNotice}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setLoadedFromHashNotice(null)}
+            className="p-1 text-accent/70 hover:text-accent rounded-sm"
+            aria-label="Dismiss loaded recipe notice"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Dismissible Alert: File Upload Error */}
+      {fileUploadError && (
+        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{fileUploadError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFileUploadError(null)}
+            className="p-1 text-red-400/70 hover:text-red-400 rounded-sm"
+            aria-label="Dismiss upload error notice"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* JWT Security Notice if JWT is detected or inspected */}
+      {magicDetections.some((m) => m.type === "jwt") && (
+        <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-400 flex items-start gap-2.5">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div>
+            <strong className="block font-semibold">JWT Claims Inspector Notice</strong>
+            <span className="text-[11px] text-muted">
+              This client-side tool decodes and displays claims for inspection only. It does <em>not</em> verify the HMAC or RSA cryptographic signature. Never make authentication or authorization decisions based on an unverified token.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Main Workbench Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">

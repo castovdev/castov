@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { RegExpParser } from "regexpp";
 import type { AST } from "regexpp";
-import { CopyIcon, CheckIcon, AlertCircleIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react";
+import { AlertCircleIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react";
 
 const PRESETS = [
   { name: "Email Address", pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", testString: "hello@castov.com" },
@@ -62,10 +62,10 @@ function describeNode(node: AST.Node): { title: string; desc: string } {
 function ASTNodeView({ node, regex, depth = 0 }: { node: AST.Node; regex: string; depth?: number }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const { title, desc } = describeNode(node);
-  
+
   // Get raw text from original regex using node.start and node.end
   const rawText = regex.substring(node.start, node.end);
-  
+
   let children: AST.Node[] = [];
   if (node.type === "Pattern") children = node.alternatives;
   else if (node.type === "Alternative") children = node.elements;
@@ -79,7 +79,7 @@ function ASTNodeView({ node, regex, depth = 0 }: { node: AST.Node; regex: string
 
   return (
     <div className={`flex flex-col ${depth > 0 ? "ml-4 border-l border-line pl-4 mt-2" : ""}`}>
-      <div 
+      <div
         className={`flex flex-col bg-card border border-line rounded-xl p-3 ${hasChildren ? "cursor-pointer hover:border-primary/30 hover:shadow-sm" : ""} transition-all`}
         onClick={() => hasChildren && setIsExpanded(!isExpanded)}
       >
@@ -100,7 +100,7 @@ function ASTNodeView({ node, regex, depth = 0 }: { node: AST.Node; regex: string
         </div>
         {desc && <p className={`text-xs text-muted mt-1.5 ${hasChildren ? "ml-[22px]" : ""}`}>{desc}</p>}
       </div>
-      
+
       {hasChildren && isExpanded && (
         <div className="flex flex-col gap-2 mt-2">
           {children.map((child, i) => (
@@ -110,6 +110,45 @@ function ASTNodeView({ node, regex, depth = 0 }: { node: AST.Node; regex: string
       )}
     </div>
   );
+}
+
+interface RegexMatch {
+  text: string;
+  index: number;
+  groups: string[];
+}
+
+interface MatchExecutionResult {
+  matches: RegexMatch[];
+  error: string | null;
+  timeMs: number;
+}
+
+function executeRegexMatch(pattern: string, flags: string, testString: string): MatchExecutionResult {
+  if (!pattern) return { matches: [], error: null, timeMs: 0 };
+  try {
+    const start = performance.now();
+    const re = new RegExp(pattern, flags);
+    const matches: RegexMatch[] = [];
+    let m: RegExpExecArray | null;
+    let safeCount = 0;
+
+    if (!re.global) {
+      m = re.exec(testString);
+      if (m) matches.push({ text: m[0], index: m.index, groups: m.slice(1) });
+    } else {
+      while ((m = re.exec(testString)) !== null && safeCount < 1000) {
+        if (m[0].length === 0) re.lastIndex++; // Prevent infinite loops
+        matches.push({ text: m[0], index: m.index, groups: m.slice(1) });
+        safeCount++;
+      }
+    }
+
+    const timeMs = performance.now() - start;
+    return { matches, error: null, timeMs };
+  } catch (err: any) {
+    return { matches: [], error: err.message, timeMs: 0 };
+  }
 }
 
 export function RegexExplainerTool() {
@@ -129,32 +168,10 @@ export function RegexExplainerTool() {
   }, [pattern]);
 
   // Execute Match
-  const matchResult = useMemo(() => {
-    if (!pattern) return { matches: [], error: null, timeMs: 0 };
-    try {
-      const start = performance.now();
-      const re = new RegExp(pattern, flags);
-      const matches = [];
-      let m;
-      let safeCount = 0;
-      
-      if (!re.global) {
-        m = re.exec(testString);
-        if (m) matches.push({ text: m[0], index: m.index, groups: m.slice(1) });
-      } else {
-        while ((m = re.exec(testString)) !== null && safeCount < 1000) {
-          if (m[0].length === 0) re.lastIndex++; // Prevent infinite loops
-          matches.push({ text: m[0], index: m.index, groups: m.slice(1) });
-          safeCount++;
-        }
-      }
-      
-      const timeMs = performance.now() - start;
-      return { matches, error: null, timeMs };
-    } catch (err: any) {
-      return { matches: [], error: err.message, timeMs: 0 };
-    }
-  }, [pattern, flags, testString]);
+  const matchResult = useMemo(
+    () => executeRegexMatch(pattern, flags, testString),
+    [pattern, flags, testString]
+  );
 
   // Highlight matches in test string
   const renderHighlightedText = () => {
@@ -163,7 +180,7 @@ export function RegexExplainerTool() {
 
     let lastIndex = 0;
     const elements: React.ReactNode[] = [];
-    
+
     matchResult.matches.forEach((match, i) => {
       // Add text before match
       if (match.index > lastIndex) {
@@ -177,7 +194,7 @@ export function RegexExplainerTool() {
       );
       lastIndex = match.index + match.text.length;
     });
-    
+
     // Add remaining text
     if (lastIndex < testString.length) {
       elements.push(<span key={`text-end`}>{testString.substring(lastIndex)}</span>);
@@ -188,7 +205,7 @@ export function RegexExplainerTool() {
 
   return (
     <div className="w-full max-w-6xl mx-auto flex flex-col gap-8">
-      
+
       {/* Presets */}
       <div className="flex flex-wrap gap-2">
         {PRESETS.map(preset => (
@@ -206,7 +223,7 @@ export function RegexExplainerTool() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* Left Column: Editor & Tester */}
         <div className="flex flex-col gap-6">
           {/* Regex Input */}
@@ -215,11 +232,11 @@ export function RegexExplainerTool() {
               <span className="text-primary font-mono text-xl">/</span>
               Regular Expression
             </h2>
-            
+
             <div className="flex gap-2">
               <div className="flex-1 bg-field border border-line rounded-xl flex items-center px-4 shadow-sm focus-within:border-primary/50 transition-colors">
                 <span className="text-muted font-mono text-lg select-none">/</span>
-                <input 
+                <input
                   type="text"
                   value={pattern}
                   onChange={e => setPattern(e.target.value)}
@@ -228,7 +245,7 @@ export function RegexExplainerTool() {
                 />
                 <span className="text-muted font-mono text-lg select-none">/</span>
               </div>
-              <input 
+              <input
                 type="text"
                 value={flags}
                 onChange={e => setFlags(e.target.value)}
@@ -237,7 +254,7 @@ export function RegexExplainerTool() {
                 title="Regex Flags (e.g. g, m, i)"
               />
             </div>
-            
+
             {astResult.error && (
               <div className="flex items-center gap-2 text-danger text-sm bg-danger/10 p-3 rounded-lg border border-danger/20">
                 <AlertCircleIcon size={16} />
@@ -260,17 +277,17 @@ export function RegexExplainerTool() {
                 {matchResult.matches.length} matches • {matchResult.timeMs.toFixed(2)}ms
               </div>
             </div>
-            
+
             <div className="relative flex-1 min-h-[200px]">
               {/* Highlight Overlay */}
-              <div 
+              <div
                 className="absolute inset-0 p-4 font-mono text-sm whitespace-pre-wrap break-words pointer-events-none text-transparent leading-relaxed"
                 aria-hidden="true"
               >
                 {renderHighlightedText()}
               </div>
               {/* Actual Textarea */}
-              <textarea 
+              <textarea
                 value={testString}
                 onChange={e => setTestString(e.target.value)}
                 className="absolute inset-0 w-full h-full bg-transparent border border-line rounded-xl p-4 font-mono text-sm text-fg focus:outline-none focus:border-primary/50 resize-none leading-relaxed transition-colors shadow-sm"

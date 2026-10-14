@@ -58,7 +58,7 @@ export function CommandPalette() {
   const isBase64Encode = rawSearch.toLowerCase().startsWith("b64 ");
   const base64Str = isBase64Encode ? rawSearch.slice(4) : "";
   let base64Encoded = "";
-  try { if (isBase64Encode) base64Encoded = btoa(base64Str); } catch {}
+  try { if (isBase64Encode) base64Encoded = btoa(base64Str); } catch { /* invalid input for btoa: leave encoded value empty */ }
 
   // Color Hex detection
   const isHex = /^#([0-9A-F]{3}){1,2}$/i.test(rawSearch);

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useUrlState } from "@/hooks/use-url-state";
 import { CodeEditor } from "@/components/ui/code-editor";
-import { CopyButton } from "@/components/ui/copy-button";
 
 function generateTsInterfaces(jsonString: string): string {
   try {

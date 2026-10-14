@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Copy, Check, RefreshCw, Sparkles, Sliders } from "lucide-react";
+import { Copy, Check, RefreshCw } from "lucide-react";
 
 interface ColorFormat {
   label: string;

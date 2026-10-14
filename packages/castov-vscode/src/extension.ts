@@ -114,7 +114,6 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const iso = parsed.date.toISOString();
-      const utc = parsed.date.toUTCString();
       const local = parsed.date.toLocaleString();
 
       const action = await vscode.window.showInformationMessage(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PlusIcon, XIcon, GlobeIcon, SunIcon, MoonIcon } from "lucide-react";
 
 export function TimezoneSimulatorTool() {

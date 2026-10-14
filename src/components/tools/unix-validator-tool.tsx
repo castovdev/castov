@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, useEffect, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import { validateTimestamp, type TimestampValidation, type UnitChoice } from "@/lib/time";
 import { UnitSelect } from "../ui/unit-select";
 import { Share2 } from "lucide-react";
@@ -13,13 +13,10 @@ export function UnixValidatorTool() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue, shareState] = useUrlState("ts", "");
   const [unit, setUnit] = useState<UnitChoice>("auto");
-  const [result, setResult] = useState<TimestampValidation | null>(null);
+  const [result, setResult] = useState<TimestampValidation | null>(() =>
+    value ? validateTimestamp(value, "auto") : null
+  );
   const [copied, setCopied] = useState(false);
-
-  // Auto-run if loaded from URL
-  useEffect(() => {
-    if (value) run(value, unit);
-  }, []);
 
   function run(raw: string, choice: UnitChoice) {
     setResult(validateTimestamp(raw, choice));

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Text, Sphere } from "@react-three/drei";
-import { Atom, Cpu, Play, Infinity as InfinityIcon } from "lucide-react";
+import { Atom, Cpu } from "lucide-react";
 import * as THREE from "three";
 
 // Simple 2-Qubit State Simulator
@@ -22,7 +22,7 @@ const getQubitProbs = (state: QState) => {
 function BlochSphere({ position, label, prob }: { position: [number, number, number], label: string, prob: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
   
-  useFrame((state) => {
+  useFrame(() => {
     if (meshRef.current) meshRef.current.rotation.y += 0.01;
   });
 

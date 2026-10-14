@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Network, Zap, Shield, Link as LinkIcon, Send, MessageSquare } from "lucide-react";
+import { Network, Zap, Shield, Send } from "lucide-react";
 
 export function P2pGhostTunnelTool() {
   const [mode, setMode] = useState<"host" | "client" | null>(null);
@@ -71,7 +71,7 @@ export function P2pGhostTunnelTool() {
       await peerRef.current.setRemoteDescription(remoteOffer);
       const localAnswer = await peerRef.current.createAnswer();
       await peerRef.current.setLocalDescription(localAnswer);
-    } catch (e) {
+    } catch {
       alert("Invalid Offer Token");
     }
   };
@@ -81,7 +81,7 @@ export function P2pGhostTunnelTool() {
     try {
       const remoteAnswer = JSON.parse(atob(answer));
       await peerRef.current.setRemoteDescription(remoteAnswer);
-    } catch (e) {
+    } catch {
       alert("Invalid Answer Token");
     }
   };

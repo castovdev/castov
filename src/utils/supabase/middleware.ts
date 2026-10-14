@@ -20,7 +20,7 @@ export async function updateSession(request: NextRequest) {
             return request.cookies.getAll();
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
             supabaseResponse = NextResponse.next({
               request,
             });
@@ -34,7 +34,7 @@ export async function updateSession(request: NextRequest) {
 
     const authRes = await supabase.auth.getUser();
     user = authRes.data.user;
-  } catch (err) {
+  } catch {
     // Graceful fallback if auth check fails
   }
 

@@ -42,7 +42,7 @@ export function PinnedToolsTray() {
     setPinned(updated);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch {}
+    } catch { /* localStorage unavailable: pins stay in memory only */ }
   };
 
   if (!mounted || pinned.length === 0) return null;
@@ -115,7 +115,7 @@ export function PinButton({ slug }: { slug: ToolSlug }) {
         setIsPinned(true);
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    } catch {}
+    } catch { /* localStorage unavailable: pins stay in memory only */ }
   };
 
   if (!mounted) return null;

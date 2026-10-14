@@ -4,7 +4,6 @@ import { TOOLS } from '@/content/tools';
 import { GUIDES } from '@/content/guides';
 import { AI_HUB_LIVE } from '@/lib/flags';
 
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
   return new Date();
@@ -30,6 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/convert`, lastModified: getLastMod('src/app/convert/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/chrono-db`, lastModified: getLastMod('src/app/chrono-db/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/webhook-tester`, lastModified: getLastMod('src/app/webhook-tester/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/tech-trends`, lastModified: getLastMod('src/app/tech-trends/page.tsx'), changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/nexus-grid`, lastModified: getLastMod('src/app/nexus-grid/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/env-vault`, lastModified: getLastMod('src/app/env-vault/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/sonic-gap`, lastModified: getLastMod('src/app/sonic-gap/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },

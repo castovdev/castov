@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Download, Upload, Copy, Check, Sparkles, Image as ImageIcon } from "lucide-react";
+import { Download, Upload, Copy, Check, Image as ImageIcon } from "lucide-react";
 
 interface IconSize {
   name: string;

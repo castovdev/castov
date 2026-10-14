@@ -921,7 +921,7 @@ export function getExamples(slug: ToolSlug): ToolExamples {
             results: [
               { label: "Algorithm", value: "HS256" },
               { label: "Subject", value: "user_1" },
-              { label: "Status", value: "Valid (Unexpired)" }
+              { label: "Verification Status", value: "Unverified Signature (Claims Decoded Only)" }
             ]
           }
         ]

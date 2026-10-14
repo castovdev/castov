@@ -28,6 +28,7 @@ const TOP_TOOLS = [
 const ECOSYSTEM = [
   { href: "/cli", label: "Castov CLI", badge: "npm" },
   { href: "/extension", label: "VS Code Extension", badge: "v0.1" },
+  { href: "/tech-trends", label: "Tech Pulse Radar", badge: "Live" },
   { href: "/cheatsheets", label: "Interactive Cheat Sheets", badge: "Popular" },
   { href: "/http-status", label: "HTTP Status Guide" },
   { href: "/chmod/755", label: "Chmod Permissions" },

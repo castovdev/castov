@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { PlusIcon, UsersIcon } from "lucide-react";
@@ -14,13 +14,9 @@ export default function TeamWorkspacePage() {
 
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchTeams();
-  }, []);
-
-  const fetchTeams = async () => {
+  const fetchTeams = useCallback(async () => {
     setLoading(true);
-    const { data: userTeams, error } = await supabase
+    const { data: userTeams } = await supabase
       .from('team_members')
       .select('team_id, role, teams(id, name, created_at)');
     
@@ -29,7 +25,11 @@ export default function TeamWorkspacePage() {
       setTeams(userTeams.map(ut => ({ ...ut.teams, role: ut.role })));
     }
     setLoading(false);
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchTeams();
+  }, [fetchTeams]);
 
   const handleCreateTeam = async (e: React.FormEvent) => {
     e.preventDefault();

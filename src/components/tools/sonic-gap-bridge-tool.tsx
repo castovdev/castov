@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Volume2, Mic, Activity, ShieldAlert, WifiOff, RefreshCcw } from "lucide-react";
+import { Volume2, Mic, Activity, ShieldAlert } from "lucide-react";
 
 const FREQ_0 = 18000; // 18 kHz (near ultrasonic)
 const FREQ_1 = 19000; // 19 kHz
@@ -135,7 +135,7 @@ export function SonicGapBridgeTool() {
       };
       
       detectFrequency();
-    } catch (err) {
+    } catch {
       alert("Microphone access denied or unavailable.");
       setMode("idle");
     }

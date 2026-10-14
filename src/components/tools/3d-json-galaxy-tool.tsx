@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars, Text, Line, Stats, Sparkles } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import { BoxIcon, UploadCloudIcon, Zap, Crosshair } from "lucide-react";
+import { BoxIcon, UploadCloudIcon, Crosshair } from "lucide-react";
 import * as THREE from "three";
 
 interface NodeData {
@@ -48,7 +48,7 @@ function TypewriterText({ text, speed = 20 }: { text: string, speed?: number }) 
 }
 
 // Camera Interpolator for cinematic zoom
-function CinematicCamera({ focusPos, isHovering }: { focusPos: THREE.Vector3 | null, isHovering: boolean }) {
+function CinematicCamera({ focusPos, isHovering: _isHovering }: { focusPos: THREE.Vector3 | null, isHovering: boolean }) {
   useFrame((state) => {
     if (focusPos) {
       const targetCamPos = focusPos.clone().add(new THREE.Vector3(0, 5, 10));
@@ -86,7 +86,7 @@ function DataNode({ data, setHud, setFocus }: { data: NodeData, setHud: (s: HudS
         ref={meshRef}
         onClick={(e) => { e.stopPropagation(); setFocus(new THREE.Vector3(...data.position)); }}
         onPointerOver={(e) => { e.stopPropagation(); setHovered(true); setHud({ label: data.label, path: data.path, value: data.value, type: data.type }); document.body.style.cursor = 'crosshair'; }}
-        onPointerOut={(e) => { setHovered(false); setHud(null); document.body.style.cursor = 'auto'; }}
+        onPointerOut={() => { setHovered(false); setHud(null); document.body.style.cursor = 'auto'; }}
       >
         {/* @ts-ignore */}
         <icosahedronGeometry args={geometryArgs} />
@@ -178,7 +178,7 @@ export function ThreeJsonGalaxyTool({ providedJson = null }: { providedJson?: an
         const obj = JSON.parse(ev.target?.result as string);
         parseJSONToGraph(obj);
         setError("");
-      } catch (err) {
+      } catch {
         setError("Invalid JSON file.");
       }
     };

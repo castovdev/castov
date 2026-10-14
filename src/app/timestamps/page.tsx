@@ -38,7 +38,7 @@ export default function TimestampsPage() {
         ))}
       </div>
       <p>
-        Need deeper reference? Check out our <Link href="/guides">timestamp guides</Link> for detailed explanations of Unix time, epoch, ISO 8601, and RFC 3339 formats.
+        Need deeper reference? Check out our <Link href="/guides">timestamp guides</Link> for detailed explanations of Unix time, epoch, ISO 8601, and RFC 3339 formats.
       </p>
     </StaticPage>
   );

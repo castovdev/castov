@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Copy, Check, Play, Pause, RefreshCw, Code, Sparkles, Layers } from "lucide-react";
+import { Copy, Check, Play, Pause } from "lucide-react";
 
 type AnimationPreset = "stroke-draw" | "pulse-glow" | "morph-spin" | "float-shadow";
 

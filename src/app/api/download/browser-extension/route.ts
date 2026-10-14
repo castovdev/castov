@@ -15,7 +15,7 @@ export async function GET() {
         },
       });
     }
-  } catch {}
+  } catch { /* local file unavailable: fall back to redirect below */ }
 
   return NextResponse.redirect("https://castov.com/castov-extension.zip", 307);
 }

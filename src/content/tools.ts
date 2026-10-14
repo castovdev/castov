@@ -2365,7 +2365,7 @@ export const TOOLS: Tool[] = [
       },
       {
         q: "Can I share my custom recipe and input with my team?",
-        a: "Yes, click the Share Recipe button to generate a permalink with your entire pipeline encoded directly into the URL hash."
+        a: "Yes, click the Share Recipe button to generate a permalink with your pipeline steps encoded directly into the URL hash. To prevent sensitive credential leaks, input data is excluded by default unless you explicitly opt in."
       }
     ],
     related: ["jwt-decoder", "base64-encoder-decoder", "hash-generator", "json-viewer", "diff-checker"]

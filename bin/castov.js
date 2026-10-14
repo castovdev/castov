@@ -34,7 +34,7 @@ program
       );
       console.log("✅ JWT Payload (Decoded Offline):");
       console.log(JSON.stringify(JSON.parse(jsonPayload), null, 2));
-    } catch (e) {
+    } catch {
       console.error("❌ Invalid JWT Token");
     }
   });

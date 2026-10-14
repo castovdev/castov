@@ -1,7 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Dna, Play, CheckCircle2, XCircle } from "lucide-react";
+
+const PASSING = ["user@gmail.com", "admin.123@company.co.uk", "test-email@domain.com"];
+const FAILING = ["user@gmail", "admin@.com", "test@domain.", "invalid email"];
+
+// Genetic Algorithm Heuristics (Building Blocks for Emails)
+const BLOCKS = [
+  "[a-zA-Z0-9._%+-]+",
+  "@",
+  "[a-zA-Z0-9.-]+",
+  "\\.",
+  "[a-zA-Z]{2,}",
+  "^",
+  "$",
+  ".*",
+  "\\w+"
+];
+
+const evaluateFitness = (regexStr: string) => {
+  try {
+    const r = new RegExp(regexStr);
+    let score = 0;
+    PASSING.forEach(p => { if (r.test(p)) score += 10; });
+    FAILING.forEach(f => { if (!r.test(f)) score += 10; });
+
+    const maxScore = (PASSING.length + FAILING.length) * 10;
+    return (score / maxScore) * 100;
+  } catch {
+    return 0; // Invalid regex syntax
+  }
+};
 
 export function RegexGeneticEvolutionTool() {
   const [evolving, setEvolving] = useState(false);
@@ -9,64 +39,34 @@ export function RegexGeneticEvolutionTool() {
   const [bestRegex, setBestRegex] = useState("");
   const [fitness, setFitness] = useState(0);
 
-  const passing = ["user@gmail.com", "admin.123@company.co.uk", "test-email@domain.com"];
-  const failing = ["user@gmail", "admin@.com", "test@domain.", "invalid email"];
-
-  // Genetic Algorithm Heuristics (Building Blocks for Emails)
-  const blocks = [
-    "[a-zA-Z0-9._%+-]+",
-    "@",
-    "[a-zA-Z0-9.-]+",
-    "\\.",
-    "[a-zA-Z]{2,}",
-    "^",
-    "$",
-    ".*",
-    "\\w+"
-  ];
-
-  const evaluateFitness = (regexStr: string) => {
-    try {
-      const r = new RegExp(regexStr);
-      let score = 0;
-      passing.forEach(p => { if (r.test(p)) score += 10; });
-      failing.forEach(f => { if (!r.test(f)) score += 10; });
-      
-      const maxScore = (passing.length + failing.length) * 10;
-      return (score / maxScore) * 100;
-    } catch {
-      return 0; // Invalid regex syntax
-    }
-  };
-
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (evolving) {
       interval = setInterval(() => {
         setGeneration(prev => prev + 1);
-        
+
         // Mutate a regex from blocks
         const mutationLength = Math.floor(Math.random() * 5) + 3;
         let candidate = "^";
         for(let i=0; i<mutationLength; i++) {
-          candidate += blocks[Math.floor(Math.random() * blocks.length)];
+          candidate += BLOCKS[Math.floor(Math.random() * BLOCKS.length)];
         }
         candidate += "$";
 
         const currentFitness = evaluateFitness(candidate);
-        
+
         // Introduce artificial progression for the demo if real evolution gets stuck
         setFitness(prev => {
           const newF = Math.max(prev, currentFitness);
           if (newF > prev) setBestRegex(candidate);
-          
+
           // Override after 50 generations to show successful convergence
           if (generation > 50) {
             setBestRegex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
             setEvolving(false);
             return 100;
           }
-          
+
           return newF;
         });
 
@@ -92,7 +92,7 @@ export function RegexGeneticEvolutionTool() {
             <CheckCircle2 className="w-5 h-5" /> Should Match
           </h3>
           <div className="space-y-2 font-mono text-sm">
-            {passing.map((s, i) => (
+            {PASSING.map((s, i) => (
               <div key={i} className="bg-success/10 text-success px-3 py-2 rounded border border-success/20">{s}</div>
             ))}
           </div>
@@ -102,7 +102,7 @@ export function RegexGeneticEvolutionTool() {
             <XCircle className="w-5 h-5" /> Should Reject
           </h3>
           <div className="space-y-2 font-mono text-sm">
-            {failing.map((s, i) => (
+            {FAILING.map((s, i) => (
               <div key={i} className="bg-danger/10 text-danger px-3 py-2 rounded border border-danger/20">{s}</div>
             ))}
           </div>
@@ -115,8 +115,8 @@ export function RegexGeneticEvolutionTool() {
             <div className="text-sm text-muted mb-1">Generation</div>
             <div className="text-3xl font-bold font-mono">{generation}</div>
           </div>
-          <button 
-            onClick={() => { setEvolving(true); setGeneration(0); setFitness(0); setBestRegex(""); }} 
+          <button
+            onClick={() => { setEvolving(true); setGeneration(0); setFitness(0); setBestRegex(""); }}
             disabled={evolving || fitness === 100}
             className="btn btn-primary gap-2 rounded-full px-8"
           >

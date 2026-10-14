@@ -17,6 +17,6 @@ gitFiles.forEach(file => {
       }
       current += '/' + exact;
     }
-  } catch(e) {}
+  } catch { /* best-effort audit: unreadable path is skipped */ }
 });
 console.log('Bad:', bad.length ? bad : 'None');

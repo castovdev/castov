@@ -2,7 +2,7 @@
  * Site-wide configuration. Only PUBLIC values live here (NEXT_PUBLIC_*): they are inlined into
  * the client bundle by design, so never put secrets in them.
  */
-const isProduction = process.env.NODE_ENV === "production";
+export const isProduction = process.env.NODE_ENV === "production";
 
 /** Resolved once. In production the value must come from NEXT_PUBLIC_SITE_URL (see scripts/check-env.mjs). */
 function resolveSiteUrl(): string {

@@ -25,6 +25,26 @@ export default function ToolsPage() {
       path="/tools"
     >
       <PinnedToolsTray />
+
+      {/* Featured Radar Banner */}
+      <div className="mb-10 p-5 rounded-2xl bg-gradient-to-r from-accent/10 via-card to-card border border-accent/30 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-accent/15 text-accent border border-accent/20 mb-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+            </span>
+            NEW STANDALONE TOOL
+          </div>
+          <h2 className="text-lg font-bold text-fg">Tech Pulse Radar</h2>
+          <p className="text-sm text-muted max-w-xl">
+            Live velocity streams aggregating viral GitHub repositories, Hacker News debates, and Dev.to articles with automated keyword radar.
+          </p>
+        </div>
+        <Link href="/tech-trends" className="btn btn-primary btn-sm shrink-0 self-start sm:self-center">
+          Open Tech Radar &rarr;
+        </Link>
+      </div>
       {mainCategories.map((category) => {
         const tools = TOOLS.filter((t) => t.category === category);
         return (

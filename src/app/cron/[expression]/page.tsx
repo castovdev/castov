@@ -9,6 +9,12 @@ import { parseCron, describeCron, nextRuns, formatCompact } from "@/lib/time";
 import { CRON_PRESETS, getPresetBySlug } from "@/lib/time/cron-presets";
 
 type Params = { expression: string };
+
+// Server component: "next runs" is intentionally relative to the moment the page is
+// generated (build/ISR time). Kept outside the component so the clock read is explicit.
+function upcomingRunsUtc(cron: Parameters<typeof nextRuns>[0]): string[] {
+  return nextRuns(cron, Date.now(), 3).map((ms) => formatCompact(ms, "UTC"));
+}
 export const dynamicParams = true;
 
 function resolveCronInput(input: string): { expression: string; title?: string; intent?: string } | null {
@@ -78,9 +84,7 @@ export default async function CronPage({ params }: { params: Promise<Params> }) 
   }
 
   const humanDesc = describeCron(parsed.value);
-  const nextRunTimes = nextRuns(parsed.value, Date.now(), 3).map((ms) =>
-    formatCompact(ms, "UTC")
-  );
+  const nextRunTimes = upcomingRunsUtc(parsed.value);
 
   const prose = intent
     ? `${intent} In crontab syntax, ${expression} translates to: "${humanDesc}".`

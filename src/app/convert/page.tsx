@@ -113,8 +113,6 @@ export default function ConvertHubPage() {
         </h2>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 list-none p-0">
           {POPULAR_PAIRS.map((pair) => {
-            const from = formatById(pair.from);
-            const to = formatById(pair.to);
             const targetUrl = PAIR_TOOL_MAP[`${pair.from}-${pair.to}`] || "/tools";
             return (
               <li key={`${pair.from}-${pair.to}`}>

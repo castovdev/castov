@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Download, Upload, Monitor, Laptop, Smartphone, Sparkles } from "lucide-react";
+import { Download, Upload, Monitor, Laptop, Smartphone } from "lucide-react";
 
 type DeviceType = "browser" | "macbook" | "iphone";
 

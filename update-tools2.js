@@ -40,17 +40,17 @@ const contentMap = {
 };
 
 for (const [slug, data] of Object.entries(contentMap)) {
-  const parts = txt.split(\`slug: "\${slug}"\`);
+  const parts = txt.split(`slug: "${slug}"`);
   if (parts.length > 1) {
     let block = parts[1];
     
     // Naively replace empty arrays
-    block = block.replace(/sections:\s*\[\]/, \`sections: \${data.sections}\`);
-    block = block.replace(/howTo:\s*\[\]/, \`howTo: \${data.howTo}\`);
-    block = block.replace(/faq:\s*\[\]/, \`faq: \${data.faq}\`);
+    block = block.replace(/sections:\s*\[\]/, `sections: ${data.sections}`);
+    block = block.replace(/howTo:\s*\[\]/, `howTo: ${data.howTo}`);
+    block = block.replace(/faq:\s*\[\]/, `faq: ${data.faq}`);
     
     parts[1] = block;
-    txt = parts.join(\`slug: "\${slug}"\`);
+    txt = parts.join(`slug: "${slug}"`);
     console.log("Updated: " + slug);
   }
 }

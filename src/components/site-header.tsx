@@ -11,6 +11,7 @@ import { Search } from "lucide-react";
 
 const DESKTOP_NAV = [
   { href: "/tools", label: "Tools" },
+  { href: "/tech-trends", label: "Tech Radar" },
   ...(AI_HUB_LIVE ? [{ href: "/ai", label: "AI Hub" }] : []),
   { href: "/cheatsheets", label: "Cheat Sheets" },
   { href: "/guides", label: "Guides" },

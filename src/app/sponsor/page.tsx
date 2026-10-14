@@ -1,14 +1,8 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import { 
   Heart, 
-  Sparkles, 
-  TrendingUp, 
-  ShieldCheck, 
-  Users, 
   Mail, 
   ArrowRight,
-  ExternalLink,
   CheckCircle2
 } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";

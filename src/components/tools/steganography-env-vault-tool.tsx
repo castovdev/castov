@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Lock, Image as ImageIcon, ShieldCheck, Unlock, KeyRound, Activity } from "lucide-react";
 
 // --- WebCrypto API Utilities ---
@@ -200,7 +200,7 @@ export function SteganographyEnvVaultTool() {
           const payloadBuf = binStrToBuf(payloadBin);
           const decrypted = await decryptAES(payloadBuf, password);
           setDecodedText(decrypted);
-        } catch (e: any) {
+        } catch {
           alert("Decryption failed. Incorrect Password or corrupted image.");
           setDecodedText("");
         } finally {

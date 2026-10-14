@@ -14,7 +14,7 @@ try {
     if (existsSync(".env.local")) process.loadEnvFile(".env.local");
     else if (existsSync(".env")) process.loadEnvFile(".env");
   }
-} catch {}
+} catch { /* optional: env file may be missing or unreadable */ }
 
 const env = {
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || "https://castov.com",

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getExamples } from "@/content/examples";
 import { getGuide } from "@/content/guides";
 import { toolPath, type Tool } from "@/content/tools";
-import { faqJsonLd, webApplicationJsonLd, breadcrumbJsonLd } from "@/lib/seo";
+import { faqJsonLd, webApplicationJsonLd } from "@/lib/seo";
 import { Breadcrumb } from "./breadcrumb";
 import { ExamplesSection } from "./examples-section";
 import { FaqSection } from "./faq-section";

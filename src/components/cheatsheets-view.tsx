@@ -9,8 +9,7 @@ import {
   Regex, 
   Copy, 
   Check, 
-  Search,
-  BookOpen
+  Search
 } from "lucide-react";
 
 interface CheatItem {

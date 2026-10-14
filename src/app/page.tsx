@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { CategorySection } from "@/components/category-section";
 import { FaqSection } from "@/components/faq-section";
 import { HOME_FAQ } from "@/content/home";
 import { buildMetadata, faqJsonLd, websiteJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
-import { ArrowRight, Terminal, ShieldCheck, Workflow, Database, Component, Play, Lock, Command, Zap, Code } from "lucide-react";
+import { ArrowRight, Terminal, ShieldCheck, Workflow, Command, Zap, Code } from "lucide-react";
 import { HeroQuickConvert } from "@/components/hero-quick-convert";
 import { PinnedToolsTray } from "@/components/pinned-tools";
 

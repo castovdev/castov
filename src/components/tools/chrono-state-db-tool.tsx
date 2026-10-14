@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Database, GitCommit, GitBranch, GitMerge, Clock, FileJson, CheckCircle } from "lucide-react";
+import { Database, Clock, FileJson, CheckCircle } from "lucide-react";
 
 interface Commit {
   id: string;
@@ -13,14 +13,11 @@ interface Commit {
 
 export function ChronoStateDbTool() {
   const [commits, setCommits] = useState<Commit[]>([
-    { id: "genesis", parentId: null, message: "Initial DB Setup", data: '{"users": []}', timestamp: Date.now() }
+    { id: "genesis", parentId: null, message: "Initial DB Setup", data: '{"users": []}', timestamp: 1700000000000 }
   ]);
   const [head, setHead] = useState<string>("genesis");
-  const [branch, setBranch] = useState<string>("main");
   const [currentData, setCurrentData] = useState('{"users": []}');
   const [commitMsg, setCommitMsg] = useState("");
-
-  const headCommit = commits.find(c => c.id === head);
 
   const generateId = () => Math.random().toString(36).substring(2, 8);
 
@@ -39,7 +36,7 @@ export function ChronoStateDbTool() {
       setCommits([...commits, newCommit]);
       setHead(newId);
       setCommitMsg("");
-    } catch (e) {
+    } catch {
       alert("Invalid JSON data. Cannot commit broken state.");
     }
   };
@@ -99,7 +96,7 @@ export function ChronoStateDbTool() {
             <h3 className="font-bold text-white uppercase tracking-widest flex items-center gap-2 mb-6"><Clock className="w-4 h-4"/> Merkle Timeline</h3>
             
             <div className="space-y-0 relative pl-4 border-l-2 border-white/20">
-              {commits.map((c, i) => (
+              {commits.map((c) => (
                 <div key={c.id} className="relative mb-6">
                   <div className={`absolute -left-[23px] w-4 h-4 rounded-full border-2 ${head === c.id ? "bg-[#10B981] border-[#10B981] shadow-[0_0_10px_#10B981]" : "bg-black border-white/40"}`} />
                   <div className="pl-4">
