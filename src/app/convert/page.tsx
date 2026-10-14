@@ -7,13 +7,22 @@ import { GUIDES } from "@/content/guides";
 import { FaqSection } from "@/components/faq-section";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { AdSlot } from "@/components/ad-slot";
+import { CODE_CONVERTERS } from "@/lib/code-converters-registry";
+import { ArrowRight, Code2, Database, Network, FileCode2, Clock } from "lucide-react";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Convert Between Time Formats – Unix, ISO, RFC, UTC | Castov",
+  title: "Online Developer Code, Schema & Time Converters | Castov",
   description:
-    "Convert between Unix timestamps, ISO 8601, RFC 3339, RFC 2822, UTC and local date formats. Browse the most popular conversions and use the free online tools.",
+    "Free instant browser converters: JSON to Zod, Prisma, Drizzle, Rust, Go, Python, cURL to Fetch/Python/Axios, Docker Run to Compose, SQL to Prisma, plus Unix timestamp & time format translators.",
   path: "/convert",
 });
+
+const CATEGORIES = [
+  { name: "JSON & Schemas", icon: Code2, count: 10, desc: "Convert JSON into typed models, validators, and ORM schemas." },
+  { name: "DevOps & Network", icon: Network, count: 5, desc: "Transform cURL, Docker commands, and environment variables." },
+  { name: "SQL & Database", icon: Database, count: 3, desc: "Convert SQL CREATE TABLE into Prisma models, TypeScript, or JSON." },
+  { name: "Data Formats", icon: FileCode2, count: 4, desc: "Seamless conversions between CSV, JSON, and YAML." },
+] as const;
 
 const FORMATS = [
   { id: "unix-seconds", slug: "unix-seconds", name: "Unix Seconds", example: "1700000000" },
@@ -82,35 +91,118 @@ export default function ConvertHubPage() {
   );
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8">
       <Breadcrumb
         path="/convert"
         crumbs={[{ name: "Home", href: "/" }, { name: "Convert" }]}
       />
 
-      <div className="hero-section -mx-4 px-4 py-12 md:py-16">
+      <div className="hero-section -mx-4 px-4 py-12 md:py-16 text-center sm:text-left">
         <div className="mb-6">
           <span className="hero-badge">
             <span className="hero-badge-dot" aria-hidden="true" />
-            15+ format conversions — free, private, browser-based
+            20+ Developer Code Converters & Time Translators — 100% Private & In-Browser
           </span>
         </div>
 
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-fg">
-          Convert Between Time Formats
+        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-fg">
+          Developer Code & Schema Converter Matrix
         </h1>
-        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
-          Translate between Unix timestamps, ISO 8601, RFC 3339, RFC 2822, UTC and local
-          date formats. The most-used pairs are listed below, or pick a tool to get started.
+        <p className="mt-5 max-w-3xl text-lg leading-relaxed text-muted">
+          Instant client-side transformation matrix for developers. Convert JSON to Zod, Prisma, Drizzle,
+          Rust, Go, and Python Pydantic; transform cURL commands into modern Fetch, Python Requests, or Axios;
+          and translate Unix timestamps across all standard ISO/RFC formats.
         </p>
       </div>
 
       <AdSlot placement="tool-top" />
 
-      <section aria-labelledby="popular-conversions" className="mt-10">
-        <h2 id="popular-conversions" className="section-heading mb-6">
-          Popular Conversions
-        </h2>
+      {/* Code & Schema Converters Matrix */}
+      <section aria-labelledby="code-converters-matrix" className="mt-12">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h2 id="code-converters-matrix" className="text-2xl sm:text-3xl font-bold tracking-tight text-fg">
+              Code & Schema Converters
+            </h2>
+            <p className="text-sm text-muted mt-1">
+              Select a converter below for instant, zero-latency code generation in your browser.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 text-xs font-medium text-accent bg-accent/10 px-3 py-1.5 rounded-full border border-accent/20 self-start sm:self-auto">
+            <span>20 Specialized Engines</span>
+          </div>
+        </div>
+
+        {/* Categories Loop */}
+        <div className="space-y-12">
+          {CATEGORIES.map((cat) => {
+            const catConverters = CODE_CONVERTERS.filter((c) => c.category === cat.name);
+            const Icon = cat.icon;
+
+            return (
+              <div key={cat.name} className="border-t border-line/60 pt-8 first:border-0 first:pt-0">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10 text-accent border border-accent/20">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-fg">{cat.name}</h3>
+                    <p className="text-xs text-muted">{cat.desc}</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {catConverters.map((c) => (
+                    <Link
+                      key={c.slug}
+                      href={`/convert/${c.slug}`}
+                      className="group card block p-4 no-underline hover:border-accent transition-all duration-200"
+                    >
+                      <div className="flex items-start justify-between">
+                        <span className="font-semibold text-fg group-hover:text-accent transition-colors text-sm">
+                          {c.name}
+                        </span>
+                        <ArrowRight className="h-4 w-4 text-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0 ml-2 mt-0.5" />
+                      </div>
+                      <p className="mt-2 text-xs text-muted line-clamp-2 leading-relaxed">
+                        {c.description}
+                      </p>
+                      <div className="mt-3 flex items-center gap-2 text-[11px] font-mono text-muted/80">
+                        <span className="bg-field px-1.5 py-0.5 rounded border border-line uppercase">
+                          {c.inputLanguage}
+                        </span>
+                        <span>→</span>
+                        <span className="bg-field px-1.5 py-0.5 rounded border border-line uppercase text-accent font-semibold">
+                          {c.outputLanguage}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <AdSlot placement="content-middle" />
+
+      {/* Time Format Conversions (Preserved) */}
+      <section aria-labelledby="popular-conversions" className="mt-16 border-t border-line/80 pt-12">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+            <Clock className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 id="popular-conversions" className="text-2xl font-bold tracking-tight text-fg">
+              Time & Timestamp Conversions
+            </h2>
+            <p className="text-xs text-muted">
+              Convert between Unix timestamps, ISO 8601, RFC 3339, RFC 2822, and UTC date formats.
+            </p>
+          </div>
+        </div>
+
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 list-none p-0">
           {POPULAR_PAIRS.map((pair) => {
             const targetUrl = PAIR_TOOL_MAP[`${pair.from}-${pair.to}`] || "/tools";
@@ -134,12 +226,11 @@ export default function ConvertHubPage() {
         </ul>
       </section>
 
-      <AdSlot placement="content-middle" />
-
-      <section aria-labelledby="formats-overview" className="mt-10">
-        <h2 id="formats-overview" className="section-heading mb-6">
-          Supported Formats
-        </h2>
+      {/* Supported Time Formats Table */}
+      <section aria-labelledby="formats-overview" className="mt-12">
+        <h3 id="formats-overview" className="section-heading mb-4 text-lg">
+          Supported Timestamp Formats
+        </h3>
         <div className="not-prose overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <thead className="bg-hover">
@@ -178,10 +269,11 @@ export default function ConvertHubPage() {
         </div>
       </section>
 
+      {/* All Time Conversion Tools */}
       <section aria-labelledby="all-tools" className="mt-12">
-        <h2 id="all-tools" className="section-heading mb-6">
-          All Conversion Tools
-        </h2>
+        <h3 id="all-tools" className="section-heading mb-4 text-lg">
+          Time Conversion Tools
+        </h3>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 list-none p-0">
           {timestampTools.map((t) => (
             <li key={t.slug}>
@@ -201,6 +293,7 @@ export default function ConvertHubPage() {
 
       <AdSlot placement="content-bottom" />
 
+      {/* Related Guides */}
       <section aria-labelledby="related-guides" className="mt-12">
         <h2 id="related-guides" className="section-heading mb-6">
           Related Guides
@@ -247,18 +340,20 @@ export default function ConvertHubPage() {
 
       <section className="cta-band mt-12 p-10 text-center" aria-labelledby="cta-heading">
         <h2 id="cta-heading" className="text-3xl font-extrabold tracking-tight">
-          Ready to convert a timestamp?
+          Ready to convert your code or timestamps?
         </h2>
         <p className="mx-auto mt-3 max-w-lg text-muted">
-          Pick any format pair above, or use the Unix Timestamp Converter for the
-          most common case.
+          Pick any code or timestamp converter above to start instant, client-side transformation.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/unix-timestamp-converter" className="btn btn-primary">
-            Unix Timestamp Converter
+          <Link href="/convert/json-to-zod" className="btn btn-primary">
+            JSON to Zod Converter
           </Link>
-          <Link href="/iso-8601-converter" className="btn btn-secondary">
-            ISO 8601 Converter
+          <Link href="/convert/curl-to-fetch" className="btn btn-secondary">
+            cURL to Fetch Converter
+          </Link>
+          <Link href="/unix-timestamp-converter" className="btn btn-secondary">
+            Unix Timestamp Converter
           </Link>
         </div>
       </section>

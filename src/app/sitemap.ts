@@ -3,6 +3,7 @@ import { AI_TOOLS, AI_CATEGORIES } from '@/lib/ai-tools';
 import { TOOLS } from '@/content/tools';
 import { GUIDES } from '@/content/guides';
 import { AI_HUB_LIVE } from '@/lib/flags';
+import { CODE_CONVERTERS } from '@/lib/code-converters-registry';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -56,6 +57,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: getLastMod('src/content/guides.ts'),
       changeFrequency: 'monthly',
       priority: 0.7,
+    });
+  });
+
+  CODE_CONVERTERS.forEach((converter) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/convert/${converter.slug}`,
+      lastModified: getLastMod('src/lib/code-converters-registry.ts'),
+      changeFrequency: 'weekly',
+      priority: 0.8,
     });
   });
 
