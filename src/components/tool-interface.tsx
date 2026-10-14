@@ -78,6 +78,7 @@ import { TokenCostVisualizerTool } from "./tools/token-visualizer-tool";
 import { GitTimeTravelerTool } from "./tools/git-time-traveler-tool";
 import { SvgKeyframeAnimatorTool } from "./tools/svg-animator-tool";
 import { MockDataStudioTool } from "./tools/mock-data-studio-tool";
+import { CyberDecoderTool } from "./tools/cyber-decoder-tool";
 
 /**
  * Maps a tool slug to its interactive interface. To add a tool: add its content to
@@ -207,5 +208,7 @@ export function ToolInterface({ slug }: { slug: ToolSlug }) {
       return <SvgKeyframeAnimatorTool />;
     case "mock-data-studio":
       return <MockDataStudioTool />;
+    case "cyber-decoder":
+      return <CyberDecoderTool />;
   }
 }

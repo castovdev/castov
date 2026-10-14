@@ -893,6 +893,41 @@ export function getExamples(slug: ToolSlug): ToolExamples {
       };
     }
 
+    case "cyber-decoder": {
+      return {
+        kind: "io",
+        intro: "Real-world data decoding, cryptographic analysis, and transformation recipes.",
+        items: [
+          {
+            title: "Base64 & Hex Stream Decoding",
+            input: "43 61 73 74 6f 76 (Hexadecimal bytes)",
+            results: [
+              { label: "Decoded String", value: "Castov" },
+              { label: "Detected Format", value: "Hexadecimal byte stream" },
+              { label: "Entropy", value: "2.585 (Standard text)" }
+            ]
+          },
+          {
+            title: "ROT13 Cipher Deobfuscation",
+            input: "Pnfgbi qrpbqre vf snfg naq 100% pyvrag-fvqr.",
+            results: [
+              { label: "Decoded Plaintext", value: "Castov decoder is fast and 100% client-side." },
+              { label: "Method", value: "Caesar ROT13 shift (+13)" }
+            ]
+          },
+          {
+            title: "JWT Token Claims Inspection",
+            input: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyXzEiLCJleHAiOjE4MDAwMDAwMDB9.sig",
+            results: [
+              { label: "Algorithm", value: "HS256" },
+              { label: "Subject", value: "user_1" },
+              { label: "Status", value: "Valid (Unexpired)" }
+            ]
+          }
+        ]
+      };
+    }
+
     case "timezone-simulator":
     case "universal-config-sync":
     case "env-vault":

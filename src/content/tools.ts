@@ -62,7 +62,8 @@ export type ToolSlug =
   | "token-visualizer"
   | "git-time-traveler"
   | "svg-animator"
-  | "mock-data-studio";
+  | "mock-data-studio"
+  | "cyber-decoder";
 
 export interface ContentSection {
   heading: string;
@@ -2314,6 +2315,60 @@ export const TOOLS: Tool[] = [
       { q: "Is my data generated on a remote server?", a: "No, all synthetic data generation is executed client-side in your browser." }
     ],
     related: ["json-to-ts", "json-formatter", "diff-checker"]
+  },
+  {
+    slug: "cyber-decoder",
+    category: "Developer",
+    name: "CyberChef & Magic Decoder",
+    seoTitle: "CyberChef Online & Magic Decoder | Castov",
+    metaDescription: "Instant client-side CyberChef & magic decoder. Auto-detect formats, chain operations, crack ciphers, decode Base64, JWT, Hex, and analyze data in browser.",
+    intro: "The Swiss Army Knife for developers, security analysts, and CTF players. Automatically detect obscure data encodings, chain transformation recipes, and analyze entropy entirely in your browser.",
+    cardDescription: "Auto-detect and decode Base64, JWT, Hex, ciphers, and hash pipelines.",
+    sections: [
+      {
+        heading: "Modern Client-Side CyberChef & Universal Decoder",
+        paragraphs: [
+          "Developers, reverse engineers, and security analysts frequently encounter obscure encoded payloads, obfuscated malware scripts, JWT tokens, and multi-layered data transforms. Manually navigating multiple websites or running command-line scripts introduces friction and potential privacy leaks.",
+          "Castov CyberChef brings the versatility of a Swiss Army Knife directly into the browser with zero server uploads, lightning-fast execution, and automatic format detection."
+        ]
+      },
+      {
+        heading: "Multi-Step Transformation Recipes & Entropy Inspection",
+        paragraphs: [
+          "Real-world security investigations often require combining multiple decoders in sequence. For example, malicious payloads may be hex-encoded, then compressed, and then Base64-encoded. Our recipe pipeline allows you to chain operations effortlessly, inspect intermediate step previews, and toggle steps on and off with zero latency.",
+          "Integrated Shannon entropy calculation immediately reveals whether an unknown payload is plain text, Base64 obfuscated, or strongly encrypted."
+        ]
+      }
+    ],
+    howTo: [
+      "Paste or upload any encoded string, cipher text, token, or raw byte stream into the input pane.",
+      "Review the Magic Inspector recommendations or browse operations to construct your transformation pipeline.",
+      "Reorder, configure parameters, or toggle individual steps to observe live decoded output in real time.",
+      "Inspect Shannon entropy, hex dump offsets, or copy and share the reproducible recipe link."
+    ],
+    faq: [
+      {
+        q: "Is my data or secret key sent to any remote server?",
+        a: "No, every operation, cipher, and hash executes 100% locally in your web browser using client-side Web Crypto and JavaScript. Zero network requests are sent."
+      },
+      {
+        q: "What formats can the Magic Inspector auto-detect?",
+        a: "It automatically identifies JWT tokens, Base64 strings, Hex byte streams, URL percent-encoding, HTML entities, 8-bit binary streams, Morse code, JSON structures, and standard cryptographic hashes (MD5, SHA-1, SHA-256)."
+      },
+      {
+        q: "How does the recipe pipeline work?",
+        a: "You can chain multiple transformation steps together in sequence, such as Base64 decoding followed by URL decoding and JSON formatting. Each step can be reordered, fine-tuned, or toggled on and off."
+      },
+      {
+        q: "What does the Shannon Entropy score indicate?",
+        a: "Entropy measures the randomness of the input data on a scale from 0 to 8. Scores above 7.2 typically indicate encrypted payloads or compressed archives, while scores below 4.5 indicate standard natural language or structured code."
+      },
+      {
+        q: "Can I share my custom recipe and input with my team?",
+        a: "Yes, click the Share Recipe button to generate a permalink with your entire pipeline encoded directly into the URL hash."
+      }
+    ],
+    related: ["jwt-decoder", "base64-encoder-decoder", "hash-generator", "json-viewer", "diff-checker"]
   }
 ];
 
