@@ -63,7 +63,7 @@ export default function AiDirectoryPage() {
             <p className="text-muted mt-1">Our most popular AI configuration tools.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[220px]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-auto md:auto-rows-[220px]">
             
             {/* Main Large Card */}
             <Link href="/ai/vercel-ai-sdk-code-generator" className="md:col-span-2 md:row-span-2 card p-8 flex flex-col justify-between hover:border-muted transition-colors group">
@@ -122,7 +122,7 @@ export default function AiDirectoryPage() {
                     View All &rarr;
                   </Link>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {tools.map((tool) => (
                     <Link
                       key={tool.slug}

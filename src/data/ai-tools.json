@@ -3,7 +3,7 @@
     "slug": "cursorrules-generator",
     "name": ".cursorrules Generator",
     "category": "prompts",
-    "description": "Developer-focused .cursorrules Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Generate project-tailored .cursorrules configuration files with code conventions, tech stack standards, and file hierarchy guidelines for Cursor IDE.",
     "keywords": [
       ".cursorrules generator",
       "prompts",
@@ -27,14 +27,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the .cursorrules Generator",
-      "content": "The .cursorrules Generator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "The .cursorrules Generator produces structured instructions that prime Cursor AI models on your architecture, preferred design patterns, and package constraints."
     }
   },
   {
     "slug": "claude-system-prompt-builder",
     "name": "Claude System Prompt Builder",
     "category": "prompts",
-    "description": "Developer-focused Claude System Prompt Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Craft XML-structured system prompts for Claude 3.5 Sonnet and Opus with explicit constraints, negative examples, and deterministic response formats.",
     "keywords": [
       "claude system prompt builder",
       "prompts",
@@ -58,14 +58,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Claude System Prompt Builder",
-      "content": "The Claude System Prompt Builder is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Anthropic models respond best to structured XML tags (<instructions>, <context>, <rules>). This tool designs system prompts following Anthropic official prompt engineering documentation."
     }
   },
   {
     "slug": "gpt4o-system-prompt-generator",
     "name": "GPT-4o System Prompt Generator",
     "category": "prompts",
-    "description": "Developer-focused GPT-4o System Prompt Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Create high-precision system instructions for OpenAI GPT-4o and o1/o3 reasoning models with strict JSON schema output formatting and safety boundaries.",
     "keywords": [
       "gpt-4o system prompt generator",
       "prompts",
@@ -89,14 +89,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the GPT-4o System Prompt Generator",
-      "content": "The GPT-4o System Prompt Generator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Designed for OpenAI latest multimodal and reasoning models, this generator structures clear persona roles, tone definitions, and strict markdown/JSON schema compliance."
     }
   },
   {
     "slug": "copilot-instructions-generator",
     "name": "Copilot Instructions Generator",
     "category": "prompts",
-    "description": "Developer-focused Copilot Instructions Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Build customized .github/copilot-instructions.md files to teach GitHub Copilot repository conventions, testing paradigms, and preferred libraries.",
     "keywords": [
       "copilot instructions generator",
       "prompts",
@@ -120,14 +120,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Copilot Instructions Generator",
-      "content": "The Copilot Instructions Generator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "GitHub Copilot automatically loads instructions from .github/copilot-instructions.md. This generator standardizes project guidelines for all team members."
     }
   },
   {
     "slug": "windsurf-rules-generator",
     "name": "Windsurf Rules Generator",
     "category": "prompts",
-    "description": "Developer-focused Windsurf Rules Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Generate .windsurfrules configuration files for Codeium Windsurf Cascade agent with directory structure hints and workspace rules.",
     "keywords": [
       "windsurf rules generator",
       "prompts",
@@ -151,14 +151,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Windsurf Rules Generator",
-      "content": "The Windsurf Rules Generator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Windsurf rules allow developers to guide the Cascade agent through specific coding practices, linting requirements, and multi-file editing rules."
     }
   },
   {
     "slug": "few-shot-prompt-formatter",
     "name": "Few-Shot Prompt Formatter",
     "category": "prompts",
-    "description": "Developer-focused Few-Shot Prompt Formatter for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Structure input-output demonstration pairs into clean few-shot prompt templates to significantly improve LLM accuracy on complex reasoning tasks.",
     "keywords": [
       "few-shot prompt formatter",
       "prompts",
@@ -182,14 +182,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Few-Shot Prompt Formatter",
-      "content": "The Few-Shot Prompt Formatter is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Few-shot prompting provides concrete demonstration pairs that guide the model pattern completion, drastically reducing hallucinations on edge cases."
     }
   },
   {
     "slug": "chain-of-thought-prompt-builder",
     "name": "Chain of Thought Prompt Builder",
     "category": "prompts",
-    "description": "Developer-focused Chain of Thought Prompt Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Construct step-by-step Chain of Thought (CoT) prompts with deliberation frameworks to boost model problem-solving on math, logic, and code.",
     "keywords": [
       "chain of thought prompt builder",
       "prompts",
@@ -213,14 +213,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Chain of Thought Prompt Builder",
-      "content": "The Chain of Thought Prompt Builder is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "CoT prompting encourages the model to generate intermediate reasoning steps before arriving at a final answer, improving accuracy on complex logic."
     }
   },
   {
     "slug": "ai-agent-persona-designer",
     "name": "AI Agent Persona Designer",
     "category": "prompts",
-    "description": "Developer-focused AI Agent Persona Designer for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Design nuanced multi-agent system personas with tone of voice, domain boundaries, escalation triggers, and tool authorization scopes.",
     "keywords": [
       "ai agent persona designer",
       "prompts",
@@ -244,14 +244,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the AI Agent Persona Designer",
-      "content": "The AI Agent Persona Designer is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Build consistent and specialized agent personas for autonomous workflows, customer support, or code review with well-defined capabilities and safety boundaries."
     }
   },
   {
     "slug": "ollama-modelfile-builder",
     "name": "Ollama Modelfile Builder",
     "category": "local-llm",
-    "description": "Developer-focused Ollama Modelfile Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Build custom Ollama Modelfile configurations with GGUF base models, system parameters (temperature, top_p), and custom prompt templates.",
     "keywords": [
       "ollama modelfile builder",
       "local-llm",
@@ -275,14 +275,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Ollama Modelfile Builder",
-      "content": "The Ollama Modelfile Builder is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Generate reproducible Modelfile scripts to build, test, and run tailored local models on Ollama with custom system prompts and inference flags."
     }
   },
   {
     "slug": "gguf-vram-estimator",
     "name": "GGUF VRAM Estimator",
     "category": "local-llm",
-    "description": "Developer-focused GGUF VRAM Estimator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Calculate GPU VRAM requirements for running quantized GGUF models (Q4_K_M, Q8_0, etc.) with specified context window sizes across Nvidia GPUs.",
     "keywords": [
       "gguf vram estimator",
       "local-llm",
@@ -306,14 +306,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the GGUF VRAM Estimator",
-      "content": "The GGUF VRAM Estimator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Avoid CUDA out-of-memory errors by accurately estimating weight sizes, KV cache footprints, and context requirements before downloading large models."
     }
   },
   {
     "slug": "vllm-config-generator",
     "name": "vLLM Config Generator",
     "category": "local-llm",
-    "description": "Developer-focused vLLM Config Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Generate production-ready vLLM engine configurations and launch arguments including tensor parallel size, max model len, and GPU memory utilization.",
     "keywords": [
       "vllm config generator",
       "local-llm",
@@ -337,14 +337,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the vLLM Config Generator",
-      "content": "The vLLM Config Generator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Configure high-throughput vLLM inference deployments with optimized PagedAttention settings, multi-GPU tensor parallelism, and KV cache sizing."
     }
   },
   {
     "slug": "context-window-memory-calculator",
     "name": "Context Window Memory Calculator",
     "category": "local-llm",
-    "description": "Developer-focused Context Window Memory Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Estimate KV cache memory consumption for transformer models across sequence lengths (8k, 32k, 128k) and concurrent batch sizes.",
     "keywords": [
       "context window memory calculator",
       "local-llm",
@@ -368,14 +368,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Context Window Memory Calculator",
-      "content": "The Context Window Memory Calculator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Understand the memory scaling of attention layers as context lengths expand, helping you plan hardware provisioning for long-context LLMs."
     }
   },
   {
     "slug": "huggingface-modelcard-generator",
     "name": "HuggingFace Modelcard Generator",
     "category": "local-llm",
-    "description": "Developer-focused HuggingFace Modelcard Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Create comprehensive README.md model cards for Hugging Face Hub with metadata YAML, license tags, evaluation tables, and usage examples.",
     "keywords": [
       "huggingface modelcard generator",
       "local-llm",
@@ -399,14 +399,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the HuggingFace Modelcard Generator",
-      "content": "The HuggingFace Modelcard Generator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Standardize open-source model releases with complete documentation covering training data, model architecture, limitations, and reproducible code snippets."
     }
   },
   {
     "slug": "openwebui-pipeline-configurator",
     "name": "OpenWebUI Pipeline Configurator",
     "category": "local-llm",
-    "description": "Developer-focused OpenWebUI Pipeline Configurator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Generate Python pipeline filters and valve configurations for OpenWebUI to customize RAG retrieval, moderation, and user prompts.",
     "keywords": [
       "openwebui pipeline configurator",
       "local-llm",
@@ -430,14 +430,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the OpenWebUI Pipeline Configurator",
-      "content": "The OpenWebUI Pipeline Configurator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Easily build modular middleware valves for OpenWebUI to intercept prompts, apply safety filters, and inject vector store context."
     }
   },
   {
     "slug": "llm-api-cost-calculator",
     "name": "LLM API Cost Calculator",
     "category": "calculators",
-    "description": "Developer-focused LLM API Cost Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Compare real-time API inference costs across OpenAI, Anthropic Claude, Google Gemini, and open-source cloud providers based on token usage.",
     "keywords": [
       "llm api cost calculator",
       "calculators",
@@ -461,14 +461,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the LLM API Cost Calculator",
-      "content": "The LLM API Cost Calculator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Model your monthly infrastructure expenditure by inputting prompt and completion token volumes across leading commercial and open-source models."
     }
   },
   {
     "slug": "repo-token-estimator",
     "name": "Repo Token Estimator",
     "category": "calculators",
-    "description": "Developer-focused Repo Token Estimator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Estimate token counts and context footprint for entire codebases to determine feasibility for 128k, 200k, and 1M context window LLMs.",
     "keywords": [
       "repo token estimator",
       "calculators",
@@ -492,14 +492,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Repo Token Estimator",
-      "content": "The Repo Token Estimator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Calculate whether your repository fits within modern frontier model context windows, accounting for file types, exclusions, and overhead."
     }
   },
   {
     "slug": "embedding-cost-calculator",
     "name": "Embedding Cost Calculator",
     "category": "calculators",
-    "description": "Developer-focused Embedding Cost Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Calculate vector embedding pricing for text datasets using OpenAI text-embedding-3-small/large, Voyage, and Cohere embedding APIs.",
     "keywords": [
       "embedding cost calculator",
       "calculators",
@@ -523,14 +523,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Embedding Cost Calculator",
-      "content": "The Embedding Cost Calculator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Plan embedding and vector indexing budgets for large knowledge bases, documentation sets, and RAG architectures."
     }
   },
   {
     "slug": "fine-tuning-cost-estimator",
     "name": "Fine-Tuning Cost Estimator",
     "category": "calculators",
-    "description": "Developer-focused Fine-Tuning Cost Estimator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Estimate token volume, training epochs, and hosting costs for fine-tuning OpenAI GPT-4o-mini, Mistral, and Llama 3 models on custom datasets.",
     "keywords": [
       "fine-tuning cost estimator",
       "calculators",
@@ -554,14 +554,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Fine-Tuning Cost Estimator",
-      "content": "The Fine-Tuning Cost Estimator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Forecast total compute and API costs for supervised fine-tuning (SFT) based on dataset size, target epochs, and parameter scale."
     }
   },
   {
     "slug": "rag-chunk-size-calculator",
     "name": "RAG Chunk Size Calculator",
     "category": "calculators",
-    "description": "Developer-focused RAG Chunk Size Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Determine optimal chunk size, overlap tokens, and embedding vector dimensions for retrieval-augmented generation (RAG) pipelines.",
     "keywords": [
       "rag chunk size calculator",
       "calculators",
@@ -585,14 +585,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the RAG Chunk Size Calculator",
-      "content": "The RAG Chunk Size Calculator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Balance semantic coherence against token economy by calculating optimal chunking parameters for dense and hybrid search systems."
     }
   },
   {
     "slug": "llm-latency-benchmark-calculator",
     "name": "LLM Latency Benchmark Calculator",
     "category": "calculators",
-    "description": "Developer-focused LLM Latency Benchmark Calculator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Estimate Time to First Token (TTFT) and token generation throughput (tokens/sec) based on model parameter size and cloud accelerator specs.",
     "keywords": [
       "llm latency benchmark calculator",
       "calculators",
@@ -616,14 +616,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the LLM Latency Benchmark Calculator",
-      "content": "The LLM Latency Benchmark Calculator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Benchmark expected streaming responsiveness and generation throughput for interactive applications and voice agents."
     }
   },
   {
     "slug": "json-schema-tool-calling-generator",
     "name": "JSON Schema Tool Calling Generator",
     "category": "schemas",
-    "description": "Developer-focused JSON Schema Tool Calling Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Convert TypeScript types or JSON objects into strict JSON Schema function definitions compatible with OpenAI and Anthropic tool calling.",
     "keywords": [
       "json schema tool calling generator",
       "schemas",
@@ -647,14 +647,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the JSON Schema Tool Calling Generator",
-      "content": "The JSON Schema Tool Calling Generator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Generate fully compliant JSON schemas with parameter types, required fields, and descriptions for deterministic LLM function execution."
     }
   },
   {
     "slug": "pydantic-structured-output-builder",
     "name": "Pydantic Structured Output Builder",
     "category": "schemas",
-    "description": "Developer-focused Pydantic Structured Output Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Generate Python Pydantic V2 BaseModel schemas with Field descriptions and validators for OpenAI and Instructor structured outputs.",
     "keywords": [
       "pydantic structured output builder",
       "schemas",
@@ -678,14 +678,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Pydantic Structured Output Builder",
-      "content": "The Pydantic Structured Output Builder is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Ensure type-safe responses from language models by generating Pydantic validation models that enforce exact field constraints."
     }
   },
   {
     "slug": "vercel-ai-sdk-code-generator",
     "name": "Vercel AI SDK Code Generator",
     "category": "schemas",
-    "description": "Developer-focused Vercel AI SDK Code Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Generate boilerplate Route Handlers and React Client components for streaming UI, text, and structured objects using the Vercel AI SDK.",
     "keywords": [
       "vercel ai sdk code generator",
       "schemas",
@@ -709,14 +709,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Vercel AI SDK Code Generator",
-      "content": "The Vercel AI SDK Code Generator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Quickly scaffold Next.js App Router integrations with streamText, streamObject, and useChat hooks from the official Vercel AI SDK."
     }
   },
   {
     "slug": "langchain-boilerplate-builder",
     "name": "Langchain Boilerplate Builder",
     "category": "schemas",
-    "description": "Developer-focused Langchain Boilerplate Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Create modern LangChain and LangGraph pipeline templates in TypeScript and Python with prompt chains, memory, and tool integration.",
     "keywords": [
       "langchain boilerplate builder",
       "schemas",
@@ -740,14 +740,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Langchain Boilerplate Builder",
-      "content": "The Langchain Boilerplate Builder is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Bootstrap stateful agent architectures with modern LangChain Expression Language (LCEL) and LangGraph workflow nodes."
     }
   },
   {
     "slug": "mcp-config-builder",
     "name": "MCP Config Builder",
     "category": "schemas",
-    "description": "Developer-focused MCP Config Builder for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Generate claude_desktop_config.json and Cursor Model Context Protocol (MCP) server definitions with stdio and SSE transport.",
     "keywords": [
       "mcp config builder",
       "schemas",
@@ -771,14 +771,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the MCP Config Builder",
-      "content": "The MCP Config Builder is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Configure Model Context Protocol clients to connect your IDE and desktop assistants to local filesystems, databases, and custom tools."
     }
   },
   {
     "slug": "rest-api-to-ai-tool-converter",
     "name": "REST API to AI Tool Converter",
     "category": "schemas",
-    "description": "Developer-focused REST API to AI Tool Converter for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Transform OpenAPI / Swagger specifications and REST endpoints into executable AI agent tool declarations and parameter schemas.",
     "keywords": [
       "rest api to ai tool converter",
       "schemas",
@@ -802,14 +802,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the REST API to AI Tool Converter",
-      "content": "The REST API to AI Tool Converter is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Bridge legacy RESTful APIs into intelligent agents by automatically translating HTTP endpoints into LLM-callable functions."
     }
   },
   {
     "slug": "ai-guardrails-configurator",
     "name": "AI Guardrails Configurator",
     "category": "evals",
-    "description": "Developer-focused AI Guardrails Configurator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Configure input/output safety guardrails, regex redaction filters, PII sanitizers, and prompt injection defense policies for LLM applications.",
     "keywords": [
       "ai guardrails configurator",
       "evals",
@@ -833,14 +833,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the AI Guardrails Configurator",
-      "content": "The AI Guardrails Configurator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Implement enterprise-grade content moderation and data privacy defenses before sending user prompts to external models."
     }
   },
   {
     "slug": "prompt-markdown-json-escaper",
     "name": "Prompt Markdown JSON Escaper",
     "category": "evals",
-    "description": "Developer-focused Prompt Markdown JSON Escaper for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Safely escape markdown, code fences, backticks, and quotation marks within JSON strings and LLM system prompts without syntax breakage.",
     "keywords": [
       "prompt markdown json escaper",
       "evals",
@@ -864,14 +864,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the Prompt Markdown JSON Escaper",
-      "content": "The Prompt Markdown JSON Escaper is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Prevent broken API payloads and parse errors by properly escaping multi-line code blocks and nested JSON strings inside prompts."
     }
   },
   {
     "slug": "jsonl-dataset-formatter",
     "name": "JSONL Dataset Formatter",
     "category": "evals",
-    "description": "Developer-focused JSONL Dataset Formatter for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Format and validate raw prompt-completion pairs or multi-turn chat messages into strict OpenAI and Anthropic fine-tuning JSONL format.",
     "keywords": [
       "jsonl dataset formatter",
       "evals",
@@ -895,14 +895,14 @@
     ],
     "pseoContent": {
       "h2": "How to use the JSONL Dataset Formatter",
-      "content": "The JSONL Dataset Formatter is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Verify line-by-line syntax, system message roles, and token limits before submitting datasets for model fine-tuning."
     }
   },
   {
     "slug": "llm-eval-rubric-generator",
     "name": "LLM Eval Rubric Generator",
     "category": "evals",
-    "description": "Developer-focused LLM Eval Rubric Generator for AI developers. Generate, configure, and optimize seamlessly.",
+    "description": "Build structured automated evaluation rubrics and grading criteria for LLM-as-a-judge pipelines to score accuracy, safety, and conciseness.",
     "keywords": [
       "llm eval rubric generator",
       "evals",
@@ -926,7 +926,7 @@
     ],
     "pseoContent": {
       "h2": "How to use the LLM Eval Rubric Generator",
-      "content": "The LLM Eval Rubric Generator is designed to streamline your AI development workflow. Simply enter your requirements in the form above to generate optimized configurations instantly."
+      "content": "Design quantitative evaluation scorecards and deterministic judging prompts to benchmark model variants and system prompt changes."
     }
   }
 ]

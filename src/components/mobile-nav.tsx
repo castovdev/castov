@@ -80,6 +80,11 @@ export function MobileNav() {
           </p>
           <ul className="grid grid-cols-2 gap-2 mb-4">
             {[
+              { href: "/convert", label: "Converters Matrix" },
+              { href: "/regex-patterns", label: "Regex Lab" },
+              { href: "/error-fixes", label: "Error Fixes" },
+              { href: "/tech-trends", label: "Tech Radar" },
+              { href: "/ai", label: "AI Developer Hub" },
               { href: "/developer", label: "Developer Hub" },
               { href: "/timezones", label: "Time Zones Hub" },
               { href: "/timestamps", label: "Timestamps Hub" },

@@ -33,7 +33,7 @@ export function SiteHeader() {
               {SITE.name}
             </span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-6 text-sm font-medium">
             {DESKTOP_NAV.map((item) => (
               <Link
                 key={item.href}
@@ -51,10 +51,10 @@ export function SiteHeader() {
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
-            className="flex items-center gap-2 h-8 px-2.5 sm:px-3 text-xs sm:text-sm text-muted rounded-lg bg-field hover:bg-hover border border-line transition-colors cursor-pointer"
+            className="flex items-center justify-center sm:justify-start gap-2 h-9 w-9 sm:w-auto px-0 sm:px-3 text-xs sm:text-sm text-muted rounded-lg bg-field hover:bg-hover border border-line transition-colors cursor-pointer"
             aria-label="Search tools (Ctrl+K)"
           >
-            <Search className="w-3.5 h-3.5 text-muted shrink-0" />
+            <Search className="w-4 h-4 text-muted shrink-0" />
             <span className="hidden sm:inline">Search tools...</span>
             <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-line bg-card px-1.5 font-mono text-[10px] text-muted font-medium">
               Ctrl K
