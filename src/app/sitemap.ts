@@ -6,6 +6,8 @@ import { AI_HUB_LIVE } from '@/lib/flags';
 import { CODE_CONVERTERS } from '@/lib/code-converters-registry';
 import { REGEX_PATTERNS } from '@/lib/regex-patterns-registry';
 import { ERROR_FIXES } from '@/lib/error-fixes-registry';
+import { TIMEZONE_PAIRS } from '@/lib/timezone-pairs-registry';
+import { NETWORK_PORTS, CIDR_BLOCKS } from '@/lib/network-ports-registry';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -100,6 +102,39 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/error-fixes/${err.slug}`,
       lastModified: getLastMod('src/lib/error-fixes-registry.ts'),
       changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+  });
+
+  sitemapEntries.push(
+    { url: `${baseUrl}/directory`, lastModified: getLastMod('src/app/directory/page.tsx'), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/time`, lastModified: getLastMod('src/app/time/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${baseUrl}/ports`, lastModified: getLastMod('src/app/ports/page.tsx'), changeFrequency: 'weekly', priority: 0.9 }
+  );
+
+  TIMEZONE_PAIRS.forEach((pair) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/time/${pair.slug}`,
+      lastModified: getLastMod('src/lib/timezone-pairs-registry.ts'),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+  });
+
+  NETWORK_PORTS.forEach((p) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/ports/${p.port}`,
+      lastModified: getLastMod('src/lib/network-ports-registry.ts'),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    });
+  });
+
+  CIDR_BLOCKS.forEach((c) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/cidr/${c.prefix}`,
+      lastModified: getLastMod('src/lib/network-ports-registry.ts'),
+      changeFrequency: 'monthly',
       priority: 0.8,
     });
   });

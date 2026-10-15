@@ -29,6 +29,8 @@ const ECOSYSTEM = [
   { href: "/cli", label: "Castov CLI", badge: "npm" },
   { href: "/extension", label: "VS Code Extension", badge: "v0.1" },
   { href: "/tech-trends", label: "Tech Pulse Radar", badge: "Live" },
+  { href: "/time", label: "Timezone Pair Matrix", badge: "60+" },
+  { href: "/ports", label: "Network Ports & CIDR", badge: "60+" },
   { href: "/regex-patterns", label: "Regex Patterns Lab", badge: "40" },
   { href: "/error-fixes", label: "Error Fix Encyclopedia", badge: "35" },
   { href: "/cheatsheets", label: "Interactive Cheat Sheets", badge: "Popular" },
@@ -36,19 +38,19 @@ const ECOSYSTEM = [
   { href: "/chmod/755", label: "Chmod Permissions" },
   { href: "/webhook-tester", label: "Webhook Tester" },
   { href: "/diff-checker", label: "Text & Code Diff" },
-  { href: "/sonic-gap", label: "Sonic-Gap Ultrasonic", badge: "Lab" },
 ];
 
 const RESOURCES = [
+  { href: "/directory", label: "Full Site Directory (900+)" },
   { href: "/tools", label: "All Tools Directory" },
   { href: "/convert", label: "Code & Schema Converters" },
+  { href: "/time", label: "Global Timezone Converters" },
+  { href: "/ports", label: "Ports & Subnet Reference" },
   { href: "/regex-patterns", label: "Regex Patterns Library" },
   { href: "/error-fixes", label: "Developer Error Fixes" },
   { href: "/guides", label: "Developer Guides" },
-  { href: "/code", label: "Code Hub & Snippets" },
   { href: "/timezones", label: "Time Zones Hub" },
   { href: "/timestamps", label: "Epoch Timestamps" },
-  { href: "/chrono-db", label: "Chrono State DB" },
 ];
 
 export function SiteFooter() {
