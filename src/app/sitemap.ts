@@ -33,6 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/chrono-db`, lastModified: getLastMod('src/app/chrono-db/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/webhook-tester`, lastModified: getLastMod('src/app/webhook-tester/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/tech-trends`, lastModified: getLastMod('src/app/tech-trends/page.tsx'), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/cursorrules`, lastModified: getLastMod('src/app/cursorrules/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/nexus-grid`, lastModified: getLastMod('src/app/nexus-grid/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/env-vault`, lastModified: getLastMod('src/app/env-vault/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/sonic-gap`, lastModified: getLastMod('src/app/sonic-gap/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
