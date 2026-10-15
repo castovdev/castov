@@ -38,6 +38,22 @@ export function EnvVaultTool() {
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptError, setDecryptError] = useState("");
 
+  // Auto-detect payload from URL on mount
+  useState(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const url = new URL(window.location.href);
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const p = hashParams.get("payload") || url.searchParams.get("payload") || url.searchParams.get("id");
+      if (p) {
+        setMode("decrypt");
+        setVaultId(p);
+      }
+    } catch {
+      // ignore
+    }
+  });
+
   const MAX_ENV_SIZE_BYTES = 64 * 1024; // 64 KB
 
   const handleEncrypt = async () => {
@@ -60,17 +76,23 @@ export function EnvVaultTool() {
       const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(rawEnv));
       
       const payloadBase64 = arrayBufferToBase64(salt.buffer as ArrayBuffer) + ":" + arrayBufferToBase64(iv.buffer as ArrayBuffer) + ":" + arrayBufferToBase64(ciphertext);
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://castov.com";
       
-      // Save to Supabase (client-side UUID avoids needing SELECT which is blocked by RLS)
-      const clientVaultId = crypto.randomUUID();
-      const supabase = createClient();
-      const { error } = await supabase.from('env_vaults').insert([{ id: clientVaultId, encrypted_payload: payloadBase64 }]);
+      // Zero-Knowledge client hash link (100% serverless, zero storage risk)
+      const zeroKnowledgeLink = `${origin}/env-vault#payload=${encodeURIComponent(payloadBase64)}`;
       
-      if (error) {
-        setEncryptError(`Failed to save encrypted vault to server: ${error.message || "Database request failed"}`);
-      } else {
-        const origin = typeof window !== "undefined" ? window.location.origin : "";
-        setEncryptedLink(`${origin}/tools/env-vault?id=${clientVaultId}`);
+      // Also try saving to Supabase if configured for short links
+      try {
+        const clientVaultId = crypto.randomUUID();
+        const supabase = createClient();
+        const { error } = await supabase.from('env_vaults').insert([{ id: clientVaultId, encrypted_payload: payloadBase64 }]);
+        if (!error) {
+          setEncryptedLink(`${origin}/env-vault?id=${clientVaultId}`);
+        } else {
+          setEncryptedLink(zeroKnowledgeLink);
+        }
+      } catch {
+        setEncryptedLink(zeroKnowledgeLink);
       }
     } catch (e: any) {
       console.error(e);
@@ -87,13 +109,15 @@ export function EnvVaultTool() {
     try {
       let payloadBase64 = vaultId.trim();
 
-      // If user pasted a URL, extract parameter or ID
+      // If user pasted a URL, extract parameter, hash, or ID
       if (payloadBase64.includes("http://") || payloadBase64.includes("https://")) {
         try {
           const parsed = new URL(payloadBase64);
+          const hashP = new URLSearchParams(parsed.hash.replace(/^#/, "")).get("payload");
           const p = parsed.searchParams.get("payload");
           const id = parsed.searchParams.get("id");
-          if (p) payloadBase64 = p;
+          if (hashP) payloadBase64 = hashP;
+          else if (p) payloadBase64 = p;
           else if (id) payloadBase64 = id;
         } catch {
           // ignore URL parse failure

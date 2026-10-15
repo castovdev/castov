@@ -1,0 +1,18 @@
+name: 'Castov Security & Secret Scanner'
+description: 'Fast, zero-config secret scanner, regex vulnerability detector, and developer checks by Castov.'
+author: 'Castov (https://castov.com)'
+inputs:
+  path:
+    description: 'Path or directory to scan'
+    required: false
+    default: '.'
+  fail-on-secrets:
+    description: 'Whether to fail the CI step if leaked API keys or private tokens are found'
+    required: false
+    default: 'true'
+runs:
+  using: 'node20'
+  main: 'scripts/action-scanner.cjs'
+branding:
+  icon: 'shield'
+  color: 'blue'
