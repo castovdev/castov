@@ -6,6 +6,7 @@ import { Breadcrumb } from '@/components/breadcrumb';
 import { FaqSection } from '@/components/faq-section';
 import Link from 'next/link';
 import { HTTP_STATUS_CODES } from '@/lib/http-statuses';
+import { AdSensePlaceholder } from '@/components/adsense-placeholder';
 
 type Params = { code: string };
 export const dynamicParams = false;
@@ -109,13 +110,7 @@ export default async function HttpStatusPage({ params }: { params: Promise<Param
               HTTP status codes are divided into 5 categories: 1xx (Informational), 2xx (Success), 3xx (Redirection), 4xx (Client Error), and 5xx (Server Error).
             </p>
           </div>
-          <div className="w-full min-h-[400px] bg-card border border-line rounded-xl flex flex-col items-center justify-center text-muted text-sm shadow-sm opacity-80 overflow-hidden relative group">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px]" />
-            <span className="relative z-10 font-mono text-xs mb-2">Advertisement</span>
-            <span className="relative z-10 text-center max-w-[200px] leading-relaxed">
-              AdSense space reserved.<br />Sticky placement for high RPM.
-            </span>
-          </div>
+          <AdSensePlaceholder />
         </aside>
       </div>
     </div>

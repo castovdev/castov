@@ -70,7 +70,7 @@ export function TimezoneSelect({
         className="input mb-2"
         type="text"
         role="searchbox"
-        placeholder="Search by city or region\u2026 e.g. New"
+        placeholder="Search by city or region… e.g. New"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => {

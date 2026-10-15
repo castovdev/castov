@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ShareButton } from "@/components/share-button";
+import { ADS } from "@/lib/site";
+import { AdSensePlaceholder } from "@/components/adsense-placeholder";
 
 function getPermissions(digit: string) {
   const val = parseInt(digit, 10);
@@ -92,7 +94,7 @@ export default async function ChmodPage({ params }: { params: Promise<{ code: st
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_300px] gap-12 items-start">
+      <div className={`grid ${ADS.client ? "lg:grid-cols-[1fr_300px]" : ""} gap-12 items-start`}>
         <div className="prose-tf max-w-none">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div className="p-6 bg-card border border-line rounded-2xl shadow-sm text-center">
@@ -112,15 +114,11 @@ export default async function ChmodPage({ params }: { params: Promise<{ code: st
           <FaqSection items={faqItems} />
         </div>
 
-        <aside className="sticky top-24 flex flex-col gap-6">
-          <div className="w-full min-h-[400px] bg-card border border-line rounded-xl flex flex-col items-center justify-center text-muted text-sm shadow-sm opacity-80 overflow-hidden relative group">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px]" />
-            <span className="relative z-10 font-mono text-xs mb-2">Advertisement</span>
-            <span className="relative z-10 text-center max-w-[200px] leading-relaxed">
-              AdSense space reserved.<br/>Sticky placement for high RPM.
-            </span>
-          </div>
-        </aside>
+        {ADS.client ? (
+          <aside className="sticky top-24 flex flex-col gap-6">
+            <AdSensePlaceholder />
+          </aside>
+        ) : null}
       </div>
     </div>
   );

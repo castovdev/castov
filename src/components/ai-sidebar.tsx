@@ -90,16 +90,17 @@ export function AiSidebar() {
       {/* Global Search Trigger */}
       <button 
         onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-        className="w-full flex items-center justify-between px-3 py-2 bg-black/40 border border-line/50 rounded-lg text-sm text-muted hover:text-fg hover:border-accent/50 transition-colors group"
+        aria-label="Search tools"
+        className="w-full flex items-center justify-between px-3 py-2 bg-field hover:bg-hover border border-line rounded-lg text-sm text-muted hover:text-fg hover:border-accent/40 transition-colors shadow-2xs group"
       >
         <span className="flex items-center gap-2">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70 group-hover:opacity-100">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted group-hover:text-accent transition-colors">
             <circle cx="11" cy="11" r="8"></circle>
             <path d="m21 21-4.3-4.3"></path>
           </svg>
-          Search tools...
+          <span className="font-medium text-muted group-hover:text-fg transition-colors">Search tools...</span>
         </span>
-        <kbd className="inline-flex items-center h-5 px-1.5 text-[10px] font-medium bg-field text-muted rounded border border-line/40 font-mono shadow-sm group-hover:text-accent group-hover:border-accent/30 transition-colors">
+        <kbd className="inline-flex items-center h-5 px-1.5 text-[10px] font-medium bg-card text-muted rounded border border-line/60 font-mono shadow-2xs group-hover:text-accent group-hover:border-accent/30 transition-colors">
           ⌘K
         </kbd>
       </button>

@@ -11,6 +11,8 @@ import { RelatedTools } from "./related-tools";
 import { ToolInterface } from "./tool-interface";
 import { PinButton } from "./pinned-tools";
 import { ShareButton } from "./share-button";
+import { ADS } from "@/lib/site";
+import { AdSensePlaceholder } from "./adsense-placeholder";
 
 /** Shared layout for every tool page: breadcrumb, H1, tool, then explanation, examples, FAQ, links. */
 export function ToolPage({ tool }: { tool: Tool }) {
@@ -44,7 +46,7 @@ export function ToolPage({ tool }: { tool: Tool }) {
         <ToolInterface slug={tool.slug} />
       </section>
 
-      <div className="grid gap-12 lg:grid-cols-[1fr_300px] items-start">
+      <div className={`grid gap-12 ${ADS.client ? "lg:grid-cols-[1fr_300px]" : ""} items-start`}>
         <div className="prose-tf max-w-none">
           {tool.sections.map((s) => (
             <section key={s.heading}>
@@ -78,16 +80,11 @@ export function ToolPage({ tool }: { tool: Tool }) {
           </div>
         </div>
 
-        <aside className="sticky top-24 flex flex-col gap-6">
-          {/* High-RPM AdSense Placement */}
-          <div className="w-full min-h-[400px] bg-card border border-line rounded-xl flex flex-col items-center justify-center text-muted text-sm shadow-sm opacity-80 overflow-hidden relative group">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px]" />
-            <span className="relative z-10 font-mono text-xs mb-2">Advertisement</span>
-            <span className="relative z-10 text-center max-w-[200px] leading-relaxed">
-              AdSense space reserved.<br/>Sticky placement for high RPM.
-            </span>
-          </div>
-        </aside>
+        {ADS.client ? (
+          <aside className="sticky top-24 flex flex-col gap-6">
+            <AdSensePlaceholder />
+          </aside>
+        ) : null}
       </div>
 
       {/* Full-width Related Tools section for strong internal SEO & lower bounce rate */}
