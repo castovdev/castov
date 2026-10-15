@@ -1,8 +1,8 @@
 {
   "name": "castov",
-  "version": "1.0.0",
-  "description": "Castov in your terminal: Unix timestamps, ID detector (ObjectId, Snowflake, UUIDv7, ULID), cron explainer, IANA time zone converter with DST handling, UUIDs (v4/v7), Base64, hashes, and JWT decoding. Zero-server, zero-config.",
-  "keywords": ["cli", "castov", "unix", "timestamp", "cron", "timezone", "dst", "detect", "snowflake", "ulid", "objectid", "uuid", "uuidv7", "base64", "hash", "jwt"],
+  "version": "1.1.0",
+  "description": "Castov in your terminal: terminal error healer, .cursorrules generator, Unix timestamps, ID detector (ObjectId, Snowflake, UUIDv7, ULID), cron explainer, IANA time zone converter with DST handling, UUIDs (v4/v7), Base64, hashes, and JWT decoding. Zero-server, zero-config.",
+  "keywords": ["cli", "castov", "fix", "cursorrules", "unix", "timestamp", "cron", "timezone", "dst", "detect", "snowflake", "ulid", "objectid", "uuid", "uuidv7", "base64", "hash", "jwt"],
   "homepage": "https://castov.com",
   "license": "MIT",
   "author": "Castov <https://castov.com>",
