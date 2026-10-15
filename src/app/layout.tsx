@@ -42,12 +42,14 @@ const SCHEMA_JSON_LD = {
       "@id": `${SITE.url}/#navigation`,
       "name": "Primary Navigation",
       "hasPart": [
-        { "@type": "WebPage", "name": "Canvas", "url": `${SITE.url}/canvas` },
-        { "@type": "WebPage", "name": "WebGPU NexusGrid", "url": `${SITE.url}/nexus-grid` },
-        { "@type": "WebPage", "name": "Env Steganography Vault", "url": `${SITE.url}/env-vault` },
-        { "@type": "WebPage", "name": "3D JSON Galaxy", "url": `${SITE.url}/json-viewer` },
-        { "@type": "WebPage", "name": "Sonic-Gap Bridge", "url": `${SITE.url}/sonic-gap` },
-        { "@type": "WebPage", "name": "Extension", "url": `${SITE.url}/extension` }
+        { "@type": "WebPage", "name": "Developer Tools", "url": `${SITE.url}/tools` },
+        { "@type": "WebPage", "name": "Code Converters", "url": `${SITE.url}/convert` },
+        { "@type": "WebPage", "name": "Regex Patterns Lab", "url": `${SITE.url}/regex-patterns` },
+        { "@type": "WebPage", "name": "Error Fix Encyclopedia", "url": `${SITE.url}/error-fixes` },
+        { "@type": "WebPage", "name": "Tech Pulse Radar", "url": `${SITE.url}/tech-trends` },
+        { "@type": "WebPage", "name": "AI Developer Hub", "url": `${SITE.url}/ai` },
+        { "@type": "WebPage", "name": "Timestamps & Timezones", "url": `${SITE.url}/timestamps` },
+        { "@type": "WebPage", "name": "Developer Guides", "url": `${SITE.url}/guides` }
       ]
     }
   ]
