@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const CLI = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
@@ -221,3 +221,442 @@ test("unknown command exits with code 2", () => {
   assert.equal(r.status, 2);
   assert.match(r.stderr, /unknown command/);
 });
+
+// ---------------------------------------------------------------------------
+// Robust MCP Test Harness & Dual-Mode Stream Readers
+// ---------------------------------------------------------------------------
+function createMcpHarness(t, timeoutMs = 8000) {
+  const client = spawn(process.execPath, [CLI, "mcp"], { stdio: ["pipe", "pipe", "pipe"] });
+  const timers = new Set();
+  const setTracked = (fn, d) => {
+    const id = setTimeout(() => { timers.delete(id); fn(); }, d);
+    timers.add(id);
+    return id;
+  };
+  client.on("error", () => {});       // مستمع دائم لمنع unhandled error
+  client.stderr.on("data", () => {}); // استهلاك stderr لمنع امتلاء الأنبوب
+  let closed = false;
+  let closeCode = null;
+  const closePromise = new Promise((r) => client.once("close", (code) => {
+    closed = true;
+    closeCode = code;
+    r(code);
+  }));
+
+  const cleanup = async () => {
+    for (const id of timers) clearTimeout(id);
+    timers.clear();
+    if (!closed) {
+      client.kill("SIGTERM");
+      const killTimer = setTracked(() => { if (!closed) client.kill("SIGKILL"); }, 500);
+      await Promise.race([closePromise, new Promise((r) => setTimeout(r, 2000).unref())]);
+      clearTimeout(killTimer);
+    }
+    client.stdout.removeAllListeners("data");
+  };
+  t.after(cleanup);
+  return { client, setTracked, timeoutMs, closePromise, getCloseCode: () => closeCode };
+}
+
+function readFramedResponses(client, count, timeoutMs, setTracked) {
+  return new Promise((resolve, reject) => {
+    let outBuf = Buffer.alloc(0);
+    const responses = [];
+    const timer = setTracked(() => {
+      client.stdout.removeListener("data", onData);
+      reject(new Error(`Timeout (${timeoutMs}ms) waiting for ${count} framed responses (got ${responses.length})`));
+    }, timeoutMs);
+
+    const onData = (chunk) => {
+      outBuf = Buffer.concat([outBuf, chunk]);
+      while (true) {
+        const headerEnd = outBuf.indexOf("\r\n\r\n");
+        if (headerEnd === -1) break;
+        const match = outBuf.subarray(0, headerEnd).toString("utf8").match(/^Content-Length:[ \t]*(\d+)[ \t]*$/im);
+        if (!match) break;
+        const len = parseInt(match[1], 10);
+        const start = headerEnd + 4;
+        if (outBuf.length < start + len) break;
+
+        const payload = outBuf.subarray(start, start + len).toString("utf8");
+        outBuf = outBuf.subarray(start + len);
+        responses.push(JSON.parse(payload));
+
+        if (responses.length === count) {
+          clearTimeout(timer);
+          client.stdout.removeListener("data", onData);
+          resolve(responses);
+          return;
+        }
+      }
+    };
+    client.stdout.on("data", onData);
+  });
+}
+
+function readNdjsonResponses(client, count, timeoutMs, setTracked) {
+  return new Promise((resolve, reject) => {
+    let outBuf = Buffer.alloc(0);
+    const responses = [];
+    const timer = setTracked(() => {
+      client.stdout.removeListener("data", onData);
+      reject(new Error(`Timeout (${timeoutMs}ms) waiting for ${count} ndjson responses (got ${responses.length})`));
+    }, timeoutMs);
+
+    const onData = (chunk) => {
+      outBuf = Buffer.concat([outBuf, chunk]);
+      while (true) {
+        const newlineIdx = outBuf.indexOf(0x0a);
+        if (newlineIdx === -1) break;
+        const line = outBuf.subarray(0, newlineIdx).toString("utf8").trim();
+        outBuf = outBuf.subarray(newlineIdx + 1);
+        if (line) responses.push(JSON.parse(line));
+
+        if (responses.length === count) {
+          clearTimeout(timer);
+          client.stdout.removeListener("data", onData);
+          resolve(responses);
+          return;
+        }
+      }
+    };
+    client.stdout.on("data", onData);
+  });
+}
+
+const buildFramed = (obj) => {
+  const jsonBuf = Buffer.from(JSON.stringify(obj), "utf8");
+  const headerBuf = Buffer.from(`Content-Length: ${jsonBuf.length}\r\n\r\n`, "utf8");
+  return Buffer.concat([headerBuf, jsonBuf]);
+};
+
+test("castov mcp: protocol handshake and tools/list in framed mode", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readFramedResponses(client, 2, timeoutMs, setTracked);
+
+  client.stdin.write(buildFramed({ jsonrpc: "2.0", id: 1, method: "initialize" }));
+  client.stdin.write(buildFramed({ jsonrpc: "2.0", id: 2, method: "tools/list" }));
+
+  const [initRes, listRes] = await promise;
+  assert.equal(initRes.id, 1);
+  assert.equal(initRes.result.serverInfo.name, "castov-mcp-server");
+  assert.equal(listRes.id, 2);
+  const toolNames = listRes.result.tools.map((x) => x.name);
+  assert.deepEqual(toolNames, ["castov_timestamp", "castov_detect_id", "castov_cidr", "castov_port"]);
+});
+
+test("castov mcp: handles ndjson mode and replies in ndjson", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 1, timeoutMs, setTracked);
+
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) + "\n");
+  const [res] = await promise;
+  assert.equal(res.id, 1);
+  assert.equal(res.result.tools.length, 4);
+});
+
+test("castov mcp: tools/call handles valid inputs correctly", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readFramedResponses(client, 3, timeoutMs, setTracked);
+
+  client.stdin.write(buildFramed({
+    jsonrpc: "2.0",
+    id: 10,
+    method: "tools/call",
+    params: { name: "castov_timestamp", arguments: { value: "1700000000" } },
+  }));
+  client.stdin.write(buildFramed({
+    jsonrpc: "2.0",
+    id: 11,
+    method: "tools/call",
+    params: { name: "castov_cidr", arguments: { cidr: "192.168.1.0/24" } },
+  }));
+  client.stdin.write(buildFramed({
+    jsonrpc: "2.0",
+    id: 12,
+    method: "tools/call",
+    params: { name: "castov_port", arguments: { port: 5432 } },
+  }));
+
+  const [tsRes, cidrRes, portRes] = await promise;
+  assert.equal(tsRes.id, 10);
+  assert.equal(tsRes.result.isError, undefined);
+  assert.match(tsRes.result.content[0].text, /2023-11-14T22:13:20.000Z/);
+
+  assert.equal(cidrRes.id, 11);
+  assert.equal(cidrRes.result.isError, undefined);
+  assert.match(cidrRes.result.content[0].text, /Subnet Mask: 255\.255\.255\.0/);
+
+  assert.equal(portRes.id, 12);
+  assert.equal(portRes.result.isError, undefined);
+  assert.match(portRes.result.content[0].text, /PostgreSQL/);
+});
+
+test("castov mcp: regression - invalid inputs return clear error and never hang", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readFramedResponses(client, 5, timeoutMs, setTracked);
+
+  client.stdin.write(buildFramed({
+    jsonrpc: "2.0",
+    id: 20,
+    method: "tools/call",
+    params: { name: "castov_timestamp", arguments: { value: "not-a-timestamp" } },
+  }));
+  client.stdin.write(buildFramed({
+    jsonrpc: "2.0",
+    id: 21,
+    method: "tools/call",
+    params: { name: "castov_timestamp", arguments: {} },
+  }));
+  client.stdin.write(buildFramed({
+    jsonrpc: "2.0",
+    id: 22,
+    method: "tools/call",
+    params: { name: "castov_cidr", arguments: { cidr: "999.999/99" } },
+  }));
+  client.stdin.write(buildFramed({
+    jsonrpc: "2.0",
+    id: 23,
+    method: "tools/call",
+    params: { name: "castov_port", arguments: { port: 999999 } },
+  }));
+  client.stdin.write(buildFramed({
+    jsonrpc: "2.0",
+    id: 24,
+    method: "tools/call",
+    params: { name: "nonexistent_tool", arguments: {} },
+  }));
+
+  const [r20, r21, r22, r23, r24] = await promise;
+  assert.equal(r20.id, 20);
+  assert.equal(r20.result.isError, true);
+  assert.match(r20.result.content[0].text, /invalid numeric timestamp/i);
+
+  assert.equal(r21.id, 21);
+  assert.equal(r21.result.isError, true);
+  assert.match(r21.result.content[0].text, /missing or invalid 'value'/i);
+
+  assert.equal(r22.id, 22);
+  assert.equal(r22.result.isError, true);
+  assert.match(r22.result.content[0].text, /between 0 and 32/i);
+
+  assert.equal(r23.id, 23);
+  assert.equal(r23.result.isError, true);
+  assert.match(r23.result.content[0].text, /between 1 and 65535/i);
+
+  assert.equal(r24.id, 24);
+  assert.equal(r24.result.isError, true);
+  assert.match(r24.result.content[0].text, /unknown tool/i);
+});
+
+test("castov mcp: handles header sent byte-by-byte", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readFramedResponses(client, 1, timeoutMs, setTracked);
+
+  const msg = buildFramed({ jsonrpc: "2.0", id: 801, method: "tools/list" });
+  const headerEnd = msg.indexOf("\r\n\r\n") + 4;
+
+  for (let i = 0; i < headerEnd; i++) {
+    client.stdin.write(msg.subarray(i, i + 1));
+  }
+  client.stdin.write(msg.subarray(headerEnd));
+
+  const [res] = await promise;
+  assert.equal(res.id, 801);
+  assert.equal(res.result.tools.length, 4);
+});
+
+test("castov mcp: splits multi-byte UTF-8 emoji across chunk boundaries", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readFramedResponses(client, 1, timeoutMs, setTracked);
+
+  const msg = buildFramed({
+    jsonrpc: "2.0",
+    id: 901,
+    method: "tools/call",
+    params: { name: "castov_timestamp", arguments: { value: "ساعة_1700000000_🚀" } },
+  });
+
+  const emojiIdx = msg.indexOf(Buffer.from("🚀", "utf8"));
+  const splitPoint = emojiIdx + 2; // يقطع بين بايت 2 و 3 في الإيموجي
+
+  client.stdin.write(msg.subarray(0, splitPoint));
+  setTracked(() => client.stdin.write(msg.subarray(splitPoint)), 60);
+
+  const [res] = await promise;
+  assert.equal(res.id, 901);
+  assert.equal(res.result.isError, true);
+  const text = res.result.content[0].text;
+  assert.ok(!text.includes("\uFFFD"), "Response must not contain replacement character U+FFFD");
+  assert.ok(text.includes("🚀"), "Response must contain intact rocket emoji");
+});
+
+test("castov mcp: handles fragmented header and fragmented body", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readFramedResponses(client, 2, timeoutMs, setTracked);
+
+  const msg1 = buildFramed({ jsonrpc: "2.0", id: 501, method: "tools/list" });
+  const splitHeader = 12;
+  client.stdin.write(msg1.subarray(0, splitHeader));
+  setTracked(() => client.stdin.write(msg1.subarray(splitHeader)), 60);
+
+  setTracked(() => {
+    const msg2 = buildFramed({
+      jsonrpc: "2.0",
+      id: 502,
+      method: "tools/call",
+      params: { name: "castov_port", arguments: { port: 5432 } },
+    });
+    const headerEnd = msg2.indexOf("\r\n\r\n") + 4;
+    const splitBody = headerEnd + 15;
+    client.stdin.write(msg2.subarray(0, splitBody));
+    setTracked(() => client.stdin.write(msg2.subarray(splitBody)), 60);
+  }, 180);
+
+  const [r1, r2] = await promise;
+  assert.equal(r1.id, 501);
+  assert.equal(r2.id, 502);
+  assert.match(r2.result.content[0].text, /PostgreSQL/);
+});
+
+test("castov mcp: handles 3 messages in single chunk with FIFO order and error recovery", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readFramedResponses(client, 3, timeoutMs, setTracked);
+
+  const msg1 = buildFramed({ jsonrpc: "2.0", id: 101, method: "tools/call", params: { name: "castov_cidr", arguments: { cidr: "192.168.1.0/" } } });
+  const msg2 = buildFramed({ jsonrpc: "2.0", id: 102, method: "tools/call", params: { name: "castov_cidr", arguments: { cidr: "192.168.1.0/24" } } });
+  const msg3 = buildFramed({ jsonrpc: "2.0", id: 103, method: "tools/call", params: { name: "castov_port", arguments: { port: 5432 } } });
+
+  client.stdin.write(Buffer.concat([msg1, msg2, msg3]));
+
+  const [r1, r2, r3] = await promise;
+  assert.equal(r1.id, 101);
+  assert.equal(r1.result.isError, true);
+  assert.match(r1.result.content[0].text, /Missing prefix after '\/'/);
+
+  assert.equal(r2.id, 102);
+  assert.equal(r2.result.isError, undefined);
+  assert.match(r2.result.content[0].text, /Subnet Mask: 255\.255\.255\.0/);
+
+  assert.equal(r3.id, 103);
+  assert.equal(r3.result.isError, undefined);
+  assert.match(r3.result.content[0].text, /PostgreSQL/);
+});
+
+test("castov mcp: invalid Content-Length emits framing error and exits with code 1", async (t) => {
+  const { client, closePromise } = createMcpHarness(t, 5000);
+  let outData = "";
+  client.stdout.on("data", (chunk) => { outData += chunk.toString("utf8"); });
+
+  client.stdin.write("Content-Length: abc\r\n\r\n{}");
+  const code = await closePromise;
+  assert.equal(code, 1);
+  assert.match(outData, /-32700/);
+  assert.match(outData, /Framing error/);
+});
+
+test("castov mcp: X-Content-Length header rejected with framing error and exits with code 1", async (t) => {
+  const { client, closePromise } = createMcpHarness(t, 5000);
+  let outData = "";
+  client.stdout.on("data", (chunk) => { outData += chunk.toString("utf8"); });
+
+  client.stdin.write("X-Content-Length: 100\r\n\r\n{}");
+  const code = await closePromise;
+  assert.equal(code, 1);
+  assert.match(outData, /-32700/);
+  assert.match(outData, /missing or invalid Content-Length/);
+});
+
+test("castov mcp: body exceeding MAX_BODY_SIZE triggers fatal exit", async (t) => {
+  const { client, closePromise } = createMcpHarness(t, 5000);
+  let outData = "";
+  client.stdout.on("data", (chunk) => { outData += chunk.toString("utf8"); });
+
+  client.stdin.write("Content-Length: 5000000\r\n\r\n");
+  const code = await closePromise;
+  assert.equal(code, 1);
+  assert.match(outData, /-32700/);
+  assert.match(outData, /Message body exceeds maximum size of 4MB/);
+});
+
+test("castov mcp: ndjson line exceeding MAX_BODY_SIZE triggers fatal exit", async (t) => {
+  const { client, closePromise } = createMcpHarness(t, 5000);
+  let outData = "";
+  client.stdout.on("data", (chunk) => { outData += chunk.toString("utf8"); });
+
+  const bigLine = Buffer.alloc(4 * 1024 * 1024 + 1024, 0x20);
+  bigLine[0] = 0x7b; // '{'
+  client.stdin.write(bigLine);
+
+  const code = await closePromise;
+  assert.equal(code, 1);
+  assert.match(outData, /-32700/);
+  assert.match(outData, /Message line exceeds maximum size of 4MB/);
+});
+
+test("castov mcp: negotiates supported protocolVersion or falls back to 2024-11-05", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 1, timeoutMs, setTracked);
+
+  client.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 1,
+    method: "initialize",
+    params: { protocolVersion: "2099-01-01" },
+  }) + "\n");
+
+  const [res] = await promise;
+  assert.equal(res.result.protocolVersion, "2024-11-05");
+});
+
+test("castov mcp: non-object request (null, array, primitive) returns -32600 Invalid Request", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 3, timeoutMs, setTracked);
+
+  client.stdin.write("null\n");
+  client.stdin.write("123\n");
+  client.stdin.write("[1, 2, 3]\n");
+
+  const [r1, r2, r3] = await promise;
+  assert.equal(r1.error?.code, -32600);
+  assert.equal(r1.error?.message, "Invalid Request");
+  assert.equal(r2.error?.code, -32600);
+  assert.equal(r3.error?.code, -32600);
+});
+
+test("castov mcp: primitive JSON strings containing colon (\"a:b\", \"-5:x\", \"123:4\") return -32600 Invalid Request immediately in ndjson mode", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 3, timeoutMs, setTracked);
+
+  client.stdin.write('"a:b"\n');
+  client.stdin.write('"-5:x"\n');
+  client.stdin.write('"123:4"\n');
+
+  const [r1, r2, r3] = await promise;
+  assert.equal(r1.error?.code, -32600);
+  assert.equal(r1.error?.message, "Invalid Request");
+  assert.equal(r2.error?.code, -32600);
+  assert.equal(r2.error?.message, "Invalid Request");
+  assert.equal(r3.error?.code, -32600);
+  assert.equal(r3.error?.message, "Invalid Request");
+});
+
+test("castov mcp: ndjson line exceeding MAX_BODY_SIZE with trailing newline in same chunk triggers fatal exit", async (t) => {
+  const { client, closePromise } = createMcpHarness(t, 5000);
+  let outData = "";
+  client.stdout.on("data", (chunk) => { outData += chunk.toString("utf8"); });
+
+  const bigLine = Buffer.alloc(4 * 1024 * 1024 + 1024, 0x20);
+  bigLine[0] = 0x7b; // '{'
+  bigLine[bigLine.length - 1] = 0x0a; // '\n'
+  client.stdin.write(bigLine);
+
+  const code = await closePromise;
+  assert.equal(code, 1);
+  assert.match(outData, /-32700/);
+  assert.match(outData, /Message line exceeds maximum size of 4MB/);
+});
+
+
+
+

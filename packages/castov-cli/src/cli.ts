@@ -824,112 +824,290 @@ async function main(argv: string[]): Promise<void> {
         },
       ];
 
-      process.stdin.setEncoding("utf8");
-      let buffer = "";
+      // ---------------------------------------------------------------------
+      // Model Context Protocol (MCP) Server - Dual Transport (ndjson & framed)
+      // ---------------------------------------------------------------------
+      const MAX_HEADER_SIZE = 8192;           // 8 KiB max header limit
+      const MAX_BODY_SIZE = 4 * 1024 * 1024;  // 4 MiB max payload limit
+      const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2024-11-05"]);
 
-      const sendRpc = (msg: any) => {
-        const json = JSON.stringify(msg);
-        process.stdout.write(`Content-Length: ${Buffer.byteLength(json, "utf8")}\r\n\r\n${json}`);
+      type Mode = "ndjson" | "framed";
+
+      const sendRpc = (msg: unknown, mode: Mode, cb?: () => void) => {
+        const json = Buffer.from(JSON.stringify(msg), "utf8");
+        const out = mode === "framed"
+          ? Buffer.concat([Buffer.from(`Content-Length: ${json.length}\r\n\r\n`, "utf8"), json])
+          : Buffer.concat([json, Buffer.from("\n", "utf8")]);
+        process.stdout.write(out, cb);
       };
 
-      process.stdin.on("data", (chunk: string) => {
-        buffer += chunk;
-        while (true) {
-          const headerEnd = buffer.indexOf("\r\n\r\n");
-          if (headerEnd === -1) {
-            // Also handle raw JSON-RPC per line (newline delimited)
-            const newlineIdx = buffer.indexOf("\n");
-            if (newlineIdx !== -1) {
-              const line = buffer.slice(0, newlineIdx).trim();
-              buffer = buffer.slice(newlineIdx + 1);
-              if (line) handleRpcMessage(line);
-              continue;
+      let dead = false;
+
+      const fatal = (mode: Mode, message: string) => {
+        dead = true;
+        setTimeout(() => process.exit(1), 1000).unref();
+        sendRpc(
+          { jsonrpc: "2.0", id: null, error: { code: -32700, message } },
+          mode,
+          () => process.exit(1)
+        );
+      };
+
+      const handleRpcMessage = (raw: string, mode: Mode) => {
+        let req: any;
+        try {
+          req = JSON.parse(raw);
+        } catch {
+          sendRpc({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, mode);
+          return;
+        }
+
+        if (!req || typeof req !== "object" || Array.isArray(req)) {
+          sendRpc({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid Request" } }, mode);
+          return;
+        }
+
+        const { id, method, params } = req;
+
+        if (method === "initialize") {
+          const requestedVersion = params?.protocolVersion;
+          const protocolVersion =
+            typeof requestedVersion === "string" && SUPPORTED_PROTOCOL_VERSIONS.has(requestedVersion)
+              ? requestedVersion
+              : "2024-11-05";
+
+          sendRpc({
+            jsonrpc: "2.0",
+            id,
+            result: {
+              protocolVersion,
+              capabilities: { tools: {} },
+              serverInfo: { name: "castov-mcp-server", version },
+            },
+          }, mode);
+        } else if (method === "tools/list") {
+          sendRpc({
+            jsonrpc: "2.0",
+            id,
+            result: { tools: MCP_TOOLS },
+          }, mode);
+        } else if (method === "tools/call") {
+          const toolName = params?.name;
+          const args = params?.arguments || {};
+          let toolText = "";
+          let isError = false;
+
+          try {
+            if (toolName === "castov_timestamp") {
+              if (args.value === undefined || args.value === null || (typeof args.value !== "string" && typeof args.value !== "number")) {
+                toolText = "Error: missing or invalid 'value' argument for timestamp.";
+                isError = true;
+              } else {
+                try {
+                  const res = parseTs(String(args.value));
+                  toolText = JSON.stringify(res, null, 2);
+                } catch (err: any) {
+                  toolText = `Error: ${err?.message || "invalid numeric timestamp"}`;
+                  isError = true;
+                }
+              }
+            } else if (toolName === "castov_detect_id") {
+              if (typeof args.id !== "string" || !args.id.trim()) {
+                toolText = "Error: missing or invalid 'id' argument.";
+                isError = true;
+              } else {
+                try {
+                  const matches = detectId(args.id);
+                  toolText = JSON.stringify(matches, null, 2);
+                } catch (err: any) {
+                  toolText = `Error: ${err?.message || "failed to detect id"}`;
+                  isError = true;
+                }
+              }
+            } else if (toolName === "castov_cidr") {
+              if (!args.cidr || typeof args.cidr !== "string") {
+                toolText = "Error: missing or invalid 'cidr' argument (expected format: '192.168.1.0/24' or '/24').";
+                isError = true;
+              } else {
+                let baseIp = "192.168.1.0";
+                let prefixStr = args.cidr.trim();
+                if (prefixStr.includes("/")) {
+                  const parts = prefixStr.split("/");
+                  if (parts[0]) baseIp = parts[0].trim();
+                  const sub = (parts[1] ?? "").trim();
+                  if (!sub) {
+                    toolText = `Error: Missing prefix after '/' in CIDR "${args.cidr}".`;
+                    isError = true;
+                  } else {
+                    prefixStr = sub;
+                  }
+                }
+                if (!isError) {
+                  if (!/^\d+$/.test(prefixStr)) {
+                    toolText = `Error: CIDR prefix must be an integer between 0 and 32, got "${prefixStr}".`;
+                    isError = true;
+                  } else {
+                    const prefix = Number(prefixStr);
+                    if (prefix < 0 || prefix > 32) {
+                      toolText = `Error: CIDR prefix must be an integer between 0 and 32, got "${prefixStr}".`;
+                      isError = true;
+                    } else {
+                      try {
+                        const maskInt = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0;
+                        const wildcardInt = (~maskInt) >>> 0;
+                        ipToInt(baseIp);
+                        const usableHosts = prefix >= 31 ? (prefix === 31 ? 2 : 1) : Math.max(0, Math.pow(2, 32 - prefix) - 2);
+                        toolText = `Subnet Mask: ${intToIp(maskInt)}\nWildcard: ${intToIp(wildcardInt)}\nUsable Hosts: ${usableHosts}`;
+                      } catch (err: any) {
+                        toolText = `Error: ${err?.message || "invalid CIDR"}`;
+                        isError = true;
+                      }
+                    }
+                  }
+                }
+              }
+            } else if (toolName === "castov_port") {
+              const rawPort = args.port;
+              const isStrictNumeric =
+                (typeof rawPort === "number" && Number.isInteger(rawPort)) ||
+                (typeof rawPort === "string" && /^\s*-?\d+\s*$/.test(rawPort));
+              const portNum = Number(rawPort);
+
+              if (!isStrictNumeric || portNum < 1 || portNum > 65535) {
+                toolText = `Error: Port must be an integer between 1 and 65535, got "${rawPort}".`;
+                isError = true;
+              } else {
+                const p = KNOWN_PORTS[portNum];
+                toolText = p ? `Port ${portNum}: ${p.service} (${p.proto}) - ${p.desc}` : `Port ${portNum}: Custom / Ephemeral Port`;
+              }
+            } else {
+              toolText = `Error: Unknown tool "${toolName}".`;
+              isError = true;
             }
-            break;
+          } catch (err: any) {
+            toolText = `Internal error executing tool ${toolName}: ${err?.message || String(err)}`;
+            isError = true;
           }
 
-          const header = buffer.slice(0, headerEnd);
-          const match = header.match(/Content-Length:\s*(\d+)/i);
-          if (!match) {
-            buffer = buffer.slice(headerEnd + 4);
+          sendRpc({
+            jsonrpc: "2.0",
+            id,
+            result: {
+              content: [{ type: "text", text: toolText }],
+              ...(isError ? { isError: true } : {}),
+            },
+          }, mode);
+        } else if (method === "notifications/initialized") {
+          // No response needed for notifications
+        } else if (id !== undefined) {
+          sendRpc({
+            jsonrpc: "2.0",
+            id,
+            error: { code: -32601, message: `Method not found: ${method}` },
+          }, mode);
+        }
+      };
+
+      let buffer = Buffer.alloc(0);
+
+      process.stdin.on("data", (chunk: Buffer) => {
+        if (dead) return;
+        buffer = Buffer.concat([buffer, chunk]);
+
+        while (buffer.length > 0) {
+          if (dead) return;
+
+          // 1. تجاوز المسافات والأسطر الفارغة الفاصلة بين الرسائل
+          while (buffer.length > 0 && (buffer[0] === 0x20 || buffer[0] === 0x09 || buffer[0] === 0x0d || buffer[0] === 0x0a)) {
+            buffer = buffer.subarray(1);
+          }
+          if (buffer.length === 0) break;
+
+          const firstByte = buffer[0];
+          const isExplicitJson = firstByte === 0x7b || firstByte === 0x5b; // { or [
+          const isLatin = (firstByte >= 0x41 && firstByte <= 0x5a) || (firstByte >= 0x61 && firstByte <= 0x7a); // A-Z or a-z
+
+          const firstNewline = buffer.indexOf(0x0a);
+          const firstLineBuf = firstNewline !== -1 ? buffer.subarray(0, firstNewline) : buffer;
+          const firstLineStr = firstLineBuf.toString("utf8");
+
+          const hasColon = firstLineStr.includes(":");
+
+          let mode: Mode;
+
+          if (isExplicitJson) {
+            mode = "ndjson";
+          } else if (isLatin && hasColon) {
+            mode = "framed";
+          } else if (firstNewline !== -1) {
+            // ndjson إذا اكتمل السطر الأول (\n موجود) ولم ينطبق ما سبق
+            mode = "ndjson";
+          } else {
+            // غير محسوم (لا \n ولا ":")، انتظر مع حد MAX_HEADER_SIZE كما هو
+            if (buffer.length > MAX_HEADER_SIZE) {
+              fatal("ndjson", "Header/line size limit exceeded without delimiter");
+              return;
+            }
+            break; // انتظر المزيد من البيانات لحسم النمط
+          }
+
+          if (mode === "ndjson") {
+            const newlineIdx = buffer.indexOf(0x0a);
+            if (newlineIdx === -1) {
+              if (buffer.length > MAX_BODY_SIZE) {
+                fatal("ndjson", "Message line exceeds maximum size of 4MB");
+                return;
+              }
+              break; // انتظر اكتمال السطر
+            }
+            if (newlineIdx > MAX_BODY_SIZE) {
+              fatal("ndjson", "Message line exceeds maximum size of 4MB");
+              return;
+            }
+            const line = buffer.subarray(0, newlineIdx).toString("utf8").trim();
+            buffer = buffer.subarray(newlineIdx + 1);
+            if (line) handleRpcMessage(line, "ndjson");
             continue;
           }
 
-          const contentLength = parseInt(match[1], 10);
-          const bodyStart = headerEnd + 4;
-          if (buffer.length < bodyStart + contentLength) break;
+          // نمط framed
+          const headerEnd = buffer.indexOf("\r\n\r\n");
+          if (headerEnd === -1) {
+            if (buffer.length > MAX_HEADER_SIZE) {
+              fatal("framed", "Header size limit exceeded");
+              return;
+            }
+            break; // انتظر اكتمال الترويسة بأمان
+          }
 
-          const body = buffer.slice(bodyStart, bodyStart + contentLength);
-          buffer = buffer.slice(bodyStart + contentLength);
-          handleRpcMessage(body);
+          const headerStr = buffer.subarray(0, headerEnd).toString("utf8");
+          const m = headerStr.match(/^Content-Length:[ \t]*(\d+)[ \t]*$/im);
+          if (!m) {
+            fatal("framed", "Framing error: missing or invalid Content-Length header");
+            return;
+          }
+
+          const contentLength = Number(m[1]);
+          if (!Number.isSafeInteger(contentLength)) {
+            fatal("framed", "Framing error: Content-Length exceeds safe integer range");
+            return;
+          }
+
+          if (contentLength > MAX_BODY_SIZE) {
+            fatal("framed", "Message body exceeds maximum size of 4MB");
+            return;
+          }
+
+          const bodyStart = headerEnd + 4;
+          if (buffer.length < bodyStart + contentLength) {
+            break; // انتظر اكتمال بايتات الجسم كاملة
+          }
+
+          const body = buffer.subarray(bodyStart, bodyStart + contentLength).toString("utf8");
+          buffer = buffer.subarray(bodyStart + contentLength);
+          handleRpcMessage(body, "framed");
         }
       });
-
-      const handleRpcMessage = (raw: string) => {
-        try {
-          const req = JSON.parse(raw);
-          const { id, method, params } = req;
-
-          if (method === "initialize") {
-            sendRpc({
-              jsonrpc: "2.0",
-              id,
-              result: {
-                protocolVersion: "2024-11-05",
-                capabilities: { tools: {} },
-                serverInfo: { name: "castov-mcp-server", version },
-              },
-            });
-          } else if (method === "tools/list") {
-            sendRpc({
-              jsonrpc: "2.0",
-              id,
-              result: { tools: MCP_TOOLS },
-            });
-          } else if (method === "tools/call") {
-            const toolName = params?.name;
-            const args = params?.arguments || {};
-            let toolText = "";
-
-            if (toolName === "castov_timestamp") {
-              const res = parseTs(args.value);
-              toolText = JSON.stringify(res, null, 2);
-            } else if (toolName === "castov_detect_id") {
-              const matches = detectId(args.id);
-              toolText = JSON.stringify(matches, null, 2);
-            } else if (toolName === "castov_cidr") {
-              const prefixStr = args.cidr.includes("/") ? args.cidr.split("/")[1] : args.cidr;
-              const prefix = Number(prefixStr);
-              const maskInt = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0;
-              const wildcardInt = (~maskInt) >>> 0;
-              toolText = `Subnet Mask: ${intToIp(maskInt)}\nWildcard: ${intToIp(wildcardInt)}\nUsable Hosts: ${Math.max(0, Math.pow(2, 32 - prefix) - 2)}`;
-            } else if (toolName === "castov_port") {
-              const p = KNOWN_PORTS[Number(args.port)];
-              toolText = p ? `Port ${args.port}: ${p.service} (${p.proto}) - ${p.desc}` : `Port ${args.port}: Custom / Ephemeral Port`;
-            } else {
-              toolText = `Unknown tool: ${toolName}`;
-            }
-
-            sendRpc({
-              jsonrpc: "2.0",
-              id,
-              result: {
-                content: [{ type: "text", text: toolText }],
-              },
-            });
-          } else if (method === "notifications/initialized") {
-            // No response needed for notifications
-          } else if (id !== undefined) {
-            sendRpc({
-              jsonrpc: "2.0",
-              id,
-              error: { code: -32601, message: `Method not found: ${method}` },
-            });
-          }
-        } catch {
-          // ignore malformed rpc
-        }
-      };
 
       return;
     }
