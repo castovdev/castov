@@ -1,6 +1,6 @@
-# castov (Official Castov CLI — v1.2.0)
+# castov (Official Castov CLI)
 
-Fast, 100% offline developer utilities right in your terminal: **EADDRINUSE port killer (`castov port`)**, **cryptographic `.env` secret generator (`castov secret`)**, **IPv4 CIDR subnet calculator (`castov cidr`)**, **local secret scanner (`castov scan`)**, **terminal error healer (`castov fix`)**, **AI `.cursorrules` generator (`castov rules`)**, Unix timestamps, ID detector, cron explainer, IANA timezone converter, UUID v4/v7, and JWT decoding.
+Fast, 100% offline developer utilities right in your terminal: **EADDRINUSE port killer (`castov port`)**, **cryptographic `.env` secret generator (`castov secret`)**, **IPv4 CIDR subnet calculator (`castov cidr`)**, **local secret scanner (`castov scan`)**, **terminal error healer (`castov fix`)**, **AI `.cursorrules` generator (`castov rules`)**, **MCP server (`castov mcp`)**, Unix timestamps, ID detector, cron explainer, IANA timezone converter, UUID v4/v7, and JWT decoding.
 
 Zero telemetry, zero cloud calls, zero configuration. Powered by [Castov.com](https://www.castov.com) and [`castov-sdk`](https://www.npmjs.com/package/castov-sdk).
 
@@ -15,6 +15,7 @@ npx castov cidr 192.168.1.0/24
 npx castov scan .
 npx castov rules nextjs --write
 npx castov fix "EADDRINUSE: address already in use :::3000"
+npx -y castov mcp
 ```
 
 Or install globally:
@@ -25,7 +26,7 @@ npm install -g castov
 
 ---
 
-## Flagship Terminal Commands (v1.2.0)
+## Flagship Terminal Commands
 
 ### ⚡ `castov port <port> [--kill]` (Inspect & Kill Occupying Port Process)
 Check which service uses a port, detect active listening PIDs on Windows/macOS/Linux, and optionally terminate the process:
@@ -57,6 +58,32 @@ Generate battle-tested `.cursorrules` directly in your workspace:
 ```bash
 npx castov rules nextjs --write
 ```
+
+### 🔌 `castov mcp` (Model Context Protocol Server for Claude & Cursor)
+Castov includes a built-in, local **Model Context Protocol (MCP)** server over standard I/O (stdio) to equip AI assistants (like Claude Desktop and Cursor) with offline developer tools (`castov_timestamp`, `castov_detect_id`, `castov_cidr`, and `castov_port`).
+
+#### Transport & Specifications
+- **Dual Transport Support**: Automatically detects and handles both **Newline-Delimited JSON (ndjson)** (single JSON line per message) and **Framed MCP Transport** (`Content-Length: <bytes>\r\n\r\n` headers).
+- **Symmetric Responses**: Always replies using the exact transport mode initiated by the client.
+- **Safety Limits**: Bounded buffers with a strict maximum payload size of **4 MiB** and header limit of **8 KiB**.
+
+#### Setup with Claude Desktop
+Add to your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "castov": {
+      "command": "npx",
+      "args": ["-y", "castov", "mcp"]
+    }
+  }
+}
+```
+
+#### Setup with Cursor
+In Cursor Settings → Features → MCP Servers → Add New MCP Server:
+- **Type**: `command`
+- **Command**: `npx -y castov mcp`
 
 ---
 
