@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { TechTrendsTool } from "@/components/tools/tech-trends-tool";
+import { TECH_TREND_TOPICS } from "@/lib/tech-trends-registry";
 import { buildMetadata, faqJsonLd, FaqItem } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site";
 
@@ -75,6 +77,31 @@ export default function TechTrendsPage() {
 
       {/* Main Interactive Tool */}
       <TechTrendsTool />
+
+      {/* Dedicated Topic Radars (30 Indexable Trend Pages) */}
+      <section className="mt-14 border-t border-line pt-10 space-y-4">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-fg">
+            Dedicated Technology &amp; Ecosystem Radars (Hourly ISR)
+          </h2>
+          <p className="text-xs sm:text-sm text-muted mt-1">
+            Browse dedicated live intelligence pages for 30+ high-velocity software engineering domains, languages, and infrastructure stacks.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 text-xs">
+          {TECH_TREND_TOPICS.map((t) => (
+            <Link
+              key={t.slug}
+              href={`/tech-trends/${t.slug}`}
+              className="p-3 rounded-xl bg-card border border-line hover:border-accent/50 transition-all flex flex-col gap-1 no-underline"
+            >
+              <span className="font-mono font-bold text-accent">#{t.slug}</span>
+              <span className="text-fg font-medium truncate">{t.name}</span>
+              <span className="text-[10px] text-muted truncate">{t.category}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* SEO Explanatory Content & Documentation */}
       <section className="mt-16 border-t border-line pt-10 flex flex-col gap-10">

@@ -8,6 +8,7 @@ import { REGEX_PATTERNS } from '@/lib/regex-patterns-registry';
 import { ERROR_FIXES } from '@/lib/error-fixes-registry';
 import { TIMEZONE_PAIRS } from '@/lib/timezone-pairs-registry';
 import { NETWORK_PORTS, CIDR_BLOCKS } from '@/lib/network-ports-registry';
+import { TECH_TREND_TOPICS } from '@/lib/tech-trends-registry';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -135,6 +136,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/cidr/${c.prefix}`,
       lastModified: getLastMod('src/lib/network-ports-registry.ts'),
       changeFrequency: 'monthly',
+      priority: 0.8,
+    });
+  });
+
+  TECH_TREND_TOPICS.forEach((topic) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/tech-trends/${topic.slug}`,
+      lastModified: getLastMod('src/lib/tech-trends-registry.ts'),
+      changeFrequency: 'hourly',
       priority: 0.8,
     });
   });

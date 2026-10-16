@@ -297,21 +297,29 @@ export function TechTrendsTool() {
           {data.keywords.map(({ keyword, count }) => {
             const isSelected = selectedKeyword === keyword;
             return (
-              <button
-                key={keyword}
-                type="button"
-                onClick={() => setSelectedKeyword(isSelected ? null : keyword)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
-                  isSelected
-                    ? "bg-accent text-accent-fg shadow-xs scale-105"
-                    : "bg-card text-muted hover:text-fg hover:border-accent/40 border border-line"
-                }`}
-              >
-                <span>#{keyword}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? "bg-accent-fg/20" : "bg-field text-muted"}`}>
-                  {count}
-                </span>
-              </button>
+              <div key={keyword} className="inline-flex items-center rounded-full border border-line bg-card overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setSelectedKeyword(isSelected ? null : keyword)}
+                  className={`px-3 py-1 text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                    isSelected
+                      ? "bg-accent text-accent-fg"
+                      : "text-muted hover:text-fg"
+                  }`}
+                >
+                  <span>#{keyword}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? "bg-accent-fg/20" : "bg-field text-muted"}`}>
+                    {count}
+                  </span>
+                </button>
+                <a
+                  href={`/tech-trends/${encodeURIComponent(keyword.toLowerCase())}`}
+                  title={`Open dedicated #${keyword} trend radar page`}
+                  className="px-2 py-1 text-[10px] font-mono text-accent hover:bg-hover border-l border-line no-underline"
+                >
+                  ↗
+                </a>
+              </div>
             );
           })}
         </div>
