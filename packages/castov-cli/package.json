@@ -36,7 +36,7 @@
   "homepage": "https://www.castov.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/benidira/castov.git"
+    "url": "git+https://github.com/benidira/castov.git"
   },
   "license": "MIT",
   "author": "Castov <https://www.castov.com>",
