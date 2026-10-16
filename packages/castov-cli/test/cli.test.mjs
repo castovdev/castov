@@ -153,13 +153,57 @@ test("castov tz: converts between zones and handles DST", () => {
 });
 
 test("per-command --help flags", () => {
-  const commands = ["ts", "detect", "cron", "tz", "uuid", "encode", "decode", "hash", "jwt"];
+  const commands = ["fix", "port", "secret", "cidr", "scan", "rules", "ts", "detect", "cron", "tz", "uuid", "encode", "decode", "hash", "jwt"];
   for (const cmd of commands) {
     const r = run([cmd, "--help"]);
     assert.equal(r.status, 0);
     assert.match(r.stdout, new RegExp(`castov ${cmd}`, "i"));
     assert.match(r.stdout, /Usage/i);
   }
+});
+
+test("castov port: inspects known port and outputs reference link", () => {
+  const r = run(["port", "5432"]);
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /Port 5432/);
+  assert.match(r.stdout, /PostgreSQL/);
+  assert.match(r.stdout, /https:\/\/www\.castov\.com\/ports\/5432/);
+});
+
+test("castov secret: generates cryptographic secrets", () => {
+  const r = run(["secret"]);
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /256-bit Entropy/);
+  assert.match(r.stdout, /AUTH_SECRET=/);
+  assert.match(r.stdout, /sk_live_/);
+  assert.match(r.stdout, /https:\/\/www\.castov\.com\/env-vault/);
+});
+
+test("castov cidr: calculates IPv4 subnet mask and usable host range", () => {
+  const r = run(["cidr", "192.168.1.0/24"]);
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /255\.255\.255\.0/);
+  assert.match(r.stdout, /192\.168\.1\.1 - 192\.168\.1\.254/);
+  assert.match(r.stdout, /254/);
+  assert.match(r.stdout, /https:\/\/www\.castov\.com\/cidr\/24/);
+});
+
+test("castov scan: scans directory offline", () => {
+  const r = run(["scan", "./test"]);
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /Castov Local Secret Scanner/);
+  assert.match(r.stdout, /https:\/\/www\.castov\.com\/env-vault/);
+});
+
+test("castov fix & rules: diagnoses errors and generates AI rules", () => {
+  const rFix = run(["fix", "EADDRINUSE: address already in use :::3000"]);
+  assert.equal(rFix.status, 0);
+  assert.match(rFix.stdout, /Port \/ Address Conflict/);
+
+  const rRules = run(["rules", "rust"]);
+  assert.equal(rRules.status, 0);
+  assert.match(rRules.stdout, /Rust Systems/);
+  assert.match(rRules.stdout, /https:\/\/www\.castov\.com\/cursorrules/);
 });
 
 test("global --help and --version", () => {

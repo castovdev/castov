@@ -1,34 +1,66 @@
-# castov-cli
+# castov (Official Castov CLI — v1.2.0)
 
-Fast, offline developer utilities right in your terminal. Zero telemetry, zero cloud calls, zero configuration. Powered by [`@castov/sdk`](https://www.npmjs.com/package/@castov/sdk).
+Fast, 100% offline developer utilities right in your terminal: **EADDRINUSE port killer (`castov port`)**, **cryptographic `.env` secret generator (`castov secret`)**, **IPv4 CIDR subnet calculator (`castov cidr`)**, **local secret scanner (`castov scan`)**, **terminal error healer (`castov fix`)**, **AI `.cursorrules` generator (`castov rules`)**, Unix timestamps, ID detector, cron explainer, IANA timezone converter, UUID v4/v7, and JWT decoding.
 
-## Why castov-cli?
+Zero telemetry, zero cloud calls, zero configuration. Powered by [Castov.com](https://www.castov.com) and [`castov-sdk`](https://www.npmjs.com/package/castov-sdk).
 
-- **100% Offline & Private:** Never sends your timestamps, tokens, IDs, or inputs over the internet.
-- **Zero Bloat:** Single tiny dependency (`@castov/sdk`), starts in milliseconds.
-- **Cross-Platform:** Works seamlessly across Linux, macOS, and Windows.
-- **Composable:** Clean raw outputs when piping or scripting; automatic `NO_COLOR` detection.
-- **DST-Aware:** Handles Daylight Saving Time gaps and overlaps with clear diagnostic warnings.
+## Installation & Quick Run
 
----
-
-## Installation
-
-Install globally:
+Run instantly with `npx` (no installation needed):
 
 ```bash
-npm install -g castov-cli
+npx castov port 3000 --kill
+npx castov secret
+npx castov cidr 192.168.1.0/24
+npx castov scan .
+npx castov rules nextjs --write
+npx castov fix "EADDRINUSE: address already in use :::3000"
 ```
 
-Or run directly without installing:
+Or install globally:
 
 ```bash
-npx castov-cli <command>
+npm install -g castov
 ```
 
 ---
 
-## Commands & Examples with Real Output
+## Flagship Terminal Commands (v1.2.0)
+
+### ⚡ `castov port <port> [--kill]` (Inspect & Kill Occupying Port Process)
+Check which service uses a port, detect active listening PIDs on Windows/macOS/Linux, and optionally terminate the process:
+```bash
+npx castov port 3000
+npx castov port 3000 --kill
+```
+
+### 🔐 `castov secret` (Cryptographic `.env` Secret Generator)
+Generate 256-bit Hex, Base64URL, `sk_live_` API keys, and sortable UUIDv7 secrets ready for `AUTH_SECRET` / `JWT_SECRET`:
+```bash
+npx castov secret
+```
+
+### 🌐 `castov cidr <ip/prefix>` (IPv4 Subnet Calculator)
+Calculate subnet mask, wildcard mask, network/broadcast address, and usable host IP range:
+```bash
+npx castov cidr 192.168.1.0/24
+```
+
+### 🛡️ `castov scan [dir]` (Offline Secret & API Key Leak Scanner)
+Scan your repository before `git push` for hardcoded AWS, OpenAI, Stripe, GitHub, Slack, or RSA private keys:
+```bash
+npx castov scan .
+```
+
+### 🤖 `castov rules <stack> [--write]` (`.cursorrules` & AI Guidelines)
+Generate battle-tested `.cursorrules` directly in your workspace:
+```bash
+npx castov rules nextjs --write
+```
+
+---
+
+## Core Time, ID & Crypto Commands
 
 ### 1. `castov ts` (Unix Timestamp Inspector)
 Auto-detects seconds vs. milliseconds and prints UTC, ISO 8601, and local representations.

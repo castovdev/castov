@@ -1,11 +1,15 @@
 {
   "name": "castov",
-  "version": "1.1.0",
-  "description": "Castov in your terminal: terminal error healer, .cursorrules generator, Unix timestamps, ID detector (ObjectId, Snowflake, UUIDv7, ULID), cron explainer, IANA time zone converter with DST handling, UUIDs (v4/v7), Base64, hashes, and JWT decoding. Zero-server, zero-config.",
-  "keywords": ["cli", "castov", "fix", "cursorrules", "unix", "timestamp", "cron", "timezone", "dst", "detect", "snowflake", "ulid", "objectid", "uuid", "uuidv7", "base64", "hash", "jwt"],
-  "homepage": "https://castov.com",
+  "version": "1.2.0",
+  "description": "Castov in your terminal: EADDRINUSE port inspector & killer, cryptographic .env secret generator, IPv4 CIDR subnet calculator, local secret scanner, terminal error healer, .cursorrules generator, Unix timestamps, ID detector, cron explainer, IANA time zone converter, UUIDs (v4/v7), Base64, hashes, and JWT decoding.",
+  "keywords": ["cli", "castov", "port", "kill-port", "secret", "cidr", "subnet", "scanner", "fix", "cursorrules", "unix", "timestamp", "cron", "timezone", "dst", "detect", "snowflake", "ulid", "objectid", "uuid", "uuidv7", "base64", "hash", "jwt"],
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benidira/castov.git"
+  },
   "license": "MIT",
-  "author": "Castov <https://castov.com>",
+  "author": "Castov <https://www.castov.com>",
   "type": "module",
   "bin": {
     "castov": "dist/cli.js"

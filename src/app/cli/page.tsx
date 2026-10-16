@@ -22,13 +22,13 @@ export default function CliPage() {
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-xs font-semibold text-accent mb-6">
           <Terminal className="w-3.5 h-3.5" />
-          <span>OFFICIAL NPM PACKAGE • V1.1.0</span>
+          <span>OFFICIAL NPM PACKAGE • V1.2.0</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-fg mb-4">
           Castov <span className="text-accent">CLI</span>
         </h1>
         <p className="text-xl text-muted max-w-2xl mx-auto">
-          Instant stack-trace error diagnosis, Unix timestamps, ID detector (ObjectId, Snowflake), Cron parser, UUIDs, Base64, and JWT debugging directly in your terminal.
+          EADDRINUSE port killer, cryptographic .env secret generator, IPv4 CIDR calculator, local secret scanner, AI .cursorrules generator, and Unix/JWT tools right in your terminal.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
@@ -40,7 +40,7 @@ export default function CliPage() {
           >
             <Terminal className="w-5 h-5 text-white" />
             <span>View on npm (castov)</span>
-            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">v1.1.0</span>
+            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">v1.2.0</span>
           </a>
           <a
             href="https://www.npmjs.com/package/castov-sdk"
@@ -59,7 +59,7 @@ export default function CliPage() {
           <h3 className="text-xl font-bold mb-2 text-fg">Run Instantly with npx</h3>
           <p className="text-muted text-sm mb-4">Zero installation required. Execute immediately with Node.js 18+.</p>
           <div className="bg-[#050505] rounded-lg p-4 font-mono text-xs text-[#f4f4f5] border border-white/10">
-            <code>npx castov fix &quot;EADDRINUSE: address already in use :::3000&quot;</code>
+            <code>npx castov port 3000 --kill</code>
           </div>
         </div>
         <div className="card p-6 border border-line bg-card">
@@ -74,32 +74,35 @@ export default function CliPage() {
 
       {/* Terminal Cheat Sheet */}
       <div className="mb-16 bg-card p-8 rounded-2xl border border-line">
-        <h2 className="text-2xl font-bold mb-6 text-fg">Popular Terminal Commands</h2>
+        <h2 className="text-2xl font-bold mb-6 text-fg">Popular Terminal Commands (v1.2.0)</h2>
         <div className="space-y-4 font-mono text-xs">
           <div className="p-4 bg-field rounded-xl border border-accent/30">
-            <span className="text-accent font-semibold"># Diagnose &amp; fix terminal errors or pipe crash logs directly (v1.1.0)</span>
+            <span className="text-accent font-semibold"># 1. Inspect port service, find listening PID &amp; kill EADDRINUSE process</span>
+            <div className="text-fg font-bold mt-1">npx castov port 3000 --kill</div>
+          </div>
+          <div className="p-4 bg-field rounded-xl border border-accent/30">
+            <span className="text-accent font-semibold"># 2. Generate 256-bit cryptographic secrets for .env (AUTH_SECRET, JWT_SECRET, API keys)</span>
+            <div className="text-fg font-bold mt-1">npx castov secret</div>
+          </div>
+          <div className="p-4 bg-field rounded-xl border border-accent/30">
+            <span className="text-accent font-semibold"># 3. Calculate IPv4 CIDR subnet mask, wildcard &amp; usable host range</span>
+            <div className="text-fg font-bold mt-1">npx castov cidr 192.168.1.0/24</div>
+          </div>
+          <div className="p-4 bg-field rounded-xl border border-accent/30">
+            <span className="text-accent font-semibold"># 4. Offline scan project directory for leaked API keys &amp; secrets before git push</span>
+            <div className="text-fg font-bold mt-1">npx castov scan .</div>
+          </div>
+          <div className="p-4 bg-field rounded-xl border border-accent/30">
+            <span className="text-accent font-semibold"># 5. Generate .cursorrules AI coding guidelines directly into your project</span>
+            <div className="text-fg font-bold mt-1">npx castov rules nextjs --write</div>
+          </div>
+          <div className="p-4 bg-field rounded-xl border border-line">
+            <span className="text-muted"># 6. Diagnose terminal errors or pipe crash logs directly</span>
             <div className="text-fg font-bold mt-1">npx castov fix &quot;Hydration failed because the initial UI does not match&quot;</div>
-            <div className="text-muted mt-1">npm run build 2&gt;&amp;1 | npx castov fix</div>
           </div>
           <div className="p-4 bg-field rounded-xl border border-line">
-            <span className="text-muted"># Unix timestamp parse (auto-detect seconds &amp; ms)</span>
-            <div className="text-fg font-bold mt-1">castov ts 1700000000</div>
-          </div>
-          <div className="p-4 bg-field rounded-xl border border-line">
-            <span className="text-muted"># Identify ID type (ObjectId, Snowflake, UUIDv7, ULID)</span>
-            <div className="text-fg font-bold mt-1">castov detect 507f1f77bcf86cd799439011</div>
-          </div>
-          <div className="p-4 bg-field rounded-xl border border-line">
-            <span className="text-muted"># Explain cron expression &amp; preview next 5 execution runs</span>
-            <div className="text-fg font-bold mt-1">castov cron &quot;*/15 * * * *&quot; UTC</div>
-          </div>
-          <div className="p-4 bg-field rounded-xl border border-line">
-            <span className="text-muted"># Generate time-sortable RFC 9562 UUIDv7</span>
-            <div className="text-fg font-bold mt-1">castov uuid -n 3 --v7</div>
-          </div>
-          <div className="p-4 bg-field rounded-xl border border-line">
-            <span className="text-muted"># Decode JWT token locally (offline &amp; zero-knowledge)</span>
-            <div className="text-fg font-bold mt-1">castov jwt &lt;your-token&gt;</div>
+            <span className="text-muted"># 7. Unix timestamp parse, ID detector, Cron explainer, UUIDv7 &amp; JWT decoder</span>
+            <div className="text-fg font-bold mt-1">castov ts 1700000000  |  castov uuid --v7  |  castov jwt &lt;token&gt;</div>
           </div>
         </div>
       </div>
