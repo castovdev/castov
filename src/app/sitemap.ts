@@ -9,6 +9,8 @@ import { ERROR_FIXES } from '@/lib/error-fixes-registry';
 import { TIMEZONE_PAIRS } from '@/lib/timezone-pairs-registry';
 import { NETWORK_PORTS, CIDR_BLOCKS } from '@/lib/network-ports-registry';
 import { TECH_TREND_TOPICS } from '@/lib/tech-trends-registry';
+import { CLOUD_SERVICES } from '@/lib/cloud-status-registry';
+import { LLM_MODELS } from '@/lib/llm-specs-registry';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -145,6 +147,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/tech-trends/${topic.slug}`,
       lastModified: getLastMod('src/lib/tech-trends-registry.ts'),
       changeFrequency: 'hourly',
+      priority: 0.8,
+    });
+  });
+
+  sitemapEntries.push(
+    { url: `${baseUrl}/status`, lastModified: getLastMod('src/app/status/page.tsx'), changeFrequency: 'hourly', priority: 0.9 },
+    { url: `${baseUrl}/curl-converter`, lastModified: getLastMod('src/app/curl-converter/page.tsx'), changeFrequency: 'monthly', priority: 0.8 }
+  );
+
+  CLOUD_SERVICES.forEach((cs) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/status/${cs.slug}`,
+      lastModified: getLastMod('src/lib/cloud-status-registry.ts'),
+      changeFrequency: 'hourly',
+      priority: 0.9,
+    });
+  });
+
+  LLM_MODELS.forEach((model) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/llm/${model.slug}`,
+      lastModified: getLastMod('src/lib/llm-specs-registry.ts'),
+      changeFrequency: 'weekly',
       priority: 0.8,
     });
   });

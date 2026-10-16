@@ -114,6 +114,7 @@ ${bold("Commands")}
   ${cyan("cidr")} <ip/prefix|/prefix>     Calculate IPv4 subnet mask, wildcard, usable IP range, and host count
   ${cyan("scan")} [dir]                   Scan project directory for leaked API keys, JWTs, and private keys
   ${cyan("rules")} [stack] [--write]      Generate .cursorrules / CLAUDE.md AI coding guidelines
+  ${cyan("mcp")}                          Start stdio Model Context Protocol (MCP) server for Claude / Cursor
   ${cyan("ts")} <value>                   Unix seconds or milliseconds (auto-detect) -> UTC, ISO, local
   ${cyan("detect")} <value>               Identify timestamp or ID format (ObjectId, Snowflake, UUIDv7, ULID)
   ${cyan("cron")} "<expr>" [timezone]     Plain-English cron explanation + next 5 runs
@@ -780,6 +781,157 @@ async function main(argv: string[]): Promise<void> {
         out.push(template.trim());
       }
       break;
+    }
+
+    case "mcp": {
+      // Start JSON-RPC 2.0 stdio MCP Server for Claude Desktop & Cursor
+      const MCP_TOOLS = [
+        {
+          name: "castov_timestamp",
+          description: "Inspect and convert Unix timestamp (seconds or milliseconds) to UTC, ISO 8601, and local human time.",
+          inputSchema: {
+            type: "object",
+            properties: { value: { type: "string", description: "Unix timestamp in seconds or ms" } },
+            required: ["value"],
+          },
+        },
+        {
+          name: "castov_detect_id",
+          description: "Detect and decode embedded creation date from MongoDB ObjectId, UUIDv7, ULID, or Snowflake ID.",
+          inputSchema: {
+            type: "object",
+            properties: { id: { type: "string", description: "Identifier string" } },
+            required: ["id"],
+          },
+        },
+        {
+          name: "castov_cidr",
+          description: "Calculate IPv4 CIDR subnet mask, wildcard, broadcast address, and usable host range.",
+          inputSchema: {
+            type: "object",
+            properties: { cidr: { type: "string", description: "CIDR string like 192.168.1.0/24 or /24" } },
+            required: ["cidr"],
+          },
+        },
+        {
+          name: "castov_port",
+          description: "Inspect network port purpose, service name, and standard transport protocol.",
+          inputSchema: {
+            type: "object",
+            properties: { port: { type: "number", description: "Port number between 1 and 65535" } },
+            required: ["port"],
+          },
+        },
+      ];
+
+      process.stdin.setEncoding("utf8");
+      let buffer = "";
+
+      const sendRpc = (msg: any) => {
+        const json = JSON.stringify(msg);
+        process.stdout.write(`Content-Length: ${Buffer.byteLength(json, "utf8")}\r\n\r\n${json}`);
+      };
+
+      process.stdin.on("data", (chunk: string) => {
+        buffer += chunk;
+        while (true) {
+          const headerEnd = buffer.indexOf("\r\n\r\n");
+          if (headerEnd === -1) {
+            // Also handle raw JSON-RPC per line (newline delimited)
+            const newlineIdx = buffer.indexOf("\n");
+            if (newlineIdx !== -1) {
+              const line = buffer.slice(0, newlineIdx).trim();
+              buffer = buffer.slice(newlineIdx + 1);
+              if (line) handleRpcMessage(line);
+              continue;
+            }
+            break;
+          }
+
+          const header = buffer.slice(0, headerEnd);
+          const match = header.match(/Content-Length:\s*(\d+)/i);
+          if (!match) {
+            buffer = buffer.slice(headerEnd + 4);
+            continue;
+          }
+
+          const contentLength = parseInt(match[1], 10);
+          const bodyStart = headerEnd + 4;
+          if (buffer.length < bodyStart + contentLength) break;
+
+          const body = buffer.slice(bodyStart, bodyStart + contentLength);
+          buffer = buffer.slice(bodyStart + contentLength);
+          handleRpcMessage(body);
+        }
+      });
+
+      const handleRpcMessage = (raw: string) => {
+        try {
+          const req = JSON.parse(raw);
+          const { id, method, params } = req;
+
+          if (method === "initialize") {
+            sendRpc({
+              jsonrpc: "2.0",
+              id,
+              result: {
+                protocolVersion: "2024-11-05",
+                capabilities: { tools: {} },
+                serverInfo: { name: "castov-mcp-server", version },
+              },
+            });
+          } else if (method === "tools/list") {
+            sendRpc({
+              jsonrpc: "2.0",
+              id,
+              result: { tools: MCP_TOOLS },
+            });
+          } else if (method === "tools/call") {
+            const toolName = params?.name;
+            const args = params?.arguments || {};
+            let toolText = "";
+
+            if (toolName === "castov_timestamp") {
+              const res = parseTs(args.value);
+              toolText = JSON.stringify(res, null, 2);
+            } else if (toolName === "castov_detect_id") {
+              const matches = detectId(args.id);
+              toolText = JSON.stringify(matches, null, 2);
+            } else if (toolName === "castov_cidr") {
+              const prefixStr = args.cidr.includes("/") ? args.cidr.split("/")[1] : args.cidr;
+              const prefix = Number(prefixStr);
+              const maskInt = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0;
+              const wildcardInt = (~maskInt) >>> 0;
+              toolText = `Subnet Mask: ${intToIp(maskInt)}\nWildcard: ${intToIp(wildcardInt)}\nUsable Hosts: ${Math.max(0, Math.pow(2, 32 - prefix) - 2)}`;
+            } else if (toolName === "castov_port") {
+              const p = KNOWN_PORTS[Number(args.port)];
+              toolText = p ? `Port ${args.port}: ${p.service} (${p.proto}) - ${p.desc}` : `Port ${args.port}: Custom / Ephemeral Port`;
+            } else {
+              toolText = `Unknown tool: ${toolName}`;
+            }
+
+            sendRpc({
+              jsonrpc: "2.0",
+              id,
+              result: {
+                content: [{ type: "text", text: toolText }],
+              },
+            });
+          } else if (method === "notifications/initialized") {
+            // No response needed for notifications
+          } else if (id !== undefined) {
+            sendRpc({
+              jsonrpc: "2.0",
+              id,
+              error: { code: -32601, message: `Method not found: ${method}` },
+            });
+          }
+        } catch {
+          // ignore malformed rpc
+        }
+      };
+
+      return;
     }
 
     default:

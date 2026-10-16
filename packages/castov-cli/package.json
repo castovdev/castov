@@ -1,8 +1,8 @@
 {
   "name": "castov",
-  "version": "1.2.0",
-  "description": "Castov in your terminal: EADDRINUSE port inspector & killer, cryptographic .env secret generator, IPv4 CIDR subnet calculator, local secret scanner, terminal error healer, .cursorrules generator, Unix timestamps, ID detector, cron explainer, IANA time zone converter, UUIDs (v4/v7), Base64, hashes, and JWT decoding.",
-  "keywords": ["cli", "castov", "port", "kill-port", "secret", "cidr", "subnet", "scanner", "fix", "cursorrules", "unix", "timestamp", "cron", "timezone", "dst", "detect", "snowflake", "ulid", "objectid", "uuid", "uuidv7", "base64", "hash", "jwt"],
+  "version": "1.3.0",
+  "description": "Castov in your terminal: Model Context Protocol (MCP) server for Claude/Cursor, EADDRINUSE port inspector & killer, cryptographic .env secret generator, IPv4 CIDR subnet calculator, local secret scanner, terminal error healer, .cursorrules generator, Unix timestamps, ID detector, cron explainer, IANA time zone converter, UUIDs (v4/v7), Base64, hashes, and JWT decoding.",
+  "keywords": ["mcp", "mcp-server", "model-context-protocol", "claude", "cursor", "cli", "castov", "port", "kill-port", "secret", "cidr", "subnet", "scanner", "fix", "cursorrules", "unix", "timestamp", "cron", "timezone", "dst", "detect", "snowflake", "ulid", "objectid", "uuid", "uuidv7", "base64", "hash", "jwt"],
   "homepage": "https://www.castov.com",
   "repository": {
     "type": "git",

@@ -8,6 +8,8 @@ import { ERROR_FIXES } from "@/lib/error-fixes-registry";
 import { TIMEZONE_PAIRS } from "@/lib/timezone-pairs-registry";
 import { NETWORK_PORTS, CIDR_BLOCKS } from "@/lib/network-ports-registry";
 import { TECH_TREND_TOPICS } from "@/lib/tech-trends-registry";
+import { CLOUD_SERVICES } from "@/lib/cloud-status-registry";
+import { LLM_MODELS } from "@/lib/llm-specs-registry";
 import { AI_TOOLS } from "@/lib/ai-tools";
 import { CRON_PRESETS } from "@/lib/time/cron-presets";
 import { HTTP_STATUS_CODES } from "@/lib/http-statuses";
@@ -195,7 +197,7 @@ export default function SiteDirectoryPage() {
 
       {/* 8. AI Developer Tools & Live Tech Trend Topic Radars */}
       <section className="space-y-4">
-        <h2 className="text-xl font-bold text-fg">8. AI Developer Hub ({AI_TOOLS.length}) &amp; Live Tech Trend Radars ({TECH_TREND_TOPICS.length})</h2>
+        <h2 className="text-xl font-bold text-fg">8. AI Developer Hub ({AI_TOOLS.length}), Live Tech Trends ({TECH_TREND_TOPICS.length}) &amp; LLM Hardware Calculators ({LLM_MODELS.length})</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-xs sm:text-sm">
           {AI_TOOLS.map((a) => (
             <Link
@@ -213,6 +215,37 @@ export default function SiteDirectoryPage() {
               className="px-3 py-2 rounded-lg bg-card/60 hover:bg-hover border border-line/60 text-fg hover:text-accent truncate transition-colors no-underline"
             >
               Trend Radar: #{tt.slug} ({tt.name})
+            </Link>
+          ))}
+          {LLM_MODELS.map((m) => (
+            <Link
+              key={m.slug}
+              href={`/llm/${m.slug}`}
+              className="px-3 py-2 rounded-lg bg-card/60 hover:bg-hover border border-line/60 text-fg hover:text-accent truncate transition-colors no-underline"
+            >
+              LLM Calc: {m.name} ({m.creator})
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Cloud Outage Radar & cURL Tools */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-fg">Cloud &amp; AI Status Radar ({CLOUD_SERVICES.length}) &amp; cURL Code Converters</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-xs">
+          <Link
+            href="/curl-converter"
+            className="px-3 py-2 rounded-lg bg-accent/10 border border-accent/20 text-accent font-semibold truncate transition-colors no-underline"
+          >
+            cURL to Code Converter (Fetch/Python/Go/Rust)
+          </Link>
+          {CLOUD_SERVICES.map((s) => (
+            <Link
+              key={s.slug}
+              href={`/status/${s.slug}`}
+              className="px-3 py-2 rounded-lg bg-card/60 hover:bg-hover border border-line/60 text-fg hover:text-accent truncate transition-colors no-underline"
+            >
+              Status: {s.name}
             </Link>
           ))}
         </div>
