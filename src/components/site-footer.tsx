@@ -151,7 +151,7 @@ export function SiteFooter() {
           {/* Social Presence */}
           <div className="pt-4 flex items-center gap-2.5">
             <a
-              href="https://github.com/benidira/timeforge"
+              href="https://github.com/benidira/castov"
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 rounded-xl bg-field border border-line flex items-center justify-center text-muted hover:text-fg hover:border-accent/40 hover:bg-hover transition-all"
@@ -305,7 +305,7 @@ export function SiteFooter() {
               ))}
               <li className="pt-2">
                 <a
-                  href="https://github.com/benidira/timeforge"
+                  href="https://github.com/benidira/castov"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-muted hover:text-fg transition-colors inline-flex items-center gap-1 font-mono"
@@ -324,8 +324,6 @@ export function SiteFooter() {
         <div className="layout-content py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1">
             <span>&copy; {currentYear} {SITE.name}. All rights reserved.</span>
-            <span className="hidden sm:inline text-line">•</span>
-            <span className="text-muted/80">Built with Next.js & TypeScript</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
