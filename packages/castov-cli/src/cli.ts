@@ -371,6 +371,77 @@ function intToIp(int: number): string {
   ].join(".");
 }
 
+interface CidrResult {
+  baseIp: string;
+  prefix: number;
+  netInt: number;
+  maskInt: number;
+  wildcardInt: number;
+  bcastInt: number;
+  networkAddress: string;
+  subnetMask: string;
+  wildcardMask: string;
+  broadcastAddress: string;
+  firstUsable: string;
+  lastUsable: string;
+  usableHosts: number;
+  totalAddresses: number;
+}
+
+function calculateCidr(ip: string, prefix: number): CidrResult {
+  const maskInt = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0;
+  const wildcardInt = (~maskInt) >>> 0;
+  const ipInt = ipToInt(ip);
+  const netInt = (ipInt & maskInt) >>> 0;
+  const bcastInt = (netInt | wildcardInt) >>> 0;
+
+  const totalAddresses = Math.pow(2, 32 - prefix);
+
+  let usableHosts: number;
+  let firstHostInt: number;
+  let lastHostInt: number;
+  let broadcastAddress: string;
+
+  if (prefix === 32) {
+    usableHosts = 1;
+    firstHostInt = netInt;
+    lastHostInt = netInt;
+    broadcastAddress = "None (/32 Single Host)";
+  } else if (prefix === 31) {
+    usableHosts = 2;
+    firstHostInt = netInt;
+    lastHostInt = bcastInt;
+    broadcastAddress = "None (RFC 3021 Point-to-Point)";
+  } else if (prefix === 0) {
+    usableHosts = totalAddresses - 2; // 4,294,967,294
+    firstHostInt = (netInt + 1) >>> 0;
+    lastHostInt = (bcastInt - 1) >>> 0;
+    broadcastAddress = intToIp(bcastInt);
+  } else {
+    usableHosts = Math.max(0, totalAddresses - 2);
+    firstHostInt = (netInt + 1) >>> 0;
+    lastHostInt = (bcastInt - 1) >>> 0;
+    broadcastAddress = intToIp(bcastInt);
+  }
+
+  return {
+    baseIp: ip,
+    prefix,
+    netInt,
+    maskInt,
+    wildcardInt,
+    bcastInt,
+    networkAddress: intToIp(netInt),
+    subnetMask: intToIp(maskInt),
+    wildcardMask: intToIp(wildcardInt),
+    broadcastAddress,
+    firstUsable: intToIp(firstHostInt),
+    lastUsable: intToIp(lastHostInt),
+    usableHosts,
+    totalAddresses,
+  };
+}
+
 function findListeningPids(port: number): string[] {
   try {
     if (process.platform === "win32") {
@@ -656,37 +727,36 @@ async function main(argv: string[]): Promise<void> {
       if (!rawCidr) throw new UsageError(`missing <cidr> argument. Usage: castov cidr 192.168.1.0/24 or castov cidr /24`);
 
       let baseIp = "192.168.1.0";
-      let prefixStr = rawCidr;
-      if (rawCidr.includes("/")) {
-        const parts = rawCidr.split("/");
-        if (parts[0]) baseIp = parts[0];
-        prefixStr = parts[1];
+      let prefixStr = rawCidr.trim();
+      if (prefixStr.includes("/")) {
+        const parts = prefixStr.split("/");
+        if (parts[0]) baseIp = parts[0].trim();
+        const sub = (parts[1] ?? "").trim();
+        if (!sub) {
+          throw new UsageError(`Missing prefix after '/' in CIDR "${rawCidr}".`);
+        }
+        prefixStr = sub;
+      }
+
+      if (!/^\d+$/.test(prefixStr)) {
+        throw new UsageError(`CIDR prefix must be an integer between 0 and 32, got "${prefixStr}".`);
       }
 
       const prefix = Number(prefixStr);
-      if (!Number.isInteger(prefix) || prefix < 0 || prefix > 32) {
-        throw new UsageError(`CIDR prefix must be an integer between 0 and 32`);
+      if (prefix < 0 || prefix > 32) {
+        throw new UsageError(`CIDR prefix must be an integer between 0 and 32, got "${prefixStr}".`);
       }
 
-      const maskInt = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0;
-      const wildcardInt = (~maskInt) >>> 0;
-      const ipInt = ipToInt(baseIp);
-      const netInt = (ipInt & maskInt) >>> 0;
-      const bcastInt = (netInt | wildcardInt) >>> 0;
+      const res = calculateCidr(baseIp, prefix);
 
-      const totalAddresses = Math.pow(2, 32 - prefix);
-      const usableHosts = prefix >= 31 ? (prefix === 31 ? 2 : 1) : Math.max(0, totalAddresses - 2);
-      const firstHostInt = prefix >= 31 ? netInt : (netInt + 1) >>> 0;
-      const lastHostInt = prefix >= 31 ? bcastInt : (bcastInt - 1) >>> 0;
-
-      out.push(`${bold(`🌐 IPv4 CIDR Calculation: ${intToIp(netInt)}/${prefix}`)}`);
-      out.push(`Subnet Mask:     ${cyan(intToIp(maskInt))}`);
-      out.push(`Wildcard Mask:   ${intToIp(wildcardInt)}`);
-      out.push(`Network Address: ${intToIp(netInt)}`);
-      out.push(`Broadcast Addr:  ${intToIp(bcastInt)}`);
-      out.push(`Usable Range:    ${green(`${intToIp(firstHostInt)} - ${intToIp(lastHostInt)}`)}`);
-      out.push(`Total IPs:       ${totalAddresses.toLocaleString()}`);
-      out.push(`Usable Hosts:    ${bold(usableHosts.toLocaleString())}`);
+      out.push(`${bold(`🌐 IPv4 CIDR Calculation: ${res.networkAddress}/${prefix}`)}`);
+      out.push(`Subnet Mask:     ${cyan(res.subnetMask)}`);
+      out.push(`Wildcard Mask:   ${res.wildcardMask}`);
+      out.push(`Network Address: ${res.networkAddress}`);
+      out.push(`Broadcast Addr:  ${res.broadcastAddress}`);
+      out.push(`Usable Range:    ${green(`${res.firstUsable} - ${res.lastUsable}`)}`);
+      out.push(`Total IPs:       ${res.totalAddresses.toLocaleString("en-US")}`);
+      out.push(`Usable Hosts:    ${bold(res.usableHosts.toLocaleString("en-US"))}`);
       out.push(`Reference:       https://www.castov.com/cidr/${prefix >= 8 ? prefix : 24}`);
       break;
     }
@@ -953,11 +1023,16 @@ async function main(argv: string[]): Promise<void> {
                       isError = true;
                     } else {
                       try {
-                        const maskInt = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0;
-                        const wildcardInt = (~maskInt) >>> 0;
-                        ipToInt(baseIp);
-                        const usableHosts = prefix >= 31 ? (prefix === 31 ? 2 : 1) : Math.max(0, Math.pow(2, 32 - prefix) - 2);
-                        toolText = `Subnet Mask: ${intToIp(maskInt)}\nWildcard: ${intToIp(wildcardInt)}\nUsable Hosts: ${usableHosts}`;
+                        const res = calculateCidr(baseIp, prefix);
+                        toolText = [
+                          `Network Address: ${res.networkAddress}`,
+                          `Subnet Mask: ${res.subnetMask}`,
+                          `Wildcard: ${res.wildcardMask}`,
+                          `Broadcast Address: ${res.broadcastAddress}`,
+                          `First Usable: ${res.firstUsable}`,
+                          `Last Usable: ${res.lastUsable}`,
+                          `Usable Hosts: ${res.usableHosts}`,
+                        ].join("\n");
                       } catch (err: any) {
                         toolText = `Error: ${err?.message || "invalid CIDR"}`;
                         isError = true;

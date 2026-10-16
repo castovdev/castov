@@ -657,6 +657,124 @@ test("castov mcp: ndjson line exceeding MAX_BODY_SIZE with trailing newline in s
   assert.match(outData, /Message line exceeds maximum size of 4MB/);
 });
 
+test("castov cidr CLI: handles /16, /30, /31, /32, /0, non-zero base IP, and empty prefix error", () => {
+  // 1. /16
+  const r16 = run(["cidr", "172.16.0.0/16"]);
+  assert.equal(r16.status, 0);
+  assert.match(r16.stdout, /Subnet Mask:\s+255\.255\.0\.0/);
+  assert.match(r16.stdout, /Network Address:\s+172\.16\.0\.0/);
+  assert.match(r16.stdout, /Broadcast Addr:\s+172\.16\.255\.255/);
+  assert.match(r16.stdout, /Usable Range:\s+172\.16\.0\.1 - 172\.16\.255\.254/);
+  assert.match(r16.stdout, /Total IPs:\s+65,536/);
+  assert.match(r16.stdout, /Usable Hosts:\s+65,534/);
+
+  // 2. /30
+  const r30 = run(["cidr", "10.0.0.0/30"]);
+  assert.equal(r30.status, 0);
+  assert.match(r30.stdout, /Subnet Mask:\s+255\.255\.255\.252/);
+  assert.match(r30.stdout, /Broadcast Addr:\s+10\.0\.0\.3/);
+  assert.match(r30.stdout, /Usable Range:\s+10\.0\.0\.1 - 10\.0\.0\.2/);
+  assert.match(r30.stdout, /Total IPs:\s+4/);
+  assert.match(r30.stdout, /Usable Hosts:\s+2/);
+
+  // 3. /31 (RFC 3021)
+  const r31 = run(["cidr", "10.0.0.0/31"]);
+  assert.equal(r31.status, 0);
+  assert.match(r31.stdout, /Subnet Mask:\s+255\.255\.255\.254/);
+  assert.match(r31.stdout, /Broadcast Addr:\s+None \(RFC 3021 Point-to-Point\)/);
+  assert.match(r31.stdout, /Usable Range:\s+10\.0\.0\.0 - 10\.0\.0\.1/);
+  assert.match(r31.stdout, /Total IPs:\s+2/);
+  assert.match(r31.stdout, /Usable Hosts:\s+2/);
+
+  // 4. /32 (Single Host)
+  const r32 = run(["cidr", "10.0.0.5/32"]);
+  assert.equal(r32.status, 0);
+  assert.match(r32.stdout, /Subnet Mask:\s+255\.255\.255\.255/);
+  assert.match(r32.stdout, /Network Address:\s+10\.0\.0\.5/);
+  assert.match(r32.stdout, /Broadcast Addr:\s+None \(\/32 Single Host\)/);
+  assert.match(r32.stdout, /Usable Range:\s+10\.0\.0\.5 - 10\.0\.0\.5/);
+  assert.match(r32.stdout, /Total IPs:\s+1/);
+  assert.match(r32.stdout, /Usable Hosts:\s+1/);
+
+  // 5. /0
+  const r0 = run(["cidr", "0.0.0.0/0"]);
+  assert.equal(r0.status, 0);
+  assert.match(r0.stdout, /Subnet Mask:\s+0\.0\.0\.0/);
+  assert.match(r0.stdout, /Wildcard Mask:\s+255\.255\.255\.255/);
+  assert.match(r0.stdout, /Broadcast Addr:\s+255\.255\.255\.255/);
+  assert.match(r0.stdout, /Usable Range:\s+0\.0\.0\.1 - 255\.255\.255\.254/);
+  assert.match(r0.stdout, /Total IPs:\s+4,294,967,296/);
+  assert.match(r0.stdout, /Usable Hosts:\s+4,294,967,294/);
+
+  // 6. Non-zero base IP: 10.1.2.77/24
+  const rNonZero = run(["cidr", "10.1.2.77/24"]);
+  assert.equal(rNonZero.status, 0);
+  assert.match(rNonZero.stdout, /Network Address:\s+10\.1\.2\.0/);
+  assert.match(rNonZero.stdout, /Broadcast Addr:\s+10\.1\.2\.255/);
+  assert.match(rNonZero.stdout, /Usable Range:\s+10\.1\.2\.1 - 10\.1\.2\.254/);
+  assert.match(rNonZero.stdout, /Total IPs:\s+256/);
+  assert.match(rNonZero.stdout, /Usable Hosts:\s+254/);
+
+  // 7. Empty prefix error: 192.168.1.0/
+  const rEmpty = run(["cidr", "192.168.1.0/"]);
+  assert.notEqual(rEmpty.status, 0);
+  assert.match(rEmpty.stderr, /Missing prefix after '\/'/);
+});
+
+test("castov mcp: castov_cidr returns all fields and handles /31, /32, /0, non-zero base IP", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 4, timeoutMs, setTracked);
+
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 201, method: "tools/call", params: { name: "castov_cidr", arguments: { cidr: "10.1.2.77/24" } } }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 202, method: "tools/call", params: { name: "castov_cidr", arguments: { cidr: "10.0.0.0/31" } } }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 203, method: "tools/call", params: { name: "castov_cidr", arguments: { cidr: "10.0.0.5/32" } } }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 204, method: "tools/call", params: { name: "castov_cidr", arguments: { cidr: "0.0.0.0/0" } } }) + "\n");
+
+  const [r201, r202, r203, r204] = await promise;
+
+  // /24 non-zero base
+  assert.equal(r201.id, 201);
+  const t201 = r201.result.content[0].text;
+  assert.match(t201, /Network Address: 10\.1\.2\.0/);
+  assert.match(t201, /Subnet Mask: 255\.255\.255\.0/);
+  assert.match(t201, /Wildcard: 0\.0\.0\.255/);
+  assert.match(t201, /Broadcast Address: 10\.1\.2\.255/);
+  assert.match(t201, /First Usable: 10\.1\.2\.1/);
+  assert.match(t201, /Last Usable: 10\.1\.2\.254/);
+  assert.match(t201, /Usable Hosts: 254/);
+
+  // /31
+  assert.equal(r202.id, 202);
+  const t202 = r202.result.content[0].text;
+  assert.match(t202, /Network Address: 10\.0\.0\.0/);
+  assert.match(t202, /Subnet Mask: 255\.255\.255\.254/);
+  assert.match(t202, /Broadcast Address: None \(RFC 3021 Point-to-Point\)/);
+  assert.match(t202, /First Usable: 10\.0\.0\.0/);
+  assert.match(t202, /Last Usable: 10\.0\.0\.1/);
+  assert.match(t202, /Usable Hosts: 2/);
+
+  // /32
+  assert.equal(r203.id, 203);
+  const t203 = r203.result.content[0].text;
+  assert.match(t203, /Network Address: 10\.0\.0\.5/);
+  assert.match(t203, /Subnet Mask: 255\.255\.255\.255/);
+  assert.match(t203, /Broadcast Address: None \(\/32 Single Host\)/);
+  assert.match(t203, /First Usable: 10\.0\.0\.5/);
+  assert.match(t203, /Last Usable: 10\.0\.0\.5/);
+  assert.match(t203, /Usable Hosts: 1/);
+
+  // /0
+  assert.equal(r204.id, 204);
+  const t204 = r204.result.content[0].text;
+  assert.match(t204, /Network Address: 0\.0\.0\.0/);
+  assert.match(t204, /Subnet Mask: 0\.0\.0\.0/);
+  assert.match(t204, /Wildcard: 255\.255\.255\.255/);
+  assert.match(t204, /Broadcast Address: 255\.255\.255\.255/);
+  assert.match(t204, /First Usable: 0\.0\.0\.1/);
+  assert.match(t204, /Last Usable: 255\.255\.255\.254/);
+  assert.match(t204, /Usable Hosts: 4294967294/);
+});
+
 
 
 
