@@ -1,6 +1,6 @@
 {
   "name": "castov",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Castov in your terminal: Model Context Protocol (MCP) server for Claude/Cursor, EADDRINUSE port inspector & killer, cryptographic .env secret generator, IPv4 CIDR subnet calculator, local secret scanner, terminal error healer, .cursorrules generator, Unix timestamps, ID detector, cron explainer, IANA time zone converter, UUIDs (v4/v7), Base64, hashes, and JWT decoding.",
   "keywords": [
     "mcp",
