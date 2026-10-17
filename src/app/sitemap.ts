@@ -11,6 +11,7 @@ import { NETWORK_PORTS, CIDR_BLOCKS } from '@/lib/network-ports-registry';
 import { TECH_TREND_TOPICS } from '@/lib/tech-trends-registry';
 import { CLOUD_SERVICES } from '@/lib/cloud-status-registry';
 import { LLM_MODELS } from '@/lib/llm-specs-registry';
+import { HTTP_STATUS_CODES } from '@/lib/http-statuses';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -29,6 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/extension`, lastModified: getLastMod('src/app/extension/page.tsx'), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/cheatsheets`, lastModified: getLastMod('src/app/cheatsheets/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/http-status`, lastModified: getLastMod('src/app/http-status/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/chmod`, lastModified: getLastMod('src/app/chmod/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/cron`, lastModified: getLastMod('src/app/cron/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/timezones`, lastModified: getLastMod('src/app/timezones/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/timestamps`, lastModified: getLastMod('src/app/timestamps/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
@@ -171,6 +173,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: getLastMod('src/lib/llm-specs-registry.ts'),
       changeFrequency: 'weekly',
       priority: 0.8,
+    });
+  });
+
+  Object.keys(HTTP_STATUS_CODES).forEach((code) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/http-status/${code}`,
+      lastModified: getLastMod('src/app/http-status/[code]/page.tsx'),
+      changeFrequency: 'monthly',
+      priority: 0.7,
     });
   });
 

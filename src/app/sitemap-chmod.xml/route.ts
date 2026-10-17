@@ -2,7 +2,14 @@
 export async function GET() {
   const date = new Date().toISOString().split("T")[0];
   const baseUrl = "https://castov.com";
-  const entries: string[] = [];
+  const entries: string[] = [
+    `  <url>
+    <loc>${baseUrl}/chmod</loc>
+    <lastmod>${date}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>`,
+  ];
 
   for (let a = 0; a <= 7; a++) {
     for (let b = 0; b <= 7; b++) {
