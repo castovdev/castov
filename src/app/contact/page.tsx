@@ -34,7 +34,7 @@ export default function ContactPage() {
 
       <h2>Social & Source</h2>
       <ul>
-        <li><strong>GitHub:</strong> <a href="https://github.com/benidira">github.com/benidira</a></li>
+        <li><strong>GitHub:</strong> <a href="https://github.com/castovdev">github.com/castovdev</a></li>
       </ul>
 
       <h2>What helps most</h2>

@@ -27,7 +27,7 @@ const contactContent = `
       <ul>
         <li><strong>Email:</strong> <a href="mailto:support@castov.com">support@castov.com</a></li>
         <li><strong>X (Twitter):</strong> <a href="https://x.com/castov_dev">@castov_dev</a></li>
-        <li><strong>GitHub:</strong> <a href="https://github.com/benidira">github.com/benidira</a></li>
+        <li><strong>GitHub:</strong> <a href="https://github.com/castovdev">github.com/castovdev</a></li>
       </ul>
 `;
 contactCode = contactCode.replace(

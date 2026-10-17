@@ -14,7 +14,7 @@
   "homepage": "https://castov.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/benidira/timeforge"
+    "url": "https://github.com/castovdev/castov"
   },
   "engines": {
     "vscode": "^1.85.0"

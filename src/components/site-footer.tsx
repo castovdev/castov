@@ -86,7 +86,7 @@ export function SiteFooter() {
             <FooterCliCopy />
 
             <a
-              href="https://github.com/benidira/timeforge"
+              href="https://github.com/castovdev/castov"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-field hover:bg-hover border border-line hover:border-accent/40 text-xs font-medium text-fg transition-all shadow-xs active:scale-95"
@@ -151,7 +151,7 @@ export function SiteFooter() {
           {/* Social Presence */}
           <div className="pt-4 flex items-center gap-2.5">
             <a
-              href="https://github.com/benidira/castov"
+              href="https://github.com/castovdev/castov"
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 rounded-xl bg-field border border-line flex items-center justify-center text-muted hover:text-fg hover:border-accent/40 hover:bg-hover transition-all"
@@ -305,7 +305,7 @@ export function SiteFooter() {
               ))}
               <li className="pt-2">
                 <a
-                  href="https://github.com/benidira/castov"
+                  href="https://github.com/castovdev/castov"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-muted hover:text-fg transition-colors inline-flex items-center gap-1 font-mono"
