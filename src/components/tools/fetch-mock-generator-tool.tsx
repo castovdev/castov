@@ -34,7 +34,7 @@ export function FetchMockGeneratorTool() {
     );
 
     if (matchedMock) {
-      console.log(\`%c[Castov Mock Server] Intercepted \${method} \${r.path}\`, 'color: #8b5cf6; font-weight: bold;');
+      console.log(\`%c[Castov Mock Server] Intercepted \${method} \${matchedMock.path}\`, 'color: #8b5cf6; font-weight: bold;');
       
       if (matchedMock.delay > 0) {
         await new Promise(res => setTimeout(res, matchedMock.delay));
