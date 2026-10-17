@@ -1,8 +1,8 @@
 {
   "name": "castov-vscode",
-  "displayName": "Castov – Fast Developer Utilities",
-  "description": "Instant Unix timestamps, UUID v4/v7 generation, JWT decoding, Base64 converter, and timestamp hover tooltips right inside VS Code.",
-  "version": "0.1.1",
+  "displayName": "Timestamp Hover & UUID – Castov",
+  "description": "Instant Unix timestamp tooltip on hover, UUID v4/v7 generation, JWT inspection & Base64 tools right inside VS Code.",
+  "version": "0.1.2",
   "publisher": "castov",
   "icon": "icon.png",
   "galleryBanner": {
