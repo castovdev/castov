@@ -4,6 +4,10 @@
   "description": "Zero-dependency, zero-server developer utilities: Unix timestamps, ID detector (ObjectId, Snowflake, UUIDv7, ULID), cron explainer, IANA time zone converter with DST handling, UUID v4/v7, Base64, hashing, and JWT decoding. Works in Node.js, Deno, Bun, edge runtimes, and browsers.",
   "keywords": ["uuid", "uuidv7", "nanoid", "base64", "hash", "sha256", "unix", "timestamp", "cron", "timezone", "dst", "snowflake", "ulid", "objectid", "jwt", "castov", "zero-dependency"],
   "homepage": "https://castov.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/castovdev/castov.git"
+  },
   "license": "MIT",
   "author": "Castov <https://castov.com>",
   "type": "module",
