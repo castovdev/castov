@@ -1,8 +1,14 @@
 {
   "name": "castov",
-  "version": "1.0.0",
+  "version": "1.3.3",
   "private": true,
-  "description": "Castov - Free Time & Timestamp Tools",
+  "license": "MIT",
+  "description": "Castov — Zero-Telemetry AI Execution Layer (MCP Server), CLI & 63+ Local Developer Tools",
+  "homepage": "https://castov.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/castovdev/castov.git"
+  },
   "bin": {
     "castov": "./bin/castov.js"
   },
