@@ -68,7 +68,7 @@ export default function ExtensionPage() {
           </a>
           <a
             href="/api/download/extension"
-            download="castov-vscode-0.1.2.vsix"
+            download="castov-vscode-0.1.3.vsix"
             className="btn bg-card border border-line text-fg hover:bg-hover font-bold text-base px-6 py-3.5 shadow-sm transition-all flex items-center gap-2"
           >
             <Download className="w-5 h-5 text-muted" />
@@ -146,7 +146,7 @@ export default function ExtensionPage() {
               <ol className="space-y-3 text-sm text-muted">
                 <li className="flex gap-2">
                   <span className="font-bold text-accent">1.</span>
-                  <span>Download the <strong className="text-fg">castov-vscode-0.1.2.vsix</strong> file above.</span>
+                  <span>Download the <strong className="text-fg">castov-vscode-0.1.3.vsix</strong> file above.</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="font-bold text-accent">2.</span>
@@ -165,7 +165,7 @@ export default function ExtensionPage() {
               <div className="mt-6 pt-6 border-t border-line">
                 <a
                   href="/api/download/extension"
-                  download="castov-vscode-0.1.2.vsix"
+                  download="castov-vscode-0.1.3.vsix"
                   className="btn w-full justify-center bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold py-3"
                 >
                   <Download className="w-4 h-4 mr-2 text-white" /> Download .vsix File
