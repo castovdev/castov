@@ -1,158 +1,262 @@
-# Castov — Free Time & Timestamp Tools
+# Castov
 
-A free, ad-supported (later) collection of 25 browser-only tools for Unix timestamps, dates, time
-zones and developer scheduling. Next.js (App Router) + TypeScript + Tailwind CSS v4. No backend, no
-database, no accounts, no external APIs — every calculation runs in the visitor's browser.
+<p align="center">
+  <a href="https://castov.com">
+    <img src="public/castov-logo.svg" alt="Castov Logo" width="110" height="110" />
+  </a>
+</p>
 
-## Tools
+<h3 align="center">The Open-Source AI Execution Layer & Zero-Telemetry Developer Suite</h3>
 
-| # | Tool | Route |
-|---|------|-------|
-| 1 | Unix Timestamp Converter | `/unix-timestamp-converter` |
-| 2 | Epoch Converter | `/epoch-converter` |
-| 3 | Timestamp to Date | `/timestamp-to-date` |
-| 4 | Date to Timestamp | `/date-to-timestamp` |
-| 5 | Current Unix Timestamp | `/current-unix-timestamp` |
-| 6 | Milliseconds to Date | `/milliseconds-to-date` |
-| 7 | ISO 8601 to Unix Timestamp | `/iso-8601-to-unix` |
-| 8 | Unix Timestamp to ISO 8601 | `/unix-to-iso-8601` |
-| 9 | Timezone Converter | `/timezone-converter` |
-| 10 | Timestamp Difference Calculator | `/timestamp-difference` |
-| 11 | UTC Converter | `/utc-converter` |
-| 12 | Date Difference Calculator | `/date-difference` |
-| 13 | Time Duration Calculator | `/time-duration-calculator` |
-| 14 | Add Time Calculator | `/add-time` |
-| 15 | Subtract Time Calculator | `/subtract-time` |
-| 16 | Unix Timestamp Validator | `/unix-timestamp-validator` |
-| 17 | Epoch Milliseconds Converter | `/epoch-milliseconds` |
-| 18 | Unix Timestamp Batch Converter | `/unix-timestamp-batch-converter` |
-| 19 | Date Format Converter | `/date-format-converter` |
-| 20 | ISO 8601 Converter | `/iso-8601-converter` |
-| 21 | RFC 3339 Converter | `/rfc-3339-converter` |
-| 22 | Time Zone Offset Calculator | `/timezone-offset` |
-| 23 | World Clock | `/world-clock` |
-| 24 | Business Hours Converter | `/business-hours-converter` |
-| 25 | Cron Expression Generator | `/cron-generator` |
+<p align="center">
+  Deterministic local tooling for <strong>Claude Desktop</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, and <strong>Local LLMs</strong> via the Model Context Protocol (MCP) — backed by a high-performance CLI, Docker image, IDE extension, and 63+ offline-first browser utilities.
+</p>
 
-Plus 7 guides (`/guides/*`) and the standard `/about`, `/privacy`, `/terms`, `/contact` pages.
+<p align="center">
+  <a href="https://www.npmjs.com/package/castov"><img src="https://img.shields.io/npm/v/castov.svg?style=flat-square&color=2563eb&label=npm" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/castov"><img src="https://img.shields.io/npm/dw/castov?style=flat-square&color=2563eb&label=npm%20downloads" alt="npm downloads" /></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=Castov.castov-vscode"><img src="https://img.shields.io/visual-studio-marketplace/i/Castov.castov-vscode?style=flat-square&color=007acc&label=VS%20Code" alt="VS Code installs" /></a>
+  <a href="https://open-vsx.org/extension/castov/castov-vscode"><img src="https://img.shields.io/open-vsx/dt/castov/castov-vscode?style=flat-square&color=7c3aed&label=Open%20VSX" alt="Open VSX" /></a>
+  <a href="https://hub.docker.com/r/castovdev/castov"><img src="https://img.shields.io/badge/docker-castovdev%2Fcastov-blue?style=flat-square&logo=docker" alt="Docker Hub" /></a>
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-Protocol%202024--11--05-8b5cf6?style=flat-square" alt="MCP Protocol" /></a>
+  <a href="#privacy--zero-telemetry"><img src="https://img.shields.io/badge/telemetry-zero%20tracking-10b981?style=flat-square" alt="Zero Telemetry" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" /></a>
+</p>
 
-## Tech stack
+---
 
-Next.js 16 (App Router, static generation), React 19, TypeScript (strict), Tailwind CSS v4,
-Vitest + Testing Library + axe-core for tests. Zero runtime dependencies beyond React/Next — every
-time calculation is hand-written in `src/lib/time/` using `Intl.DateTimeFormat` for time zone data.
+## ⚡ What is Castov?
 
-## Development
+Modern AI agents and developer workflows suffer from two critical flaws:
+1. **Agent Hallucinations on Exact Operations**: LLMs frequently blunder arithmetic for CIDR network masks, time zone offsets, epoch milliseconds, and cryptographic key derivations.
+2. **Data & Secret Leakage**: Sending system logs, environment variables, or tokens to third-party cloud APIs presents unacceptable security hazards.
 
-```bash
-npm install
-cp .env.example .env.local   # set NEXT_PUBLIC_SITE_URL and NEXT_PUBLIC_CONTACT_EMAIL
-npm run dev                  # http://localhost:3000
+**Castov solves both.** It acts as an **in-situ Execution Layer** for developer environments. It provides deterministic, offline, and instant utilities delivered directly to your terminal, editor, Docker containers, and AI agents through the **Model Context Protocol (MCP)**.
+
+Everything runs **100% locally**. No external analytics, no telemetry, and zero cloud roundtrips.
+
+---
+
+## 🤖 AI Agent Setup (Model Context Protocol - MCP)
+
+Castov ships with a built-in, production-grade JSON-RPC 2.0 stdio MCP server supporting both `Content-Length` framed and `ndjson` stream protocols.
+
+### 1. Claude Desktop
+Add Castov to your `claude_desktop_config.json`:
+
+* **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+* **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+* **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "castov": {
+      "command": "npx",
+      "args": ["-y", "castov", "mcp"]
+    }
+  }
+}
 ```
 
-## Environment variables
+### 2. Cursor IDE & Windsurf
+Go to **Settings** → **Features** → **MCP Servers** → **Add New MCP Server**:
+* **Name**: `castov`
+* **Type**: `command`
+* **Command**: `npx -y castov mcp`
 
-| Variable | Required | Notes |
+Alternatively, add to your project's `.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "castov": {
+      "command": "npx",
+      "args": ["-y", "castov", "mcp"]
+    }
+  }
+}
+```
+
+### Native Tools Exposed to Agents
+| MCP Tool | Capability | Example Agent Prompt |
 |---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | **Yes**, for `npm run build` | `https://` origin, no path. Used for canonical URLs, sitemap, robots, Open Graph. |
-| `NEXT_PUBLIC_CONTACT_EMAIL` | **Yes**, for `npm run build` | Shown on `/contact`. |
-| `NEXT_PUBLIC_ADSENSE_CLIENT` + 3 slot IDs | No | Nothing loads or renders until these are set — see "AdSense" below. |
-| `ALLOW_PLACEHOLDER_ENV=1` | No | Bypasses the two required checks above as a **warning** instead of a build failure. Local QA only — a build made this way is not production-ready. |
+| `castov_port` | Identifies listening services, protocol mappings, and inspects process collision | *"Why is port 3000 busy and what service uses it?"* |
+| `castov_cidr` | Calculates IPv4 subnet masks, wildcard, broadcast, and usable host count | *"Calculate usable IP range and subnet mask for 10.240.0.0/22"* |
+| `castov_detect_id` | Decodes embedded creation timestamps from UUIDv7, ULID, ObjectId, Snowflake | *"When was this MongoDB ObjectId or Snowflake ID created?"* |
+| `castov_timestamp` | Bidirectional epoch conversion to ISO 8601, UTC, and localized representations | *"Convert 1713456789 to human UTC and ISO format"* |
 
-`npm run build` runs `scripts/check-env.mjs` first (via the `prebuild` script) and **fails the build**
-if the site URL or contact email is missing, malformed, or still a placeholder (e.g. `example.com`,
-`your-domain.com`, `localhost`). This is a hard build failure, not a warning, so a placeholder domain
-can never reach production by accident.
+---
 
-## Quality gates
+## 📦 Multi-Channel Distribution
+
+Castov is available everywhere modern engineering happens:
+
+### 1. Terminal CLI (Node.js / npm)
+Run instantly without installation:
+```bash
+npx castov --help
+```
+Or install globally:
+```bash
+npm install -g castov
+castov --help
+```
+
+### 2. Docker Container (Docker Hub)
+Lightweight Alpine Linux container (`node:20-alpine`) running under a non-root `node` user:
+```bash
+# Run one-off command
+docker run --rm castovdev/castov:latest uuid --v7
+
+# Interactive diagnostic shell
+docker run -it --rm castovdev/castov:latest
+```
+
+### 3. Homebrew Tap (macOS & Linux)
+Install natively via Brew:
+```bash
+brew tap castovdev/castov
+brew install castov
+
+# Verify installation
+castov --version
+```
+
+### 4. VS Code, Cursor & Windsurf Extensions
+Install the official extension directly within your editor:
+* **VS Code Marketplace**: Search `Castov` or install `Castov.castov-vscode`
+* **Open VSX Registry**: Available for Cursor, Windsurf, VSCodium: `castov/castov-vscode`
 
 ```bash
-npm run typecheck   # tsc --noEmit
-npm run lint        # eslint
-npm test            # vitest — time library, every tool's UI, SEO content, accessibility (axe)
-npm run build        # production build (prebuild runs the env guard first)
-npm run check:seo   # after build: titles/descriptions, canonicals, JSON-LD, internal links,
-                     #   sitemap/robots, no-example-domain, no-secrets-in-bundle
-npm run verify       # all of the above in order
+# Command line installation
+code --install-extension Castov.castov-vscode
 ```
 
-`check:seo` (`scripts/check-build.mjs`) crawls the actual built HTML for every URL in the sitemap and
-checks: exactly one `<h1>`, a title and meta description within sensible SEO length, a canonical URL
-that matches the real configured domain (fails if it's still `example.com`), valid JSON-LD, that every
-internal link resolves to a real page, that `sitemap.xml`/`robots.txt` exist and agree, and that the
-client JS bundle contains no secret-shaped strings and only references an allow-listed set of external
-hosts (your own domain, Google/AdSense, and a few well-known doc sites).
-
-## Testing
-
-417 tests across 12 files:
-- **Time library** (`tests/time-*.test.ts`, ~200 tests): every conversion, edge case and DST
-  transition, tested against the pure functions in `src/lib/time/` — leap years, negative
-  timestamps, daylight saving gaps/overlaps, RFC 2822/3339 parsing, cron field parsing, business-hours
-  overlap logic, etc.
-- **Tool UI** (`tests/tool-interfaces.test.tsx`, `tests/new-tool-interfaces.test.tsx`, ~90 tests):
-  renders each tool's actual component and drives it through Testing Library, covering the specific
-  edge cases named in the spec (same-date, leap year, midnight crossing, 24-hour duration, valid/invalid
-  timestamps, boundary values, mixed-unit batches, invalid cron expressions, DST offsets).
-- **Accessibility** (`tests/pages-a11y.test.tsx`): every one of the 25 tool pages, both guide pages
-  types, and the static pages are rendered and run through `axe-core` with zero violations.
-- **SEO/content** (`tests/content-seo.test.ts`): unique titles/descriptions/FAQs, sensible metadata
-  length, every internal link resolves, sitemap completeness, valid structured data.
-- **UI components + theme contrast** (`tests/ui-components.test.tsx`, `tests/theme-contrast.test.ts`).
-
-## Deploy
-
-Set `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_CONTACT_EMAIL` to real values **before** building.
-- **Vercel / Netlify / Cloudflare (Next adapter):** import the repo, add the env vars, deploy.
-- **Own server:** `npm run build && npm start` (Node 20.9+), behind HTTPS.
-
-## Add a tool
-
-1. Add its content to `src/content/tools.ts` (title, description, sections, FAQ ≥4, howTo ≥4,
-   related ≥4) and its worked examples to `src/content/examples.ts`.
-2. Build its logic as pure, tested functions in `src/lib/time/` (add a test file).
-3. Build its interface in `src/components/tools/`, reusing `ResultList`, `TimezoneSelect`,
-   `CopyButton`, `UnitSelect` where they fit.
-4. Register it in `src/components/tool-interface.tsx`. Routing, sitemap, `/tools` cards, footer
-   links and SEO metadata are all generated automatically from the `TOOLS` registry.
-
-## Architecture
-
-```
-src/
-  app/           routes (mostly thin wrappers around components below)
-  components/    layout, shared UI (ui/), and one file per tool (tools/)
-  lib/           lib/time/ = pure calculation library (no React); site.ts, seo.ts = config/helpers
-  content/       tools.ts, examples.ts, guides.ts — all page copy, separate from presentation
-tests/           mirrors the structure above
-scripts/         check-env.mjs (prebuild), check-build.mjs (post-build SEO/security audit)
+### 5. GitHub Action (CI/CD Pipelines)
+Automate security scans, secret leakage audits, and environment checks in your GitHub workflows:
+```yaml
+- name: Run Castov Secret Scanner
+  uses: castovdev/castov-action@v1.0.0
+  with:
+    command: 'scan .'
 ```
 
-## AdSense preparation
+---
 
-`AdSlot` renders nothing — no placeholder box, no fake ad — until `NEXT_PUBLIC_ADSENSE_CLIENT` and a
-slot ID are set; `AdSenseScript` (mounted once in the root layout) loads the AdSense library the same
-way, only when a client ID is configured. Before actually enabling ads in production: add a consent
-banner (required in the EEA/UK), an `ads.txt` in `public/`, and a nonce-based Content-Security-Policy
-that allow-lists Google's ad hosts (not added yet — see "Security" below for why).
+## 🛠️ CLI Quickstart & Core Commands
 
-## Security
+```text
+castov <command> [options]
+```
 
-Every response gets `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`,
-`Permissions-Policy`, `Strict-Transport-Security` and `Cross-Origin-Opener-Policy` (see
-`next.config.ts`). No secrets exist in the frontend (`check:seo` scans the built client bundle for
-secret-shaped strings on every build) and there is nothing to keep secret: no API keys, no backend.
+### 🔍 Process & Port Manager (`EADDRINUSE` Killer)
+Inspect what process is occupying a port or kill it cleanly:
+```bash
+# Inspect service and protocol
+castov port 3000
 
-**No Content-Security-Policy is set.** Next.js needs a nonce-based CSP for its own inline bootstrap
-script, and AdSense needs its own set of allowed hosts; a static CSP added without both of those would
-either break the site or be too permissive to matter. Add a nonce-based CSP together with wiring up
-AdSense for real, not before.
+# Inspect active process PID and terminate it immediately
+castov port 3000 --kill
+```
 
-## Known limitations (see final report for the full list)
+### 🔐 Cryptographic Secret Generator
+Generate high-entropy keys for `.env`, `NEXTAUTH_SECRET`, JWT signing, and API authentication:
+```bash
+castov secret
+castov secret --len 64
+```
 
-- No real mobile/desktop browser is available in this environment. Responsive CSS, `overflow-x-auto`
-  wrappers on every table, and Tailwind breakpoints were reviewed and are consistent with the rest of
-  the site, but this has not been visually confirmed on an actual device — do that before launch.
-- The World Clock's city list is not persisted between visits (resets to the default cities on reload).
-- Auto-unit detection treats 12+ digit values as milliseconds; this is wrong only for real dates before
-  March 1973 or after the year 5138.
+### 🌐 Subnet & CIDR Calculator
+Calculate network masks, wildcard masks, and usable host ranges with zero external lookups:
+```bash
+castov cidr 192.168.1.0/24
+castov cidr 10.0.0.0/16
+```
+
+### 🛡️ Local Secret Leak Scanner
+Recursively scan local directories for committed or uncommitted API tokens (AWS, Stripe, OpenAI, GitHub, Private Keys):
+```bash
+castov scan .
+```
+
+### 🚑 Crash Log & Terminal Error Healer
+Pipe terminal crashes or paste error stack traces for instant, deterministic remediation:
+```bash
+castov fix "Error: listen EADDRINUSE: address already in use :::8080"
+npm run build 2>&1 | castov fix
+```
+
+### 🧠 AI Rules & System Prompt Generator
+Bootstrap `.cursorrules` or `CLAUDE.md` with hardened engineering practices:
+```bash
+castov rules nextjs --write
+castov rules fastapi
+castov rules rust
+```
+
+### ⏱️ Universal ID & Timestamp Detector
+Extract metadata and epoch timestamps from any modern distributed identifier:
+```bash
+castov detect 018e3a2b-8a5c-7b00-9821-654321abcdef
+castov detect 507f1f77bcf86cd799439011
+castov ts 1713456789
+```
+
+---
+
+## 🌐 Complete Suite of 63 Developer Tools
+
+In addition to the CLI and MCP Server, Castov provides 63 client-side web tools accessible at [castov.com](https://castov.com):
+
+| Category | Featured Tools |
+|---|---|
+| **Security & Privacy** | Steganography Env Vault, Client-Side Secret Scanner, Zero-Knowledge Env Vault, Hash Generator (SHA-256/512/MD5), JWT Decoder, Base64 Encoder/Decoder, UUID v4/v7 Generator. |
+| **Networking & DevOps** | EADDRINUSE Port Inspector, IPv4 CIDR Calculator, Dockerfile Visualizer, P2P Ghost Tunnel, Fetch Mock Generator, API Load Tester, DNS & Header Inspector. |
+| **Data & Architecture** | JSON to TypeScript Type Generator, 3D JSON Galaxy, Interactive JSON Formatter & Viewer, SQLite In-Browser Fiddle, Line-by-Line Diff Checker, AST Conflict Telepathy. |
+| **Frontend & UI** | Glassmorphism CSS Studio, App Mockup Generator, High-Resolution Code-to-Image Renderer, Favicon Generator, GitHub Profile README Builder. |
+| **Time & Scheduling (25+ Tools)** | Unix Timestamp Converter, Epoch Converter, ISO 8601 & RFC 3339 Parser, Timezone Converter & Simulator, Plain-English Cron Generator & Explainer, World Clock, Business Hours Matrix, Milliseconds to Date. |
+
+---
+
+## 🔒 Privacy & Zero-Telemetry Guarantee
+
+Engineering tools should never leak your IP, company secrets, or code snippets. 
+
+* **0 Analytics or Tracking Cookies**: No PostHog, Google Analytics, or third-party telemetry scripts.
+* **Offline First**: All cryptographic operations rely on the browser and runtime's native `SubtleCrypto` / Web Crypto API.
+* **Air-Gap Compatible**: Both the CLI, Docker image, and web application can run in offline and restricted intranet environments.
+
+---
+
+## 💻 Local Development
+
+Castov is built with **Next.js 16 (App Router)**, **TypeScript (Strict)**, and **Tailwind CSS v4**.
+
+```bash
+# 1. Clone repository
+git clone https://github.com/castovdev/castov.git
+cd castov
+
+# 2. Install dependencies
+npm install
+
+# 3. Setup local environment
+cp .env.example .env.local
+
+# 4. Start development server
+npm run dev
+
+# 5. Build CLI and Web applications
+npm run build
+```
+
+To run tests across packages:
+```bash
+npm run test
+```
+
+---
+
+## 📄 License
+
+Castov is open-source software licensed under the **[MIT License](./LICENSE)**. Free for personal, commercial, and enterprise usage.
