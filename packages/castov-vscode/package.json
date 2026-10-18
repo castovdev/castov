@@ -109,7 +109,9 @@
   "scripts": {
     "vscode:prepublish": "npm run build",
     "build": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish castov-vscode-0.1.2.vsix"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
