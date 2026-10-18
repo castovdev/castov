@@ -10,7 +10,8 @@ import {
   Key, 
   Fingerprint, 
   FileCode,
-  ArrowRight
+  ArrowRight,
+  Blocks
 } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
 
@@ -53,8 +54,17 @@ export default function ExtensionPage() {
             className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold text-base px-6 py-3.5 shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2.5"
           >
             <Code2 className="w-5 h-5 text-white" />
-            <span>Install on Visual Studio Marketplace</span>
+            <span>Install on VS Code Marketplace</span>
             <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">Official</span>
+          </a>
+          <a
+            href="https://open-vsx.org/extension/Castov/castov-vscode"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn bg-[#6366f1] text-white hover:bg-[#4f46e5] font-bold text-base px-6 py-3.5 shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] flex items-center gap-2.5"
+          >
+            <Blocks className="w-5 h-5 text-white" />
+            <span>Open VSX (Cursor &amp; Windsurf)</span>
           </a>
           <a
             href="/api/download/extension"

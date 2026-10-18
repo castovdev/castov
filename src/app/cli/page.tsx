@@ -4,10 +4,11 @@ import { Terminal, Shield, Lock, Zap } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { websiteJsonLd, buildMetadata } from "@/lib/seo";
+import { InstallationDistributionSection } from "@/components/installation-distribution-section";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Castov CLI & Env Vault | Secure Local Secrets",
-  description: "Pull your encrypted environment variables securely into your local development server using the Castov CLI.",
+  title: "Castov CLI & MCP Server | Fast Developer Utilities",
+  description: "EADDRINUSE port killer, Model Context Protocol (MCP) server, CIDR calculator, and offline developer utilities for your terminal.",
   path: "/cli",
 });
 
@@ -22,7 +23,7 @@ export default function CliPage() {
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-xs font-semibold text-accent mb-6">
           <Terminal className="w-3.5 h-3.5" />
-          <span>OFFICIAL NPM PACKAGE • V1.2.0</span>
+          <span>OFFICIAL NPM PACKAGE • V1.3.3</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-fg mb-4">
           Castov <span className="text-accent">CLI</span>
@@ -40,7 +41,7 @@ export default function CliPage() {
           >
             <Terminal className="w-5 h-5 text-white" />
             <span>View on npm (castov)</span>
-            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">v1.2.0</span>
+            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">v1.3.3</span>
           </a>
           <a
             href="https://www.npmjs.com/package/castov-sdk"
@@ -72,9 +73,14 @@ export default function CliPage() {
         </div>
       </div>
 
+      {/* Multi-Platform Installation Grid */}
+      <div className="mb-16 -mx-4 sm:mx-0">
+        <InstallationDistributionSection />
+      </div>
+
       {/* Terminal Cheat Sheet */}
       <div className="mb-16 bg-card p-8 rounded-2xl border border-line">
-        <h2 className="text-2xl font-bold mb-6 text-fg">Popular Terminal Commands (v1.2.0)</h2>
+        <h2 className="text-2xl font-bold mb-6 text-fg">Popular Terminal Commands (v1.3.3)</h2>
         <div className="space-y-4 font-mono text-xs">
           <div className="p-4 bg-field rounded-xl border border-accent/30">
             <span className="text-accent font-semibold"># 1. Inspect port service, find listening PID &amp; kill EADDRINUSE process</span>

@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/json-ld";
 import { ArrowRight, Terminal, ShieldCheck, Workflow, Command, Zap, Code } from "lucide-react";
 import { HeroQuickConvert } from "@/components/hero-quick-convert";
 import { PinnedToolsTray } from "@/components/pinned-tools";
+import { InstallationDistributionSection } from "@/components/installation-distribution-section";
 
 export const metadata: Metadata = {
   ...buildMetadata({
@@ -150,6 +151,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* --- MULTI-PLATFORM DISTRIBUTION & EXECUTION LAYER --- */}
+      <InstallationDistributionSection />
 
       {/* --- FLAGSHIP FEATURES --- */}
       <section className="py-24 border-b border-line bg-bg relative overflow-hidden">
