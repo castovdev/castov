@@ -1,0 +1,12 @@
+# Smithery.ai MCP Server Configuration
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction:
+    |-
+    (config) => ({
+      command: 'npx',
+      args: ['-y', 'castov', 'mcp']
+    })
