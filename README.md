@@ -1,8 +1,8 @@
 # Castov
 
 <p align="center">
-  <a href="https://castov.com">
-    <img src="public/castov-logo.svg" alt="Castov Logo" width="110" height="110" />
+  <a href="https://www.castov.com">
+    <img src="https://raw.githubusercontent.com/castovdev/castov/main/public/logo.png" alt="Castov Logo" width="180" />
   </a>
 </p>
 
