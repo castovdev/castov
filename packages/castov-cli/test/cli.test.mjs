@@ -1,9 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const CLI = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
+const DIST_CLI = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
+const BIN_CLI = fileURLToPath(new URL("../../../bin/castov.js", import.meta.url));
+const CLI = existsSync(DIST_CLI) ? DIST_CLI : BIN_CLI;
 const run = (args, input) =>
   spawnSync(process.execPath, [CLI, ...args], {
     input,
