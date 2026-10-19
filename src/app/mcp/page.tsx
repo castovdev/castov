@@ -15,6 +15,7 @@ import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { websiteJsonLd, buildMetadata } from "@/lib/seo";
 import { McpConfigCopier } from "@/components/mcp-config-copier";
+import { McpLivePlayground } from "@/components/mcp-live-playground";
 
 export const metadata: Metadata = buildMetadata({
   title: "Castov MCP Server (v1.4.0) | 10 Local Tools for Claude, Cursor & Windsurf",
@@ -212,6 +213,20 @@ export default function McpServerPage() {
           </span>
         </div>
         <McpConfigCopier />
+      </section>
+
+      {/* Interactive MCP Live Playground */}
+      <section className="mb-16">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-fg flex items-center gap-2.5">
+            <Cpu className="w-6 h-6 text-accent" />
+            <span>Interactive MCP Live Playground</span>
+          </h2>
+          <span className="text-xs font-mono text-emerald-400 hidden sm:inline">
+            JSON-RPC 2.0 Stdio Inspector
+          </span>
+        </div>
+        <McpLivePlayground />
       </section>
 
       {/* Why Castov MCP Architecture Cards */}

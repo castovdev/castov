@@ -23,12 +23,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const sitemapEntries: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: getLastMod('src/app/page.tsx'), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${baseUrl}/mcp`, lastModified: getLastMod('src/app/mcp/page.tsx'), changeFrequency: 'daily', priority: 1.0 },
     { url: `${baseUrl}/tools`, lastModified: getLastMod('src/app/tools/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${baseUrl}/developer`, lastModified: getLastMod('src/app/developer/page.tsx'), changeFrequency: 'weekly', priority: 0.95 },
+    { url: `${baseUrl}/cli`, lastModified: getLastMod('src/app/cli/page.tsx'), changeFrequency: 'weekly', priority: 0.95 },
+    { url: `${baseUrl}/extension`, lastModified: getLastMod('src/app/extension/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/guides`, lastModified: getLastMod('src/app/guides/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/developer`, lastModified: getLastMod('src/app/developer/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/cli`, lastModified: getLastMod('src/app/cli/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/mcp`, lastModified: getLastMod('src/app/mcp/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/extension`, lastModified: getLastMod('src/app/extension/page.tsx'), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/cheatsheets`, lastModified: getLastMod('src/app/cheatsheets/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/http-status`, lastModified: getLastMod('src/app/http-status/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/chmod`, lastModified: getLastMod('src/app/chmod/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },

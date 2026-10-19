@@ -3,12 +3,21 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import { SearchIcon, BoxIcon, CodeIcon, SettingsIcon, ClockIcon, HashIcon, TypeIcon, LinkIcon, PaletteIcon } from "lucide-react";
+import { SearchIcon, BoxIcon, CodeIcon, SettingsIcon, ClockIcon, HashIcon, TypeIcon, LinkIcon, PaletteIcon, CpuIcon, TerminalIcon, CopyIcon } from "lucide-react";
 import { AI_TOOLS } from "@/lib/ai-tools";
 import { AI_HUB_LIVE } from "@/lib/flags";
 import { TOOLS } from "@/content/tools";
 import { parseTimestamp } from "@/lib/time/timestamp";
 import { toIsoUtc } from "@/lib/time/format";
+
+const MCP_STDIO_JSON_CONFIG = `{
+  "mcpServers": {
+    "castov": {
+      "command": "npx",
+      "args": ["-y", "castov@latest", "mcp"]
+    }
+  }
+}`;
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -53,6 +62,7 @@ export function CommandPalette() {
   const isNumber = /^\d+$/.test(rawSearch);
   const parsedTime = isNumber ? parseTimestamp(rawSearch, "auto") : null;
   const isUuid = rawSearch.toLowerCase() === "uuid";
+  const isMcpQuery = ["mcp", "claude", "cursor", "windsurf"].includes(rawSearch.toLowerCase());
   
   // Base64 detection
   const isBase64Encode = rawSearch.toLowerCase().startsWith("b64 ");
@@ -76,7 +86,7 @@ export function CommandPalette() {
   const urlStr = isUrl ? rawSearch.slice(4) : "";
   const urlEncoded = isUrl ? encodeURIComponent(urlStr) : "";
 
-  const hasInlineActions = isUuid || (parsedTime && parsedTime.ok) || isBase64Encode || isHex || isUrl;
+  const hasInlineActions = isUuid || isMcpQuery || (parsedTime && parsedTime.ok) || isBase64Encode || isHex || isUrl;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
@@ -98,7 +108,7 @@ export function CommandPalette() {
             value={search}
             onValueChange={setSearch}
             className="flex-1 bg-transparent border-none outline-none h-14 px-4 text-fg placeholder:text-muted/60 text-lg"
-            placeholder="Search tools, or type 'uuid', 'b64 text', 'url text', '#hex'..."
+            placeholder="Search tools, or type 'mcp', 'uuid', 'b64 text', 'url text', '#hex'..."
           />
           <kbd className="hidden sm:inline-flex items-center h-6 px-2 text-[10px] font-medium bg-field text-muted rounded border border-line/40 font-mono">
             ESC
@@ -107,12 +117,23 @@ export function CommandPalette() {
 
         <Command.List className="max-h-[350px] overflow-y-auto p-2 scrollbar-thin">
           <Command.Empty className="p-6 text-center text-sm text-muted">
-            No results found. Try typing 'uuid' or a timestamp.
+            No results found. Try typing &apos;mcp&apos;, &apos;uuid&apos;, or a timestamp.
           </Command.Empty>
 
           {/* Inline Compute Tools */}
           {hasInlineActions && (
             <Command.Group heading="Inline Actions" className="text-xs font-medium text-muted/60 px-2 py-1">
+              {isMcpQuery && (
+                <Command.Item
+                  value={`${rawSearch} copy npx command mcp server`}
+                  onSelect={() => copyToClipboard("npx -y castov@latest mcp")}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors mt-1"
+                >
+                  <CpuIcon className="w-4 h-4 text-accent" />
+                  <span className="font-semibold text-accent font-mono">npx -y castov@latest mcp</span>
+                  <span className="text-xs text-muted ml-auto">Press Enter to copy command</span>
+                </Command.Item>
+              )}
               {isUuid && (
                 <Command.Item
                   value="generate uuid"
@@ -171,7 +192,51 @@ export function CommandPalette() {
             </Command.Group>
           )}
 
-          <Command.Group heading="General" className="text-xs font-medium text-muted/60 px-2 py-1">
+          <Command.Group heading="MCP Server & Ecosystem (v1.4.0)" className="text-xs font-medium text-muted/60 px-2 py-1">
+            <Command.Item
+              value="mcp server claude desktop cursor windsurf model context protocol playground"
+              onSelect={() => runCommand(() => router.push("/mcp"))}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors mt-1"
+            >
+              <CpuIcon className="w-4 h-4 text-accent" />
+              <span className="font-semibold">Castov MCP Server &amp; Live Playground</span>
+              <span className="text-[11px] font-mono bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded ml-auto">Grade A • v1.4.0</span>
+            </Command.Item>
+            <Command.Item
+              value="copy mcp command npx castov mcp"
+              onSelect={() => copyToClipboard("npx -y castov@latest mcp")}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+            >
+              <CopyIcon className="w-4 h-4 text-accent" />
+              <span>Copy MCP Command: <code className="font-mono text-xs text-accent">npx -y castov@latest mcp</code></span>
+            </Command.Item>
+            <Command.Item
+              value="copy mcp json config claude desktop cursor windsurf"
+              onSelect={() => copyToClipboard(MCP_STDIO_JSON_CONFIG)}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+            >
+              <CopyIcon className="w-4 h-4 text-primary" />
+              <span>Copy MCP JSON Config (Claude / Cursor / Windsurf)</span>
+            </Command.Item>
+            <Command.Item
+              value="cli command line interface terminal npx castov"
+              onSelect={() => runCommand(() => router.push("/cli"))}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+            >
+              <TerminalIcon className="w-4 h-4" />
+              <span>Castov CLI (v1.4.0)</span>
+            </Command.Item>
+            <Command.Item
+              value="developer hub sdk vscode extension"
+              onSelect={() => runCommand(() => router.push("/developer"))}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+            >
+              <CodeIcon className="w-4 h-4" />
+              <span>Developer Hub &amp; SDK</span>
+            </Command.Item>
+          </Command.Group>
+
+          <Command.Group heading="General" className="text-xs font-medium text-muted/60 px-2 py-1 mt-1">
             <Command.Item
               onSelect={() => runCommand(() => router.push("/"))}
               className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors mt-1"
@@ -196,7 +261,7 @@ export function CommandPalette() {
               onSelect={() => runCommand(() => router.push("/sponsor"))}
               className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
             >
-              <SettingsIcon className="w-4 h-4" /> Sponsor & Advertise
+              <SettingsIcon className="w-4 h-4" /> Sponsor &amp; Advertise
             </Command.Item>
           </Command.Group>
           

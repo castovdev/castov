@@ -6,9 +6,9 @@ import { ToolCard } from "@/components/tool-card";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Developer Hub – Timestamp & Time Tools for Developers | Castov",
+  title: "Developer Hub – MCP Server, CLI, SDK & Time Tools | Castov",
   description:
-    "Free developer resources for working with Unix timestamps, ISO 8601, RFC 3339, cron expressions and time zones in JavaScript, Python, Go and more.",
+    "Official Castov Developer Ecosystem: Grade-A MCP Server (v1.4.0) with 10 local AI tools, CLI, TypeScript SDK, VS Code Extension, and browser utilities.",
   path: "/developer",
 });
 
@@ -29,12 +29,65 @@ export default function DeveloperPage() {
   return (
     <StaticPage
       title="Developer Hub & Ecosystem"
-      intro="Discover Castov's developer-focused integrations: SDK, Command Line Interface, VS Code Extension, and more."
+      intro="Discover Castov's developer-focused integrations: Model Context Protocol (MCP) Server v1.4.0, Command Line Interface, TypeScript SDK, and VS Code Extension."
       crumbs={[{ name: "Home", href: "/" }, { name: "Developer" }]}
       path="/developer"
     >
       {/* Ecosystem Showcase */}
       <div className="not-prose grid gap-6 mt-8 mb-16 lg:grid-cols-2">
+        {/* MCP Server (Featured full-width on large screens or prominent card) */}
+        <div className="lg:col-span-2 bg-card border-2 border-accent/40 hover:border-accent transition-colors p-6 sm:p-8 rounded-2xl shadow-xl shadow-accent/5 flex flex-col justify-between">
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-accent/15 text-accent rounded-xl">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                  </svg>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-fg">Castov MCP Server</h3>
+                  <span className="text-xs bg-accent/15 text-accent px-2.5 py-0.5 rounded-full font-mono font-semibold">v1.4.0</span>
+                  <span className="text-xs bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-mono font-semibold">
+                    Glama Grade A • 10 Tools
+                  </span>
+                </div>
+              </div>
+              <span className="text-xs font-mono text-muted">STDIO JSON-RPC 2.0 • Zero Telemetry</span>
+            </div>
+            <p className="text-muted text-sm sm:text-base mb-4 leading-relaxed">
+              Give Claude Desktop, Cursor, Windsurf, and VS Code Copilot deterministic local execution superpowers. Includes 10 hardened, read-only tools for port &amp; process inspection, IPv4 CIDR calculation, UUIDv7/ULID/Snowflake decoding, Cron scheduling, JWT inspection, and secret leak scanning.
+            </p>
+            <pre className="code-block text-xs sm:text-sm overflow-x-auto border border-line bg-field/50 p-3.5 rounded-xl font-mono text-fg mb-4">
+              <code>npx -y castov@latest mcp</code>
+            </pre>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <Link
+              href="/mcp"
+              className="btn bg-accent text-white hover:bg-accent/90 text-xs sm:text-sm font-bold px-5 py-2.5 text-center rounded-xl"
+            >
+              Open MCP Docs &amp; Live Playground
+            </Link>
+            <a
+              href="https://glama.ai/mcp/servers/castovdev/castov"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn bg-field border border-line text-fg hover:bg-hover text-xs sm:text-sm font-semibold px-4 py-2.5 text-center rounded-xl"
+            >
+              Glama Grade A Report
+            </a>
+            <a
+              href="https://www.npmjs.com/package/castov"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn bg-field border border-line text-muted hover:text-fg text-xs sm:text-sm font-medium px-4 py-2.5 text-center rounded-xl"
+            >
+              npm: castov@1.4.0
+            </a>
+          </div>
+        </div>
+
         {/* SDK */}
         <div className="bg-card border-2 border-primary/20 hover:border-primary/50 transition-colors p-6 rounded-2xl shadow-lg shadow-primary/5 flex flex-col justify-between">
           <div>
@@ -44,7 +97,7 @@ export default function DeveloperPage() {
               </div>
               <div className="flex items-center gap-2">
                 <h3 className="text-xl font-bold text-fg">castov-sdk</h3>
-                <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-mono font-semibold">v1.0.0</span>
+                <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-mono font-semibold">v1.4.0</span>
               </div>
             </div>
             <p className="text-muted text-sm mb-4">
@@ -75,14 +128,14 @@ export default function DeveloperPage() {
               </div>
               <div className="flex items-center gap-2">
                 <h3 className="text-xl font-bold text-fg">Castov CLI</h3>
-                <span className="text-xs bg-accent/15 text-accent px-2 py-0.5 rounded-full font-mono font-semibold">v1.0.0</span>
+                <span className="text-xs bg-accent/15 text-accent px-2 py-0.5 rounded-full font-mono font-semibold">v1.4.0</span>
               </div>
             </div>
             <p className="text-muted text-sm mb-4">
               Instant zero-server developer toolkit in your terminal. Run standalone via npx or install globally with zero configuration.
             </p>
             <pre className="code-block text-xs overflow-x-auto border border-line bg-field/50 p-3 rounded-lg font-mono text-fg mb-3">
-              <code>npx castov --help</code>
+              <code>npx castov@latest --help</code>
             </pre>
           </div>
           <div className="mt-2 flex items-center gap-2">
@@ -110,10 +163,13 @@ export default function DeveloperPage() {
               <div className="p-2 bg-[#007ACC]/10 text-[#007ACC] rounded-lg">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z"/></svg>
               </div>
-              <h3 className="text-xl font-bold text-fg">VS Code Extension</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-bold text-fg">VS Code Extension</h3>
+                <span className="text-xs bg-[#007ACC]/15 text-[#007ACC] px-2 py-0.5 rounded-full font-mono font-semibold">v0.1.4</span>
+              </div>
             </div>
             <p className="text-muted text-sm mb-4">
-              The official zero-server developer toolkit directly in your editor. Select text to encode/decode, or insert UUIDs without switching windows.
+              The official zero-server developer toolkit directly in your editor. Includes 1-click MCP Server setup for Cursor &amp; VS Code Copilot.
             </p>
           </div>
           <div className="mt-2 flex flex-col sm:flex-row gap-2">
@@ -129,7 +185,7 @@ export default function DeveloperPage() {
               href="/extension"
               className="btn bg-field border border-line text-muted hover:text-fg text-xs font-medium px-4 py-2 text-center"
             >
-              Download VSIX
+              Download VSIX (v0.1.4)
             </Link>
           </div>
         </div>
@@ -143,7 +199,7 @@ export default function DeveloperPage() {
           </div>
           <h3 className="text-xl font-bold text-fg mb-2">Global Command Center</h3>
           <p className="text-muted text-sm">
-            Press the shortcut anywhere on Castov to open the Command Palette. Inline compute UUIDs, search tools, and navigate blazing fast.
+            Press the shortcut anywhere on Castov to open the Command Palette. Inline compute UUIDs, copy MCP configs, search tools, and navigate blazing fast.
           </p>
         </div>
       </div>
