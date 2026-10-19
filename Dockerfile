@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.title="Castov MCP & CLI" \
       org.opencontainers.image.licenses="MIT"
 
 # Install latest published Castov CLI & MCP Server globally
-RUN npm install -g castov@1.3.3 --omit=dev && npm cache clean --force
+RUN npm install -g castov@1.4.0 --omit=dev && npm cache clean --force
 
 # Security best practice: run as non-root user
 USER node

@@ -342,7 +342,18 @@ test("castov mcp: protocol handshake and tools/list in framed mode", async (t) =
   assert.equal(initRes.result.serverInfo.name, "castov-mcp-server");
   assert.equal(listRes.id, 2);
   const toolNames = listRes.result.tools.map((x) => x.name);
-  assert.deepEqual(toolNames, ["castov_timestamp", "castov_detect_id", "castov_cidr", "castov_port"]);
+  assert.deepEqual(toolNames, [
+    "castov_timestamp",
+    "castov_detect_id",
+    "castov_cidr",
+    "castov_port",
+    "castov_cron",
+    "castov_timezone",
+    "castov_secret",
+    "castov_jwt_decode",
+    "castov_hash",
+    "castov_scan_secrets",
+  ]);
 });
 
 test("castov mcp: handles ndjson mode and replies in ndjson", async (t) => {
@@ -352,7 +363,7 @@ test("castov mcp: handles ndjson mode and replies in ndjson", async (t) => {
   client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) + "\n");
   const [res] = await promise;
   assert.equal(res.id, 1);
-  assert.equal(res.result.tools.length, 4);
+  assert.equal(res.result.tools.length, 10);
 });
 
 test("castov mcp: tools/call handles valid inputs correctly", async (t) => {
@@ -463,7 +474,7 @@ test("castov mcp: handles header sent byte-by-byte", async (t) => {
 
   const [res] = await promise;
   assert.equal(res.id, 801);
-  assert.equal(res.result.tools.length, 4);
+  assert.equal(res.result.tools.length, 10);
 });
 
 test("castov mcp: splits multi-byte UTF-8 emoji across chunk boundaries", async (t) => {
@@ -775,6 +786,48 @@ test("castov mcp: castov_cidr returns all fields and handles /31, /32, /0, non-z
   assert.match(t204, /Usable Hosts: 4294967294/);
 });
 
+test("castov mcp: extended suite (cron, timezone, secret, jwt_decode, hash, scan_secrets, ping)", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 8, timeoutMs, setTracked);
 
+  const sampleJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkNhc3RvdiIsImV4cCI6MTkwMDAwMDAwMH0.signature";
 
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 301, method: "ping" }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 302, method: "prompts/list" }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 303, method: "tools/call", params: { name: "castov_cron", arguments: { expression: "*/15 * * * *", timezone: "UTC" } } }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 304, method: "tools/call", params: { name: "castov_timezone", arguments: { dateTime: "2026-06-15 12:00", fromZone: "UTC", toZone: "America/New_York" } } }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 305, method: "tools/call", params: { name: "castov_secret", arguments: { bytes: 32 } } }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 306, method: "tools/call", params: { name: "castov_jwt_decode", arguments: { token: sampleJwt } } }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 307, method: "tools/call", params: { name: "castov_hash", arguments: { text: "castov", algorithm: "sha256" } } }) + "\n");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 308, method: "tools/call", params: { name: "castov_scan_secrets", arguments: { content: "AWS_KEY=AKIAIOSFODNN7EXAMPLE\nSAFE=123" } } }) + "\n");
 
+  const [rPing, rPrompts, rCron, rTz, rSec, rJwt, rHash, rScan] = await promise;
+
+  assert.deepEqual(rPing.result, {});
+  assert.deepEqual(rPrompts.result, { prompts: [] });
+
+  const cronObj = JSON.parse(rCron.result.content[0].text);
+  assert.equal(cronObj.timezone, "UTC");
+  assert.equal(cronObj.nextRuns.length, 5);
+
+  const tzObj = JSON.parse(rTz.result.content[0].text);
+  assert.equal(tzObj.toZone, "America/New_York");
+  assert.match(tzObj.toFormatted, /08:00/);
+
+  const secObj = JSON.parse(rSec.result.content[0].text);
+  assert.equal(secObj.entropyBits, 256);
+  assert.equal(secObj.hex.length, 64);
+
+  const jwtObj = JSON.parse(rJwt.result.content[0].text);
+  assert.equal(jwtObj.payload.name, "Castov");
+  assert.equal(typeof jwtObj.expired, "boolean");
+
+  const hashObj = JSON.parse(rHash.result.content[0].text);
+  assert.equal(hashObj.algorithm, "sha256");
+  assert.equal(hashObj.hashHex.length, 64);
+
+  const scanObj = JSON.parse(rScan.result.content[0].text);
+  assert.equal(scanObj.clean, false);
+  assert.equal(scanObj.findingCount, 1);
+  assert.equal(scanObj.findings[0].type, "AWS Access Key ID");
+});

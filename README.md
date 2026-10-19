@@ -78,13 +78,19 @@ Alternatively, add to your project's `.cursor/mcp.json`:
 }
 ```
 
-### Native Tools Exposed to Agents
+### Native Tools Exposed to Agents (10 Tools — All 100% Local & Read-Only)
 | MCP Tool | Capability | Example Agent Prompt |
 |---|---|---|
 | `castov_port` | Identifies listening services, protocol mappings, and inspects process collision | *"Why is port 3000 busy and what service uses it?"* |
 | `castov_cidr` | Calculates IPv4 subnet masks, wildcard, broadcast, and usable host count | *"Calculate usable IP range and subnet mask for 10.240.0.0/22"* |
 | `castov_detect_id` | Decodes embedded creation timestamps from UUIDv7, ULID, ObjectId, Snowflake | *"When was this MongoDB ObjectId or Snowflake ID created?"* |
 | `castov_timestamp` | Bidirectional epoch conversion to ISO 8601, UTC, and localized representations | *"Convert 1713456789 to human UTC and ISO format"* |
+| `castov_cron` | Parses 5-field cron schedules into plain English and computes next 5 runs | *"Explain cron `0 9 * * 1-5` and show the next 5 runs in `America/New_York`"* |
+| `castov_timezone` | Converts timestamps across IANA time zones with DST transition warnings | *"Convert `2026-03-29 14:30` from `America/New_York` to `Europe/Paris`"* |
+| `castov_secret` | Generates CSPRNG 256-bit Hex, Base64URL, API keys, and sortable UUIDv7 secrets | *"Generate a 256-bit cryptographic secret for `AUTH_SECRET` and `JWT_SECRET`"* |
+| `castov_jwt_decode` | Decodes JWT headers, payloads, and `exp` status offline with zero network calls | *"Decode this JWT offline and check if it is expired"* |
+| `castov_hash` | Computes SHA-256/384/512, SHA-1, MD5 digests and Base64/Base64URL encodings | *"Compute the SHA-256 hex digest and Base64URL encoding of this webhook payload"* |
+| `castov_scan_secrets` | Audits code snippets, git diffs, or `.env` blocks for leaked API keys & private keys | *"Scan this git diff for any accidentally hardcoded AWS, Stripe, or OpenAI keys"* |
 
 ---
 

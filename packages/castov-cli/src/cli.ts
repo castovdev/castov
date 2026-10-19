@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { parseArgs } from "node:util";
 import { createRequire } from "node:module";
-import { randomBytes } from "node:crypto";
-import { execSync } from "node:child_process";
-import { readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
+import { randomBytes, createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { readdirSync, readFileSync, writeFileSync, lstatSync } from "node:fs";
 import { join, relative, extname } from "node:path";
 import {
   castov,
@@ -443,9 +443,10 @@ function calculateCidr(ip: string, prefix: number): CidrResult {
 }
 
 function findListeningPids(port: number): string[] {
+  if (!Number.isInteger(port) || port < 1 || port > 65535) return [];
   try {
     if (process.platform === "win32") {
-      const stdout = execSync(`netstat -ano -p tcp`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+      const stdout = execFileSync("netstat", ["-ano", "-p", "tcp"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
       const pids = new Set<string>();
       for (const line of stdout.split(/\r?\n/)) {
         if (!line.includes("LISTENING")) continue;
@@ -458,11 +459,11 @@ function findListeningPids(port: number): string[] {
       }
       return [...pids];
     } else {
-      const stdout = execSync(`lsof -ti tcp:${port} -sTCP:LISTEN`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+      const stdout = execFileSync("lsof", ["-ti", `tcp:${port}`, "-sTCP:LISTEN"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
       return stdout
         .split(/\r?\n/)
         .map((s) => s.trim())
-        .filter(Boolean);
+        .filter((s) => /^\d+$/.test(s));
     }
   } catch {
     return [];
@@ -674,11 +675,12 @@ async function main(argv: string[]): Promise<void> {
         out.push(`Status:       ${yellow(`ACTIVE (Listening PID: ${pids.join(", ")})`)}`);
         if (values.kill) {
           for (const pid of pids) {
+            if (!/^\d+$/.test(pid)) continue;
             try {
               if (process.platform === "win32") {
-                execSync(`taskkill /PID ${pid} /F`, { stdio: "ignore" });
+                execFileSync("taskkill", ["/PID", pid, "/F"], { stdio: "ignore" });
               } else {
-                execSync(`kill -9 ${pid}`, { stdio: "ignore" });
+                execFileSync("kill", ["-9", pid], { stdio: "ignore" });
               }
               out.push(`Action:       ${green(`✓ Terminated process PID ${pid} on port ${portNum}`)}`);
             } catch {
@@ -773,11 +775,14 @@ async function main(argv: string[]): Promise<void> {
       ];
       const IGNORE_DIRS = new Set(["node_modules", ".git", ".next", "dist", "build", "coverage", ".vercel"]);
       const ALLOWED_EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".env", ".yml", ".yaml", ".py", ".go", ".rs", ".sh"]);
+      const MAX_DEPTH = 12;
+      const MAX_FILES = 5000;
 
       let scannedFiles = 0;
       const findings: { file: string; line: number; type: string }[] = [];
 
-      const walk = (dir: string) => {
+      const walk = (dir: string, depth = 0) => {
+        if (depth > MAX_DEPTH || scannedFiles >= MAX_FILES) return;
         let entries: string[] = [];
         try {
           entries = readdirSync(dir);
@@ -785,16 +790,18 @@ async function main(argv: string[]): Promise<void> {
           return;
         }
         for (const entry of entries) {
+          if (scannedFiles >= MAX_FILES) break;
           if (IGNORE_DIRS.has(entry)) continue;
           const fullPath = join(dir, entry);
           let st;
           try {
-            st = statSync(fullPath);
+            st = lstatSync(fullPath);
           } catch {
             continue;
           }
+          if (st.isSymbolicLink()) continue;
           if (st.isDirectory()) {
-            walk(fullPath);
+            walk(fullPath, depth + 1);
           } else if (st.isFile() && st.size < 1_000_000) {
             const ext = extname(entry).toLowerCase();
             if (!ALLOWED_EXT.has(ext) && !entry.startsWith(".env")) continue;
@@ -803,6 +810,7 @@ async function main(argv: string[]): Promise<void> {
               const content = readFileSync(fullPath, "utf8");
               const lines = content.split(/\r?\n/);
               lines.forEach((lineText, idx) => {
+                if (lineText.length > 4096) return;
                 for (const pat of SECRET_PATTERNS) {
                   if (pat.regex.test(lineText)) {
                     findings.push({
@@ -854,42 +862,150 @@ async function main(argv: string[]): Promise<void> {
     }
 
     case "mcp": {
-      // Start JSON-RPC 2.0 stdio MCP Server for Claude Desktop & Cursor
+      // Start JSON-RPC 2.0 stdio MCP Server for Claude Desktop, Cursor, Windsurf & Glama
+      const READONLY_ANNOTATIONS = {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      };
+
       const MCP_TOOLS = [
         {
           name: "castov_timestamp",
-          description: "Inspect and convert Unix timestamp (seconds or milliseconds) to UTC, ISO 8601, and local human time.",
+          description: "Inspect and convert a Unix epoch timestamp (seconds or milliseconds) to UTC, ISO 8601, and localized human time.",
+          annotations: { title: "Unix Timestamp Converter", ...READONLY_ANNOTATIONS },
           inputSchema: {
             type: "object",
-            properties: { value: { type: "string", description: "Unix timestamp in seconds or ms" } },
+            properties: {
+              value: { type: "string", description: "Unix epoch timestamp in seconds (10 digits) or milliseconds (13 digits), e.g. '1713456789'" },
+            },
             required: ["value"],
+            additionalProperties: false,
           },
         },
         {
           name: "castov_detect_id",
-          description: "Detect and decode embedded creation date from MongoDB ObjectId, UUIDv7, ULID, or Snowflake ID.",
+          description: "Detect identifier format and decode embedded creation timestamp from MongoDB ObjectId, UUIDv7, ULID, or Twitter/Discord Snowflake ID.",
+          annotations: { title: "Distributed ID & Timestamp Detector", ...READONLY_ANNOTATIONS },
           inputSchema: {
             type: "object",
-            properties: { id: { type: "string", description: "Identifier string" } },
+            properties: {
+              id: { type: "string", description: "Identifier string (UUIDv7, ULID, 24-hex ObjectId, or numeric Snowflake ID)" },
+            },
             required: ["id"],
+            additionalProperties: false,
           },
         },
         {
           name: "castov_cidr",
-          description: "Calculate IPv4 CIDR subnet mask, wildcard, broadcast address, and usable host range.",
+          description: "Calculate IPv4 CIDR subnet mask, wildcard mask, network address, broadcast address, usable IP range, and total host count.",
+          annotations: { title: "IPv4 CIDR Subnet Calculator", ...READONLY_ANNOTATIONS },
           inputSchema: {
             type: "object",
-            properties: { cidr: { type: "string", description: "CIDR string like 192.168.1.0/24 or /24" } },
+            properties: {
+              cidr: { type: "string", description: "IPv4 CIDR block such as '192.168.1.0/24', '10.0.0.0/16', or '/24'" },
+            },
             required: ["cidr"],
+            additionalProperties: false,
           },
         },
         {
           name: "castov_port",
-          description: "Inspect network port purpose, service name, and standard transport protocol.",
+          description: "Inspect network port number (1-65535) for standard IANA service assignment, transport protocol (TCP/UDP), and typical application purpose.",
+          annotations: { title: "Network Port Inspector", ...READONLY_ANNOTATIONS },
           inputSchema: {
             type: "object",
-            properties: { port: { type: "number", description: "Port number between 1 and 65535" } },
+            properties: {
+              port: { type: "number", description: "TCP/UDP port number between 1 and 65535 (e.g. 3000, 5432, 6379)" },
+            },
             required: ["port"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_cron",
+          description: "Parse a 5-field cron expression into plain English and calculate the next 5 upcoming execution times in a specified IANA timezone.",
+          annotations: { title: "Cron Expression Explainer & Schedule Calculator", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              expression: { type: "string", description: "5-field cron expression (minute hour day-of-month month day-of-week), e.g. '*/15 * * * *' or '0 9 * * 1-5'" },
+              timezone: { type: "string", description: "Optional IANA timezone name (defaults to 'UTC', e.g. 'America/New_York', 'Europe/London')" },
+            },
+            required: ["expression"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_timezone",
+          description: "Convert a date/time string between two IANA time zones with exact UTC offset, timezone abbreviation, and Daylight Saving Time (DST) transition warnings.",
+          annotations: { title: "IANA Timezone & DST Converter", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              dateTime: { type: "string", description: "Date/time string in 'YYYY-MM-DD HH:mm' or ISO 8601 format, e.g. '2026-03-29 14:30'" },
+              fromZone: { type: "string", description: "Source IANA timezone (e.g. 'America/New_York' or 'UTC')" },
+              toZone: { type: "string", description: "Target IANA timezone (e.g. 'Europe/Paris' or 'Asia/Tokyo')" },
+            },
+            required: ["dateTime", "fromZone", "toZone"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_secret",
+          description: "Generate cryptographically secure random secrets (CSPRNG) in Hex, Base64URL, API Key ('sk_live_...'), and sortable UUIDv7 formats for .env files and JWT signing.",
+          annotations: { title: "Cryptographic Secret & Key Generator", readOnlyHint: true, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+          inputSchema: {
+            type: "object",
+            properties: {
+              bytes: { type: "number", description: "Optional entropy length in bytes between 8 and 512 (default: 32 bytes / 256 bits)" },
+            },
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_jwt_decode",
+          description: "Decode a JSON Web Token (JWT) header and payload locally offline without external network calls, inspecting claims (exp, iat, nbf, sub, iss) and expiration status.",
+          annotations: { title: "Local Offline JWT Decoder", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              token: { type: "string", description: "Encoded JWT string (header.payload.signature)" },
+            },
+            required: ["token"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_hash",
+          description: "Compute deterministic cryptographic hashes (sha256, sha384, sha512, sha1, md5) and Base64 / Base64URL encodings of input text locally.",
+          annotations: { title: "Cryptographic Hash & Base64 Computer", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              text: { type: "string", description: "Input text string to hash and encode" },
+              algorithm: {
+                type: "string",
+                enum: ["sha256", "sha384", "sha512", "sha1", "md5"],
+                description: "Hash algorithm to use (default: 'sha256')",
+              },
+            },
+            required: ["text"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_scan_secrets",
+          description: "Scan a code snippet, git diff, or .env configuration text locally for leaked credentials (AWS Access Keys, Stripe Live Keys, OpenAI API Keys, GitHub PATs, Slack Tokens, and RSA/OpenSSH Private Keys).",
+          annotations: { title: "Offline Secret & Credential Leak Scanner", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              content: { type: "string", description: "Code snippet, configuration file text, or git diff to audit for hardcoded secrets" },
+            },
+            required: ["content"],
+            additionalProperties: false,
           },
         },
       ];
@@ -899,7 +1015,7 @@ async function main(argv: string[]): Promise<void> {
       // ---------------------------------------------------------------------
       const MAX_HEADER_SIZE = 8192;           // 8 KiB max header limit
       const MAX_BODY_SIZE = 4 * 1024 * 1024;  // 4 MiB max payload limit
-      const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2024-11-05"]);
+      const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2024-11-05", "2025-03-26", "2025-06-18"]);
 
       type Mode = "ndjson" | "framed";
 
@@ -951,10 +1067,16 @@ async function main(argv: string[]): Promise<void> {
             id,
             result: {
               protocolVersion,
-              capabilities: { tools: {} },
+              capabilities: { tools: { listChanged: false } },
               serverInfo: { name: "castov-mcp-server", version },
             },
           }, mode);
+        } else if (method === "ping") {
+          sendRpc({ jsonrpc: "2.0", id, result: {} }, mode);
+        } else if (method === "prompts/list") {
+          sendRpc({ jsonrpc: "2.0", id, result: { prompts: [] } }, mode);
+        } else if (method === "resources/list") {
+          sendRpc({ jsonrpc: "2.0", id, result: { resources: [] } }, mode);
         } else if (method === "tools/list") {
           sendRpc({
             jsonrpc: "2.0",
@@ -963,7 +1085,7 @@ async function main(argv: string[]): Promise<void> {
           }, mode);
         } else if (method === "tools/call") {
           const toolName = params?.name;
-          const args = params?.arguments || {};
+          const args = params?.arguments && typeof params.arguments === "object" ? params.arguments : {};
           let toolText = "";
           let isError = false;
 
@@ -982,8 +1104,8 @@ async function main(argv: string[]): Promise<void> {
                 }
               }
             } else if (toolName === "castov_detect_id") {
-              if (typeof args.id !== "string" || !args.id.trim()) {
-                toolText = "Error: missing or invalid 'id' argument.";
+              if (typeof args.id !== "string" || !args.id.trim() || args.id.length > 256) {
+                toolText = "Error: missing or invalid 'id' argument (must be a non-empty string up to 256 chars).";
                 isError = true;
               } else {
                 try {
@@ -995,7 +1117,7 @@ async function main(argv: string[]): Promise<void> {
                 }
               }
             } else if (toolName === "castov_cidr") {
-              if (!args.cidr || typeof args.cidr !== "string") {
+              if (!args.cidr || typeof args.cidr !== "string" || args.cidr.length > 64) {
                 toolText = "Error: missing or invalid 'cidr' argument (expected format: '192.168.1.0/24' or '/24').";
                 isError = true;
               } else {
@@ -1055,6 +1177,129 @@ async function main(argv: string[]): Promise<void> {
                 const p = KNOWN_PORTS[portNum];
                 toolText = p ? `Port ${portNum}: ${p.service} (${p.proto}) - ${p.desc}` : `Port ${portNum}: Custom / Ephemeral Port`;
               }
+            } else if (toolName === "castov_cron") {
+              if (typeof args.expression !== "string" || !args.expression.trim() || args.expression.length > 128) {
+                toolText = "Error: missing or invalid 'expression' argument (expected 5-field cron expression).";
+                isError = true;
+              } else {
+                const tzArg = typeof args.timezone === "string" && args.timezone.trim() ? args.timezone.trim() : undefined;
+                try {
+                  const res = explainCron(args.expression.trim(), tzArg);
+                  toolText = JSON.stringify(res, null, 2);
+                } catch (err: any) {
+                  toolText = `Error: ${err?.message || "invalid cron expression or timezone"}`;
+                  isError = true;
+                }
+              }
+            } else if (toolName === "castov_timezone") {
+              if (
+                typeof args.dateTime !== "string" || !args.dateTime.trim() ||
+                typeof args.fromZone !== "string" || !args.fromZone.trim() ||
+                typeof args.toZone !== "string" || !args.toZone.trim()
+              ) {
+                toolText = "Error: 'dateTime', 'fromZone', and 'toZone' are required string arguments.";
+                isError = true;
+              } else {
+                try {
+                  const res = convertTz(args.dateTime.trim(), args.fromZone.trim(), args.toZone.trim());
+                  toolText = JSON.stringify(res, null, 2);
+                } catch (err: any) {
+                  toolText = `Error: ${err?.message || "invalid date/time or IANA timezone"}`;
+                  isError = true;
+                }
+              }
+            } else if (toolName === "castov_secret") {
+              const rawBytes = args.bytes !== undefined ? Number(args.bytes) : 32;
+              if (!Number.isInteger(rawBytes) || rawBytes < 8 || rawBytes > 512) {
+                toolText = "Error: 'bytes' must be an integer between 8 and 512.";
+                isError = true;
+              } else {
+                const hexSecret = randomBytes(rawBytes).toString("hex");
+                const base64UrlSecret = randomBytes(rawBytes).toString("base64url");
+                const apiKey = `sk_live_${randomBytes(24).toString("base64url")}`;
+                const uuidV7 = castov.uuidv7();
+                toolText = JSON.stringify(
+                  {
+                    entropyBits: rawBytes * 8,
+                    hex: hexSecret,
+                    base64url: base64UrlSecret,
+                    apiKey,
+                    uuidv7: uuidV7,
+                  },
+                  null,
+                  2
+                );
+              }
+            } else if (toolName === "castov_jwt_decode") {
+              if (typeof args.token !== "string" || !args.token.trim() || args.token.length > 16384) {
+                toolText = "Error: 'token' must be a non-empty JWT string.";
+                isError = true;
+              } else {
+                try {
+                  const decoded = castov.jwtDecode(args.token.trim());
+                  const payload = decoded.payload as Record<string, unknown> | null;
+                  let expired: boolean | null = null;
+                  let expiresIso: string | null = null;
+                  if (payload && typeof payload.exp === "number") {
+                    expired = payload.exp * 1000 < Date.now();
+                    expiresIso = new Date(payload.exp * 1000).toISOString();
+                  }
+                  toolText = JSON.stringify({ ...decoded, expired, expiresIso }, null, 2);
+                } catch (err: any) {
+                  toolText = `Error: ${err?.message || "invalid JWT format"}`;
+                  isError = true;
+                }
+              }
+            } else if (toolName === "castov_hash") {
+              if (typeof args.text !== "string" || args.text.length > 1_000_000) {
+                toolText = "Error: 'text' must be a string (up to 1 MB).";
+                isError = true;
+              } else {
+                const algo = typeof args.algorithm === "string" ? args.algorithm.toLowerCase().replace("-", "") : "sha256";
+                const allowedAlgos = new Set(["sha256", "sha384", "sha512", "sha1", "md5"]);
+                if (!allowedAlgos.has(algo)) {
+                  toolText = `Error: unsupported algorithm "${args.algorithm}". Allowed: sha256, sha384, sha512, sha1, md5.`;
+                  isError = true;
+                } else {
+                  const digestHex = createHash(algo).update(args.text, "utf8").digest("hex");
+                  const base64 = Buffer.from(args.text, "utf8").toString("base64");
+                  const base64url = Buffer.from(args.text, "utf8").toString("base64url");
+                  toolText = JSON.stringify({ algorithm: algo, hashHex: digestHex, base64, base64url }, null, 2);
+                }
+              }
+            } else if (toolName === "castov_scan_secrets") {
+              if (typeof args.content !== "string" || args.content.length > 524288) {
+                toolText = "Error: 'content' must be a string (up to 512 KB).";
+                isError = true;
+              } else {
+                const SECRET_PATTERNS = [
+                  { name: "AWS Access Key ID", regex: /\bAKIA[0-9A-Z]{16}\b/ },
+                  { name: "Stripe Live Secret Key", regex: /\bsk_live_[0-9a-zA-Z]{24,99}\b/ },
+                  { name: "OpenAI API Key", regex: /\bsk-(?:proj-)?[a-zA-Z0-9]{32,128}\b/ },
+                  { name: "GitHub Personal Access Token", regex: /\bghp_[0-9a-zA-Z]{36}\b/ },
+                  { name: "Slack Token", regex: /\bxox[baprs]-[0-9a-zA-Z-]{10,48}\b/ },
+                  { name: "RSA / OpenSSH Private Key", regex: /-----BEGIN (?:RSA |OPENSSH |EC )?PRIVATE KEY-----/ },
+                ];
+                const lines = String(args.content).split(/\r?\n/).slice(0, 10000);
+                const findings: { line: number; type: string }[] = [];
+                lines.forEach((lineText: string, idx: number) => {
+                  const boundedLine = lineText.slice(0, 2048);
+                  for (const pat of SECRET_PATTERNS) {
+                    if (pat.regex.test(boundedLine)) {
+                      findings.push({ line: idx + 1, type: pat.name });
+                    }
+                  }
+                });
+                toolText = JSON.stringify(
+                  {
+                    clean: findings.length === 0,
+                    findingCount: findings.length,
+                    findings,
+                  },
+                  null,
+                  2
+                );
+              }
             } else {
               toolText = `Error: Unknown tool "${toolName}".`;
               isError = true;
@@ -1072,7 +1317,7 @@ async function main(argv: string[]): Promise<void> {
               ...(isError ? { isError: true } : {}),
             },
           }, mode);
-        } else if (method === "notifications/initialized") {
+        } else if (method === "notifications/initialized" || method === "notifications/cancelled") {
           // No response needed for notifications
         } else if (id !== undefined) {
           sendRpc({
