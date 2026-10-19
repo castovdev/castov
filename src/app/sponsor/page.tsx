@@ -21,44 +21,44 @@ const TIERS = [
     name: "Tool Banner Sponsor",
     price: "$299",
     period: "/month",
-    desc: "Dedicated sticky sponsor banner on top high-traffic tools like Cron Generator, Chmod Calculator, or Diff Checker.",
+    desc: "Dedicated sticky sponsor banner on high-traffic tools like Cron Generator, Chmod Calculator, CIDR Calculator, or Port Inspector.",
     features: [
-      "Exclusive sponsor slot on 1 high-traffic tool",
-      "Over 40,000 targeted developer impressions/mo",
-      "Custom tracking UTM link & direct brand logo",
+      "Exclusive sponsor slot on 1 high-traffic utility category",
+      "Over 50,000 targeted developer impressions/mo",
+      "Custom tracking UTM link & direct brand badge",
       "DoFollow backlink from high-authority domain",
       "Monthly performance click reports"
     ],
     cta: "Claim Tool Placement",
-    popular: true
-  },
-  {
-    name: "Sitewide Footer Partner",
-    price: "$499",
-    period: "/month",
-    desc: "Prominent brand logo and link placed in the global footer across all 600+ pages of Castov.",
-    features: [
-      "Persistent brand visibility across all 600+ pages",
-      "Over 120,000 monthly pageviews reach",
-      "Brand logo with verified sponsor badge",
-      "Ideal for cloud hosts, dev tools, and SaaS APIs",
-      "Priority inclusion in developer newsletters"
-    ],
-    cta: "Become Sitewide Partner",
     popular: false
   },
   {
+    name: "MCP & AI Ecosystem Partner",
+    price: "$749",
+    period: "/month",
+    desc: "Featured placement on the Castov MCP Server hub (/mcp), Developer Hub (/developer), and sitewide across 1,000+ engineering pages.",
+    features: [
+      "Featured partner banner on /mcp & /developer",
+      "Persistent brand visibility across 1,000+ indexed pages",
+      "Over 180,000 monthly developer pageviews reach",
+      "Ideal for AI coding tools, Cloud DBs, and DevSecOps APIs",
+      "Priority inclusion in MCP Stack Composer & CLI docs"
+    ],
+    cta: "Become Ecosystem Partner",
+    popular: true
+  },
+  {
     name: "Community Supporter",
-    price: "$25",
+    price: "$49",
     period: "/one-time",
-    desc: "Buy our engineering team a coffee and support independent, 100% zero-server open developer utilities.",
+    desc: "Support independent, 100% zero-telemetry open-source developer utilities and our MIT-licensed MCP Server.",
     features: [
       "Supporter badge on our GitHub repository",
-      "Direct support for open-source development",
+      "Direct support for open-source MCP & CLI development",
       "Shoutout on our release notes and changelog",
-      "Good karma from 50,000+ happy engineers"
+      "Good karma from 100,000+ engineers worldwide"
     ],
-    cta: "Support via Buy Me a Coffee",
+    cta: "Become a Supporter",
     popular: false
   }
 ];
@@ -78,36 +78,36 @@ export default function SponsorPage() {
       <div className="text-center mt-8 mb-16">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-xs font-semibold text-accent mb-6">
           <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-          <span>DEVELOPER AUDIENCE PARTNERSHIPS</span>
+          <span>DEVELOPER &amp; AI ENGINEER PARTNERSHIPS</span>
         </div>
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-fg mb-6">
           Put Your Brand in Front of <br />
           <span className="bg-gradient-to-r from-accent to-emerald-400 bg-clip-text text-transparent">
-            50,000+ Software Engineers
+            100,000+ Software Engineers
           </span>
         </h1>
         <p className="text-xl text-muted max-w-2xl mx-auto leading-relaxed">
-          Castov is used daily by frontend engineers, backend architects, and DevOps leads. Showcase your cloud infrastructure, databases, and APIs where engineers work.
+          Castov powers daily workflows for full-stack engineers, SREs, and AI developers using Cursor &amp; Claude Desktop. Showcase your cloud infrastructure, databases, and APIs where engineers build.
         </p>
       </div>
 
       {/* Metrics Banner */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-3xl bg-field border border-line mb-16 text-center">
         <div>
-          <div className="text-3xl font-extrabold text-fg font-mono">100K+</div>
-          <div className="text-xs text-muted mt-1">Monthly Tool Executions</div>
+          <div className="text-3xl font-extrabold text-fg font-mono">150K+</div>
+          <div className="text-xs text-muted mt-1">Monthly Tool &amp; MCP Runs</div>
         </div>
         <div>
-          <div className="text-3xl font-extrabold text-accent font-mono">600+</div>
+          <div className="text-3xl font-extrabold text-accent font-mono">1,000+</div>
           <div className="text-xs text-muted mt-1">Search-Indexed Pages</div>
         </div>
         <div>
-          <div className="text-3xl font-extrabold text-emerald-400 font-mono">100%</div>
-          <div className="text-xs text-muted mt-1">Technical Developer Audience</div>
+          <div className="text-3xl font-extrabold text-emerald-400 font-mono">Grade A</div>
+          <div className="text-xs text-muted mt-1">Glama Certified MCP Server</div>
         </div>
         <div>
-          <div className="text-3xl font-extrabold text-purple-400 font-mono">90+</div>
-          <div className="text-xs text-muted mt-1">Countries Worldwide</div>
+          <div className="text-3xl font-extrabold text-purple-400 font-mono">100%</div>
+          <div className="text-xs text-muted mt-1">High-Intent Dev Audience</div>
         </div>
       </div>
 

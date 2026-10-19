@@ -1,3 +1,5 @@
+import { TERMINAL_ERROR_FIXES } from "./error-fixes-terminal";
+
 export interface ConfigVariable {
   key: string;
   label: string;
@@ -22,7 +24,7 @@ export interface ErrorFix {
   relatedSlugs: string[];
 }
 
-export const ERROR_FIXES: ErrorFix[] = [
+const CORE_ERROR_FIXES: ErrorFix[] = [
   // 1. Next.js Hydration Failed
   {
     slug: "nextjs-hydration-failed",
@@ -2549,6 +2551,11 @@ OLLAMA_HOST=0.0.0.0:${p} ollama serve`;
     ],
     relatedSlugs: ["docker-compose-version-attribute-is-obsolete", "node-eaddrinuse-port-already-in-use", "docker-bind-address-already-in-use"],
   },
+];
+
+export const ERROR_FIXES: ErrorFix[] = [
+  ...CORE_ERROR_FIXES,
+  ...TERMINAL_ERROR_FIXES.filter((t) => !CORE_ERROR_FIXES.some((c) => c.slug === t.slug)),
 ];
 
 export function getErrorBySlug(slug: string): ErrorFix | undefined {

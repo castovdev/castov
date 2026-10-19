@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 const BADGE_PRESETS: Record<string, { label: string; value: string; color: string }> = {
   security: { label: "castov scan", value: "0 secrets leaked", color: "#10b981" },
   cursorrules: { label: "AI rules", value: "castov ready", color: "#3b82f6" },
-  mcp: { label: "MCP server", value: "castov enabled", color: "#8b5cf6" },
-  cli: { label: "npx castov", value: "v1.3.0", color: "#06b6d4" },
+  mcp: { label: "MCP server", value: "Grade A • v1.4.0", color: "#10b981" },
+  cli: { label: "npx castov", value: "v1.4.0", color: "#06b6d4" },
   privacy: { label: "telemetry", value: "zero-knowledge", color: "#10b981" },
   status: { label: "status", value: "operational", color: "#10b981" },
 };

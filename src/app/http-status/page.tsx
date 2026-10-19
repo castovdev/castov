@@ -99,6 +99,17 @@ export default function HttpStatusIndexPage() {
         </p>
       </div>
 
+      <div className="mb-12 rounded-2xl border border-accent/30 bg-accent/5 p-5 sm:p-6">
+        <h2 className="text-lg font-bold text-fg mb-1">Free HTTP status mock endpoint</h2>
+        <p className="text-sm text-muted mb-3">
+          Reproduce any status from 200 to 599 to test retries, error screens, and timeouts. CORS enabled, add{" "}
+          <code className="font-mono">?delay=2000</code> to simulate a slow server.
+        </p>
+        <code className="block overflow-x-auto rounded-md bg-[#0b0f17] px-3 py-2 font-mono text-xs text-slate-200 sm:text-sm">
+          curl -i https://castov.com/api/mock/429
+        </code>
+      </div>
+
       <div className="space-y-12">
         {CATEGORIES.map((cat) => {
           const codes = HTTP_STATUS_LIST.filter((s) => s.type === cat.key);

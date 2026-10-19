@@ -16,6 +16,8 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { websiteJsonLd, buildMetadata } from "@/lib/seo";
 import { McpConfigCopier } from "@/components/mcp-config-copier";
 import { McpLivePlayground } from "@/components/mcp-live-playground";
+import { McpStackBuilder } from "@/components/mcp-stack-builder";
+import { SponsorSlot } from "@/components/sponsor-slot";
 
 export const metadata: Metadata = buildMetadata({
   title: "Castov MCP Server (v1.4.0) | 10 Local Tools for Claude, Cursor & Windsurf",
@@ -228,6 +230,13 @@ export default function McpServerPage() {
         </div>
         <McpLivePlayground />
       </section>
+
+      {/* Viral Multi-Server MCP Stack Composer */}
+      <section className="mb-16">
+        <McpStackBuilder />
+      </section>
+
+      <SponsorSlot context="mcp" />
 
       {/* Why Castov MCP Architecture Cards */}
       <section className="grid sm:grid-cols-3 gap-6 mb-16">
