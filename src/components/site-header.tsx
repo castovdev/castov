@@ -11,6 +11,7 @@ import { Search } from "lucide-react";
 
 const DESKTOP_NAV = [
   { href: "/tools", label: "Tools" },
+  { href: "/mcp", label: "MCP Server" },
   { href: "/convert", label: "Converters" },
   { href: "/regex-patterns", label: "Regex" },
   { href: "/error-fixes", label: "Error Fixes" },

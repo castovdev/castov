@@ -43,6 +43,8 @@ const SCHEMA_JSON_LD = {
       "name": "Primary Navigation",
       "hasPart": [
         { "@type": "WebPage", "name": "Developer Tools", "url": `${SITE.url}/tools` },
+        { "@type": "WebPage", "name": "Castov MCP Server", "url": `${SITE.url}/mcp` },
+        { "@type": "WebPage", "name": "Castov CLI", "url": `${SITE.url}/cli` },
         { "@type": "WebPage", "name": "Code Converters", "url": `${SITE.url}/convert` },
         { "@type": "WebPage", "name": "Regex Patterns Lab", "url": `${SITE.url}/regex-patterns` },
         { "@type": "WebPage", "name": "Error Fix Encyclopedia", "url": `${SITE.url}/error-fixes` },

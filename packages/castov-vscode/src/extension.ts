@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import * as crypto from "crypto";
+import * as fs from "fs";
+import * as path from "path";
 
 function generateUuidV7(): string {
   const now = Date.now();
@@ -223,7 +225,99 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // 9. Timestamp Hover Tooltip Provider
+  // 9. Setup Castov MCP Server (1-Click Workspace / Clipboard Configuration)
+  context.subscriptions.push(
+    vscode.commands.registerCommand("castov.setupMcpServer", async () => {
+      const pick = await vscode.window.showQuickPick(
+        [
+          {
+            label: "Cursor IDE (.cursor/mcp.json)",
+            description: "Write Castov MCP config into workspace .cursor/mcp.json",
+            value: "cursor"
+          },
+          {
+            label: "VS Code Copilot (.vscode/mcp.json)",
+            description: "Write Castov MCP config into workspace .vscode/mcp.json",
+            value: "vscode"
+          },
+          {
+            label: "Copy MCP JSON to Clipboard",
+            description: "For Claude Desktop, Windsurf, or manual setup",
+            value: "clipboard"
+          }
+        ],
+        { placeHolder: "Select where to configure the Castov MCP Server (10 local tools)" }
+      );
+
+      if (!pick) return;
+
+      const standardConfig = {
+        mcpServers: {
+          castov: {
+            command: "npx",
+            args: ["-y", "castov@latest", "mcp"]
+          }
+        }
+      };
+
+      const workspaceFolders = vscode.workspace.workspaceFolders;
+      if (pick.value === "clipboard" || !workspaceFolders || workspaceFolders.length === 0) {
+        await vscode.env.clipboard.writeText(JSON.stringify(standardConfig, null, 2));
+        const action = await vscode.window.showInformationMessage(
+          "Castov MCP Server config copied to clipboard!",
+          "View MCP Documentation"
+        );
+        if (action === "View MCP Documentation") {
+          vscode.env.openExternal(vscode.Uri.parse("https://castov.com/mcp"));
+        }
+        return;
+      }
+
+      const rootDir = workspaceFolders[0].uri.fsPath;
+      const targetSubdir = pick.value === "cursor" ? ".cursor" : ".vscode";
+      const targetDir = path.join(rootDir, targetSubdir);
+      const targetFile = path.join(targetDir, "mcp.json");
+
+      try {
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        let configObj: Record<string, any> = {};
+        if (fs.existsSync(targetFile)) {
+          try {
+            configObj = JSON.parse(fs.readFileSync(targetFile, "utf8"));
+          } catch {
+            configObj = {};
+          }
+        }
+
+        if (pick.value === "vscode") {
+          configObj.servers = configObj.servers || {};
+          configObj.servers.castov = {
+            type: "stdio",
+            command: "npx",
+            args: ["-y", "castov@latest", "mcp"]
+          };
+        } else {
+          configObj.mcpServers = configObj.mcpServers || {};
+          configObj.mcpServers.castov = {
+            command: "npx",
+            args: ["-y", "castov@latest", "mcp"]
+          };
+        }
+
+        fs.writeFileSync(targetFile, JSON.stringify(configObj, null, 2) + "\n", "utf8");
+        const doc = await vscode.workspace.openTextDocument(targetFile);
+        await vscode.window.showTextDocument(doc);
+        vscode.window.showInformationMessage(`Castov MCP Server (10 tools) configured in ${targetSubdir}/mcp.json!`);
+      } catch (err: any) {
+        vscode.window.showErrorMessage(`Castov: Failed to write MCP configuration: ${err.message}`);
+      }
+    })
+  );
+
+  // 10. Timestamp Hover Tooltip Provider
   context.subscriptions.push(
     vscode.languages.registerHoverProvider({ scheme: "file" }, {
       provideHover(document, position) {
@@ -249,3 +343,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+

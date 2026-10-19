@@ -59,6 +59,10 @@ export default function HomePage() {
             <Link href="/tools" className="group flex items-center justify-center gap-2 bg-accent text-white dark:text-[#050505] px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-hover transition-all w-full sm:w-auto shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:shadow-[0_0_25px_rgba(37,99,235,0.4)]">
               Explore Tools <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </Link>
+            <Link href="/mcp" className="flex items-center justify-center gap-2 bg-card border border-accent/40 text-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-field transition-colors w-full sm:w-auto shadow-sm">
+              <ShieldCheck size={20} className="text-emerald-400" />
+              <span>MCP Server (10 Tools)</span>
+            </Link>
             <Link href="/developer" className="flex items-center justify-center gap-2 bg-card border border-line text-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-field transition-colors w-full sm:w-auto shadow-sm">
               Read Documentation
             </Link>
@@ -91,21 +95,24 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* SDK & CLI */}
+            {/* SDK, CLI & MCP */}
             <div className="bg-bg border border-line p-8 rounded-3xl hover:border-primary/50 transition-colors shadow-sm group flex flex-col justify-between">
               <div>
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Terminal className="text-primary w-7 h-7" />
                 </div>
                 <div className="flex items-center gap-2 mb-3">
-                  <h3 className="text-2xl font-bold text-fg">Castov CLI &amp; SDK</h3>
-                  <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-mono font-semibold">npm v1.0.0</span>
+                  <h3 className="text-2xl font-bold text-fg">MCP Server &amp; CLI</h3>
+                  <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-mono font-semibold">npm v1.4.0</span>
                 </div>
                 <p className="text-muted leading-relaxed mb-6">
-                  Execute zero-server developer utilities directly in terminal (<code className="text-fg bg-field px-1 rounded">npx castov</code>) or import into TypeScript applications with <code className="text-fg bg-field px-1 rounded">castov-sdk</code>.
+                  Connect 10 Glama Grade-A certified local tools to Claude, Cursor, and Windsurf (<code className="text-fg bg-field px-1 rounded">npx castov mcp</code>) or run utilities in terminal.
                 </p>
               </div>
-              <div className="flex items-center gap-3 pt-4 border-t border-line">
+              <div className="flex items-center gap-4 pt-4 border-t border-line">
+                <Link href="/mcp" className="text-sm font-semibold text-accent hover:underline">
+                  MCP Setup &rarr;
+                </Link>
                 <Link href="/cli" className="text-sm font-semibold text-primary hover:underline">
                   CLI Guide &rarr;
                 </Link>
@@ -115,7 +122,7 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                   className="text-sm font-semibold text-muted hover:text-fg"
                 >
-                  npm package &rarr;
+                  npm &rarr;
                 </a>
               </div>
             </div>
