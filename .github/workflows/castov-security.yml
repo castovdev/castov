@@ -20,5 +20,7 @@ jobs:
           fail-on-secrets: 'true'
 
       - name: Run Castov CLI & MCP Server Test Suite (39 Tests)
-        run: node --test packages/castov-cli/test/cli.test.mjs
+        working-directory: packages/castov-cli
+        run: npm install --ignore-scripts && npm run build && npm test
+
 
