@@ -18,6 +18,7 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=Castov.castov-vscode"><img src="https://img.shields.io/visual-studio-marketplace/i/Castov.castov-vscode?style=flat-square&color=007acc&label=VS%20Code" alt="VS Code installs" /></a>
   <a href="https://open-vsx.org/extension/castov/castov-vscode"><img src="https://img.shields.io/open-vsx/dt/castov/castov-vscode?style=flat-square&color=7c3aed&label=Open%20VSX" alt="Open VSX" /></a>
   <a href="https://hub.docker.com/r/castovdev/castov"><img src="https://img.shields.io/badge/docker-castovdev%2Fcastov-blue?style=flat-square&logo=docker" alt="Docker Hub" /></a>
+  <a href="https://glama.ai/mcp/servers/castovdev/castov"><img src="https://glama.ai/mcp/servers/castovdev/castov/badges/score.svg" alt="Castov MCP server Glama score" /></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-Protocol%202024--11--05-8b5cf6?style=flat-square" alt="MCP Protocol" /></a>
   <a href="#privacy--zero-telemetry"><img src="https://img.shields.io/badge/telemetry-zero%20tracking-10b981?style=flat-square" alt="Zero Telemetry" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" /></a>
