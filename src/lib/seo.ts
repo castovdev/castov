@@ -118,18 +118,52 @@ export function softwareAppJsonLd(input: { name: string; description: string; ur
   };
 }
 
-export function howToJsonLd(input: { name: string; description: string; steps: { name: string; text: string }[] }) {
+export function howToJsonLd(input: {
+  name: string;
+  description: string;
+  totalTime?: string;
+  toolName?: string;
+  steps: { name: string; text: string }[];
+}) {
   return {
     "@context": "https://schema.org",
     "@type": "HowTo",
     name: input.name,
     description: input.description,
+    totalTime: input.totalTime ?? "PT2M",
+    tool: input.toolName
+      ? [{ "@type": "HowToTool", name: input.toolName }]
+      : [{ "@type": "HowToTool", name: "Castov CLI (npx castov)" }],
     step: input.steps.map((s, i) => ({
       "@type": "HowToStep",
       position: i + 1,
       name: s.name,
       text: s.text,
     })),
+  };
+}
+
+export function techArticleJsonLd(input: {
+  headline: string;
+  description: string;
+  path: string;
+  proficiencyLevel?: "Beginner" | "Intermediate" | "Expert";
+  dependencies?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: input.headline,
+    description: input.description,
+    url: absoluteUrl(input.path),
+    proficiencyLevel: input.proficiencyLevel ?? "Intermediate",
+    dependencies: input.dependencies ?? "Node.js >= 18, npx castov",
+    author: { "@type": "Organization", name: SITE.name, url: SITE.url },
+    publisher: { "@type": "Organization", name: SITE.name, url: SITE.url },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": absoluteUrl(input.path),
+    },
   };
 }
 
@@ -142,3 +176,4 @@ export function webPageJsonLd({ name, description, path }: { name: string; descr
     url: absoluteUrl(path),
   };
 }
+

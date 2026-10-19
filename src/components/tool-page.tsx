@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getExamples } from "@/content/examples";
 import { getGuide } from "@/content/guides";
 import { toolPath, type Tool } from "@/content/tools";
-import { faqJsonLd, webApplicationJsonLd } from "@/lib/seo";
+import { faqJsonLd, howToJsonLd, softwareAppJsonLd, techArticleJsonLd } from "@/lib/seo";
 import { Breadcrumb } from "./breadcrumb";
 import { ExamplesSection } from "./examples-section";
 import { FaqSection } from "./faq-section";
@@ -20,9 +20,37 @@ export function ToolPage({ tool }: { tool: Tool }) {
   const guide = tool.guide ? getGuide(tool.guide) : undefined;
   const examples = getExamples(tool.slug);
 
+  const structuredData = [
+    softwareAppJsonLd({
+      name: tool.name,
+      description: tool.metaDescription,
+      url: path,
+      category: "DeveloperApplication",
+    }),
+    techArticleJsonLd({
+      headline: tool.seoTitle,
+      description: tool.metaDescription,
+      path,
+      dependencies: "Modern Web Browser or Castov CLI (npx castov)",
+    }),
+    ...(tool.howTo && tool.howTo.length > 0
+      ? [
+          howToJsonLd({
+            name: `How to use ${tool.name}`,
+            description: tool.metaDescription,
+            toolName: tool.name,
+            steps: tool.howTo.map((stepText, idx) => ({
+              name: `Step ${idx + 1}`,
+              text: stepText,
+            })),
+          }),
+        ]
+      : []),
+  ];
+
   return (
     <div className="layout-content max-w-5xl py-8 sm:py-12">
-      <JsonLd data={webApplicationJsonLd({ name: tool.name, description: tool.metaDescription, path })} />
+      <JsonLd data={structuredData} />
       <Breadcrumb
         path={path}
         crumbs={[{ name: "Home", href: "/" }, { name: "Tools", href: "/tools" }, { name: tool.name }]}

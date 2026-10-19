@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { buildMetadata, faqJsonLd, softwareAppJsonLd } from "@/lib/seo";
+import { buildMetadata, faqJsonLd, howToJsonLd, softwareAppJsonLd, techArticleJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { FaqSection } from "@/components/faq-section";
 import { AdSlot } from "@/components/ad-slot";
+import { SponsorSlot } from "@/components/sponsor-slot";
 import { ErrorFixGeneratorTool } from "@/components/tools/error-fix-generator-tool";
 import {
   ERROR_FIXES,
@@ -71,16 +72,44 @@ export default async function ErrorFixPage({
     }
   }
 
+  const howToSteps = [
+    {
+      name: "Identify the Root Cause",
+      text: errorItem.rootCause,
+    },
+    {
+      name: "Run Diagnostic Terminal Commands",
+      text: errorItem.diagnosticCommands.join(" && "),
+    },
+    {
+      name: "Apply the Verified Code & Configuration Fix",
+      text: errorItem.fixedCode,
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      {/* Schemas */}
+      {/* Schemas: SoftwareApplication + TechArticle + HowTo + FAQPage */}
       <JsonLd
-        data={softwareAppJsonLd({
-          name: errorItem.name,
-          description: errorItem.summary,
-          url: `/error-fixes/${errorItem.slug}`,
-          category: "DeveloperApplication",
-        })}
+        data={[
+          softwareAppJsonLd({
+            name: errorItem.name,
+            description: errorItem.summary,
+            url: `/error-fixes/${errorItem.slug}`,
+            category: "DeveloperApplication",
+          }),
+          techArticleJsonLd({
+            headline: errorItem.title,
+            description: errorItem.summary,
+            path: `/error-fixes/${errorItem.slug}`,
+            dependencies: `${errorItem.category}, Castov CLI (npx castov)`,
+          }),
+          howToJsonLd({
+            name: errorItem.title,
+            description: errorItem.summary,
+            steps: howToSteps,
+          }),
+        ]}
       />
       {errorItem.faqs && errorItem.faqs.length > 0 && (
         <JsonLd data={faqJsonLd(errorItem.faqs)} />
@@ -140,6 +169,8 @@ export default async function ErrorFixPage({
         </div>
       )}
 
+      <SponsorSlot context="devops" />
+
       {/* Related Error Fixes */}
       {relatedErrors.length > 0 && (
         <section className="my-14" aria-labelledby="related-errors-heading">
@@ -151,7 +182,7 @@ export default async function ErrorFixPage({
               href="/error-fixes"
               className="text-sm font-medium text-accent hover:underline flex items-center gap-1"
             >
-              Browse All 35 Guides <ArrowRight className="h-3.5 w-3.5" />
+              Browse All {ERROR_FIXES.length} Guides <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

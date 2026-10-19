@@ -1695,8 +1695,863 @@ ssh -Tv git@github.com`;
     ],
     relatedSlugs: ["git-fatal-refusing-to-merge-unrelated-histories", "aws-s3-access-denied-403", "systemd-service-start-request-repeated-too-quickly"],
   },
+
+  // 36. MCP Server Connection Closed / EOF Error in Claude Desktop & Cursor
+  {
+    slug: "mcp-server-connection-closed-eof",
+    name: "MCP Error: Server Disconnected / Connection Closed (EOF)",
+    title: "How to Fix 'MCP Error -32000: Connection closed' in Claude Desktop & Cursor",
+    summary: "Fix Model Context Protocol (MCP) stdio transport disconnects caused by console.log stdout pollution, missing -y npx flag, or PATH resolution on Windows/macOS.",
+    category: "TypeScript & Node.js",
+    errorMessage: "MCP error -32000: Connection closed / Server disconnected unexpectedly (EOF on stdio transport)",
+    rootCause: "In stdio-based MCP servers, `stdout` is strictly reserved for JSON-RPC 2.0 frames. Any stray `console.log()` or npm install banner printed to stdout corrupts the JSON parser. Additionally, omitting `-y` in `npx` causes npx to wait for interactive confirmation on stdin, hanging or closing the pipe.",
+    brokenCode: `// ❌ Broken claude_desktop_config.json / .cursor/mcp.json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "npx",
+      "args": ["castov", "mcp"] // Missing -y flag causes interactive prompt hang!
+    }
+  }
+}`,
+    fixedCode: `// ✅ Fixed: Always pass "-y" to npx and keep stdout strictly for JSON-RPC 2.0
+{
+  "mcpServers": {
+    "castov": {
+      "command": "npx",
+      "args": ["-y", "castov@latest", "mcp"]
+    }
+  }
+}`,
+    diagnosticCommands: [
+      "npx -y castov@latest mcp",
+      "node -v && which npx",
+    ],
+    configVariables: [
+      { key: "serverName", label: "MCP Server Name", defaultValue: "castov", placeholder: "e.g. castov" },
+      { key: "pkgName", label: "npm Package", defaultValue: "castov@latest", placeholder: "e.g. castov@latest" },
+    ],
+    generateCustomSolution: (vars) => {
+      const s = vars.serverName || "castov";
+      const p = vars.pkgName || "castov@latest";
+      return `// Paste into .cursor/mcp.json or claude_desktop_config.json:
+{
+  "mcpServers": {
+    "${s}": {
+      "command": "npx",
+      "args": ["-y", "${p}", "mcp"]
+    }
+  }
+}`;
+    },
+    faqs: [
+      { q: "Why does Windows Claude Desktop fail with spawn npx ENOENT?", a: "On Windows, `npx` is a `.cmd` wrapper (`npx.cmd`). If your client does not resolve `.cmd` extensions automatically, set `\"command\": \"cmd\"` with `\"args\": [\"/c\", \"npx\", \"-y\", \"castov@latest\", \"mcp\"]`." },
+    ],
+    relatedSlugs: ["node-eaddrinuse-port-already-in-use", "nextjs-hydration-failed", "docker-bind-address-already-in-use"],
+  },
+
+  // 37. Next.js 16 Middleware to Proxy Deprecation Warning
+  {
+    slug: "nextjs-middleware-to-proxy-deprecation",
+    name: "Next.js 16: 'middleware' File Convention is Deprecated (Use 'proxy')",
+    title: "Fix Next.js 16 Warning: The 'middleware' file convention is deprecated. Please use 'proxy' instead",
+    summary: "Migrate Next.js middleware.ts to the new proxy.ts convention introduced in Next.js 16 App Router.",
+    category: "Next.js & React",
+    errorMessage: "⚠ The \"middleware\" file convention is deprecated. Please use \"proxy\" instead. To migrate automatically, run: npx @next/codemod@canary middleware-to-proxy .",
+    rootCause: "Next.js 16 renamed `middleware.ts` to `proxy.ts` (and the exported `middleware` function to `proxy`) to clarify that it runs as a network request boundary proxy rather than full Express-style application middleware.",
+    brokenCode: `// ❌ Deprecated in Next.js 16: src/middleware.ts
+import { NextResponse, type NextRequest } from "next/server";
+
+export function middleware(request: NextRequest) {
+  return NextResponse.next();
+}`,
+    fixedCode: `// ✅ Modern Next.js 16: src/proxy.ts
+import { NextResponse, type NextRequest } from "next/server";
+
+export function proxy(request: NextRequest) {
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+};`,
+    diagnosticCommands: [
+      "npx @next/codemod@canary middleware-to-proxy .",
+      "npm run build",
+    ],
+    configVariables: [
+      { key: "dir", label: "Source Directory", defaultValue: "src", placeholder: "e.g. src or ." },
+    ],
+    generateCustomSolution: (vars) => {
+      const d = vars.dir || "src";
+      return `# Run official Next.js 16 codemod:
+npx @next/codemod@canary middleware-to-proxy .
+
+# Or manually rename ${d}/middleware.ts to ${d}/proxy.ts and export function proxy(req: NextRequest)`;
+    },
+    faqs: [
+      { q: "Does the matcher config syntax change in proxy.ts?", a: "No, `export const config = { matcher: [...] }` works identically in `proxy.ts`." },
+    ],
+    relatedSlugs: ["nextjs-hydration-failed", "nextjs-dynamic-server-usage", "ts-cannot-find-module-path-alias"],
+  },
+
+  // 38. Supabase PostgreSQL RLS Policy Violation (Code 42501)
+  {
+    slug: "supabase-rls-new-row-violates-policy",
+    name: "Postgres 42501: new row violates row-level security policy",
+    title: "Fix Supabase Error: 'new row violates row-level security policy for table' (Code 42501)",
+    summary: "Resolve PostgreSQL and Supabase Row-Level Security (RLS) INSERT/UPDATE permission errors with proper auth.uid() policies.",
+    category: "Database & ORM",
+    errorMessage: "PostgrestError: new row violates row-level security policy for table \"profiles\" (code: \"42501\")",
+    rootCause: "Row-Level Security (RLS) is enabled on the PostgreSQL table, which denies all writes by default unless an explicit `FOR INSERT WITH CHECK (...)` policy matches the current `auth.uid()` or role.",
+    brokenCode: `-- ❌ Broken: RLS enabled on table, or only SELECT policy created
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view profiles"
+ON public.profiles FOR SELECT USING (true);
+-- Missing INSERT policy causes 42501 on every insert!`,
+    fixedCode: `-- ✅ Fixed: Add explicit INSERT and UPDATE policies checking auth.uid()
+CREATE POLICY "Authenticated users can insert their own profile"
+ON public.profiles
+FOR INSERT
+TO authenticated
+WITH CHECK ((select auth.uid()) = user_id);`,
+    diagnosticCommands: [
+      "npx supabase db diff",
+      "npx castov port 54322",
+    ],
+    configVariables: [
+      { key: "table", label: "Table Name", defaultValue: "profiles", placeholder: "e.g. posts" },
+      { key: "ownerCol", label: "User ID Column", defaultValue: "user_id", placeholder: "e.g. author_id" },
+    ],
+    generateCustomSolution: (vars) => {
+      const t = vars.table || "profiles";
+      const c = vars.ownerCol || "user_id";
+      return `-- Run in Supabase SQL Editor:
+ALTER TABLE public.${t} ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow authenticated insert own rows on ${t}"
+ON public.${t}
+FOR INSERT
+TO authenticated
+WITH CHECK ((select auth.uid()) = ${c});
+
+CREATE POLICY "Allow authenticated update own rows on ${t}"
+ON public.${t}
+FOR UPDATE
+TO authenticated
+USING ((select auth.uid()) = ${c})
+WITH CHECK ((select auth.uid()) = ${c});`;
+    },
+    faqs: [
+      { q: "Why wrap auth.uid() in (select auth.uid())?", a: "Wrapping `(select auth.uid())` allows PostgreSQL's query planner to cache the result as an initPlan once per query instead of re-evaluating it on every row." },
+    ],
+    relatedSlugs: ["postgres-fatal-password-authentication-failed", "prisma-p1001-cant-reach-database", "postgres-remaining-connection-slots-reserved"],
+  },
+
+  // 39. Next.js 15/16 Async Dynamic APIs (params / searchParams / cookies / headers)
+  {
+    slug: "nextjs-sync-dynamic-apis-params-promise",
+    name: "Next.js 15/16: Route used `params.id` without awaiting `params`",
+    title: "Fix Next.js 15/16 Error: 'Route used params.slug. params should be awaited before using its properties'",
+    summary: "Resolve Next.js 15 and 16 asynchronous Dynamic API errors where `params`, `searchParams`, `cookies()`, and `headers()` return Promises.",
+    category: "Next.js & React",
+    errorMessage: "Error: Route \"/posts/[slug]\" used `params.slug`. `params` should be awaited before using its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis",
+    rootCause: "Starting in Next.js 15 and enforced strictly in Next.js 16, route `params`, `searchParams`, `cookies()`, `headers()`, and `draftMode()` are asynchronous Promises to allow partial prerendering (PPR) and streaming before request-specific data is resolved.",
+    brokenCode: `// ❌ Broken in Next.js 15/16: Synchronous access to params
+export default function PostPage({ params }: { params: { slug: string } }) {
+  return <h1>Post: {params.slug}</h1>;
+}`,
+    fixedCode: `// ✅ Fixed in Next.js 15/16: Await params Promise (or use React.use() in Client Components)
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  return <h1>Post: {slug}</h1>;
+}`,
+    diagnosticCommands: [
+      "npx @next/codemod@canary next-async-request-api .",
+      "npx castov fix \"params should be awaited before using its properties\"",
+    ],
+    configVariables: [
+      { key: "paramName", label: "Dynamic Route Param", defaultValue: "slug", placeholder: "e.g. id, slug" },
+    ],
+    generateCustomSolution: (vars) => {
+      const p = vars.paramName || "slug";
+      return `// Server Component (page.tsx / layout.tsx / route.ts):
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ ${p}: string }>;
+}) {
+  const { ${p} } = await params;
+  return <div>{${p}}</div>;
+}
+
+// Or run the official Next.js codemod automatically:
+// npx @next/codemod@canary next-async-request-api .`;
+    },
+    faqs: [
+      { q: "How do I read async params inside a 'use client' component?", a: "In a Client Component, import `use` from `react` and call `const { slug } = use(params);`." },
+    ],
+    relatedSlugs: ["nextjs-middleware-to-proxy-deprecation", "nextjs-hydration-failed", "nextjs-dynamic-server-usage"],
+  },
+
+  // 40. Next.js 15/16 useSearchParams Missing Suspense Boundary
+  {
+    slug: "nextjs-missing-suspense-with-csr-bailout",
+    name: "Next.js: useSearchParams() should be wrapped in a suspense boundary",
+    title: "Fix Next.js Build Error: 'useSearchParams() should be wrapped in a suspense boundary at page'",
+    summary: "Fix static prerendering bailout errors when calling `useSearchParams()` inside Client Components during `next build`.",
+    category: "Next.js & React",
+    errorMessage: "useSearchParams() should be wrapped in a suspense boundary at page \"/search\". Read more: https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout",
+    rootCause: "When a statically generated page renders a Client Component that calls `useSearchParams()` without a `<Suspense>` boundary, Next.js would otherwise force the entire page tree to bail out to client-side rendering (CSR), hurting SEO and initial paint.",
+    brokenCode: `// ❌ Broken: Page directly renders Client Component using useSearchParams()
+import SearchBar from "./search-bar";
+export default function SearchPage() {
+  return <SearchBar />;
+}`,
+    fixedCode: `// ✅ Fixed: Wrap the component reading searchParams in <Suspense>
+import { Suspense } from "react";
+import SearchBar from "./search-bar";
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="h-10 animate-pulse rounded bg-muted/20" />}>
+      <SearchBar />
+    </Suspense>
+  );
+}`,
+    diagnosticCommands: [
+      "npm run build",
+      "npx castov fix \"useSearchParams() should be wrapped in a suspense boundary\"",
+    ],
+    configVariables: [
+      { key: "component", label: "Client Component Name", defaultValue: "SearchFilter", placeholder: "e.g. SearchFilter" },
+    ],
+    generateCustomSolution: (vars) => {
+      const comp = vars.component || "SearchFilter";
+      return `import { Suspense } from "react";
+import { ${comp} } from "./${comp}";
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <${comp} />
+    </Suspense>
+  );
+}`;
+    },
+    faqs: [
+      { q: "Why does useSearchParams require Suspense in App Router?", a: "Static pages are built at compile time when URL query strings do not exist. Wrapping `<Suspense>` lets Next.js pre-render the static shell and hydrate only the query-dependent subtree on the client." },
+    ],
+    relatedSlugs: ["nextjs-sync-dynamic-apis-params-promise", "nextjs-hydration-failed", "nextjs-dynamic-server-usage"],
+  },
+
+  // 41. Next.js Server Functions Cannot Pass Functions to Client Components
+  {
+    slug: "nextjs-functions-cannot-be-passed-directly-to-client-components",
+    name: "Next.js: Functions cannot be passed directly to Client Components",
+    title: "Fix Next.js Error: 'Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with use server'",
+    summary: "Resolve React Server Component serialization errors when passing callbacks or non-serializable classes across the Server-Client boundary.",
+    category: "Next.js & React",
+    errorMessage: "Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with \"use server\".",
+    rootCause: "Props passed from a Server Component to a `\"use client\"` component must be serialized over the React Flight wire format. Regular JavaScript closures cannot be serialized across the network unless marked as a Server Action (`\"use server\"`).",
+    brokenCode: `// ❌ Broken: Server Component passes an inline JS function to a Client Button
+import ClientButton from "./ClientButton";
+export default function Page() {
+  return <ClientButton onClick={() => console.log("Clicked")} />;
+}`,
+    fixedCode: `// ✅ Fixed Option A: Move the event handler inside the Client Component
+// ✅ Fixed Option B: Mark server mutation with "use server"
+import ClientButton from "./ClientButton";
+export default function Page() {
+  async function handleAction() {
+    "use server";
+    // Runs securely on server
+  }
+  return <ClientButton action={handleAction} />;
+}`,
+    diagnosticCommands: [
+      "npm run typecheck",
+      "npx castov fix \"Functions cannot be passed directly to Client Components\"",
+    ],
+    configVariables: [
+      { key: "fnName", label: "Action Function Name", defaultValue: "submitFormAction", placeholder: "e.g. saveSettings" },
+    ],
+    generateCustomSolution: (vars) => {
+      const fn = vars.fnName || "submitFormAction";
+      return `// actions.ts
+"use server";
+
+export async function ${fn}(formData: FormData) {
+  // Server-side logic here
+  return { ok: true };
+}`;
+    },
+    faqs: [
+      { q: "Can I pass Date or Map objects from Server to Client Components?", a: "Plain objects, arrays, strings, numbers, booleans, and `Date` instances are supported by React Flight, or convert timestamps to ISO strings / epoch numbers using `npx castov time now`." },
+    ],
+    relatedSlugs: ["nextjs-hydration-failed", "nextjs-sync-dynamic-apis-params-promise", "react-too-many-re-renders"],
+  },
+
+  // 42. Docker Compose Version Obsolete & Service Hostname Resolution Error
+  {
+    slug: "docker-compose-version-attribute-is-obsolete",
+    name: "Docker Compose: the attribute `version` is obsolete",
+    title: "Fix Docker Compose Warning: 'the attribute version is obsolete, it will be ignored' & Container Refused",
+    summary: "Modernize `compose.yaml` to the Compose Specification and fix `localhost` vs service-name networking between containers.",
+    category: "DevOps & Docker",
+    errorMessage: "WARN[0000] /app/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion",
+    rootCause: "Docker Compose v2+ follows the unified Compose Specification where top-level `version: '3.8'` is deprecated. Additionally, containers attempting to connect to `localhost:5432` instead of the Compose service hostname (`db:5432`) fail with `ECONNREFUSED`.",
+    brokenCode: `# ❌ Deprecated docker-compose.yml
+version: "3.8"
+services:
+  web:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://postgres:pass@localhost:5432/mydb`,
+    fixedCode: `# ✅ Modern Compose Spec with healthcheck & internal service DNS
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:pass@db:5432/mydb`,
+    diagnosticCommands: [
+      "docker compose config",
+      "npx castov port 5432",
+    ],
+    configVariables: [
+      { key: "service", label: "Database Service Name", defaultValue: "db", placeholder: "e.g. postgres" },
+      { key: "port", label: "Service Port", defaultValue: "5432", placeholder: "e.g. 5432" },
+    ],
+    generateCustomSolution: (vars) => {
+      const s = vars.service || "db";
+      const p = vars.port || "5432";
+      return `# Remove top-level 'version:' from docker-compose.yml and connect via service name '${s}:${p}':
+DATABASE_URL="postgresql://postgres:postgres@${s}:${p}/app"
+
+# Check if host port ${p} is conflicting with a local daemon:
+npx castov port ${p}`;
+    },
+    faqs: [
+      { q: "Why does `depends_on` alone not wait for PostgreSQL to accept connections?", a: "`depends_on: [db]` only waits for the container process to start, not for PostgreSQL to finish initializing. Use `condition: service_healthy` with `pg_isready`." },
+    ],
+    relatedSlugs: ["docker-bind-address-already-in-use", "prisma-p1001-cant-reach-database", "docker-no-space-left-on-device"],
+  },
+
+  // 43. Docker Buildx / DinD Exec Format Error (ARM64 vs AMD64 Mismatch)
+  {
+    slug: "docker-exec-format-error-platform-mismatch",
+    name: "Docker: exec user process caused: exec format error",
+    title: "Fix Docker 'exec /usr/local/bin/docker-entrypoint.sh: exec format error' (ARM64 vs AMD64)",
+    summary: "Resolve CPU architecture mismatches when building Docker images on Apple Silicon (M1/M2/M3/M4 `linux/arm64`) and deploying to x86_64 (`linux/amd64`) cloud servers.",
+    category: "DevOps & Docker",
+    errorMessage: "exec /usr/local/bin/docker-entrypoint.sh: exec format error",
+    rootCause: "The container image was built for a different CPU instruction set (e.g., `linux/arm64` on a MacBook) than the target Linux host (`linux/amd64` on AWS ECS, EKS, or DigitalOcean), or a shell script entrypoint is missing its `#!/bin/sh` shebang or has Windows `CRLF` line endings.",
+    brokenCode: `# ❌ Building on Apple Silicon without target platform flag
+docker build -t myorg/api:latest .
+docker push myorg/api:latest`,
+    fixedCode: `# ✅ Build multi-arch or explicit linux/amd64 image with Buildx
+docker buildx build --platform linux/amd64,linux/arm64 -t myorg/api:latest --push .`,
+    diagnosticCommands: [
+      "docker inspect --format='{{.Os}}/{{.Architecture}}' myorg/api:latest",
+      "npx castov fix \"exec format error\"",
+    ],
+    configVariables: [
+      { key: "image", label: "Docker Image Tag", defaultValue: "myorg/api:latest", placeholder: "e.g. myorg/api:latest" },
+    ],
+    generateCustomSolution: (vars) => {
+      const img = vars.image || "myorg/api:latest";
+      return `# 1. Build specifically for x86_64 cloud servers:
+docker buildx build --platform linux/amd64 -t ${img} --push .
+
+# 2. If caused by entrypoint script on Windows, ensure LF line endings and #!/usr/bin/env sh shebang:
+sed -i 's/\\r$//' docker-entrypoint.sh
+chmod +x docker-entrypoint.sh`;
+    },
+    faqs: [
+      { q: "Can Windows CRLF line endings also cause `exec format error`?", a: "Yes! If `docker-entrypoint.sh` has `#!/bin/sh\\r\\n`, the Linux kernel looks for `/bin/sh\\r` and throws `exec format error` or `no such file or directory`." },
+    ],
+    relatedSlugs: ["docker-bind-address-already-in-use", "docker-compose-version-attribute-is-obsolete", "k8s-crashloopbackoff"],
+  },
+
+  // 44. Supabase Auth SSR: Invalid Refresh Token / Already Used
+  {
+    slug: "supabase-auth-invalid-refresh-token-already-used",
+    name: "Supabase Auth: Invalid Refresh Token: Refresh Token Not Found / Already Used",
+    title: "Fix Supabase SSR Error: 'AuthApiError: Invalid Refresh Token: Refresh Token Not Found' in Next.js",
+    summary: "Fix Supabase `@supabase/ssr` cookie synchronization race conditions in Next.js App Router proxy/middleware and Server Components.",
+    category: "Cloud & Security",
+    errorMessage: "AuthApiError: Invalid Refresh Token: Refresh Token Not Found (or Invalid Refresh Token: Already Used)",
+    rootCause: "Server Components in Next.js cannot write HTTP response cookies directly. When an expired Supabase access token is refreshed inside a Server Component without a `proxy.ts` / `middleware.ts` refreshing and persisting the rotated token first, the single-use refresh token is consumed and discarded.",
+    brokenCode: `// ❌ Calling supabase.auth.getUser() in Server Components without middleware cookie sync
+// Each parallel Server Component attempts to rotate the same single-use refresh token!`,
+    fixedCode: `// ✅ Refresh session once per request in src/proxy.ts (or middleware.ts) using @supabase/ssr
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+
+export async function updateSession(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+  await supabase.auth.getUser();
+  return supabaseResponse;
+}`,
+    diagnosticCommands: [
+      "npx castov jwt <SUPABASE_ACCESS_TOKEN>",
+      "npx castov port 54321",
+    ],
+    configVariables: [
+      { key: "cookiePrefix", label: "Project Cookie Reference", defaultValue: "sb-auth-token", placeholder: "e.g. sb-xyz-auth-token" },
+    ],
+    generateCustomSolution: () => {
+      return `# 1. Inspect your Supabase JWT expiration & iat claims locally (offline):
+npx castov jwt <YOUR_SB_ACCESS_TOKEN>
+
+# 2. Ensure @supabase/ssr >= 0.5.2 is installed and updateSession() runs in src/proxy.ts (Next.js 16) or src/middleware.ts.`;
+    },
+    faqs: [
+      { q: "Why should I use `supabase.auth.getUser()` instead of `getSession()` on the server?", a: "`getSession()` reads the unverified cookie payload directly, whereas `getUser()` revalidates the token with Supabase Auth and safely triggers token rotation in middleware." },
+    ],
+    relatedSlugs: ["supabase-rls-new-row-violates-policy", "jwt-expired-or-invalid-signature", "nextjs-middleware-to-proxy-deprecation"],
+  },
+
+  // 45. Supabase / PgBouncer Prepared Statement Already Exists (42P05)
+  {
+    slug: "supabase-pgbouncer-prepared-statement-already-exists-42p05",
+    name: "Postgres 42P05: prepared statement \"s0\" already exists (Transaction Pooler)",
+    title: "Fix Prisma & Drizzle Error: 'prepared statement \"s0\" already exists' (Postgres Error 42P05 on Port 6543)",
+    summary: "Configure Prisma, Drizzle, and `postgres.js` for Supabase Supavisor / PgBouncer transaction mode pooling on port 6543.",
+    category: "Database & ORM",
+    errorMessage: "PostgresError: prepared statement \"s0\" already exists (code: \"42P05\")",
+    rootCause: "Port `6543` in Supabase (and PgBouncer in `transaction` pool mode) shares backend PostgreSQL connections across clients per transaction. Named prepared statements (`s0`, `s1`) created by Prisma or `postgres-js` collide across pooled connections unless disabled with `?pgbouncer=true` or `prepare: false`.",
+    brokenCode: `# ❌ Missing ?pgbouncer=true on Port 6543 Transaction Pooler
+DATABASE_URL="postgresql://postgres.ref:pass@aws-0-us-east-1.pooler.supabase.com:6543/postgres"`,
+    fixedCode: `# ✅ Add ?pgbouncer=true&connection_limit=1 for Prisma + Direct URL on Port 5432 for Migrations
+DATABASE_URL="postgresql://postgres.ref:pass@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.ref:pass@aws-0-us-east-1.pooler.supabase.com:5432/postgres"`,
+    diagnosticCommands: [
+      "npx castov port 6543",
+      "npx castov port 5432",
+    ],
+    configVariables: [
+      { key: "orm", label: "ORM (prisma or drizzle)", defaultValue: "prisma", placeholder: "prisma or drizzle" },
+    ],
+    generateCustomSolution: (vars) => {
+      const orm = (vars.orm || "prisma").toLowerCase();
+      if (orm.includes("drizzle")) {
+        return `// Drizzle with postgres.js on Port 6543:
+import postgres from "postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
+
+const client = postgres(process.env.DATABASE_URL!, { prepare: false });
+export const db = drizzle(client);`;
+      }
+      return `// prisma/schema.prisma
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // port 6543 with ?pgbouncer=true
+  directUrl = env("DIRECT_URL")   // port 5432 for prisma migrate
+}`;
+    },
+    faqs: [
+      { q: "Why do I need both `DATABASE_URL` (6543) and `DIRECT_URL` (5432)?", a: "Serverless functions use port `6543` (transaction pooler) to prevent connection exhaustion, while `prisma migrate` requires session-level advisory locks available only on port `5432`." },
+    ],
+    relatedSlugs: ["prisma-p1001-cant-reach-database", "postgres-remaining-connection-slots-reserved", "supabase-rls-new-row-violates-policy"],
+  },
+
+  // 46. Prisma Error P2002 Unique Constraint Failed
+  {
+    slug: "prisma-p2002-unique-constraint-failed",
+    name: "Prisma P2002: Unique constraint failed on the fields",
+    title: "Fix PrismaClientKnownRequestError P2002: 'Unique constraint failed on the fields: (`email`)'",
+    summary: "Handle duplicate key violations gracefully with `upsert`, `createMany({ skipDuplicates: true })`, or sequence resynchronization in PostgreSQL.",
+    category: "Database & ORM",
+    errorMessage: "PrismaClientKnownRequestError: Invalid `prisma.user.create()` invocation: Unique constraint failed on the fields: (`email`)",
+    rootCause: "An `INSERT` or `UPDATE` attempted to write a value that already exists in a `@unique` or `@id` column, or an auto-incrementing PostgreSQL `SERIAL` sequence fell out of sync after manual data imports.",
+    brokenCode: `// ❌ Throws unhandled P2002 when record already exists
+await prisma.user.create({
+  data: { email: "dev@example.com", name: "Ada" },
+});`,
+    fixedCode: `// ✅ Use atomic upsert or catch P2002 explicitly
+await prisma.user.upsert({
+  where: { email: "dev@example.com" },
+  update: { name: "Ada" },
+  create: { email: "dev@example.com", name: "Ada" },
+});`,
+    diagnosticCommands: [
+      "npx prisma validate",
+      "npx castov id 018f3a9c-8b5a-7000-8000-010203040506",
+    ],
+    configVariables: [
+      { key: "table", label: "Table Name (for id sequence reset)", defaultValue: "User", placeholder: "e.g. User" },
+    ],
+    generateCustomSolution: (vars) => {
+      const tbl = vars.table || "User";
+      return `-- If P2002 happens on 'id' (autoincrement out of sync in Postgres), run:
+SELECT setval(pg_get_serial_sequence('"${tbl}"', 'id'), COALESCE(MAX(id), 1)) FROM "${tbl}";
+
+-- Or switch to collision-free time-ordered UUIDv7 via Castov CLI:
+-- npx castov id`;
+    },
+    faqs: [
+      { q: "Why does P2002 happen on `id` even when I don't pass `id` in `prisma.create()`?", a: "If rows were seeded with explicit IDs, PostgreSQL's internal sequence counter is not incremented automatically. Running `setval(pg_get_serial_sequence(...))` resyncs the sequence." },
+    ],
+    relatedSlugs: ["prisma-p1001-cant-reach-database", "supabase-pgbouncer-prepared-statement-already-exists-42p05", "supabase-rls-new-row-violates-policy"],
+  },
+
+  // 47. Prisma P2021 Table Does Not Exist in Current Database
+  {
+    slug: "prisma-p2021-table-does-not-exist",
+    name: "Prisma P2021: The table `public.User` does not exist in the current database",
+    title: "Fix Prisma Error P2021: 'The table public.User does not exist in the current database'",
+    summary: "Synchronize Prisma schema migrations with your target PostgreSQL/MySQL/SQLite database in local dev and CI/CD deployments.",
+    category: "Database & ORM",
+    errorMessage: "PrismaClientKnownRequestError: The table `public.User` does not exist in the current database. (Code: P2021)",
+    rootCause: "Your application connected to a database where migrations have not yet been applied (`prisma migrate deploy` was skipped in the build/start pipeline), or `DATABASE_URL` points to an empty database schema.",
+    brokenCode: `// ❌ package.json build script generates client but never deploys migrations
+"scripts": {
+  "build": "prisma generate && next build"
+}`,
+    fixedCode: `// ✅ Run prisma migrate deploy before building or starting production
+"scripts": {
+  "build": "prisma migrate deploy && prisma generate && next build"
+}`,
+    diagnosticCommands: [
+      "npx prisma migrate status",
+      "npx prisma db push",
+    ],
+    configVariables: [
+      { key: "schema", label: "Database Schema", defaultValue: "public", placeholder: "e.g. public" },
+    ],
+    generateCustomSolution: () => {
+      return `# 1. Check migration status against current DATABASE_URL:
+npx prisma migrate status
+
+# 2. Apply pending migrations in production/CI:
+npx prisma migrate deploy
+
+# 3. Or push schema directly in rapid prototyping:
+npx prisma db push`;
+    },
+    faqs: [
+      { q: "What is the difference between `prisma migrate dev` and `prisma migrate deploy`?", a: "`migrate dev` creates new migration SQL files and may reset local databases; `migrate deploy` safely applies committed migrations in staging/production without prompting." },
+    ],
+    relatedSlugs: ["prisma-p1001-cant-reach-database", "prisma-p2002-unique-constraint-failed", "supabase-pgbouncer-prepared-statement-already-exists-42p05"],
+  },
+
+  // 48. Claude Desktop / Cursor MCP: Server Disconnected / JSON-RPC Parse Error on stdout
+  {
+    slug: "mcp-json-rpc-unexpected-token-stdout-pollution",
+    name: "MCP Error: Unexpected token in JSON at position 0 / Server Disconnected",
+    title: "Fix Claude Desktop & Cursor MCP Error: 'Unexpected token in JSON at position 0' (stdout Pollution)",
+    summary: "Fix Model Context Protocol (MCP) stdio servers crashing when `console.log()` or dotenv banners write non-JSON text to `stdout`.",
+    category: "TypeScript & Node.js",
+    errorMessage: "SyntaxError: Unexpected token 'D', \"[dotenv@17...\" is not valid JSON (MCP stdio transport disconnected)",
+    rootCause: "In the Model Context Protocol (`stdio` transport), `process.stdout` is exclusively reserved for framed `JSON-RPC 2.0` messages. Any `console.log()`, npm banner, or `dotenv@17` startup log printed to `stdout` corrupts the JSON-RPC stream and causes Claude Desktop or Cursor to immediately disconnect the server.",
+    brokenCode: `// ❌ Broken MCP Server: console.log writes to stdout and breaks JSON-RPC!
+console.log("Starting MCP Server on stdio...");
+dotenv.config(); // dotenv v17 logs promotional banner to stdout!`,
+    fixedCode: `// ✅ Fixed: Route all diagnostics to process.stderr (console.error)
+console.error("[mcp] Server initialized on stdio");
+// Or use Castov's hardened zero-dependency MCP server:
+// npx -y castov@latest mcp`,
+    diagnosticCommands: [
+      "npx -y castov@latest mcp",
+      "npx castov fix \"Unexpected token in JSON at position 0 MCP\"",
+    ],
+    configVariables: [
+      { key: "serverName", label: "MCP Server Name", defaultValue: "castov", placeholder: "e.g. castov" },
+    ],
+    generateCustomSolution: (vars) => {
+      const name = vars.serverName || "castov";
+      return `// Verify a compliant JSON-RPC 2.0 MCP config in .cursor/mcp.json or claude_desktop_config.json:
+{
+  "mcpServers": {
+    "${name}": {
+      "command": "npx",
+      "args": ["-y", "castov@latest", "mcp"]
+    }
+  }
+}`;
+    },
+    faqs: [
+      { q: "Why did upgrading to `dotenv@17` break my MCP server?", a: "`dotenv@17` introduced a stdout informational message by default (`[dotenv@17] injecting env...`), which corrupts `stdio` JSON-RPC streams unless suppressed or replaced with native Node `--env-file`." },
+    ],
+    relatedSlugs: ["mcp-server-spawn-npx-enoent", "json-unexpected-token-at-position-0", "node-err-module-not-found-esm"],
+  },
+
+  // 49. Claude Desktop / Cursor MCP: Request Timed Out (-32001)
+  {
+    slug: "mcp-error-32001-request-timed-out",
+    name: "MCP Error -32001: Request timed out during initialize",
+    title: "Fix Claude Desktop & Cursor 'MCP Error -32001: Request timed out' on Startup",
+    summary: "Resolve MCP `initialize` handshake timeouts caused by slow `npx` registry checks, missing `-y` flags, or Content-Length vs ndjson framing mismatches.",
+    category: "TypeScript & Node.js",
+    errorMessage: "MCP error -32001: Request timed out (initialize handshake did not complete within 60000ms)",
+    rootCause: "Either `npx` paused waiting for interactive `[y/n]` confirmation to install the package (because `-y` / `--yes` was omitted), or the MCP server only supports `Content-Length` headers while the client sent newline-delimited JSON (`ndjson`).",
+    brokenCode: `{
+  "mcpServers": {
+    "my-server": {
+      "command": "npx",
+      "args": ["castov", "mcp"]
+    }
+  }
+}`,
+    fixedCode: `{
+  "mcpServers": {
+    "castov": {
+      "command": "npx",
+      "args": ["-y", "castov@latest", "mcp"]
+    }
+  }
+}`,
+    diagnosticCommands: [
+      "npx -y castov@latest mcp",
+      "npm cache verify",
+    ],
+    configVariables: [
+      { key: "pkg", label: "NPM MCP Package", defaultValue: "castov@latest", placeholder: "e.g. castov@latest" },
+    ],
+    generateCustomSolution: (vars) => {
+      const pkg = vars.pkg || "castov@latest";
+      return `# 1. Pre-warm the npx cache in your terminal first:
+npx -y ${pkg} --version
+
+# 2. Always include "-y" in args so npx never blocks on stdin prompts:
+# "args": ["-y", "${pkg}", "mcp"]`;
+    },
+    faqs: [
+      { q: "How does Castov avoid framing timeouts across different MCP clients?", a: "Castov's MCP server (`npx -y castov@latest mcp`) auto-detects both `Content-Length` headers and raw `ndjson` lines on `stdin` and replies in the matching framing mode in under 15ms." },
+    ],
+    relatedSlugs: ["mcp-server-spawn-npx-enoent", "mcp-json-rpc-unexpected-token-stdout-pollution", "npm-err-code-eresolve-unable-to-resolve-dependency-tree"],
+  },
+
+  // 50. GitHub Push Protection: GH013 Repository Rule Violations (Secret Detected)
+  {
+    slug: "github-push-protection-gh013-secret-detected",
+    name: "GitHub GH013: Push cannot contain secrets (Push Protection)",
+    title: "Fix GitHub Error 'remote: error: GH013: Repository rule violations found — Push cannot contain secrets'",
+    summary: "Scan and scrub accidentally committed API keys or tokens from your Git commit history using Castov Secret Scanner and `git reset`.",
+    category: "Git & Version Control",
+    errorMessage: "remote: error: GH013: Repository rule violations found for refs/heads/main. - Push cannot contain secrets",
+    rootCause: "GitHub Push Protection detected a live credential pattern (such as an AWS key, Stripe secret, or OpenAI token) inside one of the commits being pushed—even if you deleted the secret in a later commit.",
+    brokenCode: `# ❌ Deleting a secret in a second commit still leaves it in the earlier commit history!
+git add .env
+git commit -m "wip"
+git rm --cached .env
+git commit -m "remove env"
+git push origin main # ❌ Still blocked by GH013!`,
+    fixedCode: `# ✅ Scan locally with Castov first, then squash/amend the offending commit
+npx castov scan .
+git reset --soft HEAD~1
+git reset HEAD .env
+git commit -m "feat: clean commit without secrets"
+git push origin main`,
+    diagnosticCommands: [
+      "npx castov scan .",
+      "git log -p -n 2",
+    ],
+    configVariables: [
+      { key: "commits", label: "Number of Unpushed Commits", defaultValue: "1", placeholder: "e.g. 1 or 2" },
+    ],
+    generateCustomSolution: (vars) => {
+      const n = vars.commits || "1";
+      return `# 1. Scan all files locally (100% offline) to locate every leaked token:
+npx castov scan .
+
+# 2. Undo the last ${n} local commit(s) while keeping your working tree changes:
+git reset --soft HEAD~${n}
+
+# 3. Rotate the compromised key or generate a new cryptographic secret:
+npx castov secret 32`;
+    },
+    faqs: [
+      { q: "How do I prevent GH013 before committing?", a: "Run `npx castov scan .` in a pre-commit hook or let your AI coding agent call `castov_scan_secrets` via the Castov MCP server before staging files." },
+    ],
+    relatedSlugs: ["git-error-failed-to-push-some-refs", "git-fatal-not-a-git-repository", "docker-no-space-left-on-device"],
+  },
+
+  // 51. PostgreSQL Error 55P03 Lock Not Available / Migration Timeout
+  {
+    slug: "postgres-55p03-canceling-statement-due-to-lock-timeout",
+    name: "Postgres 55P03: canceling statement due to lock timeout",
+    title: "Fix PostgreSQL Error 55P03: 'canceling statement due to lock timeout' During Zero-Downtime Migrations",
+    summary: "Prevent `ALTER TABLE` and `CREATE INDEX` statements from blocking production traffic or failing with lock timeouts in PostgreSQL.",
+    category: "Database & ORM",
+    errorMessage: "ERROR: 55P03: canceling statement due to lock timeout (or deadlock detected 40P01)",
+    rootCause: "Standard `CREATE INDEX` or `ALTER TABLE ... ADD CONSTRAINT` acquires an `ACCESS EXCLUSIVE` or `SHARE` lock that waits behind long-running queries and blocks all incoming reads/writes until `lock_timeout` expires.",
+    brokenCode: `-- ❌ Blocks writes on large production tables and times out under load
+CREATE INDEX idx_users_created_at ON users (created_at);`,
+    fixedCode: `-- ✅ Build index concurrently without blocking concurrent inserts/updates
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_created_at ON users (created_at);`,
+    diagnosticCommands: [
+      "npx castov port 5432",
+      "psql -c \"SELECT pid, state, wait_event_type, query FROM pg_stat_activity WHERE state != 'idle';\"",
+    ],
+    configVariables: [
+      { key: "indexName", label: "Index Name", defaultValue: "idx_events_timestamp", placeholder: "e.g. idx_events_timestamp" },
+      { key: "table", label: "Table Name", defaultValue: "events", placeholder: "e.g. events" },
+    ],
+    generateCustomSolution: (vars) => {
+      const idx = vars.indexName || "idx_events_timestamp";
+      const tbl = vars.table || "events";
+      return `-- 1. Find blocking PIDs in PostgreSQL:
+SELECT pid, age(clock_timestamp(), query_start), usename, query
+FROM pg_stat_activity
+WHERE state != 'idle' AND query NOT ILIKE '%pg_stat_activity%'
+ORDER BY query_start ASC;
+
+-- 2. Create index safely without table-wide write locks:
+CREATE INDEX CONCURRENTLY IF NOT EXISTS ${idx} ON ${tbl} (created_at);`;
+    },
+    faqs: [
+      { q: "Can `CREATE INDEX CONCURRENTLY` run inside a `BEGIN ... COMMIT` transaction block?", a: "No. PostgreSQL requires `CREATE INDEX CONCURRENTLY` to run outside an explicit transaction block." },
+    ],
+    relatedSlugs: ["postgres-remaining-connection-slots-reserved", "supabase-pgbouncer-prepared-statement-already-exists-42p05", "prisma-p1001-cant-reach-database"],
+  },
+
+  // 52. Node.js 22+ ERR_REQUIRE_ASYNC_MODULE
+  {
+    slug: "node-err-require-async-module-top-level-await",
+    name: "Node.js: Error [ERR_REQUIRE_ASYNC_MODULE]: Cannot require() ES Module with top-level await",
+    title: "Fix Node.js Error [ERR_REQUIRE_ASYNC_MODULE]: Cannot require() ES Module with Top-Level Await",
+    summary: "Understand and fix `ERR_REQUIRE_ASYNC_MODULE` in Node.js 20.17+ and 22+ when CommonJS `require()` loads an ESM package containing top-level `await`.",
+    category: "TypeScript & Node.js",
+    errorMessage: "Error [ERR_REQUIRE_ASYNC_MODULE]: Must use import to load ES Module: ... because it uses top-level await",
+    rootCause: "Node.js 22+ supports `require(esm)` natively for synchronous ES modules, but synchronous `require()` cannot pause execution for an ES module that executes top-level `await` at evaluation time.",
+    brokenCode: `// ❌ Synchronous CommonJS require() of an async ESM module
+const dbModule = require("./esm-with-top-level-await.mjs");`,
+    fixedCode: `// ✅ Use dynamic import() inside an async function or convert caller to ESM
+async function loadDatabase() {
+  const dbModule = await import("./esm-with-top-level-await.mjs");
+  return dbModule;
+}`,
+    diagnosticCommands: [
+      "node -v",
+      "npx castov fix \"ERR_REQUIRE_ASYNC_MODULE\"",
+    ],
+    configVariables: [
+      { key: "pkg", label: "Module / Package Name", defaultValue: "my-esm-pkg", placeholder: "e.g. @octokit/rest" },
+    ],
+    generateCustomSolution: (vars) => {
+      const pkg = vars.pkg || "my-esm-pkg";
+      return `// Replace synchronous require("${pkg}") with dynamic import():
+const mod = await import("${pkg}");`;
+    },
+    faqs: [
+      { q: "Does Node.js 22 allow `require()` of regular ES modules without top-level await?", a: "Yes! Node.js 22 enables `require(esm)` by default for any ES module graph that does not contain top-level `await`." },
+    ],
+    relatedSlugs: ["node-err-module-not-found-esm", "ts-cannot-find-module-or-type-declarations", "webpack-module-parse-failed"],
+  },
+
+  // 53. AWS VPC / Terraform CIDR Block Overlap & Host Bits Set Error
+  {
+    slug: "terraform-cidr-invalid-network-host-bits-set",
+    name: "Terraform / AWS VPC: Invalid CIDR block (host bits set or overlapping subnet)",
+    title: "Fix AWS VPC & Terraform Error: 'is not a valid CIDR block; did you mean...' (Host Bits Set)",
+    summary: "Calculate exact IPv4 network boundary addresses and AWS 5-reserved-IP subnet masks using `npx castov cidr`.",
+    category: "Cloud & Security",
+    errorMessage: "Error: \"10.24.1.5/24\" is not a valid CIDR block: host bits are set (did you mean \"10.24.1.0/24\"?)",
+    rootCause: "A CIDR block specification must use the exact base network address where all host bits after the prefix length are zero (e.g., `10.24.0.0/22`, not `10.24.1.0/22`).",
+    brokenCode: `# ❌ Invalid /22 network boundary (3rd octet 1 is not divisible by 4)
+resource "aws_subnet" "private" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = "10.24.1.0/22"
+}`,
+    fixedCode: `# ✅ Verified base network boundary via npx castov cidr 10.24.1.0/22
+resource "aws_subnet" "private" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = "10.24.0.0/22"
+}`,
+    diagnosticCommands: [
+      "npx castov cidr 10.24.0.0/22 --json",
+      "terraform validate",
+    ],
+    configVariables: [
+      { key: "cidr", label: "CIDR Block to Normalize", defaultValue: "10.24.0.0/22", placeholder: "e.g. 10.24.0.0/22" },
+    ],
+    generateCustomSolution: (vars) => {
+      const c = vars.cidr || "10.24.0.0/22";
+      return `# Calculate exact network address, broadcast address, and AWS usable hosts locally:
+npx castov cidr ${c} --json
+
+# Or ask Claude/Cursor using Castov MCP tool: castov_cidr`;
+    },
+    faqs: [
+      { q: "How many IP addresses does AWS reserve in every VPC subnet?", a: "AWS reserves 5 IP addresses per subnet (the first 4 and the last 1 broadcast address), so a `/24` (256 total IPs) provides 251 usable AWS hosts (`npx castov cidr 10.0.0.0/24`)." },
+    ],
+    relatedSlugs: ["docker-bind-address-already-in-use", "k8s-crashloopbackoff", "nginx-502-bad-gateway"],
+  },
+
+  // 54. Ollama / Local LLM Port 11434 Connection Refused or Bound to 127.0.0.1
+  {
+    slug: "ollama-port-11434-connection-refused-docker",
+    name: "Ollama Port 11434: connect ECONNREFUSED 127.0.0.1:11434",
+    title: "Fix Ollama 'Error: connect ECONNREFUSED 127.0.0.1:11434' from Docker or Local AI Apps",
+    summary: "Diagnose port 11434 listeners with `npx castov port 11434` and configure `OLLAMA_HOST=0.0.0.0:11434` for Docker container access.",
+    category: "DevOps & Docker",
+    errorMessage: "Error: fetch failed — connect ECONNREFUSED 127.0.0.1:11434",
+    rootCause: "Either the `ollama serve` daemon is not running on port `11434`, or a Docker container is trying to reach Ollama on `127.0.0.1:11434` while Ollama is bound only to the host loopback interface (`127.0.0.1`) instead of `0.0.0.0`.",
+    brokenCode: `# ❌ Inside Docker container, localhost points to the container itself, not the host's Ollama
+OLLAMA_BASE_URL="http://localhost:11434"`,
+    fixedCode: `# ✅ Bind Ollama to 0.0.0.0 on host and connect via host.docker.internal:11434
+export OLLAMA_HOST=0.0.0.0:11434
+ollama serve
+# Inside Docker container:
+OLLAMA_BASE_URL="http://host.docker.internal:11434"`,
+    diagnosticCommands: [
+      "npx castov port 11434",
+      "curl http://127.0.0.1:11434/api/tags",
+    ],
+    configVariables: [
+      { key: "port", label: "Ollama Port", defaultValue: "11434", placeholder: "11434" },
+    ],
+    generateCustomSolution: (vars) => {
+      const p = vars.port || "11434";
+      return `# 1. Check if Ollama is actively listening on port ${p}:
+npx castov port ${p}
+
+# 2. Allow Docker containers to connect to host Ollama:
+OLLAMA_HOST=0.0.0.0:${p} ollama serve`;
+    },
+    faqs: [
+      { q: "Is it safe to set `OLLAMA_HOST=0.0.0.0:11434` on a public cloud VM?", a: "Only if port `11434` is blocked by your cloud firewall (`ufw deny 11434/tcp`), as Ollama has no built-in authentication by default." },
+    ],
+    relatedSlugs: ["docker-compose-version-attribute-is-obsolete", "node-eaddrinuse-port-already-in-use", "docker-bind-address-already-in-use"],
+  },
 ];
 
 export function getErrorBySlug(slug: string): ErrorFix | undefined {
   return ERROR_FIXES.find((e) => e.slug === slug);
 }
+

@@ -12,6 +12,7 @@ import { TECH_TREND_TOPICS } from '@/lib/tech-trends-registry';
 import { CLOUD_SERVICES } from '@/lib/cloud-status-registry';
 import { LLM_MODELS } from '@/lib/llm-specs-registry';
 import { HTTP_STATUS_CODES } from '@/lib/http-statuses';
+import { VS_COMPARISONS } from '@/lib/vs-registry';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -24,6 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapEntries: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: getLastMod('src/app/page.tsx'), changeFrequency: 'daily', priority: 1.0 },
     { url: `${baseUrl}/mcp`, lastModified: getLastMod('src/app/mcp/page.tsx'), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${baseUrl}/vs`, lastModified: getLastMod('src/app/vs/page.tsx'), changeFrequency: 'weekly', priority: 0.95 },
     { url: `${baseUrl}/llms.txt`, lastModified: getLastMod('public/llms.txt'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/llms-full.txt`, lastModified: getLastMod('public/llms-full.txt'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/tools`, lastModified: getLastMod('src/app/tools/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
@@ -54,6 +56,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/privacy`, lastModified: getLastMod('src/app/privacy/page.tsx'), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${baseUrl}/terms`, lastModified: getLastMod('src/app/terms/page.tsx'), changeFrequency: 'monthly', priority: 0.3 },
   ];
+
+  VS_COMPARISONS.forEach((comp) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/vs/${comp.slug}`,
+      lastModified: getLastMod('src/lib/vs-registry.ts'),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    });
+  });
 
   TOOLS.forEach((tool) => {
     sitemapEntries.push({

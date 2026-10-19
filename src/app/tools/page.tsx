@@ -5,7 +5,8 @@ import { TOOL_CATEGORIES, TOOLS } from "@/content/tools";
 import { StaticPage } from "@/components/static-page";
 import { ToolCard } from "@/components/tool-card";
 import { PinnedToolsTray } from "@/components/pinned-tools";
-import { buildMetadata } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
+import { buildMetadata, softwareAppJsonLd, techArticleJsonLd } from "@/lib/seo";
 
 const TITLE = "All Developer Tools | Castov";
 const DESCRIPTION =
@@ -24,10 +25,25 @@ export default function ToolsPage() {
       crumbs={[{ name: "Home", href: "/" }, { name: "Tools" }]}
       path="/tools"
     >
+      <JsonLd
+        data={[
+          softwareAppJsonLd({
+            name: "Castov Developer Toolbox & MCP Suite",
+            description: DESCRIPTION,
+            url: "/tools",
+            category: "DeveloperApplication",
+          }),
+          techArticleJsonLd({
+            headline: TITLE,
+            description: DESCRIPTION,
+            path: "/tools",
+          }),
+        ]}
+      />
       <PinnedToolsTray />
 
       {/* Featured Radar Banner */}
-      <div className="mb-10 grid gap-4 sm:grid-cols-2">
+      <div className="mb-10 grid gap-4 sm:grid-cols-3">
         <div className="p-5 rounded-2xl bg-card border border-line shadow-xs flex flex-col justify-between hover:border-accent transition-colors">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-accent/10 text-accent border border-accent/20 mb-2">
@@ -46,15 +62,30 @@ export default function ToolsPage() {
         <div className="p-5 rounded-2xl bg-card border border-line shadow-xs flex flex-col justify-between hover:border-accent transition-colors">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 mb-2">
-              35 ERROR GUIDES
+              54 ERROR GUIDES
             </div>
             <h2 className="text-lg font-bold text-fg">Error Fix Encyclopedia</h2>
             <p className="mt-1 text-sm text-muted">
-              Diagnose and solve production errors: Next.js hydration, CORS headers, Docker port conflicts, Postgres locks, and TypeScript issues.
+              Diagnose and solve production errors: Next.js 16, Docker Compose, Supabase RLS, Prisma, Postgres locks, and MCP stdio issues.
             </p>
           </div>
           <Link href="/error-fixes" className="mt-4 text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1">
             Explore Error Fixes &rarr;
+          </Link>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-card border border-line shadow-xs flex flex-col justify-between hover:border-accent transition-colors">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-500 border border-purple-500/20 mb-2">
+              ZERO-TELEMETRY VS CLOUD
+            </div>
+            <h2 className="text-lg font-bold text-fg">Comparisons (/vs)</h2>
+            <p className="mt-1 text-sm text-muted">
+              Compare Castov CLI &amp; Grade A MCP Server against Snyk, dotenvx, jwt.io, Crontab.guru, and legacy CLIs.
+            </p>
+          </div>
+          <Link href="/vs" className="mt-4 text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1">
+            Compare Alternatives &rarr;
           </Link>
         </div>
       </div>

@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { NETWORK_PORTS, getPortByNumber } from "@/lib/network-ports-registry";
-import { buildMetadata, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
+import { buildMetadata, breadcrumbJsonLd, faqJsonLd, howToJsonLd, softwareAppJsonLd, techArticleJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
+import { SponsorSlot } from "@/components/sponsor-slot";
 import { ShieldAlert, Terminal, Server, Container } from "lucide-react";
 
 export function generateStaticParams() {
@@ -42,11 +43,26 @@ export default async function NetworkPortPage({
     },
     {
       q: `How do I kill a process running on Port ${info.port} (EADDRINUSE)?`,
-      a: `On macOS and Linux, run: lsof -ti:${info.port} | xargs kill -9 (or npx kill-port ${info.port}). On Windows PowerShell/CMD, run: netstat -ano | findstr :${info.port} and then taskkill /PID <PID> /F.`,
+      a: `Run npx castov port ${info.port} --kill in any terminal, or on macOS/Linux run: lsof -ti:${info.port} | xargs kill -9. On Windows PowerShell/CMD, run: netstat -ano | findstr :${info.port} and then taskkill /PID <PID> /F.`,
     },
     {
       q: `Is it safe to expose Port ${info.port} to the internet?`,
       a: `Port ${info.port} has a ${info.riskLevel} security risk profile. ${info.description}`,
+    },
+  ];
+
+  const portHowToSteps = [
+    {
+      name: `Inspect Port ${info.port} with Castov CLI`,
+      text: `Run npx castov port ${info.port} to inspect active listeners and protocol metadata for ${info.service}.`,
+    },
+    {
+      name: `Check Listening PID on macOS / Linux / Windows`,
+      text: `Run lsof -i :${info.port} on Unix or netstat -ano | findstr :${info.port} on Windows to find the process ID.`,
+    },
+    {
+      name: `Free Port ${info.port} (Resolve EADDRINUSE)`,
+      text: `Execute npx castov port ${info.port} --kill or lsof -ti:${info.port} | xargs kill -9 to terminate the conflicting process.`,
     },
   ];
 
@@ -71,6 +87,23 @@ export default async function NetworkPortPage({
             ],
             `/ports/${info.port}`
           ),
+          softwareAppJsonLd({
+            name: `Port ${info.port} (${info.service}) Inspector & Process Killer`,
+            description: info.description,
+            url: `/ports/${info.port}`,
+            category: "DeveloperApplication",
+          }),
+          techArticleJsonLd({
+            headline: `Port ${info.port} (${info.service}) – Protocol, Security & EADDRINUSE Fix`,
+            description: info.description,
+            path: `/ports/${info.port}`,
+            dependencies: `${info.protocol} Port ${info.port}, Castov CLI (npx castov port ${info.port})`,
+          }),
+          howToJsonLd({
+            name: `How to Check and Kill Process on Port ${info.port} (${info.service})`,
+            description: `Step-by-step instructions to diagnose and free TCP/UDP Port ${info.port} (${info.service}).`,
+            steps: portHowToSteps,
+          }),
           faqJsonLd(faqs),
         ]}
       />
@@ -177,6 +210,8 @@ sudo ufw allow ${info.port}/tcp`}
           </div>
         </div>
       </section>
+
+      <SponsorSlot context="network" />
 
       {/* FAQ Section */}
       <section className="bg-card border border-line rounded-2xl p-6 space-y-4">
