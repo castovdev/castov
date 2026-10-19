@@ -173,7 +173,7 @@ function computeScanSecrets(content: string): Record<string, unknown> {
   };
 }
 
-const DEFAULT_AWS_SAMPLE = ["AWS_ACCESS_KEY_ID=AKIA", "IOSFODNN7EXAMPLE\nPORT=3000"].join("");
+const DEFAULT_AWS_SAMPLE = ["AWS_ACCESS_KEY_ID=AKIA", "IOSFODNN7EXAMPLE PORT=3000"].join("");
 const DEFAULT_JWT_SAMPLE = [
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
   "eyJzdWIiOiJ1c3JfOXg4MmYiLCJyb2xlIjoiadminIiwiaWF0IjoxNzYwODY4MDAwLCJleHAiOjE3OTI0MDQwMDB9",
@@ -450,7 +450,9 @@ const PLAYGROUND_TOOLS: PlaygroundToolSpec[] = [
 export function McpLivePlayground() {
   const [selectedToolId, setSelectedToolId] = useState<ToolId>("castov_cidr");
   const [customInputs, setCustomInputs] = useState<Record<string, string>>({});
-  const [copiedRpc, setCopiedRpc] = useState(false);
+  const [copiedReq, setCopiedReq] = useState(false);
+  const [copiedRes, setCopiedRes] = useState(false);
+  const [responseView, setResponseView] = useState<"rpc" | "decoded">("rpc");
   const [nonce, setNonce] = useState(1);
 
   const activeTool = useMemo(
@@ -495,10 +497,17 @@ export function McpLivePlayground() {
     [toolResult, nonce]
   );
 
+  const handleCopyRequest = () => {
+    navigator.clipboard.writeText(JSON.stringify(jsonRpcRequest, null, 2));
+    setCopiedReq(true);
+    setTimeout(() => setCopiedReq(false), 2000);
+  };
+
   const handleCopyResponse = () => {
-    navigator.clipboard.writeText(JSON.stringify(jsonRpcResponse, null, 2));
-    setCopiedRpc(true);
-    setTimeout(() => setCopiedRpc(false), 2000);
+    const payload = responseView === "rpc" ? jsonRpcResponse : toolResult;
+    navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+    setCopiedRes(true);
+    setTimeout(() => setCopiedRes(false), 2000);
   };
 
   return (
@@ -597,16 +606,30 @@ export function McpLivePlayground() {
       <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-line">
         {/* Request Panel */}
         <div className="p-5 sm:p-6 bg-[#070b14]">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <Terminal className="w-4 h-4 text-accent" />
               <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                Agent Request (stdio stdin)
+                JSON-RPC 2.0 Request (stdin)
               </span>
             </div>
-            <span className="text-[11px] font-mono text-accent bg-accent/10 px-2 py-0.5 rounded">
-              tools/call
-            </span>
+            <button
+              type="button"
+              onClick={handleCopyRequest}
+              className="text-xs font-mono text-muted hover:text-white inline-flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded border border-white/10"
+            >
+              {copiedReq ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-400">Copied Request</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Request</span>
+                </>
+              )}
+            </button>
           </div>
           <pre className="text-xs font-mono text-[#e4e4e7] overflow-x-auto leading-relaxed">
             <code>{JSON.stringify(jsonRpcRequest, null, 2)}</code>
@@ -615,33 +638,44 @@ export function McpLivePlayground() {
 
         {/* Response Panel */}
         <div className="p-5 sm:p-6 bg-[#070b14]">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <ArrowRight className="w-4 h-4 text-emerald-400" />
               <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">
-                Castov MCP Output (Decoded Result)
+                JSON-RPC 2.0 Response (stdout)
               </span>
             </div>
-            <button
-              type="button"
-              onClick={handleCopyResponse}
-              className="text-xs font-mono text-muted hover:text-white inline-flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded border border-white/10"
-            >
-              {copiedRpc ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-emerald-400">Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>Copy JSON-RPC</span>
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setResponseView(responseView === "rpc" ? "decoded" : "rpc")}
+                className="text-[11px] font-mono text-accent hover:text-white bg-accent/10 px-2 py-1 rounded border border-accent/20"
+              >
+                {responseView === "rpc" ? "View Decoded JSON" : "View Full JSON-RPC"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyResponse}
+                className="text-xs font-mono text-muted hover:text-white inline-flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded border border-white/10"
+              >
+                {copiedRes ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-400">Copied Response</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Response</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
           <pre className="text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed">
-            <code>{JSON.stringify(toolResult, null, 2)}</code>
+            <code>
+              {JSON.stringify(responseView === "rpc" ? jsonRpcResponse : toolResult, null, 2)}
+            </code>
           </pre>
         </div>
       </div>
