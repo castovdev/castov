@@ -56,7 +56,7 @@ export default function HomePage() {
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Link href="/tools" className="group flex items-center justify-center gap-2 bg-accent text-white dark:text-[#050505] px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-hover transition-all w-full sm:w-auto shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:shadow-[0_0_25px_rgba(37,99,235,0.4)]">
+            <Link href="/tools" className="group flex items-center justify-center gap-2 bg-accent text-accent-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-hover transition-all w-full sm:w-auto shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:shadow-[0_0_25px_rgba(37,99,235,0.4)]">
               Explore Tools <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link href="/mcp" className="flex items-center justify-center gap-2 bg-card border border-accent/40 text-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-field transition-colors w-full sm:w-auto shadow-sm">
@@ -267,7 +267,7 @@ export default function HomePage() {
             Free developer tools that run in your browser.
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Link href="/tools" className="flex items-center justify-center gap-2 bg-accent text-white dark:text-[#050505] px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-hover transition-colors shadow-sm w-full sm:w-auto">
+            <Link href="/tools" className="flex items-center justify-center gap-2 bg-accent text-accent-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-hover transition-colors shadow-sm w-full sm:w-auto">
               Browse All Tools
             </Link>
           </div>

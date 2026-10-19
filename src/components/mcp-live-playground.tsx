@@ -544,7 +544,7 @@ export function McpLivePlayground() {
               onClick={() => setSelectedToolId(tool.id)}
               className={`px-3 py-1.5 rounded-xl font-mono text-xs transition-all flex items-center gap-1.5 ${
                 active
-                  ? "bg-accent text-white font-bold shadow-sm"
+                  ? "bg-[#2563eb] text-white font-bold shadow-sm"
                   : "bg-field text-muted hover:text-fg hover:bg-hover border border-line/60"
               }`}
             >
@@ -581,7 +581,7 @@ export function McpLivePlayground() {
             <button
               type="button"
               onClick={() => setNonce((n) => n + 1)}
-              className="btn bg-accent text-white hover:bg-accent/90 text-xs font-bold px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5"
+              className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5" /> Re-Run Tool
             </button>
@@ -608,7 +608,7 @@ export function McpLivePlayground() {
         <div className="p-5 sm:p-6 bg-[#070b14]">
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-accent" />
+              <Terminal className="w-4 h-4 text-sky-400" />
               <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
                 JSON-RPC 2.0 Request (stdin)
               </span>
@@ -616,7 +616,7 @@ export function McpLivePlayground() {
             <button
               type="button"
               onClick={handleCopyRequest}
-              className="text-xs font-mono text-muted hover:text-white inline-flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded border border-white/10"
+              className="text-xs font-mono text-slate-300 hover:text-white inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded border border-white/15"
             >
               {copiedReq ? (
                 <>
@@ -631,8 +631,8 @@ export function McpLivePlayground() {
               )}
             </button>
           </div>
-          <pre className="text-xs font-mono text-[#e4e4e7] overflow-x-auto leading-relaxed">
-            <code>{JSON.stringify(jsonRpcRequest, null, 2)}</code>
+          <pre className="text-xs font-mono text-[#f8fafc] overflow-x-auto leading-relaxed">
+            <code className="text-[#f8fafc]">{JSON.stringify(jsonRpcRequest, null, 2)}</code>
           </pre>
         </div>
 
@@ -649,14 +649,14 @@ export function McpLivePlayground() {
               <button
                 type="button"
                 onClick={() => setResponseView(responseView === "rpc" ? "decoded" : "rpc")}
-                className="text-[11px] font-mono text-accent hover:text-white bg-accent/10 px-2 py-1 rounded border border-accent/20"
+                className="text-[11px] font-mono text-sky-300 hover:text-white bg-sky-500/15 px-2.5 py-1 rounded border border-sky-400/30"
               >
                 {responseView === "rpc" ? "View Decoded JSON" : "View Full JSON-RPC"}
               </button>
               <button
                 type="button"
                 onClick={handleCopyResponse}
-                className="text-xs font-mono text-muted hover:text-white inline-flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded border border-white/10"
+                className="text-xs font-mono text-slate-300 hover:text-white inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded border border-white/15"
               >
                 {copiedRes ? (
                   <>
@@ -673,7 +673,7 @@ export function McpLivePlayground() {
             </div>
           </div>
           <pre className="text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed">
-            <code>
+            <code className="text-emerald-300">
               {JSON.stringify(responseView === "rpc" ? jsonRpcResponse : toolResult, null, 2)}
             </code>
           </pre>

@@ -65,7 +65,7 @@ export default function DeveloperPage() {
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <Link
               href="/mcp"
-              className="btn bg-accent text-white hover:bg-accent/90 text-xs sm:text-sm font-bold px-5 py-2.5 text-center rounded-xl"
+              className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs sm:text-sm font-bold px-5 py-2.5 text-center rounded-xl"
             >
               Open MCP Docs &amp; Live Playground
             </Link>
@@ -112,7 +112,7 @@ export default function DeveloperPage() {
               href="https://www.npmjs.com/package/castov-sdk"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn bg-primary text-white hover:bg-primary/90 text-xs font-bold px-4 py-2 text-center flex-1"
+              className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-4 py-2 text-center flex-1"
             >
               View on npm
             </a>

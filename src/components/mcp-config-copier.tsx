@@ -145,7 +145,7 @@ export function McpConfigCopier() {
           <button
             type="button"
             onClick={handleCopy}
-            className="btn bg-accent text-white hover:bg-accent/90 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 self-start sm:self-center shrink-0"
+            className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 self-start sm:self-center shrink-0"
           >
             {copied ? (
               <>
@@ -161,9 +161,9 @@ export function McpConfigCopier() {
           </button>
         </div>
 
-        <div className="rounded-xl bg-[#070b14] border border-white/10 p-4 sm:p-5 font-mono text-xs sm:text-sm text-[#f4f4f5] overflow-x-auto">
-          <pre className="leading-relaxed">
-            <code>{current.code}</code>
+        <div className="rounded-xl bg-[#070b14] border border-white/10 p-4 sm:p-5 font-mono text-xs sm:text-sm text-[#f8fafc] overflow-x-auto">
+          <pre className="leading-relaxed text-[#f8fafc]">
+            <code className="text-emerald-300">{current.code}</code>
           </pre>
         </div>
 

@@ -77,8 +77,8 @@ const PLATFORMS: PlatformConfig[] = [
     badge: "CI/CD Marketplace",
     icon: GitBranch,
     description: "Execute MCP verification flows, secret scans, and CIDR checks automatically inside your CI/CD pipelines.",
-    command: "- name: Run Castov MCP Security Scan\n  uses: castovdev/castov-action@v1.0.0\n  with:\n    command: 'scan'\n    args: '.'",
-    docLink: "https://github.com/marketplace/actions/castov-security-quality-scan",
+    command: "- name: Run Castov MCP Security Scan\n  uses: castovdev/castov@v1.4.0\n  with:\n    path: '.'\n    fail-on-secrets: 'true'",
+    docLink: "https://github.com/marketplace/actions/castov-security-secret-scanner",
     features: [
       "Composite Action with cached Node.js 20 environment",
       "Instant PR failure on leaked API secrets or corrupt CIDR",
@@ -106,7 +106,7 @@ export function InstallationDistributionSection() {
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-xs font-semibold text-accent mb-4">
             <Terminal className="w-3.5 h-3.5" />
-            <span>GLOBAL DISTRIBUTION & MCP ECOSYSTEM</span>
+            <span>GLOBAL DISTRIBUTION &amp; MCP ECOSYSTEM</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-fg">
             Deploy Castov <span className="bg-gradient-to-r from-accent to-emerald-400 bg-clip-text text-transparent">Everywhere You Build</span>
@@ -127,7 +127,7 @@ export function InstallationDistributionSection() {
                 onClick={() => setActivePlatform(platform.id)}
                 className={`flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                   isActive
-                    ? "bg-card text-fg shadow-sm border border-line/80 text-accent"
+                    ? "bg-card text-accent shadow-sm border border-line/80"
                     : "text-muted hover:text-fg hover:bg-hover/50"
                 }`}
               >
@@ -174,13 +174,13 @@ export function InstallationDistributionSection() {
 
           {/* Terminal / Code Snippet Area */}
           <div className="p-6 sm:p-8 bg-field/80">
-            <div className="rounded-xl border border-line/80 bg-[#0b101b] p-4 sm:p-5 font-mono text-sm relative group shadow-inner">
-              <div className="flex items-center justify-between text-xs text-muted/60 pb-3 mb-3 border-b border-white/5">
+            <div className="rounded-xl border border-white/10 bg-[#0b101b] p-4 sm:p-5 font-mono text-sm relative group shadow-inner">
+              <div className="flex items-center justify-between text-xs text-slate-400 pb-3 mb-3 border-b border-white/10">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                  <span className="ml-2 font-mono text-[11px] text-muted">terminal execution</span>
+                  <span className="ml-2 font-mono text-[11px] text-slate-300">terminal execution</span>
                 </div>
                 <button
                   onClick={() => handleCopy(activeConfig.command)}
@@ -201,9 +201,9 @@ export function InstallationDistributionSection() {
                 </button>
               </div>
 
-              {/* Command Presentation */}
-              <pre className="text-fg whitespace-pre-wrap leading-relaxed overflow-x-auto text-xs sm:text-sm selection:bg-accent/30">
-                <code>{activeConfig.command}</code>
+              {/* Command Presentation — Explicit bright color on dark terminal background */}
+              <pre className="text-[#f8fafc] whitespace-pre-wrap leading-relaxed overflow-x-auto text-xs sm:text-sm font-medium selection:bg-blue-500/30">
+                <code className="text-emerald-300">{activeConfig.command}</code>
               </pre>
             </div>
 
