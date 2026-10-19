@@ -10,8 +10,9 @@
 - **Sponsorship & Partnerships (`/sponsor`)**: https://www.castov.com/sponsor
 - **Compact LLM Index**: https://www.castov.com/llms.txt
 - **NPM Package (`castov` v1.4.0)**: https://www.npmjs.com/package/castov
-- **NPM SDK (`@castov/sdk` v1.4.0)**: https://www.npmjs.com/package/@castov/sdk
-- **GitHub Repository**: https://github.com/castov/time
+- **NPM SDK (`castov-sdk` v1.0.0)**: https://www.npmjs.com/package/castov-sdk
+- **GitHub Repository**: https://github.com/castovdev/castov
+- **Author & License**: Abdelmalik Benidir / Castov (MIT License)
 - **Glama MCP Security Audit**: Grade A (100% deterministic local execution, zero telemetry, zero remote API calls, MIT License)
 
 ---

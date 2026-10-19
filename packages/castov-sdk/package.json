@@ -9,7 +9,7 @@
     "url": "git+https://github.com/castovdev/castov.git"
   },
   "license": "MIT",
-  "author": "Castov <https://castov.com>",
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/cjs/index.js",

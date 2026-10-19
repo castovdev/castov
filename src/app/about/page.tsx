@@ -35,7 +35,7 @@ export default function AboutPage() {
 
       <h2>Who builds Castov?</h2>
       <p>
-        Castov is maintained by <strong>Abdelouahab Benidira</strong> and the Castov Engineering team. We are passionate about creating privacy-first, blazing fast developer tools.
+        Castov is maintained by <strong>Abdelmalik Benidir</strong> and the Castov Engineering team. We are passionate about creating privacy-first, blazing fast developer tools.
       </p>
       <p>
         If you have feedback, feature requests, or need support, reach out to us directly at: 

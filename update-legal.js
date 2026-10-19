@@ -5,7 +5,7 @@ let aboutCode = fs.readFileSync('src/app/about/page.tsx', 'utf-8');
 const contactInfo = `
       <h2>Who builds Castov?</h2>
       <p>
-        Castov is maintained by <strong>Abdelouahab Benidira</strong> and the Castov Engineering team. We are passionate about creating privacy-first, blazing fast developer tools.
+        Castov is maintained by <strong>Abdelmalik Benidir</strong> and the Castov Engineering team. We are passionate about creating privacy-first, blazing fast developer tools.
       </p>
       <p>
         If you have feedback, feature requests, or need support, reach out to us directly at: 
@@ -22,7 +22,7 @@ fs.writeFileSync('src/app/about/page.tsx', aboutCode);
 let contactCode = fs.readFileSync('src/app/contact/page.tsx', 'utf-8');
 const contactContent = `
       <p>
-        We are always open to feedback, feature requests, or bug reports. Castov is actively maintained by <strong>Abdelouahab Benidira</strong>.
+        We are always open to feedback, feature requests, or bug reports. Castov is actively maintained by <strong>Abdelmalik Benidir</strong>.
       </p>
       <ul>
         <li><strong>Email:</strong> <a href="mailto:support@castov.com">support@castov.com</a></li>

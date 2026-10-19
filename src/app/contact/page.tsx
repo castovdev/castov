@@ -18,7 +18,7 @@ export default function ContactPage() {
       path="/contact"
     >
       <p>
-        Castov is actively maintained by <strong>Abdelouahab Benidira</strong> and the Castov Engineering team. We are always open to feedback, feature requests, or bug reports.
+        Castov is actively maintained by <strong>Abdelmalik Benidir</strong> and the Castov Engineering team. We are always open to feedback, feature requests, or bug reports.
       </p>
 
       <h2>Email</h2>
@@ -34,7 +34,7 @@ export default function ContactPage() {
 
       <h2>Social & Source</h2>
       <ul>
-        <li><strong>GitHub:</strong> <a href="https://github.com/castovdev">github.com/castovdev</a></li>
+        <li><strong>GitHub:</strong> <a href="https://github.com/castovdev/castov">github.com/castovdev/castov</a></li>
       </ul>
 
       <h2>What helps most</h2>

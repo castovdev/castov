@@ -266,4 +266,5 @@ npm run test
 
 ## 📄 License
 
-Castov is open-source software licensed under the **[MIT License](./LICENSE)**. Free for personal, commercial, and enterprise usage.
+Castov is open-source software licensed under the **[MIT License](./LICENSE)** — Copyright © 2026 **Abdelmalik Benidir / Castov** ([castov.com](https://www.castov.com)). Free for personal, commercial, and enterprise usage.
+
