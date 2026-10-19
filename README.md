@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://www.castov.com">
-    <img src="https://raw.githubusercontent.com/castovdev/castov/main/public/logo.png" alt="Castov Logo" width="180" />
+    <img src="https://raw.githubusercontent.com/castovdev/castov/main/public/logo.png?v=2" alt="Castov Logo" width="180" />
   </a>
 </p>
 
