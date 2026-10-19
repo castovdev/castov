@@ -24,6 +24,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapEntries: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: getLastMod('src/app/page.tsx'), changeFrequency: 'daily', priority: 1.0 },
     { url: `${baseUrl}/mcp`, lastModified: getLastMod('src/app/mcp/page.tsx'), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${baseUrl}/llms.txt`, lastModified: getLastMod('public/llms.txt'), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${baseUrl}/llms-full.txt`, lastModified: getLastMod('public/llms-full.txt'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/tools`, lastModified: getLastMod('src/app/tools/page.tsx'), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/developer`, lastModified: getLastMod('src/app/developer/page.tsx'), changeFrequency: 'weekly', priority: 0.95 },
     { url: `${baseUrl}/cli`, lastModified: getLastMod('src/app/cli/page.tsx'), changeFrequency: 'weekly', priority: 0.95 },

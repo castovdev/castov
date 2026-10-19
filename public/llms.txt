@@ -1,0 +1,82 @@
+# Castov (DevSecOps & Developer Toolbox Ecosystem)
+
+> Castov (https://castov.com) is an open-source, zero-telemetry DevSecOps and developer utility ecosystem featuring a Glama Grade-A certified Model Context Protocol (MCP) Server (`v1.4.0`), a zero-dependency Node.js CLI (`castov`), a TypeScript SDK (`castov-sdk`), a VS Code / Cursor / Windsurf extension (`castov-vscode`), and 1,000+ client-side browser engineering tools and reference registries.
+
+## Core Ecosystem Overview
+
+- **Castov MCP Server (`v1.4.0` — Glama Grade A Certified)**: Official stdio JSON-RPC 2.0 Model Context Protocol server exposing 10 hardened, read-only (`readOnlyHint: true`, `destructiveHint: false`, `openWorldHint: false`) local tools for Claude Desktop, Cursor, Windsurf, VS Code Copilot, Cline, and Zed.
+- **Castov CLI (`v1.4.0`)**: Instant zero-server terminal toolkit for port inspection and `EADDRINUSE` process termination, IPv4 CIDR subnet calculation, cryptographic `.env` secret generation, offline credential leak scanning, Unix timestamp conversion, UUIDv4/UUIDv7/ULID generation, Cron expression explanation, IANA timezone conversion, and offline JWT decoding.
+- **Client-Side Web Utilities (63+ Interactive Tools)**: 100% browser-executed developer utilities with zero server storage, including Steganography Environment Vaults (`AES-256-GCM`), P2P WebRTC Canvas, JSON-to-TypeScript/Zod/Prisma/Drizzle converters, Diff Checker, Regex Tester, and Cron/Chmod calculators.
+- **Programmatic SEO & Engineering Reference Registries (1,023+ Indexed Pages)**:
+  - **Network Ports Registry (`/ports/[port]`)**: 74+ deep-dive guides for TCP/UDP ports (e.g., `3000`, `5432`, `6379`, `6333` Qdrant, `11434` Ollama, `54321` Supabase) with OS-specific `lsof`/`netstat` and Docker commands.
+  - **Developer Error Fix Lab (`/error-fixes/[slug]`)**: 38+ interactive root-cause and fix guides for Next.js 16, React hydration, MCP stdio connection errors, Docker bind conflicts, Prisma, and Supabase PostgreSQL RLS policies.
+  - **IPv4 CIDR & Subnet Reference (`/cidr/[mask]`)**: Prefix `/8` through `/32` subnet masks, wildcard masks, and usable host capacities.
+  - **POSIX Chmod Reference (`/chmod/[code]`)**: All 512 octal permission combinations (`000` to `777`).
+  - **HTTP Status Code Reference (`/http-status/[code]`)**: Complete RFC specifications and debugging guides.
+
+## Quick Execution & Installation Commands
+
+### 1. Run Castov MCP Server (Stdio JSON-RPC 2.0)
+```bash
+npx -y castov@latest mcp
+```
+
+### 2. Claude Desktop / Cursor / Windsurf Configuration (`mcp.json`)
+```json
+{
+  "mcpServers": {
+    "castov": {
+      "command": "npx",
+      "args": ["-y", "castov@latest", "mcp"]
+    }
+  }
+}
+```
+
+### 3. Docker Containerized MCP & CLI Runtime
+```bash
+docker run -i --rm castovdev/castov:latest mcp
+```
+
+### 4. Common Castov CLI Terminal Commands
+```bash
+npx castov@latest --help
+npx castov port 3000 --kill
+npx castov cidr 10.240.0.0/22
+npx castov detect 018f3a9c-6d20-7000-8000-010203040506
+npx castov ts 1760868000
+npx castov cron "*/15 9-17 * * 1-5" America/New_York
+npx castov tz "2026-10-19 14:00" UTC Asia/Tokyo
+npx castov secret --len 32
+npx castov scan .
+npx castov rules nextjs --write
+```
+
+## Available MCP Server Tools (10 Hardened Local Tools)
+
+1. `castov_timestamp`: Convert Unix epoch timestamps (seconds or milliseconds) to UTC, ISO 8601, and localized time.
+2. `castov_detect_id`: Detect identifier format and extract embedded creation timestamps from UUIDv7, ULID, MongoDB ObjectId, and 64-bit Snowflake IDs.
+3. `castov_cidr`: Compute IPv4 network address, subnet mask, wildcard mask, broadcast address, usable host range, and RFC 3021 `/31` & `/32` capacities.
+4. `castov_port`: Inspect TCP/UDP port numbers (`1-65535`) for IANA service assignments, protocols, and active local listeners.
+5. `castov_cron`: Parse 5-field POSIX cron expressions into plain English and calculate the next 5 upcoming execution timestamps in any IANA timezone.
+6. `castov_timezone`: Convert date/time strings between any two IANA timezones with exact UTC offset and DST handling.
+7. `castov_secret`: Generate CSPRNG cryptographic secrets in Hex, Base64URL, API key, and time-ordered UUIDv7 formats.
+8. `castov_jwt_decode`: Decode JWT headers and payload claims (`exp`, `iat`, `nbf`, `sub`, `iss`) 100% offline.
+9. `castov_hash`: Compute deterministic `sha256`, `sha384`, `sha512`, `sha1`, and `md5` hex digests and Base64/Base64URL encodings.
+10. `castov_scan_secrets`: Scan code snippets, `.env` files, or git diffs in-memory for leaked credentials (AWS, GitHub PAT, Stripe, OpenAI, Slack, Private Keys).
+
+## Essential Links & Documentation
+
+- [Castov Homepage](https://castov.com): Main entry point and instant timestamp/developer workbench.
+- [MCP Server Documentation, Live Playground & Stack Composer](https://castov.com/mcp): Interactive JSON-RPC 2.0 inspector, 1-click IDE setup, and multi-server `mcp.json` composer.
+- [Full LLM Technical Specification (`llms-full.txt`)](https://castov.com/llms-full.txt): Complete JSON Schema definitions, parameter tables, and JSON-RPC 2.0 request/response payloads for all 10 Castov MCP tools.
+- [Castov CLI Documentation](https://castov.com/cli): Complete terminal command reference and installation options (npm, Docker, Homebrew).
+- [Developer Hub & Ecosystem](https://castov.com/developer): Overview of Castov MCP Server, CLI, TypeScript SDK, and VS Code extension.
+- [All 63+ Browser Developer Tools](https://castov.com/tools): Full directory of client-side developer utilities.
+- [Network Ports Reference (`/ports`)](https://castov.com/ports): Interactive TCP/UDP port directory and `EADDRINUSE` troubleshooting guides.
+- [Developer Error Fix Lab (`/error-fixes`)](https://castov.com/error-fixes): Root-cause analysis and interactive resolution templates for common engineering errors.
+- [VS Code & Cursor Extension (`/extension`)](https://castov.com/extension): Offline VSIX package (`v0.1.4`), Visual Studio Marketplace, and Open VSX links.
+- [Sponsor & Partner with Castov (`/sponsor`)](https://castov.com/sponsor): Direct developer sponsorship tiers and ecosystem partnerships.
+- [XML Sitemap (`/sitemap.xml`)](https://castov.com/sitemap.xml): Complete index of Castov routes and reference pages.
+- [GitHub Repository (`castovdev/castov`)](https://github.com/castovdev/castov): MIT-licensed source code, GitHub Action, and release packages.
+- [Glama MCP Certification Page](https://glama.ai/mcp/servers/castovdev/castov): Independent Grade-A security, quality, and license verification.
