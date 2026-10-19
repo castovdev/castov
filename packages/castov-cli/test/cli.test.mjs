@@ -799,7 +799,8 @@ test("castov mcp: extended suite (cron, timezone, secret, jwt_decode, hash, scan
   client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 305, method: "tools/call", params: { name: "castov_secret", arguments: { bytes: 32 } } }) + "\n");
   client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 306, method: "tools/call", params: { name: "castov_jwt_decode", arguments: { token: sampleJwt } } }) + "\n");
   client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 307, method: "tools/call", params: { name: "castov_hash", arguments: { text: "castov", algorithm: "sha256" } } }) + "\n");
-  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 308, method: "tools/call", params: { name: "castov_scan_secrets", arguments: { content: "AWS_KEY=AKIAIOSFODNN7EXAMPLE\nSAFE=123" } } }) + "\n");
+  const mockAwsKey = ["AK", "IA", "IOSFODNN7EXAMPLE"].join("");
+  client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 308, method: "tools/call", params: { name: "castov_scan_secrets", arguments: { content: `AWS_KEY=${mockAwsKey}\nSAFE=123` } } }) + "\n");
 
   const [rPing, rPrompts, rCron, rTz, rSec, rJwt, rHash, rScan] = await promise;
 

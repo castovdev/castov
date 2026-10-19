@@ -23,13 +23,13 @@ export default function CliPage() {
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-xs font-semibold text-accent mb-6">
           <Terminal className="w-3.5 h-3.5" />
-          <span>OFFICIAL NPM PACKAGE • V1.3.3</span>
+          <span>OFFICIAL NPM PACKAGE • V1.4.0</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-fg mb-4">
           Castov <span className="text-accent">CLI</span>
         </h1>
         <p className="text-xl text-muted max-w-2xl mx-auto">
-          EADDRINUSE port killer, cryptographic .env secret generator, IPv4 CIDR calculator, local secret scanner, AI .cursorrules generator, and Unix/JWT tools right in your terminal.
+          EADDRINUSE port killer, 10-tool AI Model Context Protocol (MCP) server, cryptographic .env secret generator, IPv4 CIDR calculator, local secret scanner, AI .cursorrules generator, and Unix/JWT tools right in your terminal.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
@@ -41,8 +41,14 @@ export default function CliPage() {
           >
             <Terminal className="w-5 h-5 text-white" />
             <span>View on npm (castov)</span>
-            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">v1.3.3</span>
+            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">v1.4.0</span>
           </a>
+          <Link
+            href="/mcp"
+            className="btn bg-card border border-accent/40 text-fg hover:bg-hover font-bold text-base px-6 py-3 transition-all flex items-center gap-2"
+          >
+            <span>MCP Server Setup (10 Tools)</span>
+          </Link>
           <a
             href="https://www.npmjs.com/package/castov-sdk"
             target="_blank"
@@ -80,7 +86,7 @@ export default function CliPage() {
 
       {/* Terminal Cheat Sheet */}
       <div className="mb-16 bg-card p-8 rounded-2xl border border-line">
-        <h2 className="text-2xl font-bold mb-6 text-fg">Popular Terminal Commands (v1.3.3)</h2>
+        <h2 className="text-2xl font-bold mb-6 text-fg">Popular Terminal Commands (v1.4.0)</h2>
         <div className="space-y-4 font-mono text-xs">
           <div className="p-4 bg-field rounded-xl border border-accent/30">
             <span className="text-accent font-semibold"># 1. Inspect port service, find listening PID &amp; kill EADDRINUSE process</span>

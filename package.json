@@ -1,6 +1,6 @@
 {
   "name": "castov",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "private": true,
   "license": "MIT",
   "description": "Castov — Zero-Telemetry AI Execution Layer (MCP Server), CLI & 63+ Local Developer Tools",
