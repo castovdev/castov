@@ -1,0 +1,116 @@
+{
+  "name": "chaos-proxy",
+  "displayName": "Chaos Proxy – Castov",
+  "description": "Local HTTP proxy & fault injector for resilience testing: inject 429 rate limits, 500/502 errors, custom latency, and mock payloads directly from VS Code.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Testing",
+    "Debuggers",
+    "Other"
+  ],
+  "keywords": [
+    "chaos",
+    "proxy",
+    "mock",
+    "testing",
+    "resilience",
+    "rate-limit",
+    "latency",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "chaos-proxy-container",
+          "title": "Chaos Proxy",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "chaos-proxy-container": [
+        {
+          "id": "chaosProxy.mainView",
+          "name": "Chaos Rules & Status"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "chaosProxy.toggle",
+        "title": "Chaos Proxy: Toggle Start / Stop",
+        "category": "Chaos Proxy"
+      },
+      {
+        "command": "chaosProxy.openDashboard",
+        "title": "Chaos Proxy: Open Control Panel",
+        "category": "Chaos Proxy"
+      },
+      {
+        "command": "chaosProxy.inject429",
+        "title": "Chaos Proxy: Enable 429 Rate Limit Preset",
+        "category": "Chaos Proxy"
+      },
+      {
+        "command": "chaosProxy.inject500",
+        "title": "Chaos Proxy: Enable 500 Server Error Preset",
+        "category": "Chaos Proxy"
+      },
+      {
+        "command": "chaosProxy.injectLatency",
+        "title": "Chaos Proxy: Enable 3000ms Latency Preset",
+        "category": "Chaos Proxy"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "chaosProxy.toggle",
+          "when": "view == chaosProxy.mainView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "chaosProxy.openDashboard",
+          "when": "view == chaosProxy.mainView",
+          "group": "navigation@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish chaos-proxy-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
