@@ -1,0 +1,80 @@
+{
+  "name": "token-lens",
+  "displayName": "LLM Token & Cost Lens – Castov",
+  "description": "Real-time token counter & LLM cost estimator for Claude, GPT-4o, Gemini, and DeepSeek. Features CodeLens, hover inspector, context window tracker, and cost comparisons.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "llm",
+    "token",
+    "tokenizer",
+    "cost",
+    "claude",
+    "gpt4",
+    "gemini",
+    "deepseek",
+    "context-window",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "tokenLens.openCalculator",
+        "title": "Token Lens: Open LLM Cost Calculator & Comparison",
+        "category": "Token Lens"
+      },
+      {
+        "command": "tokenLens.countSelection",
+        "title": "Token Lens: Calculate Tokens & Cost for Selection",
+        "category": "Token Lens"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "tokenLens.countSelection",
+          "when": "editorHasSelection",
+          "group": "tokenLens@1"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish token-lens-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
