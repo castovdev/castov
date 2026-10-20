@@ -9,7 +9,6 @@ type ToolId =
   | "castov_scan_secrets"
   | "castov_port"
   | "castov_timestamp"
-  | "castov_uuid"
   | "castov_cron"
   | "castov_timezone"
   | "castov_secret"
@@ -266,33 +265,6 @@ const PLAYGROUND_TOOLS: PlaygroundToolSpec[] = [
         unixMilliseconds: ms,
         iso8601Utc: d.toISOString(),
         utcString: d.toUTCString(),
-      };
-    },
-  },
-  {
-    id: "castov_uuid",
-    label: "castov_uuid",
-    badge: "Crypto ID",
-    inputLabel: "Format (uuidv7 | uuidv4 | ulid)",
-    defaultInput: "uuidv7",
-    buildArgs: (raw) => ({ format: raw.trim().toLowerCase() || "uuidv7", count: 3 }),
-    execute: (raw) => {
-      const fmt = raw.trim().toLowerCase() || "uuidv7";
-      const nowHex = Date.now().toString(16).padStart(12, "0");
-      const sampleIds =
-        fmt === "ulid"
-          ? ["01K8Z6J9X4M2Q8R9T1V3W5Y7Z0", "01K8Z6J9X4P5S7V9X2Z4B6D8F1", "01K8Z6J9X4R8T0W2Y4A6C8E0G2"]
-          : fmt === "uuidv4"
-            ? ["f47ac10b-58cc-4372-a567-0e02b2c3d479", "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d", "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"]
-            : [
-                `${nowHex.slice(0, 8)}-${nowHex.slice(8, 12)}-7a12-8b34-010203040506`,
-                `${nowHex.slice(0, 8)}-${nowHex.slice(8, 12)}-7c9f-9d10-0a1b2c3d4e5f`,
-                `${nowHex.slice(0, 8)}-${nowHex.slice(8, 12)}-7f01-ae45-998877665544`,
-              ];
-      return {
-        format: fmt,
-        count: 3,
-        ids: sampleIds,
       };
     },
   },

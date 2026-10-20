@@ -22,7 +22,7 @@ import { SponsorSlot } from "@/components/sponsor-slot";
 export const metadata: Metadata = buildMetadata({
   title: "Castov MCP Server (v1.4.0) | 10 Local Tools for Claude, Cursor & Windsurf",
   description:
-    "Official Model Context Protocol (MCP) server for AI coding agents. 10 hardened, zero-telemetry local tools for port inspection, CIDR calculation, UUIDv7/ULID/Snowflake decoding, Cron scheduling, JWT inspection, and secret scanning.",
+    "Official Model Context Protocol (MCP) server for AI coding agents. 10 hardened local tools with no behavioral telemetry for port inspection, CIDR calculation, UUIDv7/ULID/Snowflake decoding, Cron scheduling, JWT inspection, and secret scanning.",
   path: "/mcp",
 });
 
