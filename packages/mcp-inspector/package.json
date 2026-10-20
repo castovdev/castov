@@ -1,0 +1,118 @@
+{
+  "name": "mcp-inspector",
+  "displayName": "MCP Inspector & Debugger – Castov",
+  "description": "Interactive tester, schema validator, live JSON-RPC traffic logger & security scanner for Model Context Protocol (MCP) servers in VS Code & Cursor.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com/mcp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Testing",
+    "Debuggers",
+    "Other"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "cursor",
+    "claude",
+    "json-rpc",
+    "debugger",
+    "llm",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mcp-inspector-container",
+          "title": "MCP Inspector",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "mcp-inspector-container": [
+        {
+          "id": "mcpInspector.serversView",
+          "name": "MCP Servers & Tools"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "mcpInspector.openPlayground",
+        "title": "MCP: Open Interactive Inspector & Tester",
+        "category": "MCP Inspector"
+      },
+      {
+        "command": "mcpInspector.refreshServers",
+        "title": "MCP: Refresh & Discover Servers",
+        "category": "MCP Inspector",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "mcpInspector.runSecurityAudit",
+        "title": "MCP: Run Security Audit on Configs",
+        "category": "MCP Inspector",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "mcpInspector.testTool",
+        "title": "MCP: Test Selected Tool",
+        "category": "MCP Inspector"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "mcpInspector.refreshServers",
+          "when": "view == mcpInspector.serversView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "mcpInspector.runSecurityAudit",
+          "when": "view == mcpInspector.serversView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "mcpInspector.openPlayground",
+          "when": "view == mcpInspector.serversView",
+          "group": "navigation@3"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish mcp-inspector-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
