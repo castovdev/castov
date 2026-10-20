@@ -31,7 +31,7 @@ export default function PrivacyPage() {
         <li><strong>Steganography & Crypto:</strong> Steganography Env Vault (AES-GCM encryption and hiding the result inside a PNG image) and the Secret Scanner. <em>Not</em> the Env Vault sharing tool: see section 4.</li>
         <li><strong>Compute & Web APIs:</strong> NexusGrid WebGPU Engine, Sonic-Gap Audio Bridge, and Quantum Simulator.</li>
         <li><strong>P2P Ghost Tunnel:</strong> Uses a public STUN server for ICE/NAT discovery with manual copy-paste token exchange—Castov does not operate a signaling server or store tunnel payloads.</li>
-        <li><strong>Developer Canvas:</strong> Developer Canvas synchronizes workflow data directly between browser peers using WebRTC and Yjs CRDTs. Public community signaling servers are used only to coordinate the initial peer connection and may receive connection metadata. Workflow graphs, node content, and payload data are not stored on Castov servers.</li>
+        <li><strong>Developer Canvas:</strong> Developer Canvas synchronizes workflow data directly between browser peers using WebRTC and Yjs CRDTs. Public community signaling servers are used only to coordinate the initial peer connection and may temporarily receive standard network connection metadata (such as IP addresses and ICE candidates) necessary to establish the peer handshake. By application design, these signaling servers never receive, process, or store workflow graphs, node configurations, or payload data.</li>
       </ul>
 
       <h2>2. Features That Store Data Locally</h2>
