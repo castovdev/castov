@@ -6,10 +6,10 @@
   </a>
 </p>
 
-<h3 align="center">The Open-Source AI Execution Layer & Zero-Telemetry Developer Suite</h3>
+<h3 align="center">The Open-Source AI Execution Layer & Privacy-First Developer Suite</h3>
 
 <p align="center">
-  Deterministic local tooling for <strong>Claude Desktop</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, and <strong>Local LLMs</strong> via the Model Context Protocol (MCP) — backed by a high-performance CLI, Docker image, IDE extension, and 63+ offline-first browser utilities.
+  Deterministic local tooling for <strong>Claude Desktop</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, and <strong>Local LLMs</strong> via the Model Context Protocol (MCP) — backed by a high-performance CLI, Docker image, IDE extension, and 61 client-first browser utilities.
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
   <a href="https://hub.docker.com/r/castovdev/castov"><img src="https://img.shields.io/badge/docker-castovdev%2Fcastov-blue?style=flat-square&logo=docker" alt="Docker Hub" /></a>
   <a href="https://glama.ai/mcp/servers/castovdev/castov"><img src="https://glama.ai/mcp/servers/castovdev/castov/badges/score.svg" alt="Castov MCP server Glama score" /></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-Protocol%202024--11--05-8b5cf6?style=flat-square" alt="MCP Protocol" /></a>
-  <a href="#privacy--zero-telemetry"><img src="https://img.shields.io/badge/telemetry-zero%20tracking-10b981?style=flat-square" alt="Zero Telemetry" /></a>
+  <a href="#privacy--no-behavioral-telemetry-guarantee"><img src="https://img.shields.io/badge/telemetry-no%20tracking-10b981?style=flat-square" alt="No Behavioral Telemetry" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" /></a>
 </p>
 
@@ -225,7 +225,7 @@ In addition to the CLI and MCP Server, Castov provides 63 client-side web tools 
 
 ---
 
-## 🔒 Privacy & Zero-Telemetry Guarantee
+## 🔒 Privacy & No Behavioral Telemetry Guarantee
 
 Engineering tools should never leak your IP, company secrets, or code snippets. 
 

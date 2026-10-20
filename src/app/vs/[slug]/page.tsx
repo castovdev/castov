@@ -87,7 +87,7 @@ export default async function VsComparisonPage({
             dependencies: "Node.js >= 18, npx castov, Model Context Protocol (MCP)",
           }),
           howToJsonLd({
-            name: `How to Adopt Castov as a Local Zero-Telemetry Alternative to ${item.competitorName}`,
+            name: `How to Adopt Castov as a Local Alternative (No Behavioral Telemetry) to ${item.competitorName}`,
             description: item.verdictSummary,
             steps: item.howToMigrateSteps,
           }),

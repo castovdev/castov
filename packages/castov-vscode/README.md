@@ -1,6 +1,6 @@
 # Timestamp Hover & UUID – Castov (VS Code Extension)
 
-Instant Unix timestamp inspection, UUID v4/v7 generation, JWT decoding, Base64 conversion, and automatic timestamp hover tooltips right inside Visual Studio Code. Zero telemetry, zero bloat, instant execution.
+Instant Unix timestamp inspection, UUID v4/v7 generation, JWT decoding, Base64 conversion, and automatic timestamp hover tooltips right inside Visual Studio Code. No behavioral telemetry, zero bloat, instant local execution.
 
 Powered by [Castov.com](https://castov.com).
 

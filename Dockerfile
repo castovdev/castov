@@ -2,7 +2,7 @@
 FROM node:20-alpine
 
 LABEL org.opencontainers.image.title="Castov MCP & CLI" \
-      org.opencontainers.image.description="Zero-telemetry AI Execution Layer (MCP Server) & 63+ Local Developer Utilities" \
+      org.opencontainers.image.description="AI Execution Layer (MCP Server) & 61 Local Developer Utilities with no behavioral telemetry" \
       org.opencontainers.image.vendor="Castov (https://castov.com)" \
       org.opencontainers.image.source="https://github.com/castovdev/castov" \
       org.opencontainers.image.licenses="MIT"

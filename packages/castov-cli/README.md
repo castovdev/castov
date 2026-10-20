@@ -2,7 +2,7 @@
 
 Fast, 100% offline developer utilities right in your terminal: **EADDRINUSE port killer (`castov port`)**, **cryptographic `.env` secret generator (`castov secret`)**, **IPv4 CIDR subnet calculator (`castov cidr`)**, **local secret scanner (`castov scan`)**, **terminal error healer (`castov fix`)**, **AI `.cursorrules` generator (`castov rules`)**, **MCP server (`castov mcp`)**, Unix timestamps, ID detector, cron explainer, IANA timezone converter, UUID v4/v7, and JWT decoding.
 
-Zero telemetry, zero cloud calls, zero configuration. Powered by [Castov.com](https://www.castov.com) and [`castov-sdk`](https://www.npmjs.com/package/castov-sdk).
+No behavioral telemetry, no remote cloud calls during local commands, zero configuration. Powered by [Castov.com](https://www.castov.com) and [`castov-sdk`](https://www.npmjs.com/package/castov-sdk).
 
 ## Installation & Quick Run
 

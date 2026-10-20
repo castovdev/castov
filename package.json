@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
-  "description": "Castov — Zero-Telemetry AI Execution Layer (MCP Server), CLI & 63+ Local Developer Tools",
+  "description": "Castov — Developer Tools Platform with 61 Browser Tools, Local CLI & Glama Grade A MCP Server (No Behavioral Telemetry)",
   "homepage": "https://www.castov.com",
   "repository": {
     "type": "git",

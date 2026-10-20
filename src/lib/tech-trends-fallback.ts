@@ -90,7 +90,7 @@ export const FALLBACK_GITHUB_REPOS: GitHubRepoItem[] = [
 export const FALLBACK_HACKER_NEWS: HackerNewsItem[] = [
   {
     id: 201,
-    title: "Show HN: Castov – High-velocity client-first developer tools with zero telemetry",
+    title: "Show HN: Castov – High-velocity client-first developer tools with no behavioral telemetry",
     url: "https://castov.com",
     hnUrl: "https://news.ycombinator.com/item?id=201",
     score: 642,

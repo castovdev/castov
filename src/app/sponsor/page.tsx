@@ -51,7 +51,7 @@ const TIERS = [
     name: "Community Supporter",
     price: "$49",
     period: "/one-time",
-    desc: "Support independent, 100% zero-telemetry open-source developer utilities and our MIT-licensed MCP Server.",
+    desc: "Support independent open-source developer utilities with no behavioral telemetry and our MIT-licensed MCP Server.",
     features: [
       "Supporter badge on our GitHub repository",
       "Direct support for open-source MCP & CLI development",

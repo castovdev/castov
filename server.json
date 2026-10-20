@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.castovdev/castov",
-  "description": "Zero-telemetry local developer execution layer for port inspection, CIDR subnetting, ID decoding, and Unix timestamps.",
+  "description": "Local developer execution layer for port inspection, CIDR subnetting, ID decoding, and Unix timestamps with no behavioral telemetry.",
   "repository": {
     "url": "https://github.com/castovdev/castov",
     "source": "github"

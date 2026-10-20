@@ -28,7 +28,7 @@ const FAQS: FaqItem[] = [
   },
   {
     q: "Are my bookmarked articles and repositories private?",
-    a: "Yes, 100%. Castov adheres to a strict client-first, zero-telemetry architecture. All bookmarks are saved exclusively in your browser's local storage and are never uploaded or tracked on our servers.",
+    a: "Yes. Castov adheres to a client-first architecture with no behavioral telemetry. All bookmarks are saved exclusively in your browser's local storage and are never uploaded or tracked on our servers.",
   },
   {
     q: "Can I filter GitHub repositories by programming language?",

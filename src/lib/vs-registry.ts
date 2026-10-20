@@ -29,10 +29,10 @@ export const VS_COMPARISONS: VsComparison[] = [
     slug: "snyk",
     competitorName: "Snyk",
     competitorCategory: "Secret Scanning & DevSecOps",
-    title: "Castov Secret Scanner vs Snyk — Free Zero-Telemetry Alternative",
+    title: "Castov Secret Scanner vs Snyk — Free Local Alternative (No Behavioral Telemetry)",
     seoTitle: "Snyk Alternative (Free & Offline): Castov Secret Scanner vs Snyk (2026)",
     summary:
-      "Compare Castov's 100% local, zero-telemetry Secret Scanner (CLI & MCP Server) against Snyk Cloud for pre-commit secret detection, CI/CD pipelines, and AI coding agents.",
+      "Compare Castov's local Secret Scanner (no behavioral telemetry in CLI & MCP Server) against Snyk Cloud for pre-commit secret detection, CI/CD pipelines, and AI coding agents.",
     verdictSummary:
       "Snyk is a comprehensive enterprise cloud CNAPP/SCA platform for large security teams. Castov (`npx castov scan .` and `castov_scan_secrets` MCP tool) is built for developers and AI agents who want instant, zero-account, 100% offline secret detection in under 150ms without sending source code or tokens to a cloud server.",
     castovCommand: "npx castov scan .",
@@ -192,12 +192,12 @@ export const VS_COMPARISONS: VsComparison[] = [
     slug: "jwt-io",
     competitorName: "jwt.io",
     competitorCategory: "JWT Debugging & Token Inspection",
-    title: "Castov Offline JWT Decoder vs jwt.io — Zero-Telemetry Token Inspector",
-    seoTitle: "jwt.io Alternative (100% Offline & CLI/MCP): Castov vs jwt.io (2026)",
+    title: "Castov Offline JWT Decoder vs jwt.io — Local Token Inspector (No Behavioral Telemetry)",
+    seoTitle: "jwt.io Alternative (Offline & CLI/MCP): Castov vs jwt.io (2026)",
     summary:
-      "Compare Castov's 100% offline JWT Decoder (Browser, CLI `npx castov jwt`, and MCP tool `castov_jwt_decode`) against jwt.io for inspecting production bearer tokens safely.",
+      "Compare Castov's offline JWT Decoder (Browser, CLI `npx castov jwt`, and MCP tool `castov_jwt_decode`) against jwt.io for inspecting production bearer tokens safely.",
     verdictSummary:
-      "Pasting production Bearer tokens into third-party websites triggers security alerts at many organizations. Castov provides a strict zero-telemetry browser JWT inspector plus a terminal CLI (`npx castov jwt <token>`) and MCP tool (`castov_jwt_decode`) that never make external network requests.",
+      "Pasting production Bearer tokens into third-party websites triggers security alerts at many organizations. Castov provides a browser JWT inspector with no behavioral telemetry plus a terminal CLI (`npx castov jwt <token>`) and MCP tool (`castov_jwt_decode`) that execute locally without external network calls.",
     castovCommand: "npx castov jwt <token> --json",
     mcpCommand: "npx -y castov@latest mcp",
     castovToolUrl: "/jwt-decoder",

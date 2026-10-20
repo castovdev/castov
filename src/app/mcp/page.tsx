@@ -129,7 +129,7 @@ export default function McpServerPage() {
     url: "https://castov.com/mcp",
     downloadUrl: "https://www.npmjs.com/package/castov",
     description:
-      "Zero-telemetry Model Context Protocol (MCP) server exposing 10 deterministic local developer tools for AI coding agents."
+      "Model Context Protocol (MCP) server exposing 10 deterministic local developer tools with no behavioral telemetry."
   };
 
   return (

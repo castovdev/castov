@@ -136,7 +136,7 @@ export function McpConfigCopier() {
                 {current.badge}
               </span>
               <span className="text-xs text-emerald-400 flex items-center gap-1 font-medium">
-                <ShieldCheck className="w-3.5 h-3.5" /> Zero-Telemetry Stdio
+                <ShieldCheck className="w-3.5 h-3.5" /> Local Stdio • No Behavioral Telemetry
               </span>
             </div>
             <p className="text-xs font-mono text-muted break-all">{current.configPath}</p>

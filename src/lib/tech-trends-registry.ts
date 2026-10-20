@@ -272,7 +272,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     devtoTag: "opensource",
     hnQuery: "self-hosted",
     tagline: "Privacy-first open-source alternatives, personal cloud servers, and local-first apps",
-    summary: "Discover the hottest self-hosted open-source apps, Docker homelab dashboards, and zero-telemetry software.",
+    summary: "Discover the hottest self-hosted open-source apps, Docker homelab dashboards, and privacy-first software.",
     relatedToolPath: "/env-vault",
     relatedToolLabel: "Zero-Knowledge .env Vault",
   },

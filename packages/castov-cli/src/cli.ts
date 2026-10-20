@@ -198,7 +198,7 @@ ${bold("Examples")}
 `,
 
   scan: `
-${bold("castov scan")} — zero-telemetry local scanner for hardcoded secrets and API keys
+${bold("castov scan")} — local scanner with no behavioral telemetry for hardcoded secrets and API keys
 
 ${bold("Usage")}
   castov scan [directory]

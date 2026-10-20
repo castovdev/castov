@@ -77,7 +77,7 @@ export default function ToolsPage() {
         <div className="p-5 rounded-2xl bg-card border border-line shadow-xs flex flex-col justify-between hover:border-accent transition-colors">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-500 border border-purple-500/20 mb-2">
-              ZERO-TELEMETRY VS CLOUD
+              LOCAL TOOLS VS CLOUD
             </div>
             <h2 className="text-lg font-bold text-fg">Comparisons (/vs)</h2>
             <p className="mt-1 text-sm text-muted">

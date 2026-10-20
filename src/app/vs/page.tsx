@@ -10,7 +10,7 @@ import { ArrowRight, CheckCircle2, ShieldCheck, Terminal, Cpu, Zap } from "lucid
 export const metadata: Metadata = buildMetadata({
   title: "Castov vs Alternatives — Offline-First DevSecOps & MCP Comparisons (2026)",
   description:
-    "Objective technical comparisons between Castov (Zero-Telemetry CLI & Glama Grade A MCP Server) and cloud alternatives: Snyk, dotenv/dotenvx, jwt.io, Crontab.guru, and traditional shell CLIs.",
+    "Objective technical comparisons between Castov (Local CLI & Glama Grade A MCP Server with no behavioral telemetry) and cloud alternatives: Snyk, dotenv/dotenvx, jwt.io, Crontab.guru, and traditional shell CLIs.",
   path: "/vs",
 });
 
@@ -40,7 +40,7 @@ export default function VsIndexPage() {
           techArticleJsonLd({
             headline: "Castov vs Cloud DevSecOps Alternatives — Architectural Comparisons",
             description:
-              "Compare Castov's zero-telemetry local execution engine and Grade A MCP Server against Snyk, dotenv, jwt.io, Crontab.guru, and traditional CLIs.",
+              "Compare Castov's local execution engine (no behavioral telemetry) and Grade A MCP Server against Snyk, dotenv, jwt.io, Crontab.guru, and traditional CLIs.",
             path: "/vs",
           }),
           faqJsonLd(faqs),
@@ -59,7 +59,7 @@ export default function VsIndexPage() {
       <header className="p-6 sm:p-10 rounded-3xl bg-card border border-line space-y-5">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
           <ShieldCheck className="w-3.5 h-3.5" />
-          Zero-Telemetry • 100% Local Execution • Glama Grade A MCP
+          No Behavioral Telemetry • 100% Local Execution • Glama Grade A MCP
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-fg">
           Castov vs. Cloud DevTools &amp; Legacy CLIs

@@ -33,7 +33,7 @@ const LIBRARY_FAQS = [
   },
   {
     q: "Is any data sent to external servers when testing regex on Castov?",
-    a: "No. 100% of pattern evaluation and testing runs directly in your browser using the local JavaScript engine with zero telemetry.",
+    a: "No. Pattern evaluation and testing runs directly in your browser using the local JavaScript engine with no behavioral telemetry.",
   },
 ];
 

@@ -35,7 +35,7 @@ const POPULAR_MCP_SERVERS: McpRegistryEntry[] = [
     category: "Core DevSecOps",
     badge: "Grade A • 10 Tools",
     description:
-      "Zero-telemetry local CIDR subnet calculator, port & process inspector, UUIDv7/ULID/Snowflake decoder, Cron predictor, offline JWT inspector, and secret leak scanner.",
+      "Local CIDR subnet calculator, port & process inspector, UUIDv7/ULID/Snowflake decoder, Cron predictor, offline JWT inspector, and secret leak scanner with no behavioral telemetry.",
     featured: true,
     config: {
       command: "npx",
