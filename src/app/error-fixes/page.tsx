@@ -8,9 +8,9 @@ import { ERROR_FIXES } from "@/lib/error-fixes-registry";
 import { ArrowRight, Wrench, Globe, Database, Cpu, GitBranch, Cloud, Terminal } from "lucide-react";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Developer Error Fix Encyclopedia — 35 Interactive Solutions | Castov",
+  title: "Developer Error Fix Encyclopedia — 69 Interactive Solutions | Castov",
   description:
-    "Instant fixes for 35 developer errors: Next.js hydration, CORS, Docker port binds, Postgres slots, SQLite locks, OpenSSL, and TypeScript errors.",
+    "Instant fixes for 69 developer errors: Next.js hydration, CORS, Docker port binds, Postgres slots, SQLite locks, OpenSSL, and TypeScript errors.",
   path: "/error-fixes",
 });
 
@@ -51,7 +51,7 @@ export default function ErrorFixesHubPage() {
         <div className="mb-6">
           <span className="hero-badge">
             <span className="hero-badge-dot" aria-hidden="true" />
-            35 Common Developer Errors & Interactive Fix Generators
+            69 Common Developer Errors & Interactive Fix Generators
           </span>
         </div>
 

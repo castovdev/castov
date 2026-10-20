@@ -29,7 +29,7 @@ export default function DeveloperPage() {
   return (
     <StaticPage
       title="Developer Hub & Ecosystem"
-      intro="Discover Castov's developer-focused integrations: Model Context Protocol (MCP) Server v1.4.0, Command Line Interface, TypeScript SDK, and VS Code Extension."
+      intro="Free browser-based developer tools. Some collaboration, cloud, and external API features may require an account or additional configuration. Discover Castov's developer-focused integrations: Model Context Protocol (MCP) Server v1.4.0, Command Line Interface, TypeScript SDK, and VS Code Extension."
       crumbs={[{ name: "Home", href: "/" }, { name: "Developer" }]}
       path="/developer"
     >
@@ -53,7 +53,7 @@ export default function DeveloperPage() {
                   </span>
                 </div>
               </div>
-              <span className="text-xs font-mono text-muted">STDIO JSON-RPC 2.0 • Zero Telemetry</span>
+              <span className="text-xs font-mono text-muted">STDIO JSON-RPC 2.0 • 100% Local Execution</span>
             </div>
             <p className="text-muted text-sm sm:text-base mb-4 leading-relaxed">
               Give Claude Desktop, Cursor, Windsurf, and VS Code Copilot deterministic local execution superpowers. Includes 10 hardened, read-only tools for port &amp; process inspection, IPv4 CIDR calculation, UUIDv7/ULID/Snowflake decoding, Cron scheduling, JWT inspection, and secret leak scanning.
@@ -97,7 +97,7 @@ export default function DeveloperPage() {
               </div>
               <div className="flex items-center gap-2">
                 <h3 className="text-xl font-bold text-fg">castov-sdk</h3>
-                <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-mono font-semibold">v1.4.0</span>
+                <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-mono font-semibold">v1.0.0</span>
               </div>
             </div>
             <p className="text-muted text-sm mb-4">

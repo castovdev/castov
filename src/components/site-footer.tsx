@@ -33,7 +33,7 @@ const ECOSYSTEM = [
   { href: "/time", label: "Timezone Pair Matrix", badge: "60+" },
   { href: "/ports", label: "Network Ports & CIDR", badge: "60+" },
   { href: "/regex-patterns", label: "Regex Patterns Lab", badge: "40" },
-  { href: "/error-fixes", label: "Error Fix Encyclopedia", badge: "35" },
+  { href: "/error-fixes", label: "Error Fix Encyclopedia", badge: "69" },
   { href: "/cheatsheets", label: "Interactive Cheat Sheets", badge: "Popular" },
   { href: "/http-status", label: "HTTP Status Guide" },
   { href: "/chmod/755", label: "Chmod Permissions" },
@@ -42,8 +42,8 @@ const ECOSYSTEM = [
 ];
 
 const RESOURCES = [
-  { href: "/directory", label: "Full Site Directory (900+)" },
-  { href: "/tools", label: "All Tools Directory" },
+  { href: "/directory", label: "Full Site Directory" },
+  { href: "/tools", label: "All Tools Directory (61)" },
   { href: "/convert", label: "Code & Schema Converters" },
   { href: "/time", label: "Global Timezone Converters" },
   { href: "/ports", label: "Ports & Subnet Reference" },
@@ -76,9 +76,12 @@ export function SiteFooter() {
             <FooterLiveTicker />
 
             {/* Privacy trust pill */}
-            <div className="hidden sm:inline-flex items-center gap-1.5 text-muted px-2 py-1">
+            <div
+              className="hidden sm:inline-flex items-center gap-1.5 text-muted px-2 py-1"
+              title="Most tools run entirely in your browser. Sharing, collaboration, P2P signaling, and selected cloud features may use external or encrypted infrastructure."
+            >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-              <span>100% Client-Side</span>
+              <span>Client-First • No Payload Logging</span>
             </div>
           </div>
 
@@ -114,7 +117,7 @@ export function SiteFooter() {
               Precision utilities designed for daily engineering workflows
             </p>
             <p className="text-xs sm:text-sm text-muted leading-relaxed">
-              Never miss new developer tools, CLI feature updates, or cheat sheet releases. No spam, zero telemetry.
+              Never miss new developer tools, CLI feature updates, or cheat sheet releases. No spam, no behavioral tracking.
             </p>
           </div>
 
@@ -137,15 +140,18 @@ export function SiteFooter() {
           </Link>
 
           <p className="max-w-sm text-sm leading-relaxed text-muted">
-            The high-velocity developer toolbox. Client-side cryptographic security, zero server logs, and instant execution without network latency.
+            The high-velocity developer toolbox. Client-side cryptography, zero payload logging, and instant execution without network latency. Standard infrastructure logs and aggregate analytics may apply.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-field border border-line text-[11px] font-medium text-muted">
               <Terminal className="w-3 h-3 text-accent" /> Node.js 18+
             </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-field border border-line text-[11px] font-medium text-muted">
-              <ShieldCheck className="w-3 h-3 text-emerald-500" /> Zero Telemetry
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-field border border-line text-[11px] font-medium text-muted"
+              title="Your tool payloads are not logged or stored. Standard infrastructure logs and aggregate analytics may apply."
+            >
+              <ShieldCheck className="w-3 h-3 text-emerald-500" /> No Payload Logging
             </span>
           </div>
 

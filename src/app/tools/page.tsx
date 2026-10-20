@@ -21,7 +21,7 @@ export default function ToolsPage() {
   return (
     <StaticPage
       title="Tools"
-      intro={`${TOOLS.length} free tools for working with Unix time, dates, configurations, and developer workflows. Most tools run instantly in your browser. Some Labs and Cloud features use peer-to-peer signaling or encrypted cloud storage.`}
+      intro={`Free browser-based developer tools. ${TOOLS.length} tools for working with Unix time, dates, configurations, and developer workflows. Most tools run entirely in your browser. Sharing, collaboration, P2P signaling, and selected cloud features may use external or encrypted infrastructure.`}
       crumbs={[{ name: "Home", href: "/" }, { name: "Tools" }]}
       path="/tools"
     >
@@ -62,7 +62,7 @@ export default function ToolsPage() {
         <div className="p-5 rounded-2xl bg-card border border-line shadow-xs flex flex-col justify-between hover:border-accent transition-colors">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 mb-2">
-              54 ERROR GUIDES
+              69 ERROR GUIDES
             </div>
             <h2 className="text-lg font-bold text-fg">Error Fix Encyclopedia</h2>
             <p className="mt-1 text-sm text-muted">

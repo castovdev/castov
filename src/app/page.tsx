@@ -52,7 +52,7 @@ export default function HomePage() {
           </h1>
           
           <p className="text-lg lg:text-xl text-muted max-w-3xl mx-auto mb-10 leading-relaxed">
-            Most tools run entirely in your browser.
+            Free browser-based developer tools. Most tools run entirely in your browser; sharing, collaboration, P2P signaling, and selected cloud features may use external or encrypted infrastructure.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
@@ -183,7 +183,7 @@ export default function HomePage() {
                 <div>
                   <h3 className="text-xl font-bold mb-2 group-hover:text-success transition-colors text-fg">P2P Multiplayer Canvas</h3>
                   <p className="text-muted leading-relaxed">
-                    A visual node-editor for building data pipelines. Connects peers in real-time using WebRTC and CRDTs (Yjs) with direct peer-to-peer sync and zero server storage.
+                    A visual node-editor for building data pipelines. Connects peers in real-time using WebRTC and CRDTs (Yjs) with direct peer-to-peer data channels and public STUN signaling servers. No workflow payloads are stored on Castov servers.
                   </p>
                 </div>
               </div>
@@ -264,7 +264,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to supercharge your workflow?</h2>
           <p className="text-xl text-muted mb-10">
-            Free developer tools that run in your browser.
+            Free browser-based developer tools. Some collaboration, cloud, and external API features may require an account or additional configuration.
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link href="/tools" className="flex items-center justify-center gap-2 bg-accent text-accent-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-hover transition-colors shadow-sm w-full sm:w-auto">

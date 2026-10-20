@@ -68,7 +68,7 @@ const PLATFORMS: PlatformConfig[] = [
     features: [
       "Available on Open VSX Registry & VS Marketplace",
       "Interactive Timestamp Hover Tooltips in logs/JSON",
-      "Zero telemetry, 100% offline client-side execution"
+      "No behavioral telemetry, 100% offline local execution"
     ]
   },
   {

@@ -221,7 +221,7 @@ export default function ExtensionPage() {
               <Download className="w-4 h-4 mr-2 text-white" /> Download Extension ZIP
             </a>
             <Link href="/tools" className="btn bg-field border border-line text-muted hover:text-fg font-medium px-5 py-3">
-              Explore All 55+ Online Tools <ArrowRight className="w-4 h-4 ml-2" />
+              Explore All 61 Online Tools <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </div>
         </div>
@@ -232,7 +232,7 @@ export default function ExtensionPage() {
         <div className="p-6 rounded-2xl bg-field/50 border border-line/60">
           <ShieldCheck className="w-6 h-6 text-accent mx-auto mb-2" />
           <h4 className="font-bold text-fg mb-1">100% Private</h4>
-          <p className="text-xs text-muted">Runs purely client-side. Zero telemetry and zero remote data transmission.</p>
+          <p className="text-xs text-muted">Runs purely local in your editor. No behavioral telemetry and no remote payload transmission.</p>
         </div>
         <div className="p-6 rounded-2xl bg-field/50 border border-line/60">
           <Zap className="w-6 h-6 text-emerald-400 mx-auto mb-2" />

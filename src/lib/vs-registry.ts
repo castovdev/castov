@@ -42,7 +42,7 @@ export const VS_COMPARISONS: VsComparison[] = [
     rows: [
       {
         feature: "Execution Model & Privacy",
-        castov: "100% Local & Offline (Zero Telemetry, Zero Cloud Calls)",
+        castov: "100% Local & Offline (No Telemetry, Zero Cloud Calls in CLI)",
         competitor: "Cloud-connected SaaS (requires API token & telemetry sync)",
         winner: "castov",
       },

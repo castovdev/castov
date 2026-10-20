@@ -120,7 +120,7 @@ export function renderOgImage(
             castov.com
           </div>
           <div style={{ fontSize: 24, color: "#64748B", fontWeight: 500 }}>
-            Zero Telemetry • Client-Side
+            No Payload Logging • Client-First
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 # Castov — Complete LLM & AI Agent Technical Reference (llms-full.txt)
 
-> Castov (`castov` v1.4.0) is a zero-telemetry, deterministic DevSecOps & Developer Toolbox Ecosystem featuring a **Glama Grade A** Model Context Protocol (MCP) Server, a cross-platform CLI (`npx castov`), a pure TypeScript SDK (`@castov/sdk`), a VS Code Extension, 29+ client-side browser utilities, and a 1,000+ page Programmatic SEO technical registry (`https://www.castov.com`).
+> Castov (`castov` v1.4.0) is a deterministic DevSecOps & Developer Toolbox Ecosystem featuring a **Glama Grade A** Model Context Protocol (MCP) Server, a cross-platform CLI (`npx castov`), a pure TypeScript SDK (`castov-sdk` v1.0.0), a VS Code Extension (`castov-vscode` v0.1.4), 61 browser developer tools (51 core utilities + 10 experimental Labs), and an extensive Programmatic SEO technical registry (`https://www.castov.com`).
 
 - **Canonical Website**: https://www.castov.com
 - **MCP Server Hub & Interactive JSON-RPC 2.0 Playground**: https://www.castov.com/mcp

@@ -165,7 +165,7 @@ export default function McpServerPage() {
 
         <p className="text-lg sm:text-xl text-muted max-w-3xl mx-auto leading-relaxed">
           Give Claude Desktop, Cursor, Windsurf, and VS Code Copilot deterministic local execution superpowers.
-          10 hardened, read-only developer tools with zero telemetry and zero cloud roundtrips.
+          10 hardened, read-only local developer tools with no remote payload logging and zero cloud roundtrips.
         </p>
 
         {/* Official Glama & npm Badges */}
@@ -327,14 +327,14 @@ export default function McpServerPage() {
           Ready to supercharge your AI coding assistant?
         </h2>
         <p className="text-sm text-muted max-w-xl mx-auto mb-6">
-          Run Castov directly via <code className="text-fg bg-field px-1.5 py-0.5 rounded">npx -y castov@latest mcp</code> or explore all 63+ interactive browser utilities and CLI commands.
+          Run Castov directly via <code className="text-fg bg-field px-1.5 py-0.5 rounded">npx -y castov@latest mcp</code> or explore all 61 interactive browser utilities (including 10 experimental Labs) and CLI commands.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/cli" className="btn btn-primary px-6 py-3 text-sm font-bold">
             Explore Terminal CLI Commands
           </Link>
           <Link href="/tools" className="btn bg-field border border-line text-fg px-6 py-3 text-sm font-bold hover:bg-hover">
-            Browse 63+ Web Utilities
+            Browse 61 Browser Utilities
           </Link>
         </div>
       </div>

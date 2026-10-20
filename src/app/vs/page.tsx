@@ -22,7 +22,7 @@ export default function VsIndexPage() {
     },
     {
       q: "Is Castov completely free for commercial and enterprise use?",
-      a: "Yes. Both the Castov CLI (`npx castov`), the MCP Server (`npx -y castov@latest mcp`), and `@castov/sdk` are MIT-licensed, 100% free, and contain zero telemetry.",
+      a: "Yes. Both the Castov CLI (`npx castov`), the MCP Server (`npx -y castov@latest mcp`), and `@castov/sdk` are MIT-licensed, 100% free, and operate locally with no behavioral telemetry.",
     },
   ];
 
