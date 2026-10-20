@@ -26,7 +26,7 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: "Is my data sent to a server?",
-    a: "Time, date and converter tools do not upload your input to Castov servers. Some preferences, such as theme, custom time zones and selected models, are stored locally on your device. Some features use the network by design: Env Vault uploads an encrypted copy, and P2P tools use public signaling servers.",
+    a: "Time, date and converter tools do not upload your input to Castov servers. Some preferences, such as theme, custom time zones and selected models, are stored locally on your device. Some features use the network by design: Env Vault uploads an encrypted copy, P2P Ghost Tunnel uses public STUN discovery with manual token exchange, and Developer Canvas connects to public WebRTC signaling servers.",
   },
   {
     q: "What is a Unix timestamp?",

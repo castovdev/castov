@@ -105,8 +105,7 @@ export function P2pGhostTunnelTool() {
             <Zap className="w-8 h-8 text-warning" /> P2P Ghost Tunnel
           </h2>
           <p className="text-muted text-lg mb-8">
-            Bypass ngrok. Establish a direct Peer-to-Peer WebRTC Data Channel between two browsers. 
-            Zero servers, zero latency, impossible to intercept.
+            Bypass ngrok. Establish a direct Peer-to-Peer WebRTC Data Channel between two browsers using public STUN discovery and manual token exchange. No relay servers and no intermediary payload storage.
           </p>
 
           {!mode && (

@@ -374,14 +374,14 @@ export const TOOLS: Tool[] = [
     category: "Labs",
     name: "P2P Ghost Tunnel",
     seoTitle: "WebRTC P2P Ghost Tunnel | Serverless Localhost Sharing",
-    metaDescription: "Share your localhost directly to another browser using direct Peer-to-Peer WebRTC data channels with public STUN signaling.",
+    metaDescription: "Share your localhost directly to another browser using direct Peer-to-Peer WebRTC data channels with public STUN discovery and manual token exchange.",
     intro: "Bypass ngrok entirely. Generate a secure WebRTC tunnel to stream your localhost directly to a client's browser without any intermediary servers.",
     cardDescription: "Share localhost via direct P2P WebRTC connection.",
     faq: [
       { q: "Is the data routed through Castov servers?", a: "No. All payload data flows directly between browser peers using WebRTC data channels. Public STUN servers are used solely for initial ICE discovery; no payload data is routed through or stored on Castov servers." },
       { q: "What happens if both devices are behind strict NATs?", a: "Direct connection might fail without a TURN server. Currently, this tool requires at least one peer to have permissive NAT traversal or use a local network." }
     ], related: [], sections: [
-      { heading: "What is P2P Ghost Tunnel?", paragraphs: ["P2P Ghost Tunnel establishes a direct, encrypted WebRTC connection between your browser and another device, entirely bypassing centralized servers. It's designed for transferring logs, sensitive payloads, or securely chatting without leaving a trace.", "Because the signaling relies on a minimal exchange of ICE candidates (which can be done manually or via a temporary signaling channel), the resulting connection is strictly peer-to-peer."] }
+      { heading: "What is P2P Ghost Tunnel?", paragraphs: ["P2P Ghost Tunnel establishes a direct, encrypted WebRTC connection between your browser and another device, entirely bypassing centralized servers. It's designed for transferring logs, sensitive payloads, or securely chatting without leaving a trace.", "Because the signaling relies on a manual copy-paste exchange of SDP tokens and public STUN discovery, the resulting connection is strictly serverless and peer-to-peer."] }
     ], howTo: [
       "Generate an Offer from Device A and copy the SDP string.",
       "Paste the Offer into Device B to generate an Answer.",

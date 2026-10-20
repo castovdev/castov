@@ -18,7 +18,7 @@ export default function PrivacyPage() {
     >
       <h2>Transparency First</h2>
       <p>
-        At Castov, we believe developers should have absolute clarity on where their data goes. Time, date and converter tools do not upload your input to Castov servers. Some preferences, such as theme, custom time zones and selected models, are stored locally on your device. Some features use the network by design: Env Vault uploads an encrypted copy, and P2P tools use public signaling servers.
+        At Castov, we believe developers should have absolute clarity on where their data goes. Time, date and converter tools do not upload your input to Castov servers. Some preferences, such as theme, custom time zones and selected models, are stored locally on your device. Some features use the network by design: Env Vault uploads an encrypted copy, P2P Ghost Tunnel uses a public STUN server for ICE/NAT discovery with manual token exchange, and Developer Canvas connects to public WebRTC signaling servers for peer-to-peer CRDT collaboration.
       </p>
 
       <h2>1. Features That Run Entirely in the Browser (100% Local)</h2>
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
         <li><strong>Time & Utility:</strong> All Timestamp Converters, World Clocks, and Date tools.</li>
         <li><strong>Steganography & Crypto:</strong> Steganography Env Vault (AES-GCM encryption and hiding the result inside a PNG image) and the Secret Scanner. <em>Not</em> the Env Vault sharing tool: see section 4.</li>
         <li><strong>Compute & Web APIs:</strong> NexusGrid WebGPU Engine, Sonic-Gap Audio Bridge, and Quantum Simulator.</li>
-        <li><strong>P2P Tools &amp; Canvas:</strong> P2P Ghost Tunnel and Developer Canvas establish direct peer-to-peer connections using WebRTC and CRDTs (Yjs). Data is synchronized directly between browser peers over WebRTC data channels using public signaling servers. Workflow graphs and nodes are never stored on Castov servers or in any database.</li>
+        <li><strong>P2P Tools &amp; Canvas:</strong> P2P Ghost Tunnel uses a public STUN server for ICE/NAT discovery with manual copy-paste token exchange—Castov does not operate a signaling server or store tunnel payloads. Developer Canvas establishes direct peer-to-peer synchronization using WebRTC and CRDTs (Yjs) via public community signaling servers (<code>signaling.yjs.dev</code>); workflow graphs and nodes are synchronized directly between browser peers and are never stored on Castov servers or in any database.</li>
       </ul>
 
       <h2>2. Features That Store Data Locally</h2>
