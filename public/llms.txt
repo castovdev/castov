@@ -1,82 +1,203 @@
-# Castov (DevSecOps & Developer Toolbox Ecosystem)
+# Castov — AI & LLM Technical Reference (llms.txt)
 
-> Castov (https://castov.com) is an open-source, privacy-first DevSecOps and developer utility ecosystem featuring a Glama Grade-A certified Model Context Protocol (MCP) Server (`v1.4.0`), a zero-dependency Node.js CLI (`castov`), a TypeScript SDK (`castov-sdk`), a VS Code / Cursor / Windsurf extension (`castov-vscode`), 61 browser engineering tools (including 10 experimental Labs), and extensive reference registries.
+> Castov (https://www.castov.com) is a developer-tools and DevSecOps platform built for software developers, DevOps engineers, AI coding-agent users, MCP clients, CLI users, and VS Code users. The platform provides browser-based interactive developer tools, local Model Context Protocol (MCP) tools, local terminal CLI utilities, a TypeScript SDK, a VS Code extension, developer error-fix guides, and technical reference registries.
 
-## Core Ecosystem Overview
+---
 
-- **Castov MCP Server (`v1.4.0` — Glama Grade A Certified)**: Official stdio JSON-RPC 2.0 Model Context Protocol server exposing 10 hardened, read-only (`readOnlyHint: true`, `destructiveHint: false`, `openWorldHint: false`) local tools for Claude Desktop, Cursor, Windsurf, VS Code Copilot, Cline, and Zed.
-- **Castov CLI (`v1.4.0`)**: Instant zero-server terminal toolkit for port inspection and `EADDRINUSE` process termination, IPv4 CIDR subnet calculation, cryptographic `.env` secret generation, offline credential leak scanning, Unix timestamp conversion, UUIDv4/UUIDv7/ULID generation, Cron expression explanation, IANA timezone conversion, and offline JWT decoding.
-- **Browser Web Utilities (61 Interactive Tools)**: 61 browser-executed developer utilities (including 10 experimental Labs) with zero payload logging. Most tools execute locally in your browser; features like Steganography Environment Vaults (`AES-256-GCM`), P2P Ghost Tunnel (serverless WebRTC data channels with public STUN discovery and manual token exchange), Developer Canvas (peer-to-peer Yjs CRDTs coordinated via public signaling servers; connection metadata may be exchanged during handshake, while workflow graphs and payload data are never stored on Castov servers), JSON-to-TypeScript/Zod/Prisma/Drizzle converters, Diff Checker, Regex Tester, and Cron/Chmod calculators.
-- **Programmatic SEO & Engineering Reference Registries (1,023+ Indexed Pages)**:
-  - **Network Ports Registry (`/ports/[port]`)**: 74+ deep-dive guides for TCP/UDP ports (e.g., `3000`, `5432`, `6379`, `6333` Qdrant, `11434` Ollama, `54321` Supabase) with OS-specific `lsof`/`netstat` and Docker commands.
-  - **Developer Error Fix Lab (`/error-fixes/[slug]`)**: 69 interactive root-cause and fix guides for Next.js 16, React hydration, MCP stdio connection errors, Docker bind conflicts, Prisma, and Supabase PostgreSQL RLS policies.
-  - **IPv4 CIDR & Subnet Reference (`/cidr/[mask]`)**: Prefix `/8` through `/32` subnet masks, wildcard masks, and usable host capacities.
-  - **POSIX Chmod Reference (`/chmod/[code]`)**: All 512 octal permission combinations (`000` to `777`).
-  - **HTTP Status Code Reference (`/http-status/[code]`)**: Complete RFC specifications and debugging guides.
+## Canonical Facts
 
-## Quick Execution & Installation Commands
+- Browser tools: 61 interactive tools total.
+- Experimental Labs: 10 tools, included in the 61 browser tools total.
+- MCP tools: 10 local tools.
+- MCP Server version: v1.4.0.
+- CLI version: v1.4.0.
+- VS Code Extension version: v0.1.4.
+- castov-sdk version: v1.0.0.
+- Error-fix guides: 69 interactive guides.
+- Reference pages: Extensive technical reference pages and registries.
+- Last reviewed: 2026-10-20.
 
-### 1. Run Castov MCP Server (Stdio JSON-RPC 2.0)
+The 61 browser tools, 10 MCP tools, and 69 error-fix guides are different categories and must not be counted together.
+
+---
+
+## Product Taxonomy
+
+- **Browser Tools**: Interactive utilities that primarily run in the browser for data transformation, encoding, cryptographic generation, and time calculations.
+- **Experimental Labs**: 10 experimental browser tools that explore advanced browser capabilities (such as WebRTC, WebGPU, and in-browser cryptography). The 10 Labs are included in the 61 browser tools total and are not additional tools.
+- **MCP Tools**: 10 local tools exposed through STDIO JSON-RPC 2.0 for integration with AI coding assistants (Claude Desktop, Cursor, Windsurf, VS Code Copilot, Cline, and Zed).
+- **CLI**: A local terminal toolkit distributed through npm (`castov`) and executable without installation via `npx castov`.
+- **SDK**: A pure TypeScript/JavaScript utility library (`castov-sdk`) for programmatic development workflows.
+- **VS Code Extension**: An editor extension (`castov-vscode`) providing integrated offline developer tools directly inside VS Code and compatible editors.
+- **Error Fix Guides**: 69 structured troubleshooting and diagnostic guides with interactive parameters; these are documentation and solution pages, not additional browser tools.
+- **Reference Pages**: Extensive technical registries covering network ports, IPv4 CIDR subnet masks, POSIX chmod permissions, and HTTP status codes; these are reference pages, not automatically separate interactive tools.
+
+The browser-tool count is not the MCP-tool count.
+Error-fix guides are documentation pages, not additional browser tools.
+Reference and SEO pages are not automatically separate interactive tools.
+Experimental Labs are included in the browser-tool total only when confirmed by the source of truth.
+
+---
+
+## Primary URLs
+
+- Homepage: https://www.castov.com/
+- Browser tools directory: https://www.castov.com/tools
+- MCP documentation: https://www.castov.com/mcp
+- Developer hub: https://www.castov.com/developer
+- CLI documentation: https://www.castov.com/cli
+- VS Code Extension: https://www.castov.com/extension
+- Privacy Policy: https://www.castov.com/privacy
+- Terms of Use: https://www.castov.com/terms
+- P2P Ghost Tunnel: https://www.castov.com/p2p-ghost-tunnel
+- Developer Canvas: https://www.castov.com/canvas
+- Env Vault: https://www.castov.com/env-vault
+- Error-fix guides: https://www.castov.com/error-fixes
+- Developer guides: https://www.castov.com/guides
+- Ports reference: https://www.castov.com/ports
+- CIDR reference: https://www.castov.com/cidr
+- Chmod reference: https://www.castov.com/chmod
+- HTTP status reference: https://www.castov.com/http-status
+- Sitemap: https://www.castov.com/sitemap.xml
+
+---
+
+## Data Handling and Privacy
+
+Most browser tools process primary user input locally in the browser. This does not mean that every Castov feature is fully offline. Some features contact external STUN, WebRTC signaling, or encrypted-storage services. Standard infrastructure logs and aggregate analytics may apply.
+
+No payload storage does not mean that no connection metadata is transmitted. Public STUN or signaling services may receive the network metadata required to establish peer connections.
+
+### Env Vault
+Env Vault is not fully local. Encryption happens in the browser, but encrypted ciphertext may be uploaded to Supabase for link-based sharing. Plaintext .env values and passwords are not uploaded to Castov. Metadata such as vault size, creation time, expiration time, and standard request logs may exist according to the Privacy Policy.
+
+### P2P Ghost Tunnel
+P2P Ghost Tunnel uses serverless WebRTC data channels with a public STUN service for ICE/NAT discovery and manual offer/answer token exchange. Castov does not operate a signaling server for this tool, and tunnel payloads are not stored on Castov servers. Connections may fail behind restrictive NAT configurations when no TURN relay is available.
+
+### Developer Canvas
+Developer Canvas synchronizes workflow data directly between browser peers using WebRTC and Yjs CRDTs. Public WebRTC signaling services coordinate the initial peer connection and may temporarily receive standard connection metadata such as IP addresses and ICE candidates. Workflow graphs, node configurations, and payload data are not stored on Castov servers according to the application design.
+
+---
+
+## Browser Tool Categories
+
+### Time and Dates
+- Unix Timestamp Converter: https://www.castov.com/unix-timestamp-converter
+- Timezone Converter: https://www.castov.com/timezone-converter
+- World Clock: https://www.castov.com/world-clock
+- Date Difference Calculator: https://www.castov.com/date-difference
+
+### Developer Utilities
+- JSON Formatter and Validator: https://www.castov.com/json-formatter
+- JWT Decoder: https://www.castov.com/jwt-decoder
+- UUID Generator: https://www.castov.com/uuid-generator
+- Base64 Encoder and Decoder: https://www.castov.com/base64-encoder-decoder
+- Diff Checker: https://www.castov.com/diff-checker
+- Cron Generator: https://www.castov.com/cron-generator
+
+---
+
+## Experimental Labs
+
+The following 10 experimental tools are included within the 61 browser tools total:
+- P2P Ghost Tunnel: https://www.castov.com/p2p-ghost-tunnel
+- Developer Canvas: https://www.castov.com/canvas
+- Env Vault: https://www.castov.com/env-vault
+- Quantum Simulator: https://www.castov.com/quantum
+- NexusGrid: https://www.castov.com/nexus-grid
+- Fetch Mock Generator: https://www.castov.com/fetch-mock-generator
+- Steganography Env Vault: https://www.castov.com/steganography-env-vault
+- 3D JSON Galaxy: https://www.castov.com/3d-json-galaxy
+- Regex Genetic Evolution: https://www.castov.com/regex-genetic-evolution
+- AST Conflict Telepathy: https://www.castov.com/ast-conflict-telepathy
+
+---
+
+## MCP Server
+
+The Castov Model Context Protocol (MCP) server runs locally on the user's workstation over standard input/output (STDIO JSON-RPC 2.0). It does not require a Castov cloud roundtrip during normal tool invocation. MCP tools are separate from browser tools.
+
+Start the server using:
 ```bash
 npx -y castov@latest mcp
 ```
 
-### 2. Claude Desktop / Cursor / Windsurf Configuration (`mcp.json`)
-```json
-{
-  "mcpServers": {
-    "castov": {
-      "command": "npx",
-      "args": ["-y", "castov@latest", "mcp"]
-    }
-  }
-}
-```
+The 10 official MCP tools exposed by the server are:
+1. `castov_timestamp`: Converts Unix timestamps (seconds/ms) or ISO 8601 strings into UTC, local time, and relative offsets.
+2. `castov_detect_id`: Detects and extracts embedded creation timestamps from UUIDv7, UUIDv1/v4, ULID, ObjectId, and Snowflake IDs.
+3. `castov_cidr`: Computes IPv4 subnet masks, wildcard masks, broadcast addresses, and usable host counts (/8 through /32).
+4. `castov_port`: Identifies standard TCP/UDP port service registrations and inspects local listening processes.
+5. `castov_cron`: Parses 5-field POSIX cron expressions into human-readable text and predicts next execution timestamps.
+6. `castov_timezone`: Converts date-time values between any two IANA timezones with daylight saving time adjustments.
+7. `castov_secret`: Generates CSPRNG cryptographic secrets in hex, base64, base64url, and formatted .env entries.
+8. `castov_jwt_decode`: Decodes JWT headers and payload claims (exp, iat, nbf, sub, iss) offline without token transmission.
+9. `castov_hash`: Calculates deterministic cryptographic digests (MD5, SHA-1, SHA-256, SHA-384, SHA-512) in hex or base64.
+10. `castov_scan_secrets`: Scans in-memory text buffers for high-risk API keys, tokens, and private credential patterns.
 
-### 3. Docker Containerized MCP & CLI Runtime
-```bash
-docker run -i --rm castovdev/castov:latest mcp
-```
+---
 
-### 4. Common Castov CLI Terminal Commands
-```bash
-npx castov@latest --help
-npx castov port 3000 --kill
-npx castov cidr 10.240.0.0/22
-npx castov detect 018f3a9c-6d20-7000-8000-010203040506
-npx castov ts 1760868000
-npx castov cron "*/15 9-17 * * 1-5" America/New_York
-npx castov tz "2026-10-19 14:00" UTC Asia/Tokyo
-npx castov secret --len 32
-npx castov scan .
-npx castov rules nextjs --write
-```
+## CLI and SDK
 
-## Available MCP Server Tools (10 Hardened Local Tools)
+Castov CLI is a local terminal toolkit with no Castov cloud execution during normal local commands. Package installation or updates require access to the npm registry.
 
-1. `castov_timestamp`: Convert Unix epoch timestamps (seconds or milliseconds) to UTC, ISO 8601, and localized time.
-2. `castov_detect_id`: Detect identifier format and extract embedded creation timestamps from UUIDv7, ULID, MongoDB ObjectId, and 64-bit Snowflake IDs.
-3. `castov_cidr`: Compute IPv4 network address, subnet mask, wildcard mask, broadcast address, usable host range, and RFC 3021 `/31` & `/32` capacities.
-4. `castov_port`: Inspect TCP/UDP port numbers (`1-65535`) for IANA service assignments, protocols, and active local listeners.
-5. `castov_cron`: Parse 5-field POSIX cron expressions into plain English and calculate the next 5 upcoming execution timestamps in any IANA timezone.
-6. `castov_timezone`: Convert date/time strings between any two IANA timezones with exact UTC offset and DST handling.
-7. `castov_secret`: Generate CSPRNG cryptographic secrets in Hex, Base64URL, API key, and time-ordered UUIDv7 formats.
-8. `castov_jwt_decode`: Decode JWT headers and payload claims (`exp`, `iat`, `nbf`, `sub`, `iss`) 100% offline.
-9. `castov_hash`: Compute deterministic `sha256`, `sha384`, `sha512`, `sha1`, and `md5` hex digests and Base64/Base64URL encodings.
-10. `castov_scan_secrets`: Scan code snippets, `.env` files, or git diffs in-memory for leaked credentials (AWS, GitHub PAT, Stripe, OpenAI, Slack, Private Keys).
+- **CLI Version**: v1.4.0
+- **CLI Package**: https://www.npmjs.com/package/castov
+- **CLI Install Command**: `npm install -g castov` or run directly with `npx castov`
+- **CLI Documentation**: https://www.castov.com/cli
+- **SDK Version**: v1.0.0
+- **SDK Package**: https://www.npmjs.com/package/castov-sdk
+- **SDK Install Command**: `npm install castov-sdk`
+- **VS Code Extension Version**: v0.1.4
+- **VS Code Extension Documentation**: https://www.castov.com/extension
 
-## Essential Links & Documentation
+---
 
-- [Castov Homepage](https://castov.com): Main entry point and instant timestamp/developer workbench.
-- [MCP Server Documentation, Live Playground & Stack Composer](https://castov.com/mcp): Interactive JSON-RPC 2.0 inspector, 1-click IDE setup, and multi-server `mcp.json` composer.
-- [Full LLM Technical Specification (`llms-full.txt`)](https://castov.com/llms-full.txt): Complete JSON Schema definitions, parameter tables, and JSON-RPC 2.0 request/response payloads for all 10 Castov MCP tools.
-- [Castov CLI Documentation](https://castov.com/cli): Complete terminal command reference and installation options (npm, Docker, Homebrew).
-- [Developer Hub & Ecosystem](https://castov.com/developer): Overview of Castov MCP Server, CLI, TypeScript SDK, and VS Code extension.
-- [All 61 Browser Developer Tools](https://castov.com/tools): Full directory of client-side developer utilities.
-- [Network Ports Reference (`/ports`)](https://castov.com/ports): Interactive TCP/UDP port directory and `EADDRINUSE` troubleshooting guides.
-- [Developer Error Fix Lab (`/error-fixes`)](https://castov.com/error-fixes): Root-cause analysis and interactive resolution templates for common engineering errors.
-- [VS Code & Cursor Extension (`/extension`)](https://castov.com/extension): Offline VSIX package (`v0.1.4`), Visual Studio Marketplace, and Open VSX links.
-- [Sponsor & Partner with Castov (`/sponsor`)](https://castov.com/sponsor): Direct developer sponsorship tiers and ecosystem partnerships.
-- [XML Sitemap (`/sitemap.xml`)](https://castov.com/sitemap.xml): Complete index of Castov routes and reference pages.
-- [GitHub Repository (`castovdev/castov`)](https://github.com/castovdev/castov): MIT-licensed source code, GitHub Action, and release packages.
-- [Glama MCP Certification Page](https://glama.ai/mcp/servers/castovdev/castov): Independent Grade-A security, quality, and license verification.
+## Error Fix Guides and Reference Pages
+
+Error-fix guides are interactive documentation pages and are not additional browser tools. Castov provides 69 interactive guides covering framework hydration mismatches, network/CORS errors, database connection limits, and container binding issues.
+
+- Error-fix guides: https://www.castov.com/error-fixes
+- Ports registry: https://www.castov.com/ports
+- CIDR subnet reference: https://www.castov.com/cidr
+- Chmod permissions reference: https://www.castov.com/chmod
+- HTTP status codes reference: https://www.castov.com/http-status
+- Developer guides: https://www.castov.com/guides
+
+---
+
+## Important Distinctions
+
+- Castov MCP is not a cloud MCP proxy; it runs through local STDIO.
+- The browser-tool count is not the MCP-tool count.
+- Error-fix guides are documentation pages, not additional browser tools.
+- Developer Canvas is not fully offline because it uses public WebRTC signaling.
+- P2P Ghost Tunnel does not use a Castov relay or Castov signaling server; it relies on Google STUN and manual token exchange.
+- Env Vault is not fully local because encrypted ciphertext may be uploaded for sharing.
+- No payload storage does not mean that no connection metadata is transmitted.
+- No Castov payload logging does not mean that standard infrastructure logs or third-party signaling metadata do not exist.
+- Local processing does not automatically mean that a feature makes no network requests.
+
+---
+
+## Canonical Sources
+
+- Browser tool count: https://www.castov.com/tools
+- MCP capabilities and tool list: https://www.castov.com/mcp
+- Developer products and versions: https://www.castov.com/developer
+- Privacy and data handling: https://www.castov.com/privacy
+- P2P Ghost Tunnel behavior: https://www.castov.com/p2p-ghost-tunnel
+- Developer Canvas behavior: https://www.castov.com/canvas
+- Env Vault behavior: https://www.castov.com/env-vault
+- Error-fix content: https://www.castov.com/error-fixes
+- Full URL discovery: https://www.castov.com/sitemap.xml
+
+---
+
+## Document Metadata
+
+- **Purpose**: Canonical ecosystem reference and guidance for LLMs, AI coding agents, and automated developer tooling.
+- **Last Reviewed**: 2026-10-20.
+- **Source of Truth for Counts**: `src/content/tools.ts` (61 tools including 10 Labs), `src/lib/error-fixes-registry.ts` (69 error guides).
+- **Source of Truth for Privacy Behavior**: `src/app/privacy/page.tsx` and actual tool implementations.
+- **Source of Truth for MCP Capabilities**: `packages/castov-cli/src/cli.ts` (10 tools) and `src/app/mcp/page.tsx`.
+- **Source of Truth for Product Versions**: `package.json`, `packages/castov-cli/package.json` (v1.4.0), and `packages/castov-sdk/package.json` (v1.0.0).

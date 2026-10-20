@@ -68,14 +68,6 @@ const MCP_TOOLS: McpToolDoc[] = [
     inputParams: "{ value: string }"
   },
   {
-    name: "castov_uuid",
-    title: "Cryptographic UUIDv4 / UUIDv7 / ULID Generator",
-    description:
-      "Generates cryptographically secure RFC 9562 UUIDv4, time-ordered UUIDv7, or lexicographically sortable ULID identifiers in batches up to 50.",
-    promptExample: "Generate 5 time-ordered UUIDv7 identifiers for my database migration.",
-    inputParams: "{ format?: 'uuidv4' | 'uuidv7' | 'ulid', count?: number }"
-  },
-  {
     name: "castov_cron",
     title: "Cron Schedule Explainer & Next Run Predictor",
     description:

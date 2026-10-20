@@ -2335,7 +2335,7 @@ export const TOOLS: Tool[] = [
       {
         heading: "Multi-Step Transformation Recipes & Entropy Inspection",
         paragraphs: [
-          "Real-world security investigations often require combining multiple decoders in sequence. For example, malicious payloads may be hex-encoded, then compressed, and then Base64-encoded. Our recipe pipeline allows you to chain operations effortlessly, inspect intermediate step previews, and toggle steps on and off with zero latency.",
+          "Real-world security investigations often require combining multiple decoders in sequence. For example, malicious payloads may be hex-encoded, then compressed, and then Base64-encoded. Our recipe pipeline allows you to chain operations effortlessly, inspect intermediate step previews, and toggle steps on and off instantaneously without network roundtrips.",
           "Integrated Shannon entropy calculation immediately reveals whether an unknown payload is plain text, Base64 obfuscated, or strongly encrypted."
         ]
       }

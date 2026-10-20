@@ -1,19 +1,47 @@
 # Castov — Complete LLM & AI Agent Technical Reference (llms-full.txt)
 
-> Castov (`castov` v1.4.0) is a deterministic DevSecOps & Developer Toolbox Ecosystem featuring a **Glama Grade A** Model Context Protocol (MCP) Server, a cross-platform CLI (`npx castov`), a pure TypeScript SDK (`castov-sdk` v1.0.0), a VS Code Extension (`castov-vscode` v0.1.4), 61 browser developer tools (51 core utilities + 10 experimental Labs), and an extensive Programmatic SEO technical registry (`https://www.castov.com`).
+> Castov (https://www.castov.com) is a deterministic developer-tools and DevSecOps platform built for software developers, DevOps engineers, AI coding agents, and terminal power users. The ecosystem features a Glama Grade A Model Context Protocol (MCP) Server (`v1.4.0`), a local CLI (`npx castov` v1.4.0), a pure TypeScript SDK (`castov-sdk` v1.0.0), a VS Code Extension (`castov-vscode` v0.1.4), 61 browser developer tools (including 10 experimental Labs), 69 error-fix guides, and extensive technical reference registries.
 
 - **Canonical Website**: https://www.castov.com
-- **MCP Server Hub & Interactive JSON-RPC 2.0 Playground**: https://www.castov.com/mcp
-- **Developer Ecosystem (`/developer`)**: https://www.castov.com/developer
-- **CLI Documentation (`/cli`)**: https://www.castov.com/cli
-- **All Browser Utilities (`/tools`)**: https://www.castov.com/tools
-- **Sponsorship & Partnerships (`/sponsor`)**: https://www.castov.com/sponsor
-- **Compact LLM Index**: https://www.castov.com/llms.txt
-- **NPM Package (`castov` v1.4.0)**: https://www.npmjs.com/package/castov
-- **NPM SDK (`castov-sdk` v1.0.0)**: https://www.npmjs.com/package/castov-sdk
+- **Compact LLM Reference**: https://www.castov.com/llms.txt
+- **MCP Server Hub & Interactive Playground**: https://www.castov.com/mcp
+- **Developer Hub**: https://www.castov.com/developer
+- **CLI Documentation**: https://www.castov.com/cli
+- **VS Code Extension**: https://www.castov.com/extension
+- **Browser Utilities Directory**: https://www.castov.com/tools
+- **Error Fix Guides**: https://www.castov.com/error-fixes
+- **Privacy Policy**: https://www.castov.com/privacy
 - **GitHub Repository**: https://github.com/castovdev/castov
 - **Author & License**: Abdelmalik Benidir / Castov (MIT License)
-- **Glama MCP Security Audit**: Grade A (100% deterministic local execution, zero telemetry, zero remote API calls, MIT License)
+
+---
+
+## Canonical Facts
+
+- Browser tools: 61 interactive tools total.
+- Experimental Labs: 10 tools, included in the 61 browser tools total.
+- MCP tools: 10 local tools.
+- MCP Server version: v1.4.0.
+- CLI version: v1.4.0.
+- VS Code Extension version: v0.1.4.
+- castov-sdk version: v1.0.0.
+- Error-fix guides: 69 interactive guides.
+- Reference pages: Extensive technical reference pages and registries.
+- Last reviewed: 2026-10-20.
+
+The 61 browser tools, 10 MCP tools, and 69 error-fix guides are different categories and must not be counted together.
+
+---
+
+## Data Handling and Privacy Architecture
+
+Most browser tools process primary user input locally in the browser. This does not mean that every Castov feature is fully offline. Some features contact external STUN, WebRTC signaling, or encrypted-storage services. Standard infrastructure logs and aggregate analytics may apply.
+
+No payload storage does not mean that no connection metadata is transmitted. Public STUN or signaling services may receive the network metadata required to establish peer connections.
+
+- **Env Vault**: Env Vault is not fully local. Encryption happens in the browser, but encrypted ciphertext may be uploaded to Supabase for link-based sharing. Plaintext .env values and passwords are not uploaded to Castov. Metadata such as vault size, creation time, expiration time, and standard request logs may exist according to the Privacy Policy.
+- **P2P Ghost Tunnel**: P2P Ghost Tunnel uses serverless WebRTC data channels with a public STUN service for ICE/NAT discovery and manual offer/answer token exchange. Castov does not operate a signaling server for this tool, and tunnel payloads are not stored on Castov servers. Connections may fail behind restrictive NAT configurations when no TURN relay is available.
+- **Developer Canvas**: Developer Canvas synchronizes workflow data directly between browser peers using WebRTC and Yjs CRDTs. Public WebRTC signaling services coordinate the initial peer connection and may temporarily receive standard connection metadata such as IP addresses and ICE candidates. Workflow graphs, node configurations, and payload data are not stored on Castov servers according to the application design.
 
 ---
 
@@ -599,12 +627,34 @@ Scan code snippets, `.env` files, or configuration text for leaked credentials (
 
 ---
 
-## 4. Programmatic SEO & Technical Reference Registries
+## 4. Technical Reference Registries and Documentation
 
-Castov hosts deterministic, statically generated reference pages for common engineering lookups:
-- **Network Ports Registry (`/ports/[port]`)**: 74+ ports including PostgreSQL (`5432`), Redis (`6379`), Ollama (`11434`), Qdrant (`6333`), Milvus (`19530`), ChromaDB (`8000`), Weaviate (`8080`), OpenTelemetry (`4317`/`4318`), Supabase (`54321`/`54322`), Kubernetes (`6443`), and Kafka (`9092`).
-- **Developer Error Fixes (`/error-fixes/[slug]`)**: 38+ step-by-step root-cause and copy-paste remediation guides for Node.js, Docker, Git, PostgreSQL, Kubernetes, Next.js, Supabase RLS, and MCP stdio `spawn npx ENOENT` errors.
-- **IPv4 CIDR Calculators (`/cidr/[prefix]`)**: Pre-computed tables for `/8` through `/32` subnets including AWS VPC, GCP, and Azure reserved address breakdowns.
-- **Linux Chmod Matrix (`/chmod/[code]`)**: Octal and symbolic permission references (`000`–`777`) with security audits.
-- **Cron Schedule Reference (`/cron/[expression]`)**: Human-readable breakdowns and next-execution schedules for standard cron expressions.
-- **HTTP Status Codes (`/http-status/[code]`)**: RFC-compliant semantics and debugging tips for `1xx`–`5xx` status codes.
+Castov provides extensive technical reference pages and registries for engineering workflows:
+- **Developer Error Fix Guides (`/error-fixes/[slug]`)**: 69 step-by-step root-cause and copy-paste remediation guides for Next.js, React hydration, Docker, Git, PostgreSQL, Kubernetes, Supabase RLS, and MCP stdio connection issues.
+- **Network Ports Registry (`/ports/[port]`)**: 74 ports including PostgreSQL (`5432`), Redis (`6379`), Ollama (`11434`), Qdrant (`6333`), Milvus (`19530`), ChromaDB (`8000`), Weaviate (`8080`), OpenTelemetry (`4317`/`4318`), Supabase (`54321`/`54322`), Kubernetes (`6443`), and Kafka (`9092`).
+- **IPv4 CIDR Subnet Reference (`/cidr` & `/cidr/[prefix]`)**: Deterministic reference tables for `/8` through `/32` subnets with usable host capacities, wildcard masks, and RFC 3021 point-to-point configurations.
+- **Linux Chmod Matrix (`/chmod` & `/chmod/[code]`)**: Octal and symbolic permission references (`000`–`777`) with command generators and security audits.
+- **Cron Schedule Reference (`/cron` & `/cron/[expression]`)**: Human-readable breakdowns and next-execution timestamp predictions for standard cron expressions.
+- **HTTP Status Codes (`/http-status` & `/http-status/[code]`)**: RFC-compliant semantics, root-cause explanations, and client/server remediation guides for `1xx`–`5xx` status codes.
+
+---
+
+## 5. Important Distinctions and Governance
+
+- Castov MCP is not a cloud MCP proxy; it executes locally through STDIO JSON-RPC 2.0.
+- The 61 browser tools, 10 MCP tools, and 69 error-fix guides are distinct categories and must not be counted together.
+- Error-fix guides are documentation and remediation pages, not additional browser tools.
+- Developer Canvas is not fully offline because it coordinates peer discovery via public WebRTC signaling servers.
+- P2P Ghost Tunnel does not use a Castov relay or Castov signaling server; it relies on Google STUN and manual token exchange.
+- Env Vault is not fully local because client-side encrypted ciphertext may be uploaded for link sharing.
+- No payload storage does not mean that no connection metadata is transmitted.
+- No Castov payload logging does not mean that standard infrastructure logs or third-party signaling metadata do not exist.
+- Local processing does not automatically mean that a feature makes no network requests.
+
+---
+
+## 6. Document Metadata
+
+- **Purpose**: Full technical specification of Castov MCP server protocols, tool schemas, CLI/SDK commands, and reference registries for AI agents and LLM tools.
+- **Last Reviewed**: 2026-10-20.
+- **Sources of Truth**: `src/content/tools.ts` (61 browser tools), `packages/castov-cli/src/cli.ts` (10 MCP tools), `src/lib/error-fixes-registry.ts` (69 error-fix guides), `src/app/privacy/page.tsx` (privacy architecture).
