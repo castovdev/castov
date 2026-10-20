@@ -1,0 +1,117 @@
+{
+  "name": "env-doctor",
+  "displayName": "Env Doctor – Castov",
+  "description": "Audit, compare, sync & fix .env vs .env.example vs code. Detect missing, dead, duplicate, and leaked environment variables.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "env",
+    "dotenv",
+    "environment",
+    "security",
+    "config",
+    "audit",
+    "sync",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "env-doctor-container",
+          "title": "Env Doctor",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "env-doctor-container": [
+        {
+          "id": "envDoctor.auditView",
+          "name": "Env Doctor Audit"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "envDoctor.openDashboard",
+        "title": "Env Doctor: Open Interactive Dashboard",
+        "category": "Env Doctor"
+      },
+      {
+        "command": "envDoctor.runAudit",
+        "title": "Env Doctor: Run Audit & Rescan",
+        "category": "Env Doctor",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "envDoctor.generateExample",
+        "title": "Env Doctor: Generate Clean .env.example",
+        "category": "Env Doctor",
+        "icon": "$(diff-added)"
+      },
+      {
+        "command": "envDoctor.addMissingToEnv",
+        "title": "Env Doctor: Add Missing Variables to .env",
+        "category": "Env Doctor"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "envDoctor.runAudit",
+          "when": "view == envDoctor.auditView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "envDoctor.generateExample",
+          "when": "view == envDoctor.auditView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "envDoctor.openDashboard",
+          "when": "view == envDoctor.auditView",
+          "group": "navigation@3"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish env-doctor-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
