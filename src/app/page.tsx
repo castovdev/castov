@@ -183,7 +183,7 @@ export default function HomePage() {
                 <div>
                   <h3 className="text-xl font-bold mb-2 group-hover:text-success transition-colors text-fg">P2P Multiplayer Canvas</h3>
                   <p className="text-muted leading-relaxed">
-                    A visual node-editor for building data pipelines. Connects peers in real-time using WebRTC and CRDTs (Yjs) with direct peer-to-peer data channels via public signaling servers. No workflow payloads are stored on Castov servers.
+                    A visual node-editor for building data pipelines. Connects peers in real-time using WebRTC and CRDTs (Yjs) with direct peer-to-peer data channels coordinated through public signaling servers (which may receive connection metadata). Workflow graphs, node configurations, and payload data are never stored on Castov servers.
                   </p>
                 </div>
               </div>
