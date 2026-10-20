@@ -2,25 +2,16 @@ import * as vscode from "vscode";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
-
-function generateUuidV7(): string {
-  const now = Date.now();
-  const bytes = crypto.randomBytes(16);
-  // Timestamp 48 bits (big endian)
-  bytes[0] = Math.floor(now / 0x10000000000) & 0xff;
-  bytes[1] = Math.floor(now / 0x100000000) & 0xff;
-  bytes[2] = Math.floor(now / 0x1000000) & 0xff;
-  bytes[3] = Math.floor(now / 0x10000) & 0xff;
-  bytes[4] = Math.floor(now / 0x100) & 0xff;
-  bytes[5] = now & 0xff;
-  // Version 7
-  bytes[6] = 0x70 | (bytes[6] & 0x0f);
-  // Variant RFC 4122 (10xx)
-  bytes[8] = 0x80 | (bytes[8] & 0x3f);
-
-  const hex = bytes.toString("hex");
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
-}
+import { parseCron } from "./utils/cron";
+import { parseChmod } from "./utils/chmod";
+import { parseCidr } from "./utils/cidr";
+import {
+  computeHash,
+  generateSecret,
+  generateUuidV7,
+  HashAlgorithm,
+  SecretFormat,
+} from "./utils/crypto-tools";
 
 function parseTimestamp(raw: string): { date: Date; unit: "seconds" | "milliseconds" } | null {
   const trimmed = raw.trim();
@@ -218,14 +209,115 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // 8. Open Castov Web
+  // 8. Hash Selection (SHA-256, SHA-512, MD5, SHA-1)
+  context.subscriptions.push(
+    vscode.commands.registerCommand("castov.hashSelection", async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) return;
+      const selection = editor.selection;
+      const text = editor.document.getText(selection);
+      if (!text) {
+        vscode.window.showInformationMessage("Castov: Please select text to hash.");
+        return;
+      }
+
+      const pick = await vscode.window.showQuickPick(
+        [
+          { label: "SHA-256", description: "Secure 256-bit hash (Standard)", value: "sha256" as HashAlgorithm },
+          { label: "SHA-512", description: "High-security 512-bit hash", value: "sha512" as HashAlgorithm },
+          { label: "MD5", description: "128-bit checksum (Legacy / Checksum)", value: "md5" as HashAlgorithm },
+          { label: "SHA-1", description: "160-bit hash (Git / Legacy)", value: "sha1" as HashAlgorithm },
+        ],
+        { placeHolder: "Select hash algorithm" }
+      );
+
+      if (!pick) return;
+      const hash = computeHash(text, pick.value);
+
+      const action = await vscode.window.showInformationMessage(
+        `Castov ${pick.label}: ${hash}`,
+        "Replace Selection",
+        "Copy to Clipboard"
+      );
+
+      if (action === "Replace Selection") {
+        editor.edit((edit) => edit.replace(selection, hash));
+      } else if (action === "Copy to Clipboard") {
+        await vscode.env.clipboard.writeText(hash);
+        vscode.window.showInformationMessage(`Copied ${pick.label} hash to clipboard!`);
+      }
+    })
+  );
+
+  // 9. Generate Secure Secret / API Key
+  context.subscriptions.push(
+    vscode.commands.registerCommand("castov.generateSecret", async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) return;
+
+      const pick = await vscode.window.showQuickPick(
+        [
+          { label: "Hex 32 bytes (64 chars)", description: "Standard JWT secret, Encryption key, API key", value: "hex32" as SecretFormat },
+          { label: "Hex 16 bytes (32 chars)", description: "Medium-length secret key", value: "hex16" as SecretFormat },
+          { label: "Base64 32 bytes (44 chars)", description: "High-entropy Base64 token", value: "base64" as SecretFormat },
+          { label: "Alphanumeric 32 chars", description: "Password, Database password, Session token", value: "alpha32" as SecretFormat },
+          { label: "Alphanumeric 64 chars", description: "Long high-entropy alphanumeric key", value: "alpha64" as SecretFormat },
+        ],
+        { placeHolder: "Select secret format" }
+      );
+
+      if (!pick) return;
+      const secret = generateSecret(pick.value);
+
+      editor.edit((edit) => {
+        for (const selection of editor.selections) {
+          edit.replace(selection, secret);
+        }
+      });
+      vscode.window.showInformationMessage(`Castov: Inserted cryptographically secure secret (${pick.label}).`);
+    })
+  );
+
+  // 10. URL Encode Selection
+  context.subscriptions.push(
+    vscode.commands.registerCommand("castov.urlEncode", () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) return;
+      editor.edit((edit) => {
+        for (const selection of editor.selections) {
+          const text = editor.document.getText(selection);
+          edit.replace(selection, encodeURIComponent(text));
+        }
+      });
+    })
+  );
+
+  // 11. URL Decode Selection
+  context.subscriptions.push(
+    vscode.commands.registerCommand("castov.urlDecode", () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) return;
+      editor.edit((edit) => {
+        for (const selection of editor.selections) {
+          const text = editor.document.getText(selection);
+          try {
+            edit.replace(selection, decodeURIComponent(text));
+          } catch {
+            vscode.window.showErrorMessage("Castov: Invalid URL encoded string.");
+          }
+        }
+      });
+    })
+  );
+
+  // 12. Open Castov Web
   context.subscriptions.push(
     vscode.commands.registerCommand("castov.openCastov", () => {
       vscode.env.openExternal(vscode.Uri.parse("https://castov.com"));
     })
   );
 
-  // 9. Setup Castov MCP Server (1-Click Workspace / Clipboard Configuration)
+  // 13. Setup Castov MCP Server
   context.subscriptions.push(
     vscode.commands.registerCommand("castov.setupMcpServer", async () => {
       const pick = await vscode.window.showQuickPick(
@@ -317,7 +409,11 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // 10. Timestamp Hover Tooltip Provider
+  // ---------------------------------------------------------
+  // SMART HOVER PROVIDERS
+  // ---------------------------------------------------------
+
+  // A. Unix Timestamp Hover
   context.subscriptions.push(
     vscode.languages.registerHoverProvider({ scheme: "file" }, {
       provideHover(document, position) {
@@ -340,7 +436,130 @@ export function activate(context: vscode.ExtensionContext) {
       },
     })
   );
+
+  // B. Cron Expression Hover
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider({ scheme: "file" }, {
+      provideHover(document, position) {
+        const line = document.lineAt(position.line).text;
+        // Search for 5-segment cron patterns
+        const cronRegex = /(?:^|\s|["'`])((?:[\*\d\/,-]+)\s+(?:[\*\d\/,-]+)\s+(?:[\*\d\/,-]+)\s+(?:[\*\d\/,-]+)\s+(?:[\*\d\/,-]+))(?:\s|["'`]|$)/g;
+        let match;
+        while ((match = cronRegex.exec(line)) !== null) {
+          const startIdx = match.index + (match[0].indexOf(match[1]));
+          const endIdx = startIdx + match[1].length;
+          if (position.character >= startIdx && position.character <= endIdx) {
+            const parsed = parseCron(match[1]);
+            if (!parsed) continue;
+
+            const range = new vscode.Range(position.line, startIdx, position.line, endIdx);
+            const md = new vscode.MarkdownString();
+            md.isTrusted = true;
+            md.appendMarkdown(`### ⏲️ Castov Cron Schedule\n\n`);
+            md.appendMarkdown(`**Schedule:** \`${parsed.summary}\`\n\n`);
+            md.appendMarkdown(`- **Minute**: ${parsed.details.minute}\n`);
+            md.appendMarkdown(`- **Hour**: ${parsed.details.hour}\n`);
+            md.appendMarkdown(`- **Day of Month**: ${parsed.details.dayOfMonth}\n`);
+            md.appendMarkdown(`- **Month**: ${parsed.details.month}\n`);
+            md.appendMarkdown(`- **Day of Week**: ${parsed.details.dayOfWeek}\n\n`);
+
+            if (parsed.nextRuns.length > 0) {
+              md.appendMarkdown(`**Upcoming Executions:**\n`);
+              for (const run of parsed.nextRuns) {
+                md.appendMarkdown(`- \`${run}\`\n`);
+              }
+              md.appendMarkdown(`\n`);
+            }
+
+            md.appendMarkdown(`[Explore Cron Tools on Castov.com](https://castov.com/cron)`);
+            return new vscode.Hover(md, range);
+          }
+        }
+      },
+    })
+  );
+
+  // C. Chmod Permissions Hover (Context-Aware)
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider({ scheme: "file" }, {
+      provideHover(document, position) {
+        const range = document.getWordRangeAtPosition(position, /\b0?[0-7]{3}\b/);
+        if (!range) return;
+
+        const word = document.getText(range);
+        const lineText = document.lineAt(position.line).text.toLowerCase();
+        const docLang = document.languageId;
+        const fileName = path.basename(document.fileName).toLowerCase();
+
+        // Context check: only trigger if in relevant file or preceded by chmod/mode/permissions
+        const isScriptOrConfig =
+          docLang === "shellscript" ||
+          docLang === "dockerfile" ||
+          docLang === "yaml" ||
+          fileName.includes("dockerfile") ||
+          fileName.endsWith(".sh") ||
+          fileName.endsWith(".bash");
+
+        const hasKeyword =
+          lineText.includes("chmod") ||
+          lineText.includes("mode") ||
+          lineText.includes("permission");
+
+        if (!isScriptOrConfig && !hasKeyword) {
+          return;
+        }
+
+        const parsed = parseChmod(word);
+        if (!parsed) return;
+
+        const md = new vscode.MarkdownString();
+        md.isTrusted = true;
+        md.appendMarkdown(`### 🛡️ Castov Chmod Permissions (\`${parsed.octal}\`)\n\n`);
+        md.appendMarkdown(`**Symbolic:** \`${parsed.symbolic}\`\n\n`);
+        md.appendMarkdown(`| Entity | Permissions | Details |\n`);
+        md.appendMarkdown(`| :--- | :---: | :--- |\n`);
+        md.appendMarkdown(`| **Owner (User)** | \`${parsed.owner.read ? "r" : "-"}${parsed.owner.write ? "w" : "-"}${parsed.owner.execute ? "x" : "-"}\` | ${parsed.owner.summary} |\n`);
+        md.appendMarkdown(`| **Group** | \`${parsed.group.read ? "r" : "-"}${parsed.group.write ? "w" : "-"}${parsed.group.execute ? "x" : "-"}\` | ${parsed.group.summary} |\n`);
+        md.appendMarkdown(`| **Others (Public)** | \`${parsed.others.read ? "r" : "-"}${parsed.others.write ? "w" : "-"}${parsed.others.execute ? "x" : "-"}\` | ${parsed.others.summary} |\n\n`);
+        md.appendMarkdown(`[Inspect Chmod on Castov.com](https://castov.com/chmod/${parsed.octal})`);
+
+        return new vscode.Hover(md, range);
+      },
+    })
+  );
+
+  // D. CIDR Subnet Calculator Hover
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider({ scheme: "file" }, {
+      provideHover(document, position) {
+        const line = document.lineAt(position.line).text;
+        const cidrRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\/(?:[0-2]?[0-9]|3[0-2])\b/g;
+        let match;
+        while ((match = cidrRegex.exec(line)) !== null) {
+          const startIdx = match.index;
+          const endIdx = startIdx + match[0].length;
+          if (position.character >= startIdx && position.character <= endIdx) {
+            const parsed = parseCidr(match[0]);
+            if (!parsed) continue;
+
+            const range = new vscode.Range(position.line, startIdx, position.line, endIdx);
+            const md = new vscode.MarkdownString();
+            md.isTrusted = true;
+            md.appendMarkdown(`### 🌐 Castov CIDR Subnet (\`${parsed.cidr}\`)\n\n`);
+            md.appendMarkdown(`- **Type**: \`${parsed.ipType}\`\n`);
+            md.appendMarkdown(`- **Netmask**: \`${parsed.netmask}\`\n`);
+            md.appendMarkdown(`- **Network Address**: \`${parsed.networkAddress}\`\n`);
+            md.appendMarkdown(`- **Broadcast Address**: \`${parsed.broadcastAddress}\`\n`);
+            md.appendMarkdown(`- **Usable Host Range**: \`${parsed.firstUsableIp}\` – \`${parsed.lastUsableIp}\`\n`);
+            md.appendMarkdown(`- **Usable Hosts**: \`${parsed.usableHosts.toLocaleString()}\` of \`${parsed.totalHosts.toLocaleString()}\` total\n\n`);
+            md.appendMarkdown(`[Explore CIDR on Castov.com](https://castov.com/cidr)`);
+
+            return new vscode.Hover(md, range);
+          }
+        }
+      },
+    })
+  );
 }
 
 export function deactivate() {}
-

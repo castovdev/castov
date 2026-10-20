@@ -1,8 +1,8 @@
 {
   "name": "castov-vscode",
-  "displayName": "Timestamp Hover, UUID & MCP – Castov",
-  "description": "Instant Unix timestamp tooltip on hover, 1-click MCP Server setup for Cursor/VS Code, UUID v4/v7 generation, JWT inspection & Base64 tools.",
-  "version": "0.1.4",
+  "displayName": "Smart Hover Pack, UUID, Secrets & MCP – Castov",
+  "description": "Instant tooltips on hover (Timestamp, Cron, Chmod, CIDR), 1-click MCP Server setup for Cursor/VS Code, UUID v4/v7, Hash (SHA-256/MD5), Secrets, JWT & Base64.",
+  "version": "0.1.5",
   "publisher": "castov",
   "icon": "icon.png",
   "galleryBanner": {
@@ -30,13 +30,18 @@
   "keywords": [
     "mcp",
     "cursor",
+    "cron",
+    "chmod",
+    "cidr",
+    "hash",
+    "sha256",
+    "secret",
     "unix",
     "timestamp",
     "uuid",
     "uuidv7",
     "jwt",
     "base64",
-    "epoch",
     "castov"
   ],
   "main": "./dist/extension.js",
@@ -76,6 +81,16 @@
         "category": "Castov"
       },
       {
+        "command": "castov.hashSelection",
+        "title": "Castov: Hash Selection (SHA-256, SHA-512, MD5, SHA-1)",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.generateSecret",
+        "title": "Castov: Generate Secure Secret / API Key",
+        "category": "Castov"
+      },
+      {
         "command": "castov.base64Encode",
         "title": "Castov: Base64 Encode Selection",
         "category": "Castov"
@@ -83,6 +98,16 @@
       {
         "command": "castov.base64Decode",
         "title": "Castov: Base64 Decode Selection",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.urlEncode",
+        "title": "Castov: URL Encode Selection",
+        "category": "Castov"
+      },
+      {
+        "command": "castov.urlDecode",
+        "title": "Castov: URL Decode Selection",
         "category": "Castov"
       },
       {
@@ -104,14 +129,29 @@
           "group": "castov@2"
         },
         {
-          "command": "castov.base64Encode",
+          "command": "castov.hashSelection",
           "when": "editorHasSelection",
           "group": "castov@3"
         },
         {
-          "command": "castov.base64Decode",
+          "command": "castov.base64Encode",
           "when": "editorHasSelection",
           "group": "castov@4"
+        },
+        {
+          "command": "castov.base64Decode",
+          "when": "editorHasSelection",
+          "group": "castov@5"
+        },
+        {
+          "command": "castov.urlEncode",
+          "when": "editorHasSelection",
+          "group": "castov@6"
+        },
+        {
+          "command": "castov.urlDecode",
+          "when": "editorHasSelection",
+          "group": "castov@7"
         }
       ]
     }
@@ -121,7 +161,7 @@
     "build": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "vsce package",
-    "publish:openvsx": "ovsx publish castov-vscode-0.1.4.vsix"
+    "publish:openvsx": "ovsx publish castov-vscode-0.1.5.vsix"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
