@@ -1,6 +1,6 @@
 {
   "name": "chaos-proxy",
-  "displayName": "Chaos Proxy",
+  "displayName": "Chaos Proxy - Castov",
   "description": "Local HTTP proxy & fault injector for resilience testing: inject 429 rate limits, 500/502 errors, custom latency, and mock payloads directly from VS Code.",
   "version": "0.1.0",
   "publisher": "castov",

@@ -1,6 +1,6 @@
 {
   "name": "bidi-guard",
-  "displayName": "Bidi & Unicode Guard",
+  "displayName": "Bidi & Unicode Guard - Castov",
   "description": "Detect invisible Unicode, Trojan Source attacks (CVE-2021-42574), homoglyphs, and render clean RTL Arabic comments in VS Code.",
   "version": "0.1.0",
   "publisher": "castov",

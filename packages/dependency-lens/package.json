@@ -1,6 +1,6 @@
 {
   "name": "dependency-lens",
-  "displayName": "Dependency Risk Lens",
+  "displayName": "Dependency Risk Lens - Castov",
   "description": "Supply chain security, typosquatting detector & license compliance auditor for package.json & requirements.txt directly in VS Code.",
   "version": "0.1.0",
   "publisher": "castov",
