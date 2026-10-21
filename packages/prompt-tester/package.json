@@ -1,0 +1,115 @@
+{
+  "name": "prompt-tester",
+  "displayName": "Prompt Regression Tester – Castov",
+  "description": "Automated prompt regression testing & assertion framework for LLMs in VS Code. Run .prompt.yaml tests, assert outputs, compare model responses, and track prompt drift.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Testing",
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "prompt engineering",
+    "prompt testing",
+    "llm unit tests",
+    "prompt regression",
+    "evals",
+    "gemini",
+    "gpt",
+    "claude",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "prompt-tester-container",
+          "title": "Prompt Tester",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "prompt-tester-container": [
+        {
+          "id": "promptTester.testView",
+          "name": "Prompt Tests"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "promptTester.runAll",
+        "title": "Prompt Tester: Run All Prompt Tests",
+        "category": "Prompt Tester",
+        "icon": "$(play-all)"
+      },
+      {
+        "command": "promptTester.runCurrentFile",
+        "title": "Prompt Tester: Run Current Prompt File",
+        "category": "Prompt Tester",
+        "icon": "$(play)"
+      },
+      {
+        "command": "promptTester.openDashboard",
+        "title": "Prompt Tester: Open Regression Dashboard",
+        "category": "Prompt Tester",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "promptTester.createSampleTest",
+        "title": "Prompt Tester: Create Sample .prompt.json Suite",
+        "category": "Prompt Tester"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "promptTester.runAll",
+          "when": "view == promptTester.testView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "promptTester.openDashboard",
+          "when": "view == promptTester.testView",
+          "group": "navigation@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish prompt-tester-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
