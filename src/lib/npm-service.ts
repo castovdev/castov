@@ -33,14 +33,36 @@ const COPYLEFT_LICENSES = new Set([
   "gpl-2.0", "gpl-3.0", "agpl-3.0", "lgpl-2.1", "lgpl-3.0", "mpl-2.0"
 ]);
 
+export function normalizePackageName(input: string | string[]): string {
+  const raw = Array.isArray(input) ? input.join("/") : String(input || "");
+  try {
+    return decodeURIComponent(raw).trim().toLowerCase();
+  } catch {
+    return raw.trim().toLowerCase();
+  }
+}
+
+export function getNpmRegistryUrl(name: string): string {
+  const clean = normalizePackageName(name);
+  if (clean.startsWith("@")) {
+    const segments = clean.slice(1).split("/");
+    const scope = segments[0] || "";
+    const pkg = segments.slice(1).join("/");
+    const encodedScope = encodeURIComponent(scope);
+    const encodedPkg = pkg.split("/").map(encodeURIComponent).join("/");
+    return `https://registry.npmjs.org/@${encodedScope}/${encodedPkg}`;
+  }
+  return `https://registry.npmjs.org/${encodeURIComponent(clean)}`;
+}
+
 export async function fetchNpmPackageReport(
-  packageName: string
+  packageName: string | string[]
 ): Promise<NpmPackageReport | null> {
-  const cleanName = packageName.trim().toLowerCase();
+  const cleanName = normalizePackageName(packageName);
+  if (!cleanName) return null;
 
   try {
-    const encoded = encodeURIComponent(cleanName).replace("%40", "@");
-    const registryUrl = `https://registry.npmjs.org/${encoded}/latest`;
+    const registryUrl = getNpmRegistryUrl(cleanName);
 
     const res = await fetch(registryUrl, {
       next: { revalidate: 86400 }, // Cache 24 hours
@@ -53,14 +75,21 @@ export async function fetchNpmPackageReport(
     }
 
     const data = await res.json();
-    const latestVersion = data.version || "1.0.0";
-    const versionData = data;
+    const distTags = data["dist-tags"] || {};
+    const latestTag = distTags.latest;
+    const versions = data.versions || {};
+    const versionData =
+      (latestTag && versions[latestTag]) ||
+      (data.version ? data : Object.values(versions).pop() || data);
+
+    const latestVersion =
+      versionData.version || latestTag || data.version || "1.0.0";
 
     // 1. License evaluation
     const rawLicense =
       typeof versionData.license === "string"
         ? versionData.license
-        : versionData.license?.type || "MIT";
+        : versionData.license?.type || data.license || "MIT";
 
     const cleanLic = String(rawLicense).toLowerCase().trim();
     let licenseType: "PERMISSIVE" | "COPYLEFT" | "PROPRIETARY" | "UNKNOWN" = "UNKNOWN";
@@ -81,7 +110,7 @@ export async function fetchNpmPackageReport(
     const { isSquat, target } = checkTyposquat(cleanName);
 
     // 4. Deprecation
-    const deprecated = versionData.deprecated || false;
+    const deprecated = versionData.deprecated || data.deprecated || false;
 
     // 5. Size
     const dist = versionData.dist || {};
@@ -93,12 +122,32 @@ export async function fetchNpmPackageReport(
     const dependenciesCount = Object.keys(dependencies).length;
 
     // 7. Maintainers
-    const maintainersList = Array.isArray(data.maintainers)
-      ? data.maintainers.map((m: any) => m.name || m.email || "Maintainer")
-      : [];
+    const rawMaintainers =
+      Array.isArray(data.maintainers) && data.maintainers.length > 0
+        ? data.maintainers
+        : Array.isArray(versionData.maintainers)
+        ? versionData.maintainers
+        : [];
+    const maintainersList = rawMaintainers.map(
+      (m: any) => m.name || m.email || "Maintainer"
+    );
 
     // 8. Published date
-    const publishedDate = "Latest Stable";
+    let publishedDate = "Latest Stable";
+    if (data.time && latestVersion && data.time[latestVersion]) {
+      try {
+        publishedDate = new Date(data.time[latestVersion]).toLocaleDateString(
+          "en-US",
+          {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }
+        );
+      } catch {
+        publishedDate = "Latest Stable";
+      }
+    }
 
     // 9. Warnings & Score calculation
     const warnings: string[] = [];
@@ -139,19 +188,20 @@ export async function fetchNpmPackageReport(
     else if (score < 95) riskLevel = "LOW";
 
     let repoUrl = "";
-    if (typeof versionData.repository === "string") {
-      repoUrl = versionData.repository;
-    } else if (versionData.repository?.url) {
-      repoUrl = versionData.repository.url.replace(/^git\+/, "").replace(/\.git$/, "");
+    const repoSource = versionData.repository || data.repository;
+    if (typeof repoSource === "string") {
+      repoUrl = repoSource;
+    } else if (repoSource?.url) {
+      repoUrl = repoSource.url.replace(/^git\+/, "").replace(/\.git$/, "");
     }
 
     return {
       name: data.name || cleanName,
       version: latestVersion,
-      description: data.description || "NPM package utility.",
+      description: data.description || versionData.description || "NPM package utility.",
       license: String(rawLicense),
       licenseType,
-      homepage: data.homepage,
+      homepage: data.homepage || versionData.homepage,
       repository: repoUrl || undefined,
       publishedDate,
       unpackedSize,
@@ -163,7 +213,7 @@ export async function fetchNpmPackageReport(
       hasInstallScripts,
       installScripts,
       isTyposquat: isSquat,
-      squattedTarget: target,
+      squattedTarget: target || undefined,
       securityScore: score,
       securityGrade,
       riskLevel,

@@ -10,9 +10,12 @@ export function NpmSearchBar() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const clean = query.trim().toLowerCase();
+    const clean = query.trim().replace(/\/+$/, "").toLowerCase();
     if (clean) {
-      router.push(`/npm/${encodeURIComponent(clean)}`);
+      const targetPath = clean.startsWith("@")
+        ? `/npm/@${clean.slice(1).split("/").map(encodeURIComponent).join("/")}`
+        : `/npm/${encodeURIComponent(clean)}`;
+      router.push(targetPath);
     }
   };
 

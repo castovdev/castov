@@ -18,7 +18,7 @@ import { buildMetadata, faqJsonLd, webPageJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { FaqSection } from "@/components/faq-section";
-import { fetchNpmPackageReport } from "@/lib/npm-service";
+import { fetchNpmPackageReport, normalizePackageName } from "@/lib/npm-service";
 import { POPULAR_NPM_PACKAGES } from "@/lib/npm-data";
 
 export const dynamicParams = true;
@@ -36,7 +36,7 @@ export async function generateMetadata({
   params: Promise<{ package: string[] }>;
 }): Promise<Metadata> {
   const resolved = await params;
-  const pkgName = resolved.package.join("/");
+  const pkgName = normalizePackageName(resolved.package);
   const report = await fetchNpmPackageReport(pkgName);
 
   if (!report) {
@@ -60,7 +60,7 @@ export default async function NpmPackagePage({
   params: Promise<{ package: string[] }>;
 }) {
   const resolved = await params;
-  const pkgName = resolved.package.join("/");
+  const pkgName = normalizePackageName(resolved.package);
   const report = await fetchNpmPackageReport(pkgName);
 
   if (!report) {
