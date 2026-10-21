@@ -1,0 +1,112 @@
+{
+  "name": "webhook-catcher",
+  "displayName": "Webhook Catcher – Castov",
+  "description": "Local webhook receiver & replay debugger for Stripe, GitHub, Shopify & APIs. Inspect headers, payloads, verify signatures, and replay to localhost directly from VS Code.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Testing",
+    "Debuggers",
+    "Other"
+  ],
+  "keywords": [
+    "webhook",
+    "stripe",
+    "github",
+    "testing",
+    "api",
+    "debug",
+    "replay",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "webhook-catcher-container",
+          "title": "Webhook Catcher",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "webhook-catcher-container": [
+        {
+          "id": "webhookCatcher.mainView",
+          "name": "Captured Webhooks"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "webhookCatcher.toggle",
+        "title": "Webhook Catcher: Start / Stop Receiver",
+        "category": "Webhook Catcher"
+      },
+      {
+        "command": "webhookCatcher.openDashboard",
+        "title": "Webhook Catcher: Open Inspector Dashboard",
+        "category": "Webhook Catcher"
+      },
+      {
+        "command": "webhookCatcher.clearAll",
+        "title": "Webhook Catcher: Clear All Webhooks",
+        "category": "Webhook Catcher",
+        "icon": "$(clear-all)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "webhookCatcher.toggle",
+          "when": "view == webhookCatcher.mainView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "webhookCatcher.clearAll",
+          "when": "view == webhookCatcher.mainView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "webhookCatcher.openDashboard",
+          "when": "view == webhookCatcher.mainView",
+          "group": "navigation@3"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish webhook-catcher-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
