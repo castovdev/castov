@@ -1,0 +1,102 @@
+{
+  "name": "mcp-security",
+  "displayName": "MCP Config Security Scanner – Castov",
+  "description": "Security audit & scanner for Model Context Protocol (MCP) configs, mcp.json, and claude_desktop_config.json. Detects exposed API keys, dangerous shell tools, and hidden prompt injection.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Security",
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "mcp",
+    "model context protocol",
+    "security",
+    "scanner",
+    "api keys",
+    "prompt injection",
+    "audit",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mcp-security-container",
+          "title": "MCP Security",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "mcp-security-container": [
+        {
+          "id": "mcpSecurity.auditView",
+          "name": "MCP Security Audit"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "mcpSecurity.scan",
+        "title": "MCP Security: Scan All MCP Configs",
+        "category": "MCP Security",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "mcpSecurity.openDashboard",
+        "title": "MCP Security: Open Security Audit Dashboard",
+        "category": "MCP Security"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "mcpSecurity.scan",
+          "when": "view == mcpSecurity.auditView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "mcpSecurity.openDashboard",
+          "when": "view == mcpSecurity.auditView",
+          "group": "navigation@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish mcp-security-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
