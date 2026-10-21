@@ -1,0 +1,229 @@
+import { POPULAR_NPM_PACKAGES } from "./npm-data";
+
+export interface NpmPackageReport {
+  name: string;
+  version: string;
+  description: string;
+  license: string;
+  licenseType: "PERMISSIVE" | "COPYLEFT" | "PROPRIETARY" | "UNKNOWN";
+  homepage?: string;
+  repository?: string;
+  publishedDate: string;
+  unpackedSize: string;
+  dependenciesCount: number;
+  dependencies: Record<string, string>;
+  maintainersCount: number;
+  maintainers: string[];
+  deprecated?: string | boolean;
+  hasInstallScripts: boolean;
+  installScripts: string[];
+  isTyposquat: boolean;
+  squattedTarget?: string;
+  securityScore: number;
+  securityGrade: "A+" | "A" | "B" | "C" | "D" | "F";
+  riskLevel: "SAFE" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  warnings: string[];
+}
+
+const PERMISSIVE_LICENSES = new Set([
+  "mit", "apache-2.0", "bsd-2-clause", "bsd-3-clause", "isc", "unlicense", "0bsd"
+]);
+
+const COPYLEFT_LICENSES = new Set([
+  "gpl-2.0", "gpl-3.0", "agpl-3.0", "lgpl-2.1", "lgpl-3.0", "mpl-2.0"
+]);
+
+export async function fetchNpmPackageReport(
+  packageName: string
+): Promise<NpmPackageReport | null> {
+  const cleanName = packageName.trim().toLowerCase();
+
+  try {
+    const encoded = encodeURIComponent(cleanName).replace("%40", "@");
+    const registryUrl = `https://registry.npmjs.org/${encoded}/latest`;
+
+    const res = await fetch(registryUrl, {
+      next: { revalidate: 86400 }, // Cache 24 hours
+      headers: { Accept: "application/json" },
+    });
+
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error(`NPM registry returned status ${res.status}`);
+    }
+
+    const data = await res.json();
+    const latestVersion = data.version || "1.0.0";
+    const versionData = data;
+
+    // 1. License evaluation
+    const rawLicense =
+      typeof versionData.license === "string"
+        ? versionData.license
+        : versionData.license?.type || "MIT";
+
+    const cleanLic = String(rawLicense).toLowerCase().trim();
+    let licenseType: "PERMISSIVE" | "COPYLEFT" | "PROPRIETARY" | "UNKNOWN" = "UNKNOWN";
+    if (PERMISSIVE_LICENSES.has(cleanLic)) {
+      licenseType = "PERMISSIVE";
+    } else if (COPYLEFT_LICENSES.has(cleanLic)) {
+      licenseType = "COPYLEFT";
+    }
+
+    // 2. Install scripts detection
+    const scripts = versionData.scripts || {};
+    const installScripts: string[] = [];
+    if (scripts.preinstall) installScripts.push(`preinstall: ${scripts.preinstall}`);
+    if (scripts.postinstall) installScripts.push(`postinstall: ${scripts.postinstall}`);
+    const hasInstallScripts = installScripts.length > 0;
+
+    // 3. Typosquat check
+    const { isSquat, target } = checkTyposquat(cleanName);
+
+    // 4. Deprecation
+    const deprecated = versionData.deprecated || false;
+
+    // 5. Size
+    const dist = versionData.dist || {};
+    const unpackedBytes = dist.unpackedSize || 0;
+    const unpackedSize = formatBytes(unpackedBytes);
+
+    // 6. Dependencies
+    const dependencies = versionData.dependencies || {};
+    const dependenciesCount = Object.keys(dependencies).length;
+
+    // 7. Maintainers
+    const maintainersList = Array.isArray(data.maintainers)
+      ? data.maintainers.map((m: any) => m.name || m.email || "Maintainer")
+      : [];
+
+    // 8. Published date
+    const publishedDate = "Latest Stable";
+
+    // 9. Warnings & Score calculation
+    const warnings: string[] = [];
+    let score = 100;
+
+    if (isSquat) {
+      score -= 50;
+      warnings.push(`Suspected Typosquatting! Impersonates popular package "${target}".`);
+    }
+
+    if (hasInstallScripts) {
+      score -= 25;
+      warnings.push(`Contains automated install scripts (${installScripts.join(", ")}).`);
+    }
+
+    if (deprecated) {
+      score -= 30;
+      warnings.push(`This package is officially deprecated by its authors.`);
+    }
+
+    if (licenseType === "COPYLEFT") {
+      score -= 15;
+      warnings.push(`Reciprocal copyleft license (${rawLicense}). May infect proprietary code.`);
+    }
+
+    if (maintainersList.length === 1 && !POPULAR_NPM_PACKAGES.includes(cleanName)) {
+      score -= 10;
+      warnings.push(`Single maintainer supply-chain dependency risk.`);
+    }
+
+    score = Math.max(0, Math.min(100, score));
+    const securityGrade = scoreToGrade(score);
+
+    let riskLevel: "SAFE" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" = "SAFE";
+    if (isSquat || score < 40) riskLevel = "CRITICAL";
+    else if (score < 65) riskLevel = "HIGH";
+    else if (score < 85) riskLevel = "MEDIUM";
+    else if (score < 95) riskLevel = "LOW";
+
+    let repoUrl = "";
+    if (typeof versionData.repository === "string") {
+      repoUrl = versionData.repository;
+    } else if (versionData.repository?.url) {
+      repoUrl = versionData.repository.url.replace(/^git\+/, "").replace(/\.git$/, "");
+    }
+
+    return {
+      name: data.name || cleanName,
+      version: latestVersion,
+      description: data.description || "NPM package utility.",
+      license: String(rawLicense),
+      licenseType,
+      homepage: data.homepage,
+      repository: repoUrl || undefined,
+      publishedDate,
+      unpackedSize,
+      dependenciesCount,
+      dependencies,
+      maintainersCount: maintainersList.length,
+      maintainers: maintainersList.slice(0, 5),
+      deprecated,
+      hasInstallScripts,
+      installScripts,
+      isTyposquat: isSquat,
+      squattedTarget: target,
+      securityScore: score,
+      securityGrade,
+      riskLevel,
+      warnings,
+    };
+  } catch (err) {
+    return null;
+  }
+}
+
+function checkTyposquat(name: string): { isSquat: boolean; target?: string } {
+  if (POPULAR_NPM_PACKAGES.includes(name)) return { isSquat: false };
+
+  for (const pop of POPULAR_NPM_PACKAGES) {
+    if (pop.includes("-")) {
+      const noHyphen = pop.replace(/-/g, "");
+      if (name === noHyphen) return { isSquat: true, target: pop };
+    }
+    if (name.length === pop.length + 1 && name.startsWith(pop)) {
+      return { isSquat: true, target: pop };
+    }
+    if (name === `${pop}.js`) {
+      return { isSquat: true, target: pop };
+    }
+    if (Math.abs(name.length - pop.length) <= 1 && pop.length >= 5) {
+      if (levenshtein(name, pop) === 1) {
+        return { isSquat: true, target: pop };
+      }
+    }
+  }
+
+  return { isSquat: false };
+}
+
+function levenshtein(a: string, b: string): number {
+  const m = [];
+  for (let i = 0; i <= b.length; i++) m[i] = [i];
+  for (let j = 0; j <= a.length; j++) m[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      m[i][j] = b.charAt(i - 1) === a.charAt(j - 1)
+        ? m[i - 1][j - 1]
+        : Math.min(m[i - 1][j - 1] + 1, m[i][j - 1] + 1, m[i - 1][j] + 1);
+    }
+  }
+  return m[b.length][a.length];
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes <= 0) return "Unknown";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function scoreToGrade(score: number): "A+" | "A" | "B" | "C" | "D" | "F" {
+  if (score >= 95) return "A+";
+  if (score >= 85) return "A";
+  if (score >= 70) return "B";
+  if (score >= 50) return "C";
+  if (score >= 30) return "D";
+  return "F";
+}
