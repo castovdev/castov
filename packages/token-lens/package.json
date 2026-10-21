@@ -1,5 +1,5 @@
 {
-  "name": "token-lens",
+  "name": "token-lens-castov",
   "displayName": "LLM Token & Cost Lens - Castov",
   "description": "Real-time token counter & LLM cost estimator for Claude, GPT-4o, Gemini, and DeepSeek. Features CodeLens, hover inspector, context window tracker, and cost comparisons.",
   "version": "0.1.0",

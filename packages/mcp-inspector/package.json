@@ -1,5 +1,5 @@
 {
-  "name": "mcp-inspector",
+  "name": "mcp-inspector-castov",
   "displayName": "MCP Inspector & Debugger - Castov",
   "description": "Interactive tester, schema validator, live JSON-RPC traffic logger & security scanner for Model Context Protocol (MCP) servers in VS Code & Cursor.",
   "version": "0.1.0",

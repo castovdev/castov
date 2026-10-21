@@ -1,5 +1,5 @@
 {
-  "name": "env-doctor",
+  "name": "env-doctor-castov",
   "displayName": "Env Doctor - Castov",
   "description": "Audit, compare, sync & fix .env vs .env.example vs code. Detect missing, dead, duplicate, and leaked environment variables.",
   "version": "0.1.0",

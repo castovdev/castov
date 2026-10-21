@@ -1,5 +1,5 @@
 {
-  "name": "mcp-security",
+  "name": "mcp-security-castov",
   "displayName": "MCP Config Security Scanner - Castov",
   "description": "Security audit & scanner for Model Context Protocol (MCP) configs, mcp.json, and claude_desktop_config.json. Detects exposed API keys, dangerous shell tools, and hidden prompt injection.",
   "version": "0.1.0",

@@ -1,5 +1,5 @@
 {
-  "name": "ai-blame",
+  "name": "ai-blame-castov",
   "displayName": "AI Blame - Castov",
   "description": "Visualize lines of code authored by AI agents (Cursor Composer, Claude Code, Copilot, Aider, Devin) vs human developers with inline annotations & workspace analytics.",
   "version": "0.1.0",

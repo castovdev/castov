@@ -1,5 +1,5 @@
 {
-  "name": "log-story",
+  "name": "log-story-castov",
   "displayName": "Log Story - Castov",
   "description": "Developer log analyzer & root-cause story builder. Folds repetitive log spam, groups by request-id, reconstructs multi-service timelines, and pinpoints true root causes.",
   "version": "0.1.0",
