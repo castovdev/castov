@@ -1,6 +1,6 @@
 {
   "name": "agent-replay",
-  "displayName": "Agent Session Replay – Castov",
+  "displayName": "Agent Session Replay",
   "description": "Interactive chronological timeline, visual diff scrubber & 1-click rewind for AI agent file modifications (Cursor Composer, Claude Code, Copilot, Cline, Aider) in VS Code.",
   "version": "0.1.0",
   "publisher": "castov",

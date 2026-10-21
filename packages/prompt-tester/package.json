@@ -1,6 +1,6 @@
 {
   "name": "prompt-tester",
-  "displayName": "Prompt Regression Tester – Castov",
+  "displayName": "Prompt Regression Tester",
   "description": "Automated prompt regression testing & assertion framework for LLMs in VS Code. Run .prompt.yaml tests, assert outputs, compare model responses, and track prompt drift.",
   "version": "0.1.0",
   "publisher": "castov",

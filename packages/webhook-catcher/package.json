@@ -1,6 +1,6 @@
 {
   "name": "webhook-catcher",
-  "displayName": "Webhook Catcher – Castov",
+  "displayName": "Webhook Catcher",
   "description": "Local webhook receiver & replay debugger for Stripe, GitHub, Shopify & APIs. Inspect headers, payloads, verify signatures, and replay to localhost directly from VS Code.",
   "version": "0.1.0",
   "publisher": "castov",

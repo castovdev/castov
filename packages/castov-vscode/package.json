@@ -1,6 +1,6 @@
 {
   "name": "castov-vscode",
-  "displayName": "Smart Hover Pack, UUID, Secrets & MCP – Castov",
+  "displayName": "Smart Hover Pack",
   "description": "Instant tooltips on hover (Timestamp, Cron, Chmod, CIDR), 1-click MCP Server setup for Cursor/VS Code, UUID v4/v7, Hash (SHA-256/MD5), Secrets, JWT & Base64.",
   "version": "0.1.5",
   "publisher": "castov",
