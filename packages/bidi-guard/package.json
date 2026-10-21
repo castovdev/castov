@@ -1,0 +1,109 @@
+{
+  "name": "bidi-guard",
+  "displayName": "Bidi & Unicode Guard – Castov",
+  "description": "Detect invisible Unicode, Trojan Source attacks (CVE-2021-42574), homoglyphs, and render clean RTL Arabic comments in VS Code.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Security",
+    "Other"
+  ],
+  "keywords": [
+    "unicode",
+    "bidi",
+    "security",
+    "trojan-source",
+    "rtl",
+    "arabic",
+    "hebrew",
+    "homoglyph",
+    "linter",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "bidi-guard-container",
+          "title": "Bidi Guard",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "bidi-guard-container": [
+        {
+          "id": "bidiGuard.mainView",
+          "name": "Unicode & RTL Audit"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "bidiGuard.openDashboard",
+        "title": "Bidi Guard: Open Scanner & RTL Dashboard",
+        "category": "Bidi Guard"
+      },
+      {
+        "command": "bidiGuard.scanWorkspace",
+        "title": "Bidi Guard: Scan Entire Workspace for Unicode Threats",
+        "category": "Bidi Guard",
+        "icon": "$(search)"
+      },
+      {
+        "command": "bidiGuard.cleanCurrentFile",
+        "title": "Bidi Guard: Clean & Strip Invisible Characters in Current File",
+        "category": "Bidi Guard"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "bidiGuard.scanWorkspace",
+          "when": "view == bidiGuard.mainView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "bidiGuard.openDashboard",
+          "when": "view == bidiGuard.mainView",
+          "group": "navigation@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish bidi-guard-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
