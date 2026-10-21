@@ -1,0 +1,108 @@
+{
+  "name": "ai-blame",
+  "displayName": "AI Blame – Castov",
+  "description": "Visualize lines of code authored by AI agents (Cursor Composer, Claude Code, Copilot, Aider, Devin) vs human developers with inline annotations & workspace analytics.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "keywords": [
+    "ai blame",
+    "git blame",
+    "claude code",
+    "copilot",
+    "cursor",
+    "aider",
+    "co-authored-by",
+    "ai analytics",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ai-blame-container",
+          "title": "AI Blame",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "ai-blame-container": [
+        {
+          "id": "aiBlame.metricsView",
+          "name": "AI vs Human Authorship"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "aiBlame.scanWorkspace",
+        "title": "AI Blame: Scan Workspace Authorship",
+        "category": "AI Blame",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "aiBlame.openDashboard",
+        "title": "AI Blame: Open Authorship Analytics Dashboard",
+        "category": "AI Blame",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "aiBlame.toggleInlineBlame",
+        "title": "AI Blame: Toggle Active Line Annotations",
+        "category": "AI Blame"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "aiBlame.scanWorkspace",
+          "when": "view == aiBlame.metricsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "aiBlame.openDashboard",
+          "when": "view == aiBlame.metricsView",
+          "group": "navigation@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish ai-blame-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
