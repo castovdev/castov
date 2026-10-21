@@ -1,0 +1,102 @@
+{
+  "name": "dependency-lens",
+  "displayName": "Dependency Risk Lens – Castov",
+  "description": "Supply chain security, typosquatting detector & license compliance auditor for package.json & requirements.txt directly in VS Code.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Security",
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "supply chain",
+    "security",
+    "dependencies",
+    "typosquatting",
+    "license",
+    "npm",
+    "package.json",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dependency-lens-container",
+          "title": "Dependency Lens",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "dependency-lens-container": [
+        {
+          "id": "dependencyLens.riskView",
+          "name": "Supply Chain Risks"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "dependencyLens.audit",
+        "title": "Dependency Lens: Audit Workspace Dependencies",
+        "category": "Dependency Lens",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "dependencyLens.openDashboard",
+        "title": "Dependency Lens: Open Supply Chain Dashboard",
+        "category": "Dependency Lens"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "dependencyLens.audit",
+          "when": "view == dependencyLens.riskView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dependencyLens.openDashboard",
+          "when": "view == dependencyLens.riskView",
+          "group": "navigation@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish dependency-lens-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
