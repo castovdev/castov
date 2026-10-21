@@ -1,0 +1,114 @@
+{
+  "name": "agent-replay",
+  "displayName": "Agent Session Replay – Castov",
+  "description": "Interactive chronological timeline, visual diff scrubber & 1-click rewind for AI agent file modifications (Cursor Composer, Claude Code, Copilot, Cline, Aider) in VS Code.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "keywords": [
+    "agent replay",
+    "timeline",
+    "diff",
+    "rewind",
+    "claude code",
+    "cursor composer",
+    "ai agents",
+    "history",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "agent-replay-container",
+          "title": "Agent Replay",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "agent-replay-container": [
+        {
+          "id": "agentReplay.timelineView",
+          "name": "Session Timeline"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "agentReplay.openDashboard",
+        "title": "Agent Replay: Open Session Replay & Diff Scrubber",
+        "category": "Agent Replay",
+        "icon": "$(history)"
+      },
+      {
+        "command": "agentReplay.createSnapshot",
+        "title": "Agent Replay: Capture Manual Session Snapshot",
+        "category": "Agent Replay",
+        "icon": "$(camera)"
+      },
+      {
+        "command": "agentReplay.clearSession",
+        "title": "Agent Replay: Clear Session History",
+        "category": "Agent Replay",
+        "icon": "$(clear-all)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "agentReplay.createSnapshot",
+          "when": "view == agentReplay.timelineView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "agentReplay.clearSession",
+          "when": "view == agentReplay.timelineView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "agentReplay.openDashboard",
+          "when": "view == agentReplay.timelineView",
+          "group": "navigation@3"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish agent-replay-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
