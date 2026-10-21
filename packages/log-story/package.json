@@ -1,0 +1,113 @@
+{
+  "name": "log-story",
+  "displayName": "Log Story – Castov",
+  "description": "Developer log analyzer & root-cause story builder. Folds repetitive log spam, groups by request-id, reconstructs multi-service timelines, and pinpoints true root causes.",
+  "version": "0.1.0",
+  "publisher": "castov",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#090d16",
+    "theme": "dark"
+  },
+  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "license": "MIT",
+  "homepage": "https://www.castov.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castovdev/castov.git"
+  },
+  "bugs": {
+    "url": "https://github.com/castovdev/castov/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Debuggers",
+    "Other"
+  ],
+  "keywords": [
+    "log analyzer",
+    "root cause",
+    "request id",
+    "trace",
+    "logs",
+    "deduplication",
+    "timeline",
+    "castov"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "log-story-container",
+          "title": "Log Story",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "log-story-container": [
+        {
+          "id": "logStory.tracesView",
+          "name": "Log Traces & Stories"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "logStory.openDashboard",
+        "title": "Log Story: Open Log Analyzer & Story Dashboard",
+        "category": "Log Story",
+        "icon": "$(book)"
+      },
+      {
+        "command": "logStory.analyzeActiveFile",
+        "title": "Log Story: Analyze Current Log File",
+        "category": "Log Story",
+        "icon": "$(file-text)"
+      },
+      {
+        "command": "logStory.analyzeClipboard",
+        "title": "Log Story: Analyze Logs from Clipboard",
+        "category": "Log Story",
+        "icon": "$(clippy)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "logStory.analyzeActiveFile",
+          "when": "view == logStory.tracesView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "logStory.analyzeClipboard",
+          "when": "view == logStory.tracesView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "logStory.openDashboard",
+          "when": "view == logStory.tracesView",
+          "group": "navigation@3"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:openvsx": "ovsx publish log-story-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}
