@@ -23,6 +23,8 @@ export interface NpmPackageReport {
   securityGrade: "A+" | "A" | "B" | "C" | "D" | "F";
   riskLevel: "SAFE" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   warnings: string[];
+  weeklyDownloads?: number;
+  hasTypes?: boolean;
 }
 
 const PERMISSIVE_LICENSES = new Set([
@@ -195,6 +197,15 @@ export async function fetchNpmPackageReport(
       repoUrl = repoSource.url.replace(/^git\+/, "").replace(/\.git$/, "");
     }
 
+    const hasTypes = Boolean(
+      versionData.types ||
+      versionData.typings ||
+      cleanName.startsWith("@types/") ||
+      (versionData.devDependencies && versionData.devDependencies[`@types/${cleanName}`])
+    );
+
+    const weeklyDownloads = await fetchWeeklyDownloads(cleanName);
+
     return {
       name: data.name || cleanName,
       version: latestVersion,
@@ -218,9 +229,25 @@ export async function fetchNpmPackageReport(
       securityGrade,
       riskLevel,
       warnings,
+      weeklyDownloads,
+      hasTypes,
     };
   } catch (err) {
     return null;
+  }
+}
+
+async function fetchWeeklyDownloads(name: string): Promise<number> {
+  try {
+    const res = await fetch(`https://api.npmjs.org/downloads/point/last-week/${name}`, {
+      next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return 0;
+    const json = await res.json();
+    return typeof json.downloads === "number" ? json.downloads : 0;
+  } catch {
+    return 0;
   }
 }
 

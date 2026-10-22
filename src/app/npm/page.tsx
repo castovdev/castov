@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ShieldCheck, Zap, Layers } from "lucide-react";
+import { ShieldCheck, Zap, Layers, ArrowRightLeft } from "lucide-react";
 import { buildMetadata, webPageJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
@@ -52,6 +52,17 @@ export default function NpmIndexPage() {
 
         {/* Client Search Bar */}
         <NpmSearchBar />
+
+        {/* Head-to-Head Comparison Callout */}
+        <div className="mt-6 flex justify-center">
+          <Link
+            href="/npm/compare"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border/80 hover:border-accent text-xs font-semibold text-fg hover:text-accent transition-all shadow-sm"
+          >
+            <ArrowRightLeft className="w-3.5 h-3.5 text-accent" />
+            <span>Need to compare libraries? Try the <strong>NPM Package Comparison Tool</strong> &rarr;</span>
+          </Link>
+        </div>
       </div>
 
       {/* Categorized Packages */}

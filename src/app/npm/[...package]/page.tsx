@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Terminal,
   Code2,
+  ArrowRightLeft,
 } from "lucide-react";
 import { buildMetadata, faqJsonLd, webPageJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
@@ -20,6 +21,7 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { FaqSection } from "@/components/faq-section";
 import { fetchNpmPackageReport, normalizePackageName } from "@/lib/npm-service";
 import { POPULAR_NPM_PACKAGES } from "@/lib/npm-data";
+import { POPULAR_NPM_COMPARISONS, getComparisonSlug } from "@/lib/npm-comparisons";
 
 export const dynamicParams = true;
 
@@ -329,6 +331,39 @@ export default async function NpmPackagePage({
           </div>
         </div>
       )}
+
+      {/* Head-to-Head Comparisons Links */}
+      {(() => {
+        const relevantComparisons = POPULAR_NPM_COMPARISONS.filter(
+          (c) => c.pkg1 === pkgName || c.pkg2 === pkgName
+        ).slice(0, 4);
+
+        if (relevantComparisons.length === 0) return null;
+
+        return (
+          <div className="card p-6 mt-6 border border-border/80 rounded-xl">
+            <h2 className="text-base font-bold text-fg mb-3 flex items-center gap-2">
+              <ArrowRightLeft className="w-4 h-4 text-accent" />
+              <span>Head-to-Head Comparisons with {report.name}</span>
+            </h2>
+            <div className="flex flex-wrap gap-2.5">
+              {relevantComparisons.map((c) => {
+                const slug = getComparisonSlug(c.pkg1, c.pkg2);
+                return (
+                  <Link
+                    key={slug}
+                    href={`/npm/compare/${slug}`}
+                    className="px-3 py-1.5 rounded-lg bg-card border border-border hover:border-accent font-mono text-xs text-fg hover:text-accent transition-all flex items-center gap-1.5"
+                  >
+                    <span>{c.pkg1} vs {c.pkg2}</span>
+                    <ExternalLink className="w-3 h-3 opacity-60" />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* VS Code Extension Cross-Promotion Banner */}
       <div className="card p-6 sm:p-8 mt-8 border-2 border-accent/40 bg-gradient-to-r from-accent/10 via-card to-card rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
