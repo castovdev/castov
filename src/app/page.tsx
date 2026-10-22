@@ -134,16 +134,16 @@ export default function HomePage() {
                   <Code className="text-[#007ACC] w-7 h-7" />
                 </div>
                 <div className="flex items-center gap-2 mb-3">
-                  <h3 className="text-2xl font-bold text-fg">VS Code Extension</h3>
-                  <span className="text-xs bg-[#007ACC]/15 text-[#007ACC] px-2 py-0.5 rounded-full font-mono font-semibold">Official</span>
+                  <h3 className="text-2xl font-bold text-fg">VS Code Extensions</h3>
+                  <span className="text-xs bg-[#007ACC]/15 text-[#007ACC] px-2 py-0.5 rounded-full font-mono font-semibold">13 Tools</span>
                 </div>
                 <p className="text-muted leading-relaxed mb-6">
-                  Never context-switch again. Highlight text in your editor to instantly decode Base64, parse JWTs, inspect timestamps, or generate UUIDs.
+                  13 specialized extensions for supply-chain security, MCP debugging, token cost tracking, webhook catching, and offline dev utilities directly in your editor.
                 </p>
               </div>
               <div className="flex items-center gap-3 pt-4 border-t border-line">
                 <a
-                  href="https://marketplace.visualstudio.com/items?itemName=castov.castov-vscode"
+                  href="https://marketplace.visualstudio.com/publishers/Castov"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-semibold text-[#007ACC] hover:underline"
@@ -151,7 +151,7 @@ export default function HomePage() {
                   Marketplace &rarr;
                 </a>
                 <Link href="/extension" className="text-sm font-semibold text-muted hover:text-fg">
-                  Downloads &rarr;
+                  Browse All 13 &rarr;
                 </Link>
               </div>
             </div>

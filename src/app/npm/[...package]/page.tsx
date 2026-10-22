@@ -381,7 +381,7 @@ export default async function NpmPackagePage({
           </p>
         </div>
         <a
-          href="https://marketplace.visualstudio.com/items?itemName=castov.dependency-lens-castov"
+          href="https://marketplace.visualstudio.com/items?itemName=Castov.dependency-lens-castov"
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-primary font-bold px-6 py-3 shrink-0 flex items-center gap-2 shadow-lg shadow-accent/25"

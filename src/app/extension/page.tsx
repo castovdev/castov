@@ -1,174 +1,295 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { 
-  Download, 
-  Terminal, 
-  Code2, 
-  Zap, 
-  ShieldCheck, 
-  Clock, 
-  Key, 
-  Fingerprint, 
+import {
+  Download,
+  Terminal,
+  Code2,
+  Zap,
+  ShieldCheck,
+  ShieldAlert,
+  Shield,
+  KeyRound,
   FileCode,
   ArrowRight,
-  Blocks
+  Blocks,
+  Coins,
+  Sparkles,
+  Bot,
+  History,
+  TerminalSquare,
+  Webhook,
+  Flame,
+  FileSpreadsheet,
+  ExternalLink,
 } from "lucide-react";
-import { buildMetadata } from "@/lib/seo";
-
+import { buildMetadata, webPageJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { CASTOV_EXTENSIONS } from "@/lib/extensions-data";
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: "Castov Extensions – VS Code & Browser Utilities",
-    description: "Download Castov for Visual Studio Code and Chrome. Offline-first Unix timestamp inspection, UUID v4/v7, and JWT debugging in your workflow.",
-    path: "/extension"
-  })
+    title: "Castov VS Code Extensions Suite – 13 Official Developer Tools",
+    description:
+      "Explore the official Castov suite of 13 Visual Studio Code & Cursor extensions: Dependency Security, MCP Scanner, Token Counter, Webhook Catcher, and Offline Dev Utilities.",
+    path: "/extension",
+  }),
 };
 
+function getExtensionIcon(iconName: string) {
+  const props = { className: "w-5 h-5 text-accent" };
+  switch (iconName) {
+    case "ShieldAlert":
+      return <ShieldAlert {...props} className="w-5 h-5 text-rose-400" />;
+    case "ShieldCheck":
+      return <ShieldCheck {...props} className="w-5 h-5 text-emerald-400" />;
+    case "Shield":
+      return <Shield {...props} className="w-5 h-5 text-indigo-400" />;
+    case "KeyRound":
+      return <KeyRound {...props} className="w-5 h-5 text-amber-400" />;
+    case "Coins":
+      return <Coins {...props} className="w-5 h-5 text-yellow-400" />;
+    case "Sparkles":
+      return <Sparkles {...props} className="w-5 h-5 text-cyan-400" />;
+    case "Bot":
+      return <Bot {...props} className="w-5 h-5 text-purple-400" />;
+    case "History":
+      return <History {...props} className="w-5 h-5 text-blue-400" />;
+    case "TerminalSquare":
+      return <TerminalSquare {...props} className="w-5 h-5 text-teal-400" />;
+    case "Webhook":
+      return <Webhook {...props} className="w-5 h-5 text-emerald-400" />;
+    case "Flame":
+      return <Flame {...props} className="w-5 h-5 text-orange-400" />;
+    case "FileSpreadsheet":
+      return <FileSpreadsheet {...props} className="w-5 h-5 text-sky-400" />;
+    default:
+      return <Zap {...props} className="w-5 h-5 text-accent" />;
+  }
+}
+
 export default function ExtensionPage() {
+  const categories = [
+    "Security",
+    "AI & LLM",
+    "Debugging & Testing",
+    "Developer Productivity",
+  ] as const;
+
   return (
-    <div className="layout-content max-w-5xl py-12 sm:py-20">
+    <div className="layout-content max-w-6xl py-12 sm:py-20">
+      <JsonLd
+        data={webPageJsonLd({
+          name: "Castov VS Code Extensions Suite",
+          description:
+            "13 official Visual Studio Code extensions by Castov for security, MCP configs, AI tokens, and developer productivity.",
+          path: "/extension",
+        })}
+      />
+
       <Breadcrumb
         path="/extension"
-        crumbs={[{ name: "Home", href: "/" }, { name: "Tools", href: "/tools" }, { name: "Extension" }]}
+        crumbs={[
+          { name: "Home", href: "/" },
+          { name: "Ecosystem" },
+          { name: "VS Code Extensions" },
+        ]}
       />
+
       {/* Hero Section */}
-      <div className="text-center mb-16">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-xs font-semibold text-accent mb-6">
-          <Zap className="w-3.5 h-3.5" />
-          <span>OFFLINE-FIRST DEVELOPER SUITE</span>
+      <div className="text-center mb-16 mt-4">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/25 text-xs font-bold text-accent mb-6 uppercase tracking-wider">
+          <Code2 className="w-4 h-4" />
+          <span>13 OFFICIAL VS CODE EXTENSIONS</span>
         </div>
-        <h1 className="text-4xl md:text-6xl font-extrabold text-fg tracking-tight mb-6">
-          Castov in Your <span className="bg-gradient-to-r from-accent to-emerald-400 bg-clip-text text-transparent">Editor & Browser</span>
+        <h1 className="text-4xl md:text-6xl font-black text-fg tracking-tight mb-6">
+          Castov in Your{" "}
+          <span className="bg-gradient-to-r from-accent to-emerald-400 bg-clip-text text-transparent">
+            Editor & Workflow
+          </span>
         </h1>
-        <p className="text-xl text-muted max-w-2xl mx-auto leading-relaxed">
-          Bring the speed of Castov directly into Visual Studio Code and your browser. Inspect timestamps, generate UUIDs, and decode JWTs without leaving your code.
+        <p className="text-lg sm:text-xl text-muted-fg max-w-3xl mx-auto leading-relaxed">
+          Level up your development environment. From supply-chain security and
+          MCP debugging to LLM token cost estimation and zero-config local
+          webhooks—all available on the official Visual Studio Code Marketplace.
         </p>
 
-        {/* Quick Download & Marketplace CTA Buttons */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+        {/* Top Action Pills */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
-            href="https://marketplace.visualstudio.com/items?itemName=castov.castov-vscode"
+            href="https://marketplace.visualstudio.com/publishers/Castov"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold text-base px-6 py-3.5 shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2.5"
+            className="btn btn-primary font-bold px-6 py-3 shadow-lg shadow-accent/20 flex items-center gap-2"
           >
-            <Code2 className="w-5 h-5 text-white" />
-            <span>Install on VS Code Marketplace</span>
-            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold">Official</span>
+            <Code2 className="w-5 h-5" />
+            <span>Browse Castov Publisher Profile</span>
+            <ExternalLink className="w-3.5 h-3.5 opacity-80" />
           </a>
           <a
             href="https://open-vsx.org/extension/Castov/castov-vscode"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn bg-[#6366f1] text-white hover:bg-[#4f46e5] font-bold text-base px-6 py-3.5 shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] flex items-center gap-2.5"
+            className="btn btn-secondary font-bold px-5 py-3 flex items-center gap-2"
           >
-            <Blocks className="w-5 h-5 text-white" />
+            <Blocks className="w-5 h-5 text-indigo-400" />
             <span>Open VSX (Cursor &amp; Windsurf)</span>
-          </a>
-          <a
-            href="/api/download/extension"
-            download="castov-vscode-0.1.4.vsix"
-            className="btn bg-card border border-line text-fg hover:bg-hover font-bold text-base px-6 py-3.5 shadow-sm transition-all flex items-center gap-2"
-          >
-            <Download className="w-5 h-5 text-muted" />
-            <span>Download .vsix Offline Package</span>
-          </a>
-          <a
-            href="/api/download/browser-extension"
-            download="castov-extension.zip"
-            className="btn bg-card border border-line text-fg hover:bg-hover font-bold text-base px-6 py-3.5 shadow-sm transition-all flex items-center gap-2"
-          >
-            <Download className="w-5 h-5 text-muted" />
-            <span>Browser Extension (.zip)</span>
           </a>
         </div>
       </div>
 
-      {/* VS Code Extension Primary Showcase */}
-      <section className="mb-20">
-        <div className="rounded-3xl border border-line bg-card p-8 sm:p-12 shadow-sm relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row gap-12 items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 text-accent font-semibold text-sm mb-3">
-                <Code2 className="w-4 h-4" />
-                <span>PRIMARY EXTENSION</span>
+      {/* Categorized Extensions Grid */}
+      <div className="space-y-16 mb-20">
+        {categories.map((category) => {
+          const list = CASTOV_EXTENSIONS.filter((e) => e.category === category);
+          if (list.length === 0) return null;
+
+          return (
+            <section key={category} className="space-y-6">
+              <div className="flex items-center gap-3 pb-3 border-b border-border/80">
+                <div className="w-2.5 h-2.5 rounded-full bg-accent" />
+                <h2 className="text-2xl font-black text-fg tracking-tight">
+                  {category} Extensions
+                </h2>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-muted/20 text-muted-fg font-mono font-bold">
+                  {list.length} {list.length === 1 ? "tool" : "tools"}
+                </span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-fg tracking-tight mb-4">
-                Castov for Visual Studio Code
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {list.map((ext) => (
+                  <div
+                    key={ext.id}
+                    className="card p-6 border border-border/80 hover:border-accent/60 rounded-2xl bg-card/70 flex flex-col justify-between transition-all hover:shadow-xl group"
+                  >
+                    <div>
+                      {/* Header */}
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2.5 rounded-xl bg-muted/15 border border-border/60 group-hover:scale-105 transition-transform">
+                            {getExtensionIcon(ext.iconName)}
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold text-fg group-hover:text-accent transition-colors font-mono">
+                              {ext.name}
+                            </h3>
+                            <span className="text-[11px] font-mono text-muted-fg">
+                              Castov.{ext.id}
+                            </span>
+                          </div>
+                        </div>
+
+                        {ext.badge && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-accent/15 text-accent border border-accent/20">
+                            {ext.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-sm text-muted-fg leading-relaxed mb-5">
+                        {ext.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-3 pt-4 border-t border-border/60">
+                      {/* CLI Command */}
+                      <div className="bg-bg/90 p-2.5 rounded-xl border border-border/70 flex items-center justify-between font-mono text-xs">
+                        <code className="text-accent truncate select-all">
+                          {ext.installCommand}
+                        </code>
+                      </div>
+
+                      {/* Action Links */}
+                      <div className="flex items-center justify-between pt-1">
+                        <a
+                          href={ext.marketplaceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-primary text-xs font-bold px-4 py-2 flex items-center gap-1.5 shadow-sm"
+                        >
+                          <Code2 className="w-3.5 h-3.5" />
+                          <span>Install on VS Code Marketplace</span>
+                          <ExternalLink className="w-3 h-3 opacity-70" />
+                        </a>
+
+                        <a
+                          href={`https://vscode.dev/extension/Castov.${ext.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-muted-fg hover:text-fg font-semibold transition-colors"
+                        >
+                          vscode.dev &rarr;
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      {/* Manual VSIX Installation & Offline Guide */}
+      <section className="mb-20">
+        <div className="card p-8 sm:p-10 border border-border/80 rounded-3xl bg-gradient-to-b from-card to-card/50 shadow-sm">
+          <div className="flex flex-col lg:flex-row gap-10 items-start justify-between">
+            <div className="flex-1 space-y-4">
+              <div className="inline-flex items-center gap-2 text-accent font-semibold text-xs uppercase tracking-wider">
+                <Terminal className="w-4 h-4" />
+                <span>OFFLINE & AIR-GAPPED ENVIRONMENTS</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-fg tracking-tight">
+                How to Install Any Castov Extension via CLI
               </h2>
-              <p className="text-muted leading-relaxed mb-8">
-                Designed for high-velocity software engineering. Eliminates browser tab juggling by handling timestamps, cryptographic identifiers, and token inspection right inside your workspace.
+              <p className="text-muted-fg text-sm leading-relaxed">
+                Whether you use standard VS Code, Cursor, Windsurf, or VSCodium,
+                you can install any of the 13 extensions directly from your
+                terminal:
               </p>
 
-              <div className="space-y-4 mb-8">
-                <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-fg">Automatic Timestamp Hover</h3>
-                    <p className="text-sm text-muted">Hover over any 10 or 13-digit number to instantly view UTC, ISO, and Local time.</p>
-                  </div>
+              <div className="p-4 rounded-xl bg-bg border border-border font-mono text-xs space-y-2 text-muted-fg">
+                <div className="text-fg font-bold"># Example: Install Dependency Risk Lens</div>
+                <div className="text-accent select-all">
+                  code --install-extension Castov.dependency-lens-castov
                 </div>
-
-                <div className="flex items-start gap-3">
-                  <Fingerprint className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-fg">UUID v4 & Time-Ordered UUID v7</h3>
-                    <p className="text-sm text-muted">Generate secure random v4 or database-optimized chronological v7 directly at your cursor.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Key className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-fg">In-Editor JWT Inspector</h3>
-                    <p className="text-sm text-muted">Right-click any token to view decoded Header, Payload, and expiration status in seconds.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-field border border-line space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono text-muted">
-                  <span>INSTALL VIA VS CODE CLI</span>
-                </div>
-                <div className="flex items-center justify-between bg-bg p-3 rounded-lg border border-line font-mono text-xs text-accent">
-                  <code>code --install-extension castov.castov-vscode</code>
+                <div className="text-fg font-bold pt-2"># Example: Install MCP Config Security Scanner</div>
+                <div className="text-accent select-all">
+                  code --install-extension Castov.mcp-security-castov
                 </div>
               </div>
             </div>
 
-            {/* Visual Installation Card */}
-            <div className="w-full lg:w-96 rounded-2xl bg-field border border-line p-6">
-              <h3 className="font-bold text-fg mb-4 flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-accent" />
-                <span>How to Install .vsix in VS Code</span>
+            {/* Offline .VSIX helper */}
+            <div className="w-full lg:w-96 rounded-2xl bg-bg border border-border/80 p-6 space-y-4">
+              <h3 className="font-bold text-fg flex items-center gap-2 text-sm">
+                <Download className="w-4 h-4 text-accent" />
+                <span>Offline .VSIX Manual Installation</span>
               </h3>
-              <ol className="space-y-3 text-sm text-muted">
+              <ol className="space-y-2.5 text-xs text-muted-fg">
                 <li className="flex gap-2">
                   <span className="font-bold text-accent">1.</span>
-                  <span>Download the <strong className="text-fg">castov-vscode-0.1.4.vsix</strong> file above.</span>
+                  <span>In VS Code, press <strong className="text-fg">Ctrl+Shift+X</strong> (Extensions).</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="font-bold text-accent">2.</span>
-                  <span>Open VS Code and press <strong className="text-fg">Ctrl+Shift+X</strong> (Extensions view).</span>
+                  <span>Click the three dots menu (<strong className="text-fg">...</strong>) at the top of the Extensions pane.</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="font-bold text-accent">3.</span>
-                  <span>Click the three dots (<strong className="text-fg">...</strong>) at the top of the Extensions pane.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-accent">4.</span>
-                  <span>Select <strong className="text-fg">Install from VSIX...</strong> and choose the downloaded file.</span>
+                  <span>Select <strong className="text-fg">Install from VSIX...</strong> and choose your package.</span>
                 </li>
               </ol>
 
-              <div className="mt-6 pt-6 border-t border-line">
+              <div className="pt-2">
                 <a
                   href="/api/download/extension"
                   download="castov-vscode-0.1.4.vsix"
-                  className="btn w-full justify-center bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold py-3"
+                  className="btn btn-secondary w-full justify-center text-xs font-bold py-2.5 flex items-center gap-2"
                 >
-                  <Download className="w-4 h-4 mr-2 text-white" /> Download .vsix File
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download Castov Suite .vsix</span>
                 </a>
               </div>
             </div>
@@ -176,73 +297,28 @@ export default function ExtensionPage() {
         </div>
       </section>
 
-      {/* Chrome / Browser Extension Section */}
-      <section className="mb-20">
-        <div className="rounded-3xl border border-line bg-card p-8 sm:p-12 shadow-sm">
-          <div className="max-w-2xl mb-8">
-            <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm mb-3">
-              <ShieldCheck className="w-4 h-4" />
-              <span>BROWSER POPUP COMPANION</span>
-            </div>
-            <h2 className="text-3xl font-extrabold text-fg tracking-tight mb-4">
-              Castov for Chrome & Edge
-            </h2>
-            <p className="text-muted leading-relaxed">
-              Open your developer utilities with a single click or keyboard shortcut from any browser tab, even when offline.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="p-5 rounded-2xl bg-field border border-line">
-              <span className="w-7 h-7 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold text-xs mb-3">1</span>
-              <h3 className="font-semibold text-fg mb-1">Download ZIP</h3>
-              <p className="text-xs text-muted">Download and unzip the pre-bundled extension folder on your computer.</p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-field border border-line">
-              <span className="w-7 h-7 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold text-xs mb-3">2</span>
-              <h3 className="font-semibold text-fg mb-1">Enable Dev Mode</h3>
-              <p className="text-xs text-muted">Navigate to <code className="bg-bg px-1 rounded">chrome://extensions</code> and toggle Developer Mode on.</p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-field border border-line">
-              <span className="w-7 h-7 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold text-xs mb-3">3</span>
-              <h3 className="font-semibold text-fg mb-1">Load Unpacked</h3>
-              <p className="text-xs text-muted">Click "Load unpacked" and select the unzipped Castov extension directory.</p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4">
-            <a
-              href="/api/download/browser-extension"
-              download="castov-extension.zip"
-              className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] font-bold px-6 py-3 flex items-center"
-            >
-              <Download className="w-4 h-4 mr-2 text-white" /> Download Extension ZIP
-            </a>
-            <Link href="/tools" className="btn bg-field border border-line text-muted hover:text-fg font-medium px-5 py-3">
-              Explore All 61 Online Tools <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Feature Guarantee Grid */}
       <div className="grid sm:grid-cols-3 gap-6 text-center">
-        <div className="p-6 rounded-2xl bg-field/50 border border-line/60">
+        <div className="card p-6 rounded-2xl border border-border/70">
           <ShieldCheck className="w-6 h-6 text-accent mx-auto mb-2" />
-          <h4 className="font-bold text-fg mb-1">100% Private</h4>
-          <p className="text-xs text-muted">Runs purely local in your editor. No behavioral telemetry and no remote payload transmission.</p>
+          <h4 className="font-bold text-fg mb-1">100% Private & Local</h4>
+          <p className="text-xs text-muted-fg">
+            Runs purely inside your editor. Zero behavioral telemetry and zero remote payload transmission.
+          </p>
         </div>
-        <div className="p-6 rounded-2xl bg-field/50 border border-line/60">
+        <div className="card p-6 rounded-2xl border border-border/70">
           <Zap className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
-          <h4 className="font-bold text-fg mb-1">Sub-10ms Speed</h4>
-          <p className="text-xs text-muted">Lightweight native execution with zero third-party dependencies.</p>
+          <h4 className="font-bold text-fg mb-1">Blazing Fast Execution</h4>
+          <p className="text-xs text-muted-fg">
+            Lightweight native TypeScript implementations optimized for sub-10ms response times.
+          </p>
         </div>
-        <div className="p-6 rounded-2xl bg-field/50 border border-line/60">
-          <FileCode className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
+        <div className="card p-6 rounded-2xl border border-border/70">
+          <FileCode className="w-6 h-6 text-amber-400 mx-auto mb-2" />
           <h4 className="font-bold text-fg mb-1">MIT Open Source</h4>
-          <p className="text-xs text-muted">Permissive open source license for personal, educational, and commercial work.</p>
+          <p className="text-xs text-muted-fg">
+            Freely licensed for personal, enterprise, and commercial software development.
+          </p>
         </div>
       </div>
     </div>

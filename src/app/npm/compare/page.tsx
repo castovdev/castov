@@ -113,7 +113,7 @@ export default function NpmCompareIndexPage() {
         </div>
 
         <a
-          href="https://marketplace.visualstudio.com/items?itemName=castov.dependency-lens-castov"
+          href="https://marketplace.visualstudio.com/items?itemName=Castov.dependency-lens-castov"
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-primary font-bold px-6 py-3.5 shrink-0 flex items-center gap-2 shadow-lg shadow-accent/25 hover:scale-105 transition-all text-sm"
