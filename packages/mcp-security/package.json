@@ -23,7 +23,6 @@
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Security",
     "Linters",
     "Other"
   ],
