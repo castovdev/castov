@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next';
+import { SITE } from '@/lib/site';
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = SITE.url;
   return {
     rules: {
       userAgent: '*',
@@ -8,14 +10,14 @@ export default function robots(): MetadataRoute.Robots {
       disallow: ['/api/', '/admin/'],
     },
     sitemap: [
-      'https://castov.com/sitemap.xml',
-      'https://castov.com/sitemap-unix.xml',
-      'https://castov.com/sitemap-cron.xml',
-      'https://castov.com/sitemap-chmod.xml',
-      'https://castov.com/sitemap-http-status.xml',
-      'https://castov.com/sitemap-npm.xml',
-      'https://castov.com/sitemap-compare.xml',
+      `${baseUrl}/sitemap.xml`,
+      `${baseUrl}/sitemap-unix.xml`,
+      `${baseUrl}/sitemap-cron.xml`,
+      `${baseUrl}/sitemap-chmod.xml`,
+      `${baseUrl}/sitemap-http-status.xml`,
+      `${baseUrl}/sitemap-npm.xml`,
+      `${baseUrl}/sitemap-compare.xml`,
     ],
-    host: 'https://castov.com',
+    host: baseUrl,
   };
 }

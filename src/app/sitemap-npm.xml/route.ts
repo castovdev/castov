@@ -1,4 +1,5 @@
 import { POPULAR_NPM_PACKAGES } from "@/lib/npm-data";
+import { SITE } from "@/lib/site";
 
 export const dynamic = "force-static";
 export const revalidate = 86400;
@@ -13,7 +14,7 @@ function xmlEscape(str: string): string {
 }
 
 export async function GET() {
-  const baseUrl = "https://castov.com";
+  const baseUrl = SITE.url;
   const today = new Date().toISOString().split("T")[0];
 
   const entries: string[] = [

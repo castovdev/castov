@@ -86,15 +86,42 @@ describe.each(TOOLS.map((t) => [t.slug, t] as const))("tool page /%s", (_slug, t
       const parsed = JSON.parse(s.innerHTML);
       return Array.isArray(parsed) ? parsed : [parsed];
     });
-    expect(blocks.map((b) => b["@type"])).toEqual(["WebApplication", "BreadcrumbList", "FAQPage"]);
+
+    // 1. SoftwareApplication / WebApplication schema validation
+    const appSchema = blocks.find((b) => {
+      const type = b["@type"];
+      return type === "WebApplication" || (Array.isArray(type) && type.includes("WebApplication"));
+    });
+    expect(appSchema, `Tool ${tool.slug} should emit WebApplication schema`).toBeDefined();
+    expect(appSchema["@context"]).toBe("https://schema.org");
+    expect(appSchema.name).toBe(tool.name);
+    expect(appSchema.description).toBe(tool.metaDescription);
+    expect(appSchema.url).toBeTruthy();
+
+    // 2. TechArticle schema validation
+    const techArticle = blocks.find((b) => b["@type"] === "TechArticle");
+    expect(techArticle, `Tool ${tool.slug} should emit TechArticle schema`).toBeDefined();
+    expect(techArticle.headline).toBeTruthy();
+    expect(techArticle.url).toBeTruthy();
+
+    // 3. HowTo schema validation when howTo is present
+    if (tool.howTo && tool.howTo.length > 0) {
+      const howTo = blocks.find((b) => b["@type"] === "HowTo");
+      expect(howTo, `Tool ${tool.slug} with howTo steps must emit HowTo schema`).toBeDefined();
+      expect(howTo.step).toHaveLength(tool.howTo.length);
+    }
+
+    // 4. FAQPage schema validation
     const faq = blocks.find((b) => b["@type"] === "FAQPage");
-    expect(faq).toBeDefined();
+    expect(faq, `Tool ${tool.slug} should emit FAQPage schema`).toBeDefined();
     for (const q of faq.mainEntity) {
       expect(screen.getByText(q.name)).toBeInTheDocument();
       expect(screen.getByText(q.acceptedAnswer.text)).toBeInTheDocument();
     }
+
+    // 5. BreadcrumbList schema validation
     const breadcrumb = blocks.find((b) => b["@type"] === "BreadcrumbList");
-    expect(breadcrumb).toBeDefined();
+    expect(breadcrumb, `Tool ${tool.slug} should emit BreadcrumbList schema`).toBeDefined();
     expect(breadcrumb.itemListElement.map((i: { name: string }) => i.name)).toEqual(["Home", "Tools", tool.name]);
   });
 

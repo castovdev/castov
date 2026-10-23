@@ -4,8 +4,8 @@ import { buildMetadata } from "@/lib/seo";
 import { WebhookTesterClient } from "./webhook-tester-client";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Local Webhook Tester & Payload Inspector | Castov",
-  description: "Test and inspect incoming webhooks in real-time. Catch payloads from Stripe, GitHub, or any external API locally.",
+  title: "Webhook Simulator & Payload Inspector | Castov",
+  description: "Inspect and simulate webhooks locally in your browser. Debug HMAC signatures and payloads from Stripe, GitHub, and external APIs in memory.",
   path: "/webhook-tester",
 });
 

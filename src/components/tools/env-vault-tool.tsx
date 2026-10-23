@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LockIcon, UnlockIcon, CopyIcon, LinkIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { SITE } from "@/lib/site";
 
 // WebCrypto AES-GCM Helpers
 const generateKey = async (password: string, salt: Uint8Array) => {
@@ -76,7 +77,7 @@ export function EnvVaultTool() {
       const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(rawEnv));
       
       const payloadBase64 = arrayBufferToBase64(salt.buffer as ArrayBuffer) + ":" + arrayBufferToBase64(iv.buffer as ArrayBuffer) + ":" + arrayBufferToBase64(ciphertext);
-      const origin = typeof window !== "undefined" ? window.location.origin : "https://castov.com";
+      const origin = typeof window !== "undefined" && window.location.origin ? window.location.origin : SITE.url;
       
       // Zero-Knowledge client hash link (100% serverless, zero storage risk)
       const zeroKnowledgeLink = `${origin}/env-vault#payload=${encodeURIComponent(payloadBase64)}`;

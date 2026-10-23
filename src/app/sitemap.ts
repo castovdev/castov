@@ -13,6 +13,7 @@ import { CLOUD_SERVICES } from '@/lib/cloud-status-registry';
 import { LLM_MODELS } from '@/lib/llm-specs-registry';
 import { HTTP_STATUS_CODES } from '@/lib/http-statuses';
 import { VS_COMPARISONS } from '@/lib/vs-registry';
+import { SITE } from '@/lib/site';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -20,7 +21,7 @@ function getLastMod(_filePath: string) {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://castov.com';
+  const baseUrl = SITE.url;
 
   const sitemapEntries: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: getLastMod('src/app/page.tsx'), changeFrequency: 'daily', priority: 1.0 },

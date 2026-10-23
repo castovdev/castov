@@ -1,7 +1,9 @@
+import { SITE } from "@/lib/site";
+
 /** All 512 possible chmod octal codes, 000 to 777. */
 export async function GET() {
   const date = new Date().toISOString().split("T")[0];
-  const baseUrl = "https://castov.com";
+  const baseUrl = SITE.url;
   const entries: string[] = [
     `  <url>
     <loc>${baseUrl}/chmod</loc>

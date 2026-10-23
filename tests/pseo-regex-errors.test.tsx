@@ -115,21 +115,24 @@ describe("Programmatic SEO: Regex Patterns Library & Lab (40 Patterns)", () => {
   });
 });
 
-describe("Programmatic SEO: Error Fix Encyclopedia (35 Guides)", () => {
-  it("contains exactly 35 registered error fix guides", () => {
-    expect(ERROR_FIXES.length).toBe(35);
+describe("Programmatic SEO: Error Fix Encyclopedia (69 Guides)", () => {
+  it("contains all 69 registered error fix guides with minimum invariant guarantee", () => {
+    expect(ERROR_FIXES.length).toBe(69);
+    expect(ERROR_FIXES.length).toBeGreaterThanOrEqual(35);
   });
 
-  it("verifies required fields, code comparisons and diagnostics for all 35 error fixes", () => {
+  it("verifies required fields, code comparisons and diagnostics for all 69 error fixes", () => {
     const slugs = new Set<string>();
     for (const err of ERROR_FIXES) {
       expect(err.slug).toBeTruthy();
-      expect(slugs.has(err.slug)).toBe(false);
+      expect(err.slug).toMatch(/^[a-z0-9-]+$/); // URL-safe slug
+      expect(slugs.has(err.slug), `Duplicate slug detected: ${err.slug}`).toBe(false);
       slugs.add(err.slug);
 
       expect(err.name).toBeTruthy();
       expect(err.title).toBeTruthy();
       expect(err.summary).toBeTruthy();
+      expect(err.summary.length).toBeGreaterThanOrEqual(20);
       expect(err.errorMessage).toBeTruthy();
       expect(err.rootCause).toBeTruthy();
       expect(err.brokenCode).toBeTruthy();
@@ -158,9 +161,14 @@ describe("Programmatic SEO: Error Fix Encyclopedia (35 Guides)", () => {
     expect(docker!.errorMessage).toContain("Bind for 0.0.0.0");
   });
 
-  it("generates static params and metadata for all 35 error fixes", async () => {
+  it("generates static params and metadata for all 69 error fixes without duplication", async () => {
     const params = generateErrorParams();
-    expect(params.length).toBe(35);
+    expect(params.length).toBe(ERROR_FIXES.length);
+    expect(params.length).toBe(69);
+
+    const paramSlugs = new Set(params.map((p) => p.slug));
+    expect(paramSlugs.size).toBe(69); // No duplicates in route params
+
     expect(params.some((p) => p.slug === "nextjs-hydration-failed")).toBe(true);
     expect(params.some((p) => p.slug === "cors-access-control-allow-origin-missing")).toBe(true);
     expect(params.some((p) => p.slug === "linux-permission-denied-publickey")).toBe(true);

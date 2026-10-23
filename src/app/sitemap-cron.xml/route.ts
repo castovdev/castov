@@ -1,3 +1,5 @@
+import { SITE } from "@/lib/site";
+
 export async function GET() {
   const commonCrons: string[] = [];
   const minutes = ["0", "15", "30", "45", "*"];
@@ -19,7 +21,7 @@ export async function GET() {
   }
 
   const date = new Date().toISOString().split("T")[0];
-  const baseUrl = "https://castov.com";
+  const baseUrl = SITE.url;
 
   const urls = commonCrons.map((cron) => `  <url>
     <loc>${baseUrl}/cron/${cron}</loc>

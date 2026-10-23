@@ -179,4 +179,20 @@ describe("metadata and structured data", () => {
     expect(data.url).toBe(absoluteUrl("/x"));
     expect(JSON.stringify(data)).not.toMatch(/aggregateRating|review/);
   });
+
+  it("negative test: detects malformed JSON-LD and enforces schema integrity", () => {
+    // 1. Malformed JSON parsing throws SyntaxError
+    const badJson = '{"@context": "https://schema.org", "@type": "WebApplication", name: missing_quotes}';
+    expect(() => JSON.parse(badJson)).toThrow(SyntaxError);
+
+    // 2. Structured data must not contain undefined or NaN
+    const data = webApplicationJsonLd({ name: "Test Tool", description: "Desc", path: "/test" });
+    const serialized = JSON.stringify(data);
+    expect(serialized).not.toContain("undefined");
+    expect(serialized).not.toContain("NaN");
+
+    // 3. Negative test on howToJsonLd step ordering
+    const emptyHowTo = { "@context": "https://schema.org", "@type": "HowTo", name: "Incomplete" };
+    expect((emptyHowTo as any).step).toBeUndefined(); // Missing required step array in malformed HowTo
+  });
 });

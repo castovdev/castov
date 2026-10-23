@@ -17,7 +17,7 @@ try {
 } catch { /* optional: env file may be missing or unreadable */ }
 
 const env = {
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || "https://castov.com",
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || "https://www.castov.com",
   NEXT_PUBLIC_CONTACT_EMAIL: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contact@castov.com",
   ...process.env
 };

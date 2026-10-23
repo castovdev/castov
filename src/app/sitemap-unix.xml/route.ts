@@ -1,5 +1,7 @@
+import { SITE } from "@/lib/site";
+
 export async function GET() {
-  const baseUrl = "https://castov.com";
+  const baseUrl = SITE.url;
   // Generate a list of significant Unix timestamps to seed Google
   // E.g., start of every month from 2020 to 2030
   const urls: string[] = [];
