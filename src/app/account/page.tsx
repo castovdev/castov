@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
@@ -23,6 +23,9 @@ import {
   Eye,
   EyeOff,
   FileCode2,
+  Cloud,
+  Check,
+  Share2,
 } from "lucide-react";
 
 interface SavedConfig {
@@ -68,6 +71,10 @@ export default function AccountPage() {
   const [savedConfigs, setSavedConfigs] = useState<SavedConfig[]>([]);
   const [newWsName, setNewWsName] = useState("");
 
+  // Cloud sync status
+  const [isCloudSynced, setIsCloudSynced] = useState(false);
+  const [syncStatusText, setSyncStatusText] = useState<string | null>(null);
+
   // BYOK Keys
   const [apiKeys, setApiKeys] = useState<ApiKeys>({ openai: "", anthropic: "", gemini: "" });
   const [showKey, setShowKey] = useState<{ [key: string]: boolean }>({});
@@ -79,8 +86,40 @@ export default function AccountPage() {
   const [publicKeyShort, setPublicKeyShort] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedUserId, setCopiedUserId] = useState(false);
+  const [sharedConfigId, setSharedConfigId] = useState<string | null>(null);
 
   const supabase = createClient();
+
+  // Helper to sync state to Supabase cloud preferences
+  const syncToCloud = useCallback(
+    async (
+      u: User,
+      pins: ToolSlug[],
+      ws: Workspace[],
+      configs: SavedConfig[]
+    ) => {
+      try {
+        setSyncStatusText("Syncing...");
+        const { error } = await supabase.from("user_preferences").upsert({
+          user_id: u.id,
+          pinned_tools: pins,
+          workspaces: ws,
+          saved_configs: configs,
+          updated_at: new Date().toISOString(),
+        });
+        if (!error) {
+          setIsCloudSynced(true);
+          setSyncStatusText("Cloud Synced ✓");
+          setTimeout(() => setSyncStatusText(null), 3000);
+        } else {
+          setSyncStatusText(null);
+        }
+      } catch {
+        setSyncStatusText(null);
+      }
+    },
+    [supabase]
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -91,6 +130,33 @@ export default function AccountPage() {
       if (!mounted) return;
       setUser(user);
       setLoading(false);
+
+      // Local storage values
+      let currentPins: ToolSlug[] = [];
+      let currentWs: Workspace[] = [{ id: "ws_personal", name: "Personal Workspace", createdAt: Date.now() }];
+      let currentConfigs: SavedConfig[] = [];
+
+      try {
+        const storedPinned = localStorage.getItem(PINNED_STORAGE_KEY);
+        if (storedPinned) currentPins = JSON.parse(storedPinned);
+
+        const storedWs = localStorage.getItem(WORKSPACES_KEY);
+        if (storedWs) currentWs = JSON.parse(storedWs);
+
+        const storedConfigs = localStorage.getItem(SAVED_CONFIGS_KEY);
+        if (storedConfigs) currentConfigs = JSON.parse(storedConfigs);
+
+        const storedKeys = localStorage.getItem(API_KEYS_KEY);
+        if (storedKeys) {
+          try {
+            setApiKeys(JSON.parse(atob(storedKeys)));
+          } catch {
+            // Invalid base64
+          }
+        }
+      } catch {
+        // Ignore storage access restrictions
+      }
 
       if (user) {
         // 2. Fetch security record from Supabase
@@ -107,35 +173,43 @@ export default function AccountPage() {
         } else if (mounted) {
           setHasSecurityKeys(false);
         }
+
+        // 3. Fetch user cloud preferences from Supabase
+        try {
+          const { data: prefData } = await supabase
+            .from("user_preferences")
+            .select("pinned_tools, workspaces, saved_configs")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          if (mounted && prefData) {
+            setIsCloudSynced(true);
+            if (Array.isArray(prefData.pinned_tools) && prefData.pinned_tools.length > 0) {
+              currentPins = prefData.pinned_tools as ToolSlug[];
+            }
+            if (Array.isArray(prefData.workspaces) && prefData.workspaces.length > 0) {
+              currentWs = prefData.workspaces as Workspace[];
+            }
+            if (Array.isArray(prefData.saved_configs) && prefData.saved_configs.length > 0) {
+              currentConfigs = prefData.saved_configs as SavedConfig[];
+            }
+            // Sync down to localStorage
+            localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(currentPins));
+            localStorage.setItem(WORKSPACES_KEY, JSON.stringify(currentWs));
+            localStorage.setItem(SAVED_CONFIGS_KEY, JSON.stringify(currentConfigs));
+          } else if (mounted && user) {
+            // First time: push initial local values to cloud
+            syncToCloud(user, currentPins, currentWs, currentConfigs);
+          }
+        } catch {
+          // Fallback gracefully to local
+        }
       }
 
-      // 3. Load localStorage items safely
-      try {
-        const storedPinned = localStorage.getItem(PINNED_STORAGE_KEY);
-        if (storedPinned) setPinnedSlugs(JSON.parse(storedPinned));
-
-        const storedWs = localStorage.getItem(WORKSPACES_KEY);
-        if (storedWs) {
-          setWorkspaces(JSON.parse(storedWs));
-        } else {
-          const defaultWs = [{ id: "ws_personal", name: "Personal Workspace", createdAt: Date.now() }];
-          setWorkspaces(defaultWs);
-          localStorage.setItem(WORKSPACES_KEY, JSON.stringify(defaultWs));
-        }
-
-        const storedConfigs = localStorage.getItem(SAVED_CONFIGS_KEY);
-        if (storedConfigs) setSavedConfigs(JSON.parse(storedConfigs));
-
-        const storedKeys = localStorage.getItem(API_KEYS_KEY);
-        if (storedKeys) {
-          try {
-            setApiKeys(JSON.parse(atob(storedKeys)));
-          } catch {
-            // Invalid base64
-          }
-        }
-      } catch {
-        // Ignore storage access restrictions
+      if (mounted) {
+        setPinnedSlugs(currentPins);
+        setWorkspaces(currentWs);
+        setSavedConfigs(currentConfigs);
       }
     }
 
@@ -151,7 +225,7 @@ export default function AccountPage() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, syncToCloud]);
 
   // Actions
   const handleSignOut = async () => {
@@ -164,12 +238,14 @@ export default function AccountPage() {
     const next = pinnedSlugs.filter((s) => s !== slug);
     setPinnedSlugs(next);
     localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(next));
+    if (user) syncToCloud(user, next, workspaces, savedConfigs);
   };
 
   const handleDeleteConfig = (id: string) => {
     const next = savedConfigs.filter((c) => c.id !== id);
     setSavedConfigs(next);
     localStorage.setItem(SAVED_CONFIGS_KEY, JSON.stringify(next));
+    if (user) syncToCloud(user, pinnedSlugs, workspaces, next);
   };
 
   const handleCreateWorkspace = (e: React.FormEvent) => {
@@ -185,6 +261,16 @@ export default function AccountPage() {
     setActiveWsId(newWs.id);
     localStorage.setItem(WORKSPACES_KEY, JSON.stringify(next));
     setNewWsName("");
+    if (user) syncToCloud(user, pinnedSlugs, next, savedConfigs);
+  };
+
+  const handleShareConfig = (config: SavedConfig) => {
+    const shareUrl = `${window.location.origin}/${config.toolSlug}#share=${encodeURIComponent(
+      JSON.stringify({ title: config.title, content: config.content })
+    )}`;
+    navigator.clipboard.writeText(shareUrl);
+    setSharedConfigId(config.id);
+    setTimeout(() => setSharedConfigId(null), 2500);
   };
 
   const handleSaveApiKeys = (e: React.FormEvent) => {
@@ -227,7 +313,7 @@ export default function AccountPage() {
             Sign In to Access Your Dashboard
           </h1>
           <p className="relative z-10 text-sm text-muted mt-3 max-w-md mx-auto">
-            Log in to manage your saved developer workspaces, pinned favorite tools, Zero-Knowledge Team Vaults, and private AI keys.
+            Log in to manage your saved developer workspaces, pinned favorite tools, Zero-Knowledge Team Vaults, and private AI keys with cross-device cloud sync.
           </p>
           <div className="relative z-10 mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
@@ -287,9 +373,20 @@ export default function AccountPage() {
                 <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-mono font-medium bg-accent/10 border border-accent/20 text-accent uppercase">
                   {authProvider}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-medium">
-                  Active
-                </span>
+                {isCloudSynced ? (
+                  <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-medium">
+                    <Cloud className="w-3 h-3" /> Cloud Synced
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-mono bg-field border border-line text-muted">
+                    Local Device
+                  </span>
+                )}
+                {syncStatusText && (
+                  <span className="text-xs font-mono text-accent animate-pulse font-medium">
+                    {syncStatusText}
+                  </span>
+                )}
               </div>
               <p className="font-mono text-xs sm:text-sm text-muted mt-1">{user.email}</p>
               <div className="flex items-center gap-4 mt-3 text-xs text-muted flex-wrap">
@@ -460,7 +557,9 @@ export default function AccountPage() {
                         <h3 className="font-semibold text-sm text-fg group-hover:text-accent transition-colors">
                           {tool.name}
                         </h3>
-                        <p className="text-xs text-muted mt-1 line-clamp-2">{tool.cardDescription || tool.intro}</p>
+                        <p className="text-xs text-muted mt-1 line-clamp-2">
+                          {tool.cardDescription || tool.intro}
+                        </p>
                       </div>
                       <Link
                         href={`/${tool.slug}`}
@@ -511,7 +610,9 @@ export default function AccountPage() {
                         {tool.category}
                       </span>
                     </div>
-                    <p className="text-xs text-muted truncate mt-0.5">{tool.cardDescription || tool.intro}</p>
+                    <p className="text-xs text-muted truncate mt-0.5">
+                      {tool.cardDescription || tool.intro}
+                    </p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <Link
@@ -543,7 +644,7 @@ export default function AccountPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold text-fg">Saved Tool Configs &amp; Snippets</h2>
-              <p className="text-xs text-muted">Your customized presets and generated code</p>
+              <p className="text-xs text-muted">Your customized presets, generated code, and shared links</p>
             </div>
 
             {/* Create Workspace Form */}
@@ -592,7 +693,7 @@ export default function AccountPage() {
               <FileCode2 className="w-8 h-8 text-muted mx-auto mb-2 opacity-50" />
               <p className="text-sm font-semibold text-fg">No snippets in this workspace</p>
               <p className="text-xs text-muted mt-1">
-                Save outputs from JSON to TS, Cron Generator, or Regex Lab to see them here.
+                Save outputs from JSON to TS, Cron Generator, or Regex Lab to see and share them here.
               </p>
             </div>
           ) : (
@@ -615,8 +716,26 @@ export default function AccountPage() {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
+                        onClick={() => handleShareConfig(config)}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-accent/10 border border-accent/20 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
+                        title="Copy share link"
+                      >
+                        {sharedConfigId === config.id ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                            <span className="text-emerald-500">Copied Link!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Share2 className="w-3.5 h-3.5" />
+                            <span>Share</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => copyToClipboard(config.content, "pubKey")}
-                        className="p-1.5 rounded text-muted hover:text-fg hover:bg-card border border-line/40 transition-colors"
+                        className="p-1.5 rounded text-muted hover:text-fg hover:bg-card border border-line/40 transition-colors cursor-pointer"
                         title="Copy content"
                       >
                         <Copy className="w-3.5 h-3.5" />
@@ -624,7 +743,7 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={() => handleDeleteConfig(config.id)}
-                        className="p-1.5 rounded text-muted hover:text-danger hover:bg-danger/10 border border-line/40 transition-colors"
+                        className="p-1.5 rounded text-muted hover:text-danger hover:bg-danger/10 border border-line/40 transition-colors cursor-pointer"
                         title="Delete snippet"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
