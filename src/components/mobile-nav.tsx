@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { NAV_LINKS } from "./nav-links";
+import { AuthNavButton } from "./auth-nav-button";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -103,6 +104,14 @@ export function MobileNav() {
               </li>
             ))}
           </ul>
+        </div>
+        <div className="mx-auto mt-4 max-w-6xl border-t border-line/60 pt-3">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted mb-2">
+            Account &amp; Security
+          </p>
+          <div className="px-3">
+            <AuthNavButton mobile onAction={() => setOpen(false)} />
+          </div>
         </div>
       </div>
     </div>

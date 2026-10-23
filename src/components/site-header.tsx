@@ -7,6 +7,7 @@ import { AI_HUB_LIVE } from "@/lib/flags";
 import { BrandMark } from "./brand-mark";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
+import { AuthNavButton } from "./auth-nav-button";
 import { Search } from "lucide-react";
 
 const DESKTOP_NAV = [
@@ -62,6 +63,7 @@ export function SiteHeader() {
             </kbd>
           </button>
           <ThemeToggle />
+          <AuthNavButton />
         </div>
       </div>
     </header>
