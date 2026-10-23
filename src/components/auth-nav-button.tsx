@@ -134,6 +134,14 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
 
         <div className="space-y-1 pt-1">
           <Link
+            href="/account"
+            onClick={onAction}
+            className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-fg transition-colors hover:bg-hover"
+          >
+            <UserIcon className="w-4 h-4 text-accent" />
+            <span>Developer Account</span>
+          </Link>
+          <Link
             href="/env-vault/team"
             onClick={onAction}
             className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-fg transition-colors hover:bg-hover"
@@ -209,6 +217,15 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
 
           {/* Links */}
           <div className="space-y-0.5">
+            <Link
+              href="/account"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-fg transition-colors hover:bg-hover"
+            >
+              <UserIcon className="w-3.5 h-3.5 text-accent" />
+              <span>Developer Account</span>
+            </Link>
             <Link
               href="/env-vault/team"
               role="menuitem"
