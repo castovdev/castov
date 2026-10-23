@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type FormEvent } from "react";
+import { useDeveloperPreferences } from "@/hooks/use-developer-preferences";
 import {
   DEFAULT_COMPARE_ZONES,
   formatCompact,
@@ -38,7 +39,10 @@ function relation(ms: number, from: string, to: string): string {
 
 export function TimezoneConverterTool() {
   const uid = useId();
-  const [from, setFrom] = useState("UTC");
+  const prefs = useDeveloperPreferences();
+  const [selectedFrom, setSelectedFrom] = useState<string | null>(null);
+  const from = selectedFrom ?? (prefs.timezone || "UTC");
+  const setFrom = (val: string) => setSelectedFrom(val);
   const [to, setTo] = useState("America/New_York");
   const [date, setDate] = useState("");
   const [time, setTime] = useState(DEFAULT_TIME);

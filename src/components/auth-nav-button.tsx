@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { User as UserIcon, LogOut, Shield, LogIn } from "lucide-react";
+import { User as UserIcon, LogOut, Shield, LogIn, Star, ExternalLink, Cloud } from "lucide-react";
+import { getTool, type ToolSlug } from "@/content/tools";
 
 interface AuthNavButtonProps {
   mobile?: boolean;
@@ -17,6 +18,15 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [pinnedSlugs] = useState<ToolSlug[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("castov-pinned-tools");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const menuRef = useRef<HTMLDivElement>(null);
 
   const supabase = createClient();
@@ -127,10 +137,40 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold text-fg">{displayName}</div>
+            <div className="flex items-center gap-1.5">
+              <span className="truncate text-sm font-semibold text-fg">{displayName}</span>
+              <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-emerald-500 font-medium">
+                <Cloud className="w-2.5 h-2.5" />
+              </span>
+            </div>
             <div className="truncate font-mono text-xs text-muted">{user.email}</div>
           </div>
         </div>
+
+        {/* Mobile Pinned Quick Access */}
+        {pinnedSlugs.length > 0 && (
+          <div className="py-1 border-b border-line/60 space-y-1">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-muted flex items-center gap-1 px-1">
+              <Star className="w-3 h-3 text-amber-500" />
+              <span>Pinned Tools</span>
+            </div>
+            {pinnedSlugs.slice(0, 3).map((slug) => {
+              const tool = getTool(slug);
+              if (!tool) return null;
+              return (
+                <Link
+                  key={slug}
+                  href={`/${slug}`}
+                  onClick={onAction}
+                  className="flex items-center justify-between rounded-lg px-2 py-1.5 text-xs text-fg hover:bg-hover transition-colors"
+                >
+                  <span className="truncate">{tool.name}</span>
+                  <ExternalLink className="w-3 h-3 text-muted shrink-0" />
+                </Link>
+              );
+            })}
+          </div>
+        )}
 
         <div className="space-y-1 pt-1">
           <Link
@@ -152,7 +192,7 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-danger transition-colors hover:bg-hover"
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-danger transition-colors hover:bg-hover cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
@@ -181,7 +221,7 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex h-9 items-center gap-2 rounded-lg border border-line bg-field px-2 text-sm text-fg transition-colors hover:bg-hover focus:outline-none focus:ring-2 focus:ring-accent/40"
+        className="flex h-9 items-center gap-2 rounded-lg border border-line bg-field px-2 text-sm text-fg transition-colors hover:bg-hover focus:outline-none focus:ring-2 focus:ring-accent/40 cursor-pointer"
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="User menu"
@@ -207,13 +247,44 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-line bg-card/95 backdrop-blur-xl p-1.5 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95"
+          className="absolute right-0 top-full mt-2 w-60 rounded-xl border border-line bg-card/95 backdrop-blur-xl p-1.5 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95"
         >
           {/* User Info Header */}
           <div className="px-3 py-2 border-b border-line/60 mb-1">
-            <p className="text-xs font-semibold text-fg truncate">{displayName}</p>
-            <p className="font-mono text-[11px] text-muted truncate">{user.email}</p>
+            <div className="flex items-center justify-between gap-1">
+              <p className="text-xs font-semibold text-fg truncate">{displayName}</p>
+              <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.2 text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-medium">
+                <Cloud className="w-2.5 h-2.5" /> Synced
+              </span>
+            </div>
+            <p className="font-mono text-[11px] text-muted truncate mt-0.5">{user.email}</p>
           </div>
+
+          {/* Pinned Quick Access */}
+          {pinnedSlugs.length > 0 && (
+            <div className="py-1 border-b border-line/60 mb-1 space-y-0.5">
+              <div className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-muted flex items-center gap-1">
+                <Star className="w-3 h-3 text-amber-500" />
+                <span>Pinned Quick Access</span>
+              </div>
+              {pinnedSlugs.slice(0, 3).map((slug) => {
+                const tool = getTool(slug);
+                if (!tool) return null;
+                return (
+                  <Link
+                    key={slug}
+                    href={`/${slug}`}
+                    role="menuitem"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-fg hover:bg-hover transition-colors"
+                  >
+                    <span className="truncate">{tool.name}</span>
+                    <ExternalLink className="w-3 h-3 text-muted shrink-0" />
+                  </Link>
+                );
+              })}
+            </div>
+          )}
 
           {/* Links */}
           <div className="space-y-0.5">
@@ -244,7 +315,7 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
             type="button"
             role="menuitem"
             onClick={handleSignOut}
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-hover"
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-hover cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out</span>

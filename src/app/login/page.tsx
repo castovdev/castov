@@ -1,12 +1,12 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { Shield, ArrowLeft, Lock } from "lucide-react";
 
-function getSafeRedirectUrl(target: string | null, fallback = "/env-vault/team"): string {
+function getSafeRedirectUrl(target: string | null, fallback = "/account"): string {
   if (!target) return fallback;
   const trimmed = target.trim();
   if (
@@ -23,7 +23,7 @@ function getSafeRedirectUrl(target: string | null, fallback = "/env-vault/team")
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectedFrom = getSafeRedirectUrl(searchParams.get("redirectedFrom"), "/env-vault/team");
+  const redirectedFrom = getSafeRedirectUrl(searchParams.get("redirectedFrom"), "/account");
   const errorParam = searchParams.get("error");
 
   const [email, setEmail] = useState("");
@@ -33,9 +33,26 @@ function LoginForm() {
     errorParam === "auth_callback_failed" ? "Authentication callback failed. Please try again." : null
   );
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
 
   const supabase = createClient();
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (mounted) {
+        if (user) {
+          router.replace(redirectedFrom);
+        } else {
+          setCheckingAuth(false);
+        }
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [supabase, router, redirectedFrom]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +95,15 @@ function LoginForm() {
       setLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        <p className="mt-4 text-xs font-mono text-muted">Checking authentication session...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
