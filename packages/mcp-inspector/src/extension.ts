@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 4. Command: Test Specific Tool from Tree
   context.subscriptions.push(
-    vscode.commands.registerCommand("mcpInspector.testTool", (serverConfig?: McpServerConfig, tool?: McpTool) => {
+    vscode.commands.registerCommand("mcpInspector.testTool", (_serverConfig?: McpServerConfig, _tool?: McpTool) => {
       servers = ConfigScanner.scanAllServers();
       InspectorWebviewPanel.createOrShow(context.extensionUri, servers);
     })

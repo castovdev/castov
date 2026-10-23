@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { SessionRecorder } from "../recorder/session-recorder";
-import { FileChangeSnapshot } from "../types/replay";
 
 export class TimelineTreeItem extends vscode.TreeItem {
   constructor(

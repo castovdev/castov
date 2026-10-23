@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { TokenEngine, SUPPORTED_MODELS } from "../engine/tokenizer";
+import { SUPPORTED_MODELS } from "../engine/tokenizer";
 
 export class CostCalculatorWebviewPanel {
   public static currentPanel: CostCalculatorWebviewPanel | undefined;

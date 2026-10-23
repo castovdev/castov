@@ -1,6 +1,6 @@
 import * as http from "http";
 import { EventEmitter } from "events";
-import { CapturedWebhook, ServerStatus, ForwardResult } from "../types/webhook";
+import { CapturedWebhook, ServerStatus } from "../types/webhook";
 import { WebhookForwarder } from "./forwarder";
 
 export class WebhookReceiverServer extends EventEmitter {

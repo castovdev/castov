@@ -1,7 +1,6 @@
 import * as http from "http";
-import * as url from "url";
 import { EventEmitter } from "events";
-import { ChaosRule, FaultType, InterceptedRequest, ProxyStatus } from "../types/chaos";
+import { ChaosRule, InterceptedRequest, ProxyStatus } from "../types/chaos";
 
 export class ProxyEngine extends EventEmitter {
   private server: http.Server | null = null;

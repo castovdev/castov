@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { LogParser } from "../parser/log-parser";
-import { LogAnalysisReport, TraceStory } from "../types/log-story";
+import { LogAnalysisReport } from "../types/log-story";
 
 export class LogStoryWebviewPanel {
   public static currentPanel: LogStoryWebviewPanel | undefined;

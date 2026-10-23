@@ -14,7 +14,6 @@ export class DependencyHoverProvider implements vscode.HoverProvider {
     if (!match) return null;
 
     const depName = match[1];
-    const depVersion = match[2];
 
     const range = document.getWordRangeAtPosition(position, /"@?[a-zA-Z0-9_.\-\/]+"/);
     if (!range) return null;

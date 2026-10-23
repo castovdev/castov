@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ProxyEngine } from "../server/proxy-engine";
-import { ChaosRule, InterceptedRequest, ProxyStatus } from "../types/chaos";
+import { ChaosRule, InterceptedRequest } from "../types/chaos";
 
 export class ChaosWebviewPanel {
   public static currentPanel: ChaosWebviewPanel | undefined;

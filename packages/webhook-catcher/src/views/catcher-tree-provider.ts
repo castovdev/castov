@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { WebhookReceiverServer } from "../server/receiver-server";
-import { CapturedWebhook, ServerStatus } from "../types/webhook";
+import { ServerStatus } from "../types/webhook";
 
 export class WebhookCatcherTreeItem extends vscode.TreeItem {
   constructor(

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { GitBlameParser } from "../blame/git-blame-parser";
-import { FileBlameSummary, LineBlame } from "../types/blame";
+import { FileBlameSummary } from "../types/blame";
 
 export class InlineBlameDecorator implements vscode.Disposable {
   private decorationType: vscode.TextEditorDecorationType;

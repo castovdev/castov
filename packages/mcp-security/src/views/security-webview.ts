@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { MCPConfigFinder } from "../scanner/config-finder";
-import { AuditSummary, SecurityFinding } from "../types/security";
+import { AuditSummary } from "../types/security";
 
 export class MCPSecurityWebviewPanel {
   public static currentPanel: MCPSecurityWebviewPanel | undefined;
@@ -86,9 +86,6 @@ export class MCPSecurityWebviewPanel {
         : summary.overallGrade === "C"
         ? "#f59e0b"
         : "#f43f5e";
-
-    const findingsJson = JSON.stringify(summary.allFindings);
-    const serversJson = JSON.stringify(summary.serverReports);
 
     return `<!DOCTYPE html>
 <html lang="en">

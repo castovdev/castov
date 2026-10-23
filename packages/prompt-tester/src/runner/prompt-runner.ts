@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as https from "https";
 import * as http from "http";
 import * as vscode from "vscode";
 import {
@@ -8,7 +7,6 @@ import {
   PromptTestCase,
   SingleTestExecution,
   AssertionResult,
-  SuiteRunSummary,
 } from "../types/prompt-test";
 
 export class PromptRunner {

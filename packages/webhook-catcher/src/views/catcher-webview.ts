@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { WebhookReceiverServer } from "../server/receiver-server";
 import { WebhookForwarder } from "../server/forwarder";
-import { CapturedWebhook, ServerStatus } from "../types/webhook";
+import { CapturedWebhook } from "../types/webhook";
 
 export class WebhookCatcherWebviewPanel {
   public static currentPanel: WebhookCatcherWebviewPanel | undefined;

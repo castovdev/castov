@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { PackageAnalyzer } from "../analyzer/package-analyzer";
-import { SupplyChainAuditSummary, DependencyRisk } from "../types/dependency";
+import { SupplyChainAuditSummary } from "../types/dependency";
 
 export class DependencyLensWebviewPanel {
   public static currentPanel: DependencyLensWebviewPanel | undefined;

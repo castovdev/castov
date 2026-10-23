@@ -1,6 +1,6 @@
 import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import { EventEmitter } from "events";
-import { McpServerConfig, McpTool, JsonRpcRequest, JsonRpcResponse, TrafficLogEntry } from "../types/mcp";
+import { McpServerConfig, McpTool, JsonRpcRequest, TrafficLogEntry } from "../types/mcp";
 
 export class StdioMcpClient extends EventEmitter {
   private config: McpServerConfig;
@@ -50,7 +50,7 @@ export class StdioMcpClient extends EventEmitter {
           reject(err);
         });
 
-        this.process.on("close", (code) => {
+        this.process.on("close", (_code) => {
           this.cleanup();
         });
 

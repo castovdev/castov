@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { UnicodeScanner } from "../scanner/unicode-patterns";
-import { UnicodeThreat } from "../types/bidi";
 
 export class BidiDiagnosticsProvider implements vscode.CodeActionProvider {
   private diagnosticCollection: vscode.DiagnosticCollection;

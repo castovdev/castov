@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { LogAnalysisReport, TraceStory } from "../types/log-story";
+import { LogAnalysisReport } from "../types/log-story";
 
 export class LogTraceTreeItem extends vscode.TreeItem {
   constructor(

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { PromptRunner } from "../runner/prompt-runner";
-import { SingleTestExecution, SuiteRunSummary } from "../types/prompt-test";
+import { SingleTestExecution } from "../types/prompt-test";
 
 export class PromptTesterWebviewPanel {
   public static currentPanel: PromptTesterWebviewPanel | undefined;

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { GitBlameParser } from "../blame/git-blame-parser";
-import { WorkspaceBlameSummary, FileBlameSummary } from "../types/blame";
+import { WorkspaceBlameSummary } from "../types/blame";
 
 export class AIBlameTreeItem extends vscode.TreeItem {
   constructor(

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ProxyEngine } from "../server/proxy-engine";
-import { ChaosRule, ProxyStatus } from "../types/chaos";
+import { ChaosRule } from "../types/chaos";
 
 export class ChaosTreeItem extends vscode.TreeItem {
   constructor(
