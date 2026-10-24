@@ -9,6 +9,7 @@ import { FaqSection } from "./faq-section";
 import { JsonLd } from "./json-ld";
 import { RelatedTools } from "./related-tools";
 import { ToolInterface } from "./tool-interface";
+import { ToolTracker } from "./tool-tracker";
 import { PinButton } from "./pinned-tools";
 import { ShareButton } from "./share-button";
 import { ADS } from "@/lib/site";
@@ -50,6 +51,7 @@ export function ToolPage({ tool }: { tool: Tool }) {
 
   return (
     <div className="layout-content max-w-5xl py-8 sm:py-12">
+      <ToolTracker slug={tool.slug} name={tool.name} />
       <JsonLd data={structuredData} />
       <Breadcrumb
         path={path}

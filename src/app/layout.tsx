@@ -4,7 +4,9 @@ import { GeistMono } from "geist/font/mono";
 import { AdSenseScript } from "@/components/adsense-script";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { ResumeSessionPill } from "@/components/resume-session-pill";
 import { CommandPalette } from "@/components/command-palette";
+import { KeyboardShortcutsModal } from "@/components/keyboard-shortcuts-modal";
 import { PwaRegister } from "@/components/pwa-register";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE } from "@/lib/site";
@@ -48,7 +50,7 @@ const SCHEMA_JSON_LD = {
         { "@type": "WebPage", "name": "Code Converters", "url": `${SITE.url}/convert` },
         { "@type": "WebPage", "name": "Regex Patterns Lab", "url": `${SITE.url}/regex-patterns` },
         { "@type": "WebPage", "name": "Error Fix Encyclopedia", "url": `${SITE.url}/error-fixes` },
-        { "@type": "WebPage", "name": "Tech Pulse Radar", "url": `${SITE.url}/tech-trends` },
+        { "@type": "TechPulseRadar", "name": "Tech Pulse Radar", "url": `${SITE.url}/tech-trends` },
         { "@type": "WebPage", "name": "AI Developer Hub", "url": `${SITE.url}/ai` },
         { "@type": "WebPage", "name": "Timestamps & Timezones", "url": `${SITE.url}/timestamps` },
         { "@type": "WebPage", "name": "Developer Guides", "url": `${SITE.url}/guides` }
@@ -69,11 +71,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
         <SiteHeader />
+        <ResumeSessionPill />
         <main id="main" className="flex-1">
           {children}
         </main>
         <SiteFooter />
         <CommandPalette />
+        <KeyboardShortcutsModal />
         <AdSenseScript />
         <PwaRegister />
         <Analytics />
