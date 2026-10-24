@@ -392,7 +392,7 @@ const PLAYGROUND_TOOLS: PlaygroundToolSpec[] = [
     label: "castov_hash",
     badge: "Digest",
     inputLabel: "Input Payload to Hash",
-    defaultInput: "castov-mcp-v1.4.0",
+    defaultInput: "castov-mcp-v1.5.0",
     buildArgs: (raw) => ({ text: raw, algorithm: "sha256" }),
     execute: (raw) => {
       // Deterministic FNV/SHA preview in browser synchronous mode
@@ -406,7 +406,7 @@ const PLAYGROUND_TOOLS: PlaygroundToolSpec[] = [
       h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
       h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
       const hexDigest =
-        raw === "castov-mcp-v1.4.0"
+        raw === "castov-mcp-v1.5.0"
           ? "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
           : (h1 >>> 0).toString(16).padStart(8, "0").repeat(4) + (h2 >>> 0).toString(16).padStart(8, "0").repeat(4);
       return {

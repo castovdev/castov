@@ -1,6 +1,6 @@
 {
   "name": "castov",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "license": "MIT",
   "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
@@ -82,5 +82,8 @@
     "typescript": "~5.9",
     "vite": "^8.3.0",
     "vitest": "^5.0.1"
+  },
+  "overrides": {
+    "dompurify": "^3.4.17"
   }
 }

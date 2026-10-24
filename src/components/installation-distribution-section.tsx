@@ -77,7 +77,7 @@ const PLATFORMS: PlatformConfig[] = [
     badge: "CI/CD Marketplace",
     icon: GitBranch,
     description: "Execute MCP verification flows, secret scans, and CIDR checks automatically inside your CI/CD pipelines.",
-    command: "- name: Run Castov MCP Security Scan\n  uses: castovdev/castov@v1.4.0\n  with:\n    path: '.'\n    fail-on-secrets: 'true'",
+    command: "- name: Run Castov MCP Security Scan\n  uses: castovdev/castov@v1.5.0\n  with:\n    path: '.'\n    fail-on-secrets: 'true'",
     docLink: "https://github.com/marketplace/actions/castov-security-secret-scanner",
     features: [
       "Composite Action with cached Node.js 20 environment",

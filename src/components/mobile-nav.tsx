@@ -82,7 +82,7 @@ export function MobileNav() {
           <ul className="grid grid-cols-2 gap-2 mb-4">
             {[
               { href: "/mcp", label: "MCP Server (10 Tools)" },
-              { href: "/cli", label: "Castov CLI (v1.4.0)" },
+              { href: "/cli", label: "Castov CLI (v1.5.0)" },
               { href: "/convert", label: "Converters Matrix" },
               { href: "/regex-patterns", label: "Regex Lab" },
               { href: "/error-fixes", label: "Error Fixes" },

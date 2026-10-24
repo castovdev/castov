@@ -586,7 +586,7 @@ export function CommandPalette() {
           </Command.Group>
 
           {/* MCP Server */}
-          <Command.Group heading="MCP Server &amp; Ecosystem (v1.4.0)" className="text-xs font-medium text-muted/60 px-2 py-1 mt-1">
+          <Command.Group heading="MCP Server &amp; Ecosystem (v1.5.0)" className="text-xs font-medium text-muted/60 px-2 py-1 mt-1">
             <Command.Item
               value="mcp server claude desktop cursor windsurf model context protocol playground"
               onSelect={() => runCommand(() => router.push("/mcp"))}
@@ -594,7 +594,7 @@ export function CommandPalette() {
             >
               <CpuIcon className="w-4 h-4 text-accent" />
               <span className="font-semibold">Castov MCP Server &amp; Live Playground</span>
-              <span className="text-[11px] font-mono bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded ml-auto">Grade A • v1.4.0</span>
+              <span className="text-[11px] font-mono bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded ml-auto">Grade A • v1.5.0</span>
             </Command.Item>
             <Command.Item
               value="copy mcp command npx castov mcp"
@@ -618,7 +618,7 @@ export function CommandPalette() {
               className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
             >
               <TerminalIcon className="w-4 h-4" />
-              <span>Castov CLI (v1.4.0)</span>
+              <span>Castov CLI (v1.5.0)</span>
             </Command.Item>
             <Command.Item
               value="developer hub sdk vscode extension"

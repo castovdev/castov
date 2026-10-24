@@ -1439,7 +1439,7 @@ function AccountDashboard() {
                     castov login --token {cliTokenData.token}
                   </pre>
                   <p className="text-[11px] text-muted">
-                    Run this command once in your terminal to synchronize your workspaces and Team Vaults directly into CLI v1.4.0.
+                    Run this command once in your terminal to synchronize your workspaces and Team Vaults directly into CLI v1.5.0.
                   </p>
                 </div>
               </div>
