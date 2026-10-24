@@ -14,7 +14,11 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  Flame,
+  Share2,
+  Clock,
 } from "lucide-react";
+import { encryptSecretForSharing } from "@/lib/secret-crypto";
 import { encryptEnvVault, decryptEnvVault, type EncryptedVaultPayload } from "@/lib/vault-crypto";
 
 interface VaultItem {
@@ -52,6 +56,48 @@ export function DashboardEnvVault() {
 
   // Copy states
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Expiring secret share state
+  const [isSharingSecret, setIsSharingSecret] = useState(false);
+  const [shareText, setShareText] = useState("");
+  const [shareExpiry, setShareExpiry] = useState<"burn" | "1h" | "24h">("burn");
+  const [shareLoading, setShareLoading] = useState(false);
+  const [generatedShareUrl, setGeneratedShareUrl] = useState<string | null>(null);
+  const [shareError, setShareError] = useState<string | null>(null);
+
+  const handleCreateShareLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!shareText.trim()) return;
+    setShareLoading(true);
+    setShareError(null);
+    setGeneratedShareUrl(null);
+    try {
+      // 1. Encrypt 100% in browser (key never leaves client)
+      const encrypted = await encryptSecretForSharing(shareText);
+
+      // 2. Send only ciphertext & iv
+      const res = await fetch("/api/share-secret", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ciphertext: encrypted.ciphertext,
+          iv: encrypted.iv,
+          expiresIn: shareExpiry,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to create secret link");
+
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://castov.com";
+      const fullUrl = `${origin}/s/${data.id}#key=${encrypted.key}`;
+      setGeneratedShareUrl(fullUrl);
+    } catch (err: any) {
+      setShareError(err?.message || "Failed to generate link");
+    } finally {
+      setShareLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchVaults();
@@ -211,19 +257,170 @@ export function DashboardEnvVault() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              setIsCreating(!isCreating);
-              setFormError(null);
-            }}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-accent text-accent-fg text-xs font-bold hover:bg-accent-hover transition-colors shadow-sm shrink-0 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{isCreating ? "Cancel" : "New Env Vault"}</span>
-          </button>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSharingSecret(true);
+                setGeneratedShareUrl(null);
+                setShareError(null);
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-field border border-line text-xs font-bold text-fg hover:bg-hover hover:border-accent/40 transition-colors shadow-xs cursor-pointer"
+            >
+              <Flame className="w-3.5 h-3.5 text-amber-500" />
+              <span>Share Expiring Link</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsCreating(!isCreating);
+                setFormError(null);
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-accent text-accent-fg text-xs font-bold hover:bg-accent-hover transition-colors shadow-sm cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{isCreating ? "Cancel" : "New Env Vault"}</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Expiring Secret Share Modal */}
+      {isSharingSecret && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-lg rounded-2xl border border-line bg-card p-6 shadow-2xl space-y-4 animate-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <div className="flex items-center gap-2">
+                <Flame className="w-5 h-5 text-amber-500" />
+                <h3 className="font-bold text-fg text-base">Share Expiring Secret (Self-Destruct)</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSharingSecret(false)}
+                className="text-muted hover:text-fg text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-muted leading-relaxed">
+              End-to-End Encrypted via <span className="font-mono text-fg">AES-256-GCM</span>. The decryption key is encoded into the URL hash fragment and is never sent to our servers.
+            </p>
+
+            {shareError && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400">
+                {shareError}
+              </div>
+            )}
+
+            {!generatedShareUrl ? (
+              <form onSubmit={handleCreateShareLink} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1">
+                    Secret Content (.env, API Key, Token)
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="DATABASE_URL=postgres://...&#10;API_KEY=sk_live_..."
+                    value={shareText}
+                    onChange={(e) => setShareText(e.target.value)}
+                    className="w-full font-mono text-xs px-3.5 py-2.5 rounded-xl bg-field border border-line text-fg focus:border-accent focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1">
+                    Self-Destruct / Expiration Mode
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: "burn", label: "Burn (1 View)", icon: Flame },
+                      { id: "1h", label: "1 Hour", icon: Clock },
+                      { id: "24h", label: "24 Hours", icon: Lock },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setShareExpiry(opt.id as any)}
+                        className={`py-2 px-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                          shareExpiry === opt.id
+                            ? "bg-accent/15 border-accent text-accent"
+                            : "bg-field border-line text-muted hover:text-fg"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsSharingSecret(false)}
+                    className="px-4 py-2 rounded-xl bg-field border border-line text-xs font-semibold text-muted hover:text-fg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={shareLoading || !shareText.trim()}
+                    className="px-5 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1.5"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>{shareLoading ? "Encrypting..." : "Generate Expiring Link"}</span>
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-4 pt-2">
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 font-semibold flex items-center gap-2">
+                  <Check className="w-4 h-4 shrink-0" />
+                  <span>Encrypted Link Generated! Ready to share with your teammate.</span>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted">
+                    Share Link (Zero-Knowledge Hash)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={generatedShareUrl}
+                      className="flex-1 font-mono text-xs px-3.5 py-2.5 rounded-xl bg-field border border-line text-fg select-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => copyText("share-url", generatedShareUrl)}
+                      className="px-4 py-2.5 rounded-xl bg-accent text-accent-fg text-xs font-bold hover:bg-accent-hover transition-colors shadow-xs flex items-center gap-1.5 shrink-0"
+                    >
+                      {copiedId === "share-url" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedId === "share-url" ? "Copied!" : "Copy Link"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGeneratedShareUrl(null);
+                      setShareText("");
+                      setIsSharingSecret(false);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-field border border-line text-xs font-semibold text-fg hover:bg-hover"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Creation Modal / Inline Form */}
       {isCreating && (

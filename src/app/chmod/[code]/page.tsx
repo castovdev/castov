@@ -2,6 +2,7 @@ import { buildMetadata, faqJsonLd, webPageJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { FaqSection } from "@/components/faq-section";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ShareButton } from "@/components/share-button";
@@ -92,6 +93,17 @@ export default async function ChmodPage({ params }: { params: Promise<{ code: st
         <p className="text-xl text-muted leading-relaxed max-w-3xl">
           {prose}
         </p>
+      </div>
+
+            <div className="mb-8 p-4 rounded-xl bg-field border border-line flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-emerald-400 font-bold">$</span>
+          <span className="text-fg font-bold">chmod {code} myfile.txt</span>
+          <span className="text-muted text-[11px] ml-2">(Or inspect via CLI: <code className="text-accent">npx castov chmod {code}</code>)</span>
+        </div>
+        <Link href="/chmod" className="text-accent hover:underline text-xs flex items-center gap-1 font-semibold">
+          Interactive Chmod Calculator &rarr;
+        </Link>
       </div>
 
       <div className={`grid ${ADS.client ? "lg:grid-cols-[1fr_300px]" : ""} gap-12 items-start`}>

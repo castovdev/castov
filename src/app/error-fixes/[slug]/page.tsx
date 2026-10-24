@@ -8,6 +8,7 @@ import { FaqSection } from "@/components/faq-section";
 import { AdSlot } from "@/components/ad-slot";
 import { SponsorSlot } from "@/components/sponsor-slot";
 import { ErrorFixGeneratorTool } from "@/components/tools/error-fix-generator-tool";
+import { InstantTerminalFixBox } from "@/components/instant-terminal-fix-box";
 import {
   ERROR_FIXES,
   getErrorBySlug,
@@ -142,6 +143,14 @@ export default async function ErrorFixPage({
       <AdSlot placement="tool-top" />
 
       {/* Main Interactive Tool */}
+            {/* Instant 1-Click OS & Castov CLI Resolution */}
+      <InstantTerminalFixBox
+        slug={errorItem.slug}
+        category={errorItem.category}
+        diagnosticCommands={errorItem.diagnosticCommands}
+        errorMessage={errorItem.errorMessage}
+      />
+
       <section className="my-8" aria-label={errorItem.name}>
         <ErrorFixGeneratorTool slug={errorItem.slug} />
       </section>

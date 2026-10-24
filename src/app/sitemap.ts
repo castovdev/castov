@@ -14,6 +14,7 @@ import { LLM_MODELS } from '@/lib/llm-specs-registry';
 import { HTTP_STATUS_CODES } from '@/lib/http-statuses';
 import { VS_COMPARISONS } from '@/lib/vs-registry';
 import { SITE } from '@/lib/site';
+import { CRON_PRESETS } from '@/lib/time/cron-presets';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access

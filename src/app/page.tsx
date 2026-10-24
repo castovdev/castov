@@ -10,6 +10,7 @@ import { HeroQuickConvert } from "@/components/hero-quick-convert";
 import { PinnedToolsTray } from "@/components/pinned-tools";
 import { InstallationDistributionSection } from "@/components/installation-distribution-section";
 import { HomeWelcomeBanner, HomeBottomCta, HomeBentoVaultCard, HomePinnedQuickBar } from "@/components/home-personalized-view";
+import { LiveTerminalPlayground } from "@/components/live-terminal-playground";
 
 export const metadata: Metadata = {
   ...buildMetadata({
@@ -109,6 +110,7 @@ export default function HomePage() {
           {/* Quick timestamp/date paste inspector */}
           <HeroQuickConvert />
           <HomeWelcomeBanner />
+          <LiveTerminalPlayground />
         </div>
       </section>
 
