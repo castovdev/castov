@@ -1038,6 +1038,69 @@ async function main(argv: string[]): Promise<void> {
     }
 
     case "mcp": {
+      if (positionals[0] === "pull") {
+        const stackName = (positionals[1] || "devsecops").toLowerCase();
+        out.push(`${cyan("⚡ Fetching MCP stack:")} "${bold(stackName)}" from Castov Cloud...`);
+        try {
+          const res = await fetch(`https://castov.com/api/mcp-stacks?name=${encodeURIComponent(stackName)}`);
+          const data = (await res.json().catch(() => null)) as { ok?: boolean; stack?: { servers?: string[] } } | null;
+          const serverList = data?.ok && data?.stack?.servers && Array.isArray(data.stack.servers)
+            ? data.stack.servers
+            : ["castov", "github", "postgres"];
+
+          const mcpConfig: { mcpServers: Record<string, unknown> } = {
+            mcpServers: {},
+          };
+          for (const s of serverList) {
+            if (s === "castov") {
+              mcpConfig.mcpServers["castov"] = {
+                command: "npx",
+                args: ["-y", "castov@latest", "mcp"],
+              };
+            } else if (s === "github") {
+              mcpConfig.mcpServers["github"] = {
+                command: "npx",
+                args: ["-y", "@modelcontextprotocol/server-github"],
+                env: { GITHUB_PERSONAL_ACCESS_TOKEN: "<YOUR_TOKEN>" },
+              };
+            } else if (s === "postgres") {
+              mcpConfig.mcpServers["postgres"] = {
+                command: "npx",
+                args: ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost:5432/mydb"],
+              };
+            } else {
+              mcpConfig.mcpServers[s] = {
+                command: "npx",
+                args: ["-y", s],
+              };
+            }
+          }
+
+          const formatted = JSON.stringify(mcpConfig, null, 2);
+          if (values.write) {
+            const cursorDir = join(process.cwd(), ".cursor");
+            if (!existsSync(cursorDir)) mkdirSync(cursorDir, { recursive: true });
+            writeFileSync(join(cursorDir, "mcp.json"), formatted, "utf8");
+            out.push(`${green("✓ Successfully wrote .cursor/mcp.json")} with ${serverList.length} MCP servers!`);
+          } else {
+            out.push(formatted);
+            out.push(`\nTip: Add ${bold("--write")} to automatically save configuration to ${cyan(".cursor/mcp.json")}`);
+          }
+        } catch {
+          out.push(`${yellow("⚠ Could not reach cloud, generating local fallback stack:")}`);
+          const fallback = JSON.stringify(
+            {
+              mcpServers: {
+                castov: { command: "npx", args: ["-y", "castov@latest", "mcp"] },
+              },
+            },
+            null,
+            2
+          );
+          out.push(fallback);
+        }
+        break;
+      }
       // Start JSON-RPC 2.0 stdio MCP Server for Claude Desktop, Cursor, Windsurf & Glama
       const READONLY_ANNOTATIONS = {
         readOnlyHint: true,

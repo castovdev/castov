@@ -5,7 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { User as UserIcon, LogOut, Shield, LogIn, Star, ExternalLink, Cloud } from "lucide-react";
+import {
+  User as UserIcon,
+  LogOut,
+  Shield,
+  LogIn,
+  Star,
+  ExternalLink,
+  Cloud,
+  LayoutDashboard,
+} from "lucide-react";
 import { getTool, type ToolSlug } from "@/content/tools";
 
 interface AuthNavButtonProps {
@@ -178,8 +187,8 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
             onClick={onAction}
             className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-fg transition-colors hover:bg-hover"
           >
-            <UserIcon className="w-4 h-4 text-accent" />
-            <span>Developer Account</span>
+            <LayoutDashboard className="w-4 h-4 text-accent" />
+            <span>Developer Dashboard</span>
           </Link>
           <Link
             href="/env-vault/team"
@@ -215,113 +224,124 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
     );
   }
 
-  // DESKTOP VIEW: LOGGED IN WITH DROPDOWN
+  // DESKTOP VIEW: LOGGED IN WITH DASHBOARD PILL & DROPDOWN
   return (
-    <div className="relative" ref={menuRef}>
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex h-9 items-center gap-2 rounded-lg border border-line bg-field px-2 text-sm text-fg transition-colors hover:bg-hover focus:outline-none focus:ring-2 focus:ring-accent/40 cursor-pointer"
-        aria-expanded={open}
-        aria-haspopup="menu"
-        aria-label="User menu"
+    <div className="flex items-center gap-2">
+      <Link
+        href="/account"
+        className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 text-xs font-semibold rounded-lg bg-card border border-accent/30 text-accent hover:bg-field transition-colors shadow-xs"
+        title="Open Developer Dashboard"
       >
-        {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={avatarUrl}
-            alt={displayName}
-            referrerPolicy="no-referrer"
-            className="h-6 w-6 rounded-full border border-line/60 object-cover"
-          />
-        ) : (
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/20 border border-accent/40 font-mono text-[11px] font-bold text-accent">
-            {userInitial}
-          </div>
-        )}
-        <span className="max-w-[100px] truncate text-xs font-medium hidden md:inline">
-          {displayName}
-        </span>
-      </button>
+        <LayoutDashboard className="w-3.5 h-3.5" />
+        <span>Dashboard</span>
+      </Link>
 
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-full mt-2 w-60 rounded-xl border border-line bg-card/95 backdrop-blur-xl p-1.5 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95"
+      <div className="relative" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setOpen((prev) => !prev)}
+          className="flex h-9 items-center gap-2 rounded-lg border border-line bg-field px-2 text-sm text-fg transition-colors hover:bg-hover focus:outline-none focus:ring-2 focus:ring-accent/40 cursor-pointer"
+          aria-expanded={open}
+          aria-haspopup="menu"
+          aria-label="User menu"
         >
-          {/* User Info Header */}
-          <div className="px-3 py-2 border-b border-line/60 mb-1">
-            <div className="flex items-center justify-between gap-1">
-              <p className="text-xs font-semibold text-fg truncate">{displayName}</p>
-              <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.2 text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-medium">
-                <Cloud className="w-2.5 h-2.5" /> Synced
-              </span>
-            </div>
-            <p className="font-mono text-[11px] text-muted truncate mt-0.5">{user.email}</p>
-          </div>
-
-          {/* Pinned Quick Access */}
-          {pinnedSlugs.length > 0 && (
-            <div className="py-1 border-b border-line/60 mb-1 space-y-0.5">
-              <div className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-muted flex items-center gap-1">
-                <Star className="w-3 h-3 text-amber-500" />
-                <span>Pinned Quick Access</span>
-              </div>
-              {pinnedSlugs.slice(0, 3).map((slug) => {
-                const tool = getTool(slug);
-                if (!tool) return null;
-                return (
-                  <Link
-                    key={slug}
-                    href={`/${slug}`}
-                    role="menuitem"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-fg hover:bg-hover transition-colors"
-                  >
-                    <span className="truncate">{tool.name}</span>
-                    <ExternalLink className="w-3 h-3 text-muted shrink-0" />
-                  </Link>
-                );
-              })}
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              referrerPolicy="no-referrer"
+              className="h-6 w-6 rounded-full border border-line/60 object-cover"
+            />
+          ) : (
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/20 border border-accent/40 font-mono text-[11px] font-bold text-accent">
+              {userInitial}
             </div>
           )}
+          <span className="max-w-[100px] truncate text-xs font-medium hidden md:inline">
+            {displayName}
+          </span>
+        </button>
 
-          {/* Links */}
-          <div className="space-y-0.5">
-            <Link
-              href="/account"
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-fg transition-colors hover:bg-hover"
-            >
-              <UserIcon className="w-3.5 h-3.5 text-accent" />
-              <span>Developer Account</span>
-            </Link>
-            <Link
-              href="/env-vault/team"
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-fg transition-colors hover:bg-hover"
-            >
-              <Shield className="w-3.5 h-3.5 text-accent" />
-              <span>Team Vaults</span>
-            </Link>
-          </div>
-
-          <div className="my-1 border-t border-line/60" />
-
-          {/* Sign Out Action */}
-          <button
-            type="button"
-            role="menuitem"
-            onClick={handleSignOut}
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-hover cursor-pointer"
+        {open && (
+          <div
+            role="menu"
+            className="absolute right-0 top-full mt-2 w-60 rounded-xl border border-line bg-card/95 backdrop-blur-xl p-1.5 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
-          </button>
-        </div>
-      )}
+            {/* User Info Header */}
+            <div className="px-3 py-2 border-b border-line/60 mb-1">
+              <div className="flex items-center justify-between gap-1">
+                <p className="text-xs font-semibold text-fg truncate">{displayName}</p>
+                <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.2 text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-medium">
+                  <Cloud className="w-2.5 h-2.5" /> Synced
+                </span>
+              </div>
+              <p className="font-mono text-[11px] text-muted truncate mt-0.5">{user.email}</p>
+            </div>
+
+            {/* Pinned Quick Access */}
+            {pinnedSlugs.length > 0 && (
+              <div className="py-1 border-b border-line/60 mb-1 space-y-0.5">
+                <div className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-muted flex items-center gap-1">
+                  <Star className="w-3 h-3 text-amber-500" />
+                  <span>Pinned Quick Access</span>
+                </div>
+                {pinnedSlugs.slice(0, 3).map((slug) => {
+                  const tool = getTool(slug);
+                  if (!tool) return null;
+                  return (
+                    <Link
+                      key={slug}
+                      href={`/${slug}`}
+                      role="menuitem"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-fg hover:bg-hover transition-colors"
+                    >
+                      <span className="truncate">{tool.name}</span>
+                      <ExternalLink className="w-3 h-3 text-muted shrink-0" />
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Links */}
+            <div className="space-y-0.5">
+              <Link
+                href="/account"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-fg transition-colors hover:bg-hover"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5 text-accent" />
+                <span>Developer Dashboard</span>
+              </Link>
+              <Link
+                href="/env-vault/team"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-fg transition-colors hover:bg-hover"
+              >
+                <Shield className="w-3.5 h-3.5 text-accent" />
+                <span>Team Vaults</span>
+              </Link>
+            </div>
+
+            <div className="my-1 border-t border-line/60" />
+
+            {/* Sign Out Action */}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={handleSignOut}
+              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-hover cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

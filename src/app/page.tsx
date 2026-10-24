@@ -9,6 +9,7 @@ import { ArrowRight, Terminal, ShieldCheck, Workflow, Command, Zap, Code } from 
 import { HeroQuickConvert } from "@/components/hero-quick-convert";
 import { PinnedToolsTray } from "@/components/pinned-tools";
 import { InstallationDistributionSection } from "@/components/installation-distribution-section";
+import { HomeWelcomeBanner, HomeWorkspaceLink, HomeBottomCta } from "@/components/home-personalized-view";
 
 export const metadata: Metadata = {
   ...buildMetadata({
@@ -107,6 +108,7 @@ export default function HomePage() {
 
           {/* Quick timestamp/date paste inspector */}
           <HeroQuickConvert />
+          <HomeWelcomeBanner />
         </div>
       </section>
 
@@ -197,13 +199,7 @@ export default function HomePage() {
                     <p className="text-xs text-muted mt-0.5">Zero-friction leverage unlocked on registration</p>
                   </div>
                 </div>
-                <Link
-                  href="/account"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent text-accent-fg text-xs font-bold hover:bg-accent-hover transition-colors shadow-xs shrink-0"
-                >
-                  <span>Connect Workspace</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+                <HomeWorkspaceLink />
               </div>
               <p className="text-sm text-muted leading-relaxed">
                 Connect your GitHub account to sync pinned utilities, presets, and dev preferences across all your machines. Collaborate with teammates using RSA-OAEP encrypted Team Vaults to share <code className="text-fg bg-field px-1 rounded">.env</code> files without cleartext exposure in chat channels.
@@ -314,17 +310,13 @@ export default function HomePage() {
       </section>
       
       {/* --- CTA SECTION --- */}
-      <section className="py-24 bg-card">
+      <section className="py-12 lg:py-20 bg-card">
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to supercharge your workflow?</h2>
           <p className="text-xl text-muted mb-10">
             Free browser-based developer tools. Some collaboration, cloud, and external API features may require an account or additional configuration.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Link href="/tools" className="flex items-center justify-center gap-2 bg-accent text-accent-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-hover transition-colors shadow-sm w-full sm:w-auto">
-              Browse All Tools
-            </Link>
-          </div>
+          <HomeBottomCta />
         </div>
       </section>
     </div>

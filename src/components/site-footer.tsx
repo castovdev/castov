@@ -28,7 +28,7 @@ const TOP_TOOLS = [
 const ECOSYSTEM = [
   { href: "/mcp", label: "Castov MCP Server", badge: "Grade A" },
   { href: "/cli", label: "Castov CLI", badge: "v1.5.0" },
-  { href: "/extension", label: "VS Code Extensions Suite", badge: "13 Tools" },
+  { href: "/extension", label: "VS Code Extensions Suite", badge: "13 Extensions" },
   { href: "/tech-trends", label: "Tech Pulse Radar", badge: "Live" },
   { href: "/time", label: "Timezone Pair Matrix", badge: "60+" },
   { href: "/ports", label: "Network Ports & CIDR", badge: "60+" },
@@ -58,7 +58,7 @@ export function SiteFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="mt-24 border-t border-line/80 bg-card relative before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-accent/40 before:to-transparent">
+    <footer className="mt-8 sm:mt-12 lg:mt-20 border-t border-line/80 bg-card relative before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-accent/40 before:to-transparent">
       {/* 1. Upper Telemetry & Status Bar */}
       <div className="border-b border-line/60 bg-field/30">
         <div className="layout-content py-4 flex flex-col lg:flex-row items-center justify-between gap-4">

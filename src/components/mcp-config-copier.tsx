@@ -37,7 +37,7 @@ const MCP_CLIENTS: ClientConfig[] = [
     configPath:
       "macOS: ~/Library/Application Support/Claude/claude_desktop_config.json\nWindows: %APPDATA%\\Claude\\claude_desktop_config.json",
     notes:
-      "Restart Claude Desktop after saving. Look for the 🔨 hammer icon showing 10 Castov local tools.",
+      "Restart Claude Desktop after saving. Look for the 🔨 hammer icon showing 13 Castov local tools.",
     supportsWindowsCmd: true,
   },
   {
@@ -54,7 +54,7 @@ const MCP_CLIENTS: ClientConfig[] = [
     name: "Windsurf (Codeium)",
     badge: "mcp_config.json",
     configPath: "~/.codeium/windsurf/mcp_config.json",
-    notes: "Cascade agent can invoke all 10 deterministic Castov tools without cloud roundtrips.",
+    notes: "Cascade agent can invoke all 13 deterministic Castov tools without cloud roundtrips.",
     supportsWindowsCmd: true,
   },
   {

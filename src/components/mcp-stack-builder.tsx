@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   Layers,
   Check,
@@ -10,8 +11,10 @@ import {
   Sparkles,
   Code2,
   ExternalLink,
+  Cloud,
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { useUserSession } from "@/hooks/use-user-session";
 
 type IdeTarget = "cursor" | "claude" | "windsurf" | "vscode";
 
@@ -145,10 +148,14 @@ export function McpStackBuilder() {
     "github",
     "postgres",
   ]);
+  const router = useRouter();
   const [ideTarget, setIdeTarget] = useState<IdeTarget>("cursor");
   const [copiedConfig, setCopiedConfig] = useState(false);
   const [copiedShareUrl, setCopiedShareUrl] = useState(false);
   const [copiedBadge, setCopiedBadge] = useState(false);
+  const { user } = useUserSession();
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   // Hydration-safe query param loader
   useEffect(() => {
@@ -253,6 +260,36 @@ export function McpStackBuilder() {
     return `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
   }, [selectedIds.length, shareUrl]);
 
+  const handleSaveToAccount = async () => {
+    if (!user) {
+      router.push("/login?redirect=/mcp");
+      return;
+    }
+    const stackName = prompt(
+      "Enter a name for this MCP stack (e.g. devsecops, fullstack):",
+      "my-stack"
+    );
+    if (!stackName) return;
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/mcp-stacks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: stackName, servers: selectedIds }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setSaveStatus(`Saved stack '${stackName}'! Pull with CLI: castov mcp pull ${stackName}`);
+        setTimeout(() => setSaveStatus(null), 8000);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Main Stack Composer Card */}
@@ -276,6 +313,17 @@ export function McpStackBuilder() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSaveToAccount}
+              disabled={saving}
+              className="btn bg-card border border-emerald-500/30 text-emerald-400 hover:border-emerald-500/60 text-xs font-bold px-3.5 py-2 rounded-xl inline-flex items-center gap-1.5"
+              title={user ? "Save stack to your Castov account" : "Sign in to save stack"}
+            >
+              <Cloud className="w-3.5 h-3.5" />
+              <span>{saving ? "Saving..." : user ? "Save to Account" : "Sign In to Save"}</span>
+            </button>
+
             <button
               type="button"
               onClick={handleCopyShareUrl}
@@ -306,6 +354,18 @@ export function McpStackBuilder() {
             </a>
           </div>
         </div>
+
+        {saveStatus && (
+          <div className="mx-5 my-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-xs flex flex-wrap items-center justify-between gap-2 animate-in fade-in">
+            <span className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-400" />
+              {saveStatus}
+            </span>
+            <span className="text-[11px] bg-black/50 px-2 py-1 rounded text-white border border-white/10">
+              Terminal: castov mcp pull
+            </span>
+          </div>
+        )}
 
         {/* Server Selection Grid */}
         <div className="p-5 sm:p-6 grid sm:grid-cols-2 gap-3 border-b border-line">

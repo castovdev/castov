@@ -24,112 +24,24 @@ import { McpConfigCopier } from "@/components/mcp-config-copier";
 import { McpLivePlayground } from "@/components/mcp-live-playground";
 import { McpStackBuilder } from "@/components/mcp-stack-builder";
 import { SponsorSlot } from "@/components/sponsor-slot";
+import { MCP_TOOLS_CATALOG, TOTAL_MCP_TOOLS_COUNT } from "@/lib/mcp-catalog";
 
 const CURRENT_VERSION = "1.5.0";
 
 export const metadata: Metadata = buildMetadata({
   title: "Castov MCP Server: Local DevSecOps Tools for Claude, Cursor & VS Code",
   description:
-    "Castov MCP server: 10 local read-only tools for Claude Desktop, Cursor, Windsurf & VS Code. Zero data logging and zero cloud latency. Run: npx -y castov mcp",
+    "Castov MCP server: 13 local read-only tools for Claude Desktop, Cursor, Windsurf & VS Code. Zero data logging and zero cloud latency. Run: npx -y castov mcp",
   path: "/mcp",
 });
 
-interface McpToolDoc {
-  name: string;
-  title: string;
-  description: string;
-  promptExample: string;
-  inputParams: string;
-}
-
-const MCP_TOOLS: McpToolDoc[] = [
-  {
-    name: "castov_port",
-    title: "Port & Process Inspector",
-    description:
-      "Identifies standard service registrations for TCP/UDP ports (1–65535) and inspects active local processes listening on the port across Linux, macOS, and Windows.",
-    promptExample: "Check if port 3000 is currently in use and tell me which process owns it.",
-    inputParams: "{ port: number }",
-  },
-  {
-    name: "castov_cidr",
-    title: "IPv4 CIDR & Subnet Calculator",
-    description:
-      "Calculates exact IPv4 network address, subnet mask, wildcard mask, broadcast address, first/last usable host IPs, and total host capacity (including RFC 3021 /31 and /32).",
-    promptExample: "Calculate the usable IP range, broadcast address, and wildcard mask for 10.240.0.0/22.",
-    inputParams: "{ cidr: string }",
-  },
-  {
-    name: "castov_detect_id",
-    title: "Distributed ID & Timestamp Decoder",
-    description:
-      "Detects and extracts embedded creation timestamps from UUIDv7, UUIDv1/v4, ULID, MongoDB ObjectId, and Discord/Twitter Snowflake IDs.",
-    promptExample: "Decode when this ID was generated: 018f3a9c-6d20-7000-8000-010203040506",
-    inputParams: "{ id: string }",
-  },
-  {
-    name: "castov_timestamp",
-    title: "Unix Epoch & ISO 8601 Converter",
-    description:
-      "Converts Unix epoch timestamps (seconds or milliseconds) or ISO date strings into UTC, ISO 8601, local time, and relative time offsets.",
-    promptExample: "Convert Unix timestamp 1760868000 to ISO 8601 and UTC.",
-    inputParams: "{ value: string }",
-  },
-  {
-    name: "castov_cron",
-    title: "Cron Schedule Explainer & Next Run Predictor",
-    description:
-      "Parses 5-field POSIX cron expressions into human-readable descriptions and computes the exact next 5 execution timestamps in any IANA timezone.",
-    promptExample: "When are the next 5 runs for '*/15 9-17 * * 1-5' in America/New_York?",
-    inputParams: "{ expression: string, timezone?: string }",
-  },
-  {
-    name: "castov_timezone",
-    title: "IANA Timezone Converter",
-    description:
-      "Converts dates, times, or timestamps accurately between any two IANA timezones with automatic DST offset calculation.",
-    promptExample: "Convert 2026-06-15 14:30 from Europe/London to Asia/Tokyo.",
-    inputParams: "{ dateTime: string, fromZone: string, toZone: string }",
-  },
-  {
-    name: "castov_secret",
-    title: "CSPRNG Cryptographic Secret Generator",
-    description:
-      "Generates high-entropy cryptographic secrets (16 to 128 bytes) in Hex, Base64, Base64URL, and ready-to-use .env key formats via Node.js crypto.randomBytes.",
-    promptExample: "Generate a 256-bit cryptographic secret for my AUTH_SECRET and JWT_SECRET.",
-    inputParams: "{ bytes?: number }",
-  },
-  {
-    name: "castov_jwt_decode",
-    title: "Offline JWT Header & Claims Inspector",
-    description:
-      "Decodes JWT header and payload claims locally, formatting issued-at (iat), not-before (nbf), and expiration (exp) timestamps without transmitting tokens over the network.",
-    promptExample: "Inspect the payload claims and expiration status of this JWT token.",
-    inputParams: "{ token: string }",
-  },
-  {
-    name: "castov_hash",
-    title: "Cryptographic Digest Calculator",
-    description:
-      "Computes deterministic cryptographic digests (MD5, SHA-1, SHA-256, SHA-384, SHA-512) in both hexadecimal and Base64 encodings.",
-    promptExample: "Compute the SHA-256 hex and Base64 digest of this webhook payload.",
-    inputParams: "{ text: string, algorithm?: 'md5' | 'sha1' | 'sha256' | 'sha384' | 'sha512' }",
-  },
-  {
-    name: "castov_scan_secrets",
-    title: "In-Memory Secret & Credential Leak Scanner",
-    description:
-      "Audits code snippets, .env files, or terminal logs in-memory for leaked AWS keys, GitHub PATs, Stripe live keys, OpenAI keys, Slack tokens, and PEM private keys with redacted output.",
-    promptExample: "Scan this configuration snippet for any accidentally hardcoded API keys before I commit.",
-    inputParams: "{ content: string }",
-  },
-];
+const MCP_TOOLS = MCP_TOOLS_CATALOG;
 
 const FAQS = [
   {
     question: "What is an MCP server and how does Castov implement it?",
     answer:
-      "The Model Context Protocol (MCP) is an open standard introduced by Anthropic that enables AI assistants (such as Claude Desktop, Cursor, Windsurf, and VS Code) to securely invoke external tools and inspect local context. Castov implements an ultra-fast, zero-dependency MCP server running over standard input/output (stdio JSON-RPC 2.0). It provides 10 deterministic developer tools that execute 100% locally on your machine without cloud latency.",
+      "The Model Context Protocol (MCP) is an open standard introduced by Anthropic that enables AI assistants (such as Claude Desktop, Cursor, Windsurf, and VS Code) to securely invoke external tools and inspect local context. Castov implements an ultra-fast, zero-dependency MCP server running over standard input/output (stdio JSON-RPC 2.0). It provides 13 deterministic developer tools (10 core tools + 3 chained multi-step pipelines) that execute 100% locally on your machine without cloud latency.",
   },
   {
     question: "Does Castov MCP Server transmit my code, JWT tokens, or environment secrets to remote servers?",
@@ -239,7 +151,7 @@ export default function McpServerPage() {
       priceCurrency: "USD",
     },
     description:
-      "Official Model Context Protocol (MCP) server providing 10 hardened, local developer tools for Claude Desktop, Cursor, and VS Code with zero behavioral telemetry.",
+      "Official Model Context Protocol (MCP) server providing 13 hardened, local developer tools for Claude Desktop, Cursor, and VS Code with zero behavioral telemetry.",
   };
 
   const faqJsonLd = {
@@ -306,7 +218,7 @@ export default function McpServerPage() {
 
         <p className="text-base sm:text-lg text-muted max-w-3xl mx-auto leading-relaxed">
           Give Claude Desktop, Cursor, Windsurf, and VS Code Copilot deterministic local execution superpowers.
-          10 hardened, read-only local developer tools with zero remote payload logging and zero cloud roundtrips.
+          13 hardened, read-only local developer tools with zero remote payload logging and zero cloud roundtrips.
         </p>
 
         {/* Verified Badges & Repository Links */}
@@ -526,7 +438,7 @@ export default function McpServerPage() {
             <span>Complete Tool Specification</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-fg">
-            Available MCP Tools Catalog
+            Available MCP Tools Catalog ({TOTAL_MCP_TOOLS_COUNT} Tools)
           </h2>
           <p className="text-sm text-muted mt-1">
             All tools include comprehensive JSON Schema validation, explicit type constraints, and deterministic JSON output.

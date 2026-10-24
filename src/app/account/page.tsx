@@ -34,7 +34,11 @@ import {
   Award,
   Sparkles,
   RefreshCw,
+  Layers,
+  BarChart3,
 } from "lucide-react";
+import { DashboardMcpStacks } from "@/components/dashboard-mcp-stacks";
+import { DashboardAnalytics } from "@/components/dashboard-analytics";
 
 interface SavedConfig {
   id: string;
@@ -111,7 +115,7 @@ function AccountDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "pinned" | "snippets" | "preferences" | "activity" | "backup" | "security" | "byok"
+    "overview" | "pinned" | "snippets" | "preferences" | "activity" | "backup" | "security" | "byok" | "mcp_stacks" | "analytics"
   >(() => (isCliAuth ? "preferences" : "overview"));
 
   // Pinned tools state
@@ -868,6 +872,8 @@ function AccountDashboard() {
           { id: "backup", label: "Backup & Portability", icon: Download },
           { id: "security", label: "Zero-Knowledge", icon: Shield },
           { id: "byok", label: "BYOK AI Keys", icon: Key },
+          { id: "mcp_stacks", label: "MCP Stacks", icon: Layers },
+          { id: "analytics", label: "Admin Analytics", icon: BarChart3 },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -1848,6 +1854,12 @@ function AccountDashboard() {
           </form>
         </div>
       )}
+
+      {/* TAB: CLOUD MCP STACKS */}
+      {activeTab === "mcp_stacks" && <DashboardMcpStacks />}
+
+      {/* TAB: ADMIN ANALYTICS */}
+      {activeTab === "analytics" && <DashboardAnalytics />}
     </div>
   );
 }

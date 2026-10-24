@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, ArrowUp, Copy, Check, Mail, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Clock, ArrowUp, Copy, Check, Mail, ShieldCheck } from "lucide-react";
+import { useUserSession } from "@/hooks/use-user-session";
 
 export function FooterLiveTicker() {
   const [time, setTime] = useState<{ utc: string; epoch: number } | null>(null);
@@ -74,18 +76,89 @@ export function FooterCliCopy() {
 }
 
 export function FooterNewsletter() {
+  const { user } = useUserSession();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim() && email.includes("@")) {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const emailToCheck = user?.email || "";
+    if (emailToCheck && localStorage.getItem(`castov_subscribed_${emailToCheck}`)) {
+      queueMicrotask(() => {
+        setSubscribed(true);
+      });
+    }
+  }, [user]);
+
+  const handleSubscribe = async (targetEmail: string) => {
+    if (!targetEmail.trim() || !targetEmail.includes("@")) return;
+    setLoading(true);
+
+    try {
+      await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: targetEmail, source: user ? "account_1click" : "footer_form" }),
+      });
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`castov_subscribed_${targetEmail}`, "true");
+      }
       setSubscribed(true);
       setEmail("");
-      setTimeout(() => setSubscribed(false), 4000);
+    } catch {
+      // Fallback local acknowledgment
+      setSubscribed(true);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSubscribe(email);
+  };
+
+  // State 1: User is already subscribed
+  if (subscribed) {
+    return (
+      <div className="w-full max-w-sm rounded-xl bg-emerald-500/10 border border-emerald-500/25 p-3 flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2 text-emerald-400 font-medium">
+          <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400" />
+          <span>Subscribed to developer releases ✓</span>
+        </div>
+        <Link
+          href="/account"
+          className="text-[11px] font-mono text-muted hover:text-fg underline shrink-0"
+        >
+          Preferences
+        </Link>
+      </div>
+    );
+  }
+
+  // State 2: User is logged in but not yet subscribed -> 1-Click Subscribe
+  if (user && user.email) {
+    return (
+      <div className="w-full max-w-sm space-y-1.5">
+        <button
+          type="button"
+          onClick={() => handleSubscribe(user.email!)}
+          disabled={loading}
+          className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 w-full shadow-sm transition-all"
+        >
+          <Mail className="w-3.5 h-3.5" />
+          <span>{loading ? "Subscribing..." : `Subscribe with ${user.email}`}</span>
+        </button>
+        <p className="text-[10px] text-muted text-center">
+          1-Click opt-in. No spam, only major CLI releases &amp; tools.
+        </p>
+      </div>
+    );
+  }
+
+  // State 3: Visitor -> Regular Email Input
   return (
     <div className="w-full max-w-sm">
       <form onSubmit={handleSubmit} className="relative flex items-center">
@@ -107,17 +180,13 @@ export function FooterNewsletter() {
         </div>
         <button
           type="submit"
+          disabled={loading}
           aria-label="Subscribe to developer updates"
-          className="absolute right-1.5 px-3 py-1 rounded-lg bg-accent text-accent-fg hover:opacity-90 font-semibold text-xs transition-all cursor-pointer shadow-xs active:scale-95"
+          className="absolute right-1.5 px-3 py-1 rounded-lg bg-accent text-accent-fg hover:opacity-90 font-semibold text-xs transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
         >
-          {subscribed ? "Joined!" : "Subscribe"}
+          {loading ? "..." : "Subscribe"}
         </button>
       </form>
-      {subscribed && (
-        <p className="mt-1.5 text-[11px] text-emerald-500 font-medium flex items-center gap-1 animate-in fade-in">
-          <Sparkles className="w-3 h-3" /> You&apos;re in! We only send meaningful developer releases.
-        </p>
-      )}
     </div>
   );
 }
