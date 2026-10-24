@@ -1691,10 +1691,10 @@ function AccountDashboard() {
               </div>
               <div>
                 <h4 className="text-xs font-bold text-fg">
-                  مزامنة سحابية غير محدودة ومشفرة من طرف لطرف (E2EE)
+                  Unlimited End-to-End Encrypted Cloud Sync (E2EE)
                 </h4>
                 <p className="text-[11px] text-muted mt-0.5">
-                  سجل دخولك عبر GitHub لحفظ سجلك بلا حدود ومزامنته مع الـ CLI بتشفير كامل من طرف لطرف (E2EE).
+                  Sign in with GitHub to back up and sync your activity, preferences, and CLI tokens across machines.
                 </p>
               </div>
             </div>

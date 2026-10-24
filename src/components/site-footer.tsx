@@ -4,7 +4,7 @@ import { SITE } from "@/lib/site";
 import { AI_HUB_LIVE } from "@/lib/flags";
 import { BrandMark } from "./brand-mark";
 import { ShieldCheck, Sparkles, Heart, Wrench, Cpu, BookOpen, Building2, Terminal, ExternalLink } from "lucide-react";
-import { FooterLiveTicker, FooterCliCopy, FooterNewsletter, BackToTopButton } from "./footer-client";
+import { FooterLiveTicker, FooterCliCopy, FooterNewsletterSection, BackToTopButton } from "./footer-client";
 
 const COMPANY = [
   { href: "/about", label: "About Castov" },
@@ -105,25 +105,8 @@ export function SiteFooter() {
         </div>
       </div>
 
-      {/* 2. Middle Newsletter & Mission Callout */}
-      <div className="border-b border-line/60">
-        <div className="layout-content py-10 flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="space-y-2 max-w-xl text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>DEVELOPER UPDATES & RELEASES</span>
-            </div>
-            <p className="text-lg sm:text-xl font-bold tracking-tight text-fg">
-              Precision utilities designed for daily engineering workflows
-            </p>
-            <p className="text-xs sm:text-sm text-muted leading-relaxed">
-              Never miss new developer tools, CLI feature updates, or cheat sheet releases. No spam, no behavioral tracking.
-            </p>
-          </div>
-
-          <FooterNewsletter />
-        </div>
-      </div>
+      {/* 2. Middle Newsletter & Mission Callout (Hidden for authenticated developers) */}
+      <FooterNewsletterSection />
 
       {/* 3. Main Navigation Grid */}
       <div className="layout-content py-16 grid gap-12 lg:grid-cols-12">

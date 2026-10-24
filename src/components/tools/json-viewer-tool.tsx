@@ -197,7 +197,7 @@ export function JsonViewerTool() {
               {parsed && (
                 <button onClick={() => setIs3DMode(!is3DMode)} className={`text-xs px-3 py-1 rounded-full font-medium transition-colors flex items-center gap-1 ${is3DMode ? "bg-accent text-white dark:text-[#050505]" : "bg-bg border border-line text-muted hover:text-fg"}`}>
                   <BoxIcon className="w-3 h-3" />
-                  {is3DMode ? "Exit 3D Galaxy" : "تفعيل وضع مجرة 3D 🌌"}
+                  {is3DMode ? "Exit 3D Galaxy" : "Enter 3D Galaxy 🌌"}
                 </button>
               )}
             </div>

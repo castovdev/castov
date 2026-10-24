@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Clock, ArrowUp, Copy, Check, Mail, ShieldCheck } from "lucide-react";
+import { Clock, ArrowUp, Copy, Check, Mail, Sparkles, ShieldCheck } from "lucide-react";
 import { useUserSession } from "@/hooks/use-user-session";
 
 export function FooterLiveTicker() {
@@ -81,15 +80,10 @@ export function FooterNewsletter() {
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const emailToCheck = user?.email || "";
-    if (emailToCheck && localStorage.getItem(`castov_subscribed_${emailToCheck}`)) {
-      queueMicrotask(() => {
-        setSubscribed(true);
-      });
-    }
-  }, [user]);
+  // If user is already authenticated or subscribed, do not render email box in footer
+  if (user) {
+    return null;
+  }
 
   const handleSubscribe = async (targetEmail: string) => {
     if (!targetEmail.trim() || !targetEmail.includes("@")) return;
@@ -99,7 +93,7 @@ export function FooterNewsletter() {
       await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: targetEmail, source: user ? "account_1click" : "footer_form" }),
+        body: JSON.stringify({ email: targetEmail, source: "footer_form" }),
       });
 
       if (typeof window !== "undefined") {
@@ -120,45 +114,16 @@ export function FooterNewsletter() {
     handleSubscribe(email);
   };
 
-  // State 1: User is already subscribed
   if (subscribed) {
     return (
-      <div className="w-full max-w-sm rounded-xl bg-emerald-500/10 border border-emerald-500/25 p-3 flex items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-2 text-emerald-400 font-medium">
-          <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400" />
-          <span>Subscribed to developer releases ✓</span>
-        </div>
-        <Link
-          href="/account"
-          className="text-[11px] font-mono text-muted hover:text-fg underline shrink-0"
-        >
-          Preferences
-        </Link>
+      <div className="w-full max-w-sm rounded-xl bg-emerald-500/10 border border-emerald-500/25 p-3 flex items-center gap-2 text-xs text-emerald-400 font-medium">
+        <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400" />
+        <span>Subscribed to developer releases ✓</span>
       </div>
     );
   }
 
-  // State 2: User is logged in but not yet subscribed -> 1-Click Subscribe
-  if (user && user.email) {
-    return (
-      <div className="w-full max-w-sm space-y-1.5">
-        <button
-          type="button"
-          onClick={() => handleSubscribe(user.email!)}
-          disabled={loading}
-          className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 w-full shadow-sm transition-all"
-        >
-          <Mail className="w-3.5 h-3.5" />
-          <span>{loading ? "Subscribing..." : `Subscribe with ${user.email}`}</span>
-        </button>
-        <p className="text-[10px] text-muted text-center">
-          1-Click opt-in. No spam, only major CLI releases &amp; tools.
-        </p>
-      </div>
-    );
-  }
-
-  // State 3: Visitor -> Regular Email Input
+  // Visitor -> Generic Email Input
   return (
     <div className="w-full max-w-sm">
       <form onSubmit={handleSubmit} className="relative flex items-center">
@@ -187,6 +152,37 @@ export function FooterNewsletter() {
           {loading ? "..." : "Subscribe"}
         </button>
       </form>
+    </div>
+  );
+}
+
+/**
+ * Entire middle newsletter section
+ * Completely hidden when the user is logged in (as authenticated users manage preferences inside /account).
+ */
+export function FooterNewsletterSection() {
+  const { user } = useUserSession();
+
+  if (user) return null;
+
+  return (
+    <div className="border-b border-line/60">
+      <div className="layout-content py-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+        <div className="space-y-2 max-w-xl text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>DEVELOPER UPDATES &amp; RELEASES</span>
+          </div>
+          <p className="text-lg sm:text-xl font-bold tracking-tight text-fg">
+            Precision utilities designed for daily engineering workflows
+          </p>
+          <p className="text-xs sm:text-sm text-muted leading-relaxed">
+            Never miss new developer tools, CLI feature updates, or cheat sheet releases. No spam, no behavioral tracking.
+          </p>
+        </div>
+
+        <FooterNewsletter />
+      </div>
     </div>
   );
 }
