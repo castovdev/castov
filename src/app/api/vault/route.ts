@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limiter";
 
 export interface StoredVaultItem {
   id: string;
@@ -45,6 +46,15 @@ async function getAuthenticatedUserId(request: Request): Promise<string | null> 
 
 export async function GET(request: Request) {
   try {
+    const rateCheck = checkRateLimit(request, {
+      limit: 120,
+      windowMs: 60000,
+      identifier: "vault_get",
+    });
+    if (!rateCheck.success) {
+      return rateLimitResponse(rateCheck);
+    }
+
     const userId = await getAuthenticatedUserId(request);
     if (!userId) {
       return NextResponse.json(
@@ -128,6 +138,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const rateCheck = checkRateLimit(request, {
+      limit: 60,
+      windowMs: 60000,
+      identifier: "vault_post",
+    });
+    if (!rateCheck.success) {
+      return rateLimitResponse(rateCheck);
+    }
+
     const userId = await getAuthenticatedUserId(request);
     if (!userId) {
       return NextResponse.json(
@@ -238,6 +257,15 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const rateCheck = checkRateLimit(request, {
+      limit: 30,
+      windowMs: 60000,
+      identifier: "vault_delete",
+    });
+    if (!rateCheck.success) {
+      return rateLimitResponse(rateCheck);
+    }
+
     const userId = await getAuthenticatedUserId(request);
     if (!userId) {
       return NextResponse.json(

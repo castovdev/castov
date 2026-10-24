@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limiter";
 
 interface AnalyticsEvent {
   name: string;
@@ -16,6 +17,15 @@ export function getEventsBuffer(): AnalyticsEvent[] {
 
 export async function POST(request: Request) {
   try {
+    const rateCheck = checkRateLimit(request, {
+      limit: 120,
+      windowMs: 60000,
+      identifier: "analytics_track",
+    });
+    if (!rateCheck.success) {
+      return rateLimitResponse(rateCheck);
+    }
+
     const body = await request.json().catch(() => null);
     if (!body || typeof body.name !== "string" || !body.name.trim()) {
       return NextResponse.json({ ok: false, error: "Invalid event name" }, { status: 400 });

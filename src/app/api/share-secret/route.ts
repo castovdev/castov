@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createClient } from "@/utils/supabase/server";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limiter";
 
 interface StoredSecret {
   id: string;
@@ -27,6 +28,15 @@ function cleanExpired() {
 
 export async function POST(request: Request) {
   try {
+    const rateCheck = checkRateLimit(request, {
+      limit: 30,
+      windowMs: 60000,
+      identifier: "share_secret_post",
+    });
+    if (!rateCheck.success) {
+      return rateLimitResponse(rateCheck);
+    }
+
     cleanExpired();
     const body = await request.json().catch(() => ({}));
     const ciphertext = String(body.ciphertext || "").trim();
@@ -98,6 +108,15 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    const rateCheck = checkRateLimit(request, {
+      limit: 60,
+      windowMs: 60000,
+      identifier: "share_secret_get",
+    });
+    if (!rateCheck.success) {
+      return rateLimitResponse(rateCheck);
+    }
+
     cleanExpired();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id")?.trim();

@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limiter";
 
 export async function POST(request: Request) {
   try {
+    const rateCheck = checkRateLimit(request, {
+      limit: 5,
+      windowMs: 60000,
+      identifier: "newsletter_sub",
+    });
+    if (!rateCheck.success) {
+      return rateLimitResponse(rateCheck);
+    }
     const body = await request.json().catch(() => ({}));
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
 

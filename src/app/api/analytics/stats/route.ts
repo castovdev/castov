@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { createClient } from "@/utils/supabase/server";
 import { getEventsBuffer } from "../track/route";
+
+function constantTimeEmailMatch(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 const OWNER_EMAIL = (
   process.env.ADMIN_EMAIL ||
@@ -19,7 +27,7 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     const userEmail = user?.email?.toLowerCase().trim();
-    if (!user || !userEmail || userEmail !== OWNER_EMAIL) {
+    if (!user || !userEmail || !constantTimeEmailMatch(userEmail, OWNER_EMAIL)) {
       return NextResponse.json(
         { ok: false, error: "Forbidden: Owner access only" },
         { status: 403 }

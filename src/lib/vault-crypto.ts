@@ -4,7 +4,8 @@
  * Plaintext secrets and passphrases NEVER leave the user's browser.
  */
 
-const PBKDF2_ITERATIONS = 100000;
+const PBKDF2_RECOMMENDED_ITERATIONS = 600000;
+const PBKDF2_LEGACY_ITERATIONS = 100000;
 
 export interface EncryptedVaultPayload {
   ciphertext: string; // Base64 (includes 16-byte GCM auth tag at end)
@@ -30,7 +31,11 @@ function base64ToBuffer(base64: string): Uint8Array {
   return bytes;
 }
 
-async function deriveAesKey(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
+async function deriveAesKey(
+  passphrase: string,
+  salt: Uint8Array,
+  iterations: number = PBKDF2_RECOMMENDED_ITERATIONS
+): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
@@ -44,7 +49,7 @@ async function deriveAesKey(passphrase: string, salt: Uint8Array): Promise<Crypt
     {
       name: "PBKDF2",
       salt: salt as any,
-      iterations: PBKDF2_ITERATIONS,
+      iterations,
       hash: "SHA-256",
     },
     keyMaterial,
@@ -98,18 +103,29 @@ export async function decryptEnvVault(
   const iv = base64ToBuffer(payload.iv);
   const ciphertext = base64ToBuffer(payload.ciphertext);
 
-  const key = await deriveAesKey(passphrase, salt);
+  const dec = new TextDecoder();
 
+  // Try 600,000 PBKDF2 iterations first (modern hardened standard)
   try {
+    const key = await deriveAesKey(passphrase, salt, PBKDF2_RECOMMENDED_ITERATIONS);
     const decryptedBuffer = await crypto.subtle.decrypt(
       { name: "AES-GCM", iv: iv as any },
       key,
       ciphertext as any
     );
-
-    const dec = new TextDecoder();
     return dec.decode(decryptedBuffer);
   } catch {
-    throw new Error("Decryption failed. Incorrect passphrase or corrupted vault data.");
+    // Transparent backward compatibility for vaults derived with legacy 100,000 iterations
+    try {
+      const legacyKey = await deriveAesKey(passphrase, salt, PBKDF2_LEGACY_ITERATIONS);
+      const decryptedBuffer = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: iv as any },
+        legacyKey,
+        ciphertext as any
+      );
+      return dec.decode(decryptedBuffer);
+    } catch {
+      throw new Error("Decryption failed. Incorrect passphrase or corrupted vault data.");
+    }
   }
 }
