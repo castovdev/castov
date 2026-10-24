@@ -69,12 +69,25 @@ export async function POST(request: Request) {
     const name = typeof body.name === "string" ? body.name.toLowerCase().trim() : "my-stack";
     const servers = Array.isArray(body.servers) ? body.servers : ["castov"];
 
-    if (!name || name.length > 50) {
+    if (!name || name.length > 50 || !/^[a-z0-9_-]+$/.test(name)) {
       return NextResponse.json(
-        { ok: false, error: "Invalid stack name." },
+        { ok: false, error: "Stack name must be alphanumeric and under 50 characters." },
         { status: 400 }
       );
     }
+
+    if (
+      !Array.isArray(servers) ||
+      servers.length > 50 ||
+      servers.some((s) => typeof s !== "string" || s.length > 64)
+    ) {
+      return NextResponse.json(
+        { ok: false, error: "Servers list exceeds 50 items or contains invalid identifiers." },
+        { status: 400 }
+      );
+    }
+
+    const safeServers = servers.slice(0, 50).map((s) => String(s).trim().slice(0, 64));
 
     let userId = "guest_default";
     try {
@@ -91,11 +104,11 @@ export async function POST(request: Request) {
     const newStack: SavedMcpStack = {
       id: `stack_${Date.now()}`,
       name,
-      servers,
+      servers: safeServers,
       createdAt: Date.now(),
     };
 
-    const updated = [newStack, ...currentStacks.filter((s) => s.name !== name)];
+    const updated = [newStack, ...currentStacks.filter((s) => s.name !== name)].slice(0, 25);
     FALLBACK_STACKS.set(userId, updated);
 
     return NextResponse.json({

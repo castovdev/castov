@@ -17,13 +17,30 @@ export function getEventsBuffer(): AnalyticsEvent[] {
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
-    if (!body || typeof body.name !== "string") {
-      return NextResponse.json({ ok: false }, { status: 400 });
+    if (!body || typeof body.name !== "string" || !body.name.trim()) {
+      return NextResponse.json({ ok: false, error: "Invalid event name" }, { status: 400 });
+    }
+
+    const safeName = body.name.trim().slice(0, 64);
+    const sanitizedProps: Record<string, string | number | boolean> = {};
+
+    if (typeof body.props === "object" && body.props !== null && !Array.isArray(body.props)) {
+      const entries = Object.entries(body.props).slice(0, 20);
+      for (const [key, val] of entries) {
+        const safeKey = String(key).slice(0, 64);
+        if (typeof val === "string") {
+          sanitizedProps[safeKey] = val.slice(0, 256);
+        } else if (typeof val === "number" && Number.isFinite(val)) {
+          sanitizedProps[safeKey] = val;
+        } else if (typeof val === "boolean") {
+          sanitizedProps[safeKey] = val;
+        }
+      }
     }
 
     const event: AnalyticsEvent = {
-      name: body.name,
-      props: typeof body.props === "object" && body.props !== null ? body.props : {},
+      name: safeName,
+      props: sanitizedProps,
       timestamp: Date.now(),
     };
 

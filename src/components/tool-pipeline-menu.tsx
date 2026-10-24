@@ -94,7 +94,7 @@ export function ToolPipelineMenu({ currentSlug }: { currentSlug: ToolSlug }) {
               return (
                 <Link
                   key={target.slug}
-                  href={`/${target.slug}`}
+                  href={`/${target.slug}${typeof window !== "undefined" ? window.location.hash : ""}`}
                   onClick={() => setOpen(false)}
                   className="flex items-center justify-between p-2 rounded-lg hover:bg-hover transition-colors group"
                 >

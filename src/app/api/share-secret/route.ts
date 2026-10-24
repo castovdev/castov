@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { createClient } from "@/utils/supabase/server";
 
 interface StoredSecret {
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const id = `sec_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const id = `sec_${Date.now().toString(36)}_${crypto.randomBytes(8).toString("hex")}`;
     const now = Date.now();
     let ttlMs = 24 * 3600 * 1000; // default 24h max for burn
     if (expiresIn === "1h") ttlMs = 3600 * 1000;

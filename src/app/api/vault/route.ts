@@ -147,9 +147,16 @@ export async function POST(request: Request) {
     const iv = String(body.iv || "").trim();
     const salt = String(body.salt || "").trim();
 
-    if (!slug) {
+    if (!slug || slug.length > 64) {
       return NextResponse.json(
-        { ok: false, error: "Vault slug is required (e.g. 'prod-api' or 'staging')" },
+        { ok: false, error: "Vault slug is invalid or exceeds 64 characters." },
+        { status: 400 }
+      );
+    }
+
+    if (name.length > 100) {
+      return NextResponse.json(
+        { ok: false, error: "Vault name exceeds 100 characters limit." },
         { status: 400 }
       );
     }
@@ -157,6 +164,20 @@ export async function POST(request: Request) {
     if (!ciphertext || !iv || !salt) {
       return NextResponse.json(
         { ok: false, error: "Encrypted payload (ciphertext, iv, salt) is required" },
+        { status: 400 }
+      );
+    }
+
+    if (ciphertext.length > 512 * 1024) {
+      return NextResponse.json(
+        { ok: false, error: "Payload exceeds 512 KB limit." },
+        { status: 413 }
+      );
+    }
+
+    if (iv.length > 128 || salt.length > 128) {
+      return NextResponse.json(
+        { ok: false, error: "Invalid cryptographic metadata format." },
         { status: 400 }
       );
     }

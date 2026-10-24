@@ -6,12 +6,15 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
 
-    if (!email || !email.includes("@") || email.length > 255) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!email || !emailRegex.test(email) || email.length > 255) {
       return NextResponse.json(
         { ok: false, error: "Please provide a valid developer email address." },
         { status: 400 }
       );
     }
+
+    const safeSource = typeof body.source === "string" ? body.source.slice(0, 64) : "footer_1click";
 
     // 1. Save to Supabase newsletter_subscribers if configured
     try {
@@ -21,7 +24,7 @@ export async function POST(request: Request) {
           email,
           subscribed_at: new Date().toISOString(),
           status: "active",
-          source: body.source || "footer_1click",
+          source: safeSource,
         },
         { onConflict: "email" }
       );

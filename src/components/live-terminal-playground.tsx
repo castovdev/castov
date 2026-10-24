@@ -97,8 +97,33 @@ function parseCidr(input: string) {
   };
 }
 
+let terminalLineSeq = 0;
+function getNextTerminalId(prefix: string) {
+  terminalLineSeq += 1;
+  return `${prefix}-${terminalLineSeq}`;
+}
+
+const INITIAL_WELCOME_LINE: TerminalLine = {
+  id: "sys-welcome",
+  type: "system",
+  content: (
+    <div className="space-y-1 text-xs font-mono text-muted/90">
+      <div className="text-accent font-semibold flex items-center gap-2">
+        <Zap className="w-3.5 h-3.5" />
+        <span>Castov DevShell v0.2.0 (Zero-Latency Browser Sandbox)</span>
+      </div>
+      <p>
+        Simulates the full <code className="text-fg font-bold">castov-cli</code> suite locally via WebCrypto and instant transforms.
+      </p>
+      <p className="text-[11px] text-muted">
+        Click any quick-run chip above or type <code className="text-emerald-400">help</code> to see commands.
+      </p>
+    </div>
+  ),
+};
+
 export function LiveTerminalPlayground() {
-  const [history, setHistory] = useState<TerminalLine[]>([]);
+  const [history, setHistory] = useState<TerminalLine[]>([INITIAL_WELCOME_LINE]);
   const [inputValue, setInputValue] = useState("");
   const [cmdIndex, setCmdIndex] = useState(-1);
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
@@ -107,32 +132,11 @@ export function LiveTerminalPlayground() {
   const terminalEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Initial welcome message
-  useEffect(() => {
-    setHistory([
-      {
-        id: "sys-1",
-        type: "system",
-        content: (
-          <div className="space-y-1 text-xs font-mono text-muted/90">
-            <div className="text-accent font-semibold flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5" />
-              <span>Castov DevShell v0.2.0 (Zero-Latency Browser Sandbox)</span>
-            </div>
-            <p>
-              Simulates the full <code className="text-fg font-bold">castov-cli</code> suite locally via WebCrypto and instant transforms.
-            </p>
-            <p className="text-[11px] text-muted">
-              Click any quick-run chip above or type <code className="text-emerald-400">help</code> to see commands.
-            </p>
-          </div>
-        ),
-      },
-    ]);
-  }, []);
 
   useEffect(() => {
-    terminalEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (typeof terminalEndRef.current?.scrollIntoView === "function") {
+      terminalEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [history]);
 
   const handleCopyInstall = async () => {
@@ -162,7 +166,7 @@ export function LiveTerminalPlayground() {
 
     // Append user input line
     const inputLine: TerminalLine = {
-      id: "in-" + Date.now() + Math.random(),
+      id: getNextTerminalId("in"),
       type: "input",
       content: (
         <div className="flex items-center gap-2 font-mono text-xs">
@@ -183,7 +187,7 @@ export function LiveTerminalPlayground() {
 
     if (lower === "help") {
       responseLine = {
-        id: "out-" + Date.now(),
+        id: getNextTerminalId("out"),
         type: "output",
         content: (
           <div className="space-y-1 text-xs font-mono text-muted py-1">
@@ -236,7 +240,7 @@ export function LiveTerminalPlayground() {
       const b64 = btoa(String.fromCharCode(...bytes));
 
       responseLine = {
-        id: "out-" + Date.now(),
+        id: getNextTerminalId("out"),
         type: "output",
         content: (
           <div className="space-y-2 font-mono text-xs py-1">
@@ -266,7 +270,7 @@ export function LiveTerminalPlayground() {
       const expr = Array.isArray(match) ? match[1] || match.join(" ") : "*/15 9-17 * * 1-5";
 
       responseLine = {
-        id: "out-" + Date.now(),
+        id: getNextTerminalId("out"),
         type: "output",
         content: (
           <div className="space-y-2 font-mono text-xs py-1">
@@ -299,7 +303,7 @@ export function LiveTerminalPlayground() {
 
       if (!cidr) {
         responseLine = {
-          id: "err-" + Date.now(),
+          id: getNextTerminalId("err"),
           type: "error",
           content: (
             <p className="text-xs font-mono text-rose-400">
@@ -309,7 +313,7 @@ export function LiveTerminalPlayground() {
         };
       } else {
         responseLine = {
-          id: "out-" + Date.now(),
+          id: getNextTerminalId("out"),
           type: "output",
           content: (
             <div className="space-y-2 font-mono text-xs py-1">
@@ -345,7 +349,7 @@ export function LiveTerminalPlayground() {
       const port = portMatch ? portMatch[1] : "3000";
 
       responseLine = {
-        id: "out-" + Date.now(),
+        id: getNextTerminalId("out"),
         type: "output",
         content: (
           <div className="space-y-2.5 font-mono text-xs py-1">
@@ -390,7 +394,7 @@ export function LiveTerminalPlayground() {
     } else if (lower.startsWith("castov uuid") || lower === "uuid") {
       const u = crypto.randomUUID();
       responseLine = {
-        id: "out-" + Date.now(),
+        id: getNextTerminalId("out"),
         type: "output",
         content: (
           <div className="font-mono text-xs space-y-1 py-1">
@@ -402,7 +406,7 @@ export function LiveTerminalPlayground() {
     } else if (lower.startsWith("castov now") || lower === "now") {
       const now = new Date();
       responseLine = {
-        id: "out-" + Date.now(),
+        id: getNextTerminalId("out"),
         type: "output",
         content: (
           <div className="font-mono text-xs space-y-1 py-1">
@@ -422,7 +426,7 @@ export function LiveTerminalPlayground() {
         (n & 4 ? "r" : "-") + (n & 2 ? "w" : "-") + (n & 1 ? "x" : "-");
 
       responseLine = {
-        id: "out-" + Date.now(),
+        id: getNextTerminalId("out"),
         type: "output",
         content: (
           <div className="font-mono text-xs space-y-1.5 py-1">
@@ -440,7 +444,7 @@ export function LiveTerminalPlayground() {
       };
     } else {
       responseLine = {
-        id: "err-" + Date.now(),
+        id: getNextTerminalId("err"),
         type: "error",
         content: (
           <p className="text-xs font-mono text-rose-400">

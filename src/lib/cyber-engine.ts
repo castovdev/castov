@@ -427,8 +427,8 @@ export interface BruteForceCandidate {
 }
 
 export function caesarBruteForce(str: string): BruteForceCandidate[] {
-  // Sample up to 4096 characters to prevent CPU exhaustion and main-thread freeze
-  const sampleText = str.length > 4096 ? str.slice(0, 4096) : str;
+  // Sample up to 1024 characters to prevent CPU exhaustion and main-thread freeze
+  const sampleText = str.length > 1024 ? str.slice(0, 1024) : str;
   const results: BruteForceCandidate[] = [];
   for (let shift = 1; shift < 26; shift++) {
     const decoded = caesarCipher(sampleText, shift);
@@ -472,8 +472,8 @@ export function xorCipher(str: string, key: string): string {
 }
 
 export function xorBruteForce(str: string): BruteForceCandidate[] {
-  // Sample up to 4096 characters to prevent memory exhaustion (256 * 4KB = 1MB max memory)
-  const sampleText = str.length > 4096 ? str.slice(0, 4096) : str;
+  // Sample up to 1024 characters to prevent memory exhaustion and UI thread latency
+  const sampleText = str.length > 1024 ? str.slice(0, 1024) : str;
   const bytes = new TextEncoder().encode(sampleText);
   const results: BruteForceCandidate[] = [];
 

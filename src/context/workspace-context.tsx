@@ -98,8 +98,9 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   };
 
   const createWorkspace = (name: string) => {
+    const suffix = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : Date.now().toString(36);
     const newWs: Workspace = {
-      id: `ws_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      id: `ws_${Date.now()}_${suffix}`,
       name: name.trim() || "New Workspace",
       createdAt: Date.now()
     };
@@ -114,8 +115,9 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   };
 
   const saveToolConfig = ({ toolSlug, title, content, language }: { toolSlug: string; title: string; content: string; language: string }) => {
+    const suffix = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : Date.now().toString(36);
     const newConfig: SavedConfig = {
-      id: `cfg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      id: `cfg_${Date.now()}_${suffix}`,
       workspaceId: activeWorkspaceId,
       toolSlug,
       title: title.trim() || "Untitled Config",

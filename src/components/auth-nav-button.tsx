@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import {
@@ -24,7 +23,6 @@ interface AuthNavButtonProps {
 }
 
 export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) {
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -92,7 +90,9 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
     setOpen(false);
     if (onAction) onAction();
     await supabase.auth.signOut();
-    router.refresh();
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
   };
 
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
