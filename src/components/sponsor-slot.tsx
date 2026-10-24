@@ -2,17 +2,24 @@ import React from "react";
 import Link from "next/link";
 import { Sparkles, ShieldCheck, ArrowUpRight, Lock } from "lucide-react";
 
+// Set to true once verified sponsorship metrics and partnerships are established
+const SHOW_SPONSOR_BLOCK = false;
+
 interface SponsorSlotProps {
   context?: "mcp" | "network" | "devops" | "general";
 }
 
 export function SponsorSlot({ context = "general" }: SponsorSlotProps) {
+  if (!SHOW_SPONSOR_BLOCK) {
+    return null;
+  }
+
   const contextualCopy = {
     mcp: {
       badge: "AI & MCP ECOSYSTEM PARTNER",
       headline: "Building an AI Coding Tool, Cloud Database, or MCP Server?",
       subtext:
-        "Put your developer product in front of 100,000+ software engineers, DevOps architects, and AI builders using Castov every month.",
+        "Put your developer product in front of software engineers, DevOps architects, and AI builders using Castov.",
     },
     network: {
       badge: "CLOUD & INFRASTRUCTURE PARTNER",
@@ -28,9 +35,9 @@ export function SponsorSlot({ context = "general" }: SponsorSlotProps) {
     },
     general: {
       badge: "FEATURED DEVELOPER ECOSYSTEM",
-      headline: "Reach 100,000+ High-Intent Software Engineers & DevSecOps Teams",
+      headline: "Reach High-Intent Software Engineers & DevSecOps Teams",
       subtext:
-        "Showcase your API, cloud hosting, or developer tool across 1,000+ search-indexed engineering utilities on Castov.",
+        "Showcase your API, cloud hosting, or developer tool across search-indexed engineering utilities on Castov.",
     },
   }[context];
 

@@ -11,6 +11,7 @@ import {
   Code2,
   ExternalLink,
 } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 type IdeTarget = "cursor" | "claude" | "windsurf" | "vscode";
 
@@ -164,7 +165,10 @@ export function McpStackBuilder() {
           parsed.unshift("castov");
         }
         if (parsed.length > 0) {
-          setSelectedIds(Array.from(new Set(parsed)));
+          const unique = Array.from(new Set(parsed));
+          queueMicrotask(() => {
+            setSelectedIds(unique);
+          });
         }
       }
     } catch {
@@ -217,18 +221,29 @@ export function McpStackBuilder() {
 
   const handleCopyConfig = () => {
     navigator.clipboard.writeText(generatedJson);
+    trackEvent("mcp_copy_combined_config", {
+      serversCount: selectedIds.length,
+      ide: ideTarget,
+      servers: selectedIds,
+    });
     setCopiedConfig(true);
     setTimeout(() => setCopiedConfig(false), 2000);
   };
 
   const handleCopyShareUrl = () => {
     navigator.clipboard.writeText(shareUrl);
+    trackEvent("mcp_share_stack", {
+      serversCount: selectedIds.length,
+    });
     setCopiedShareUrl(true);
     setTimeout(() => setCopiedShareUrl(false), 2000);
   };
 
   const handleCopyBadge = () => {
     navigator.clipboard.writeText(markdownBadge);
+    trackEvent("mcp_copy_badge", {
+      type: "markdown",
+    });
     setCopiedBadge(true);
     setTimeout(() => setCopiedBadge(false), 2000);
   };
@@ -386,7 +401,7 @@ export function McpStackBuilder() {
             </button>
           </div>
 
-          <pre className="text-xs sm:text-sm font-mono text-emerald-300 overflow-x-auto leading-relaxed p-4 rounded-xl bg-black/40 border border-white/10">
+          <pre className="text-xs sm:text-sm font-mono text-emerald-300 overflow-x-auto break-words whitespace-pre leading-relaxed p-4 rounded-xl bg-black/40 border border-white/10">
             <code className="text-emerald-300">{generatedJson}</code>
           </pre>
         </div>

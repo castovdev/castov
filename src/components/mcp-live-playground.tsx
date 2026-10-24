@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Play, Copy, Check, Terminal, Sparkles, ShieldCheck, ArrowRight, RotateCcw } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 type ToolId =
   | "castov_cidr"
@@ -471,6 +472,7 @@ export function McpLivePlayground() {
 
   const handleCopyRequest = () => {
     navigator.clipboard.writeText(JSON.stringify(jsonRpcRequest, null, 2));
+    trackEvent("mcp_copy_request", { tool: activeTool.id });
     setCopiedReq(true);
     setTimeout(() => setCopiedReq(false), 2000);
   };
@@ -478,6 +480,7 @@ export function McpLivePlayground() {
   const handleCopyResponse = () => {
     const payload = responseView === "rpc" ? jsonRpcResponse : toolResult;
     navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+    trackEvent("mcp_copy_response", { tool: activeTool.id, view: responseView });
     setCopiedRes(true);
     setTimeout(() => setCopiedRes(false), 2000);
   };
@@ -513,7 +516,10 @@ export function McpLivePlayground() {
             <button
               key={tool.id}
               type="button"
-              onClick={() => setSelectedToolId(tool.id)}
+              onClick={() => {
+                setSelectedToolId(tool.id);
+                trackEvent("mcp_inspect_tool", { tool: tool.id });
+              }}
               className={`px-3 py-1.5 rounded-xl font-mono text-xs transition-all flex items-center gap-1.5 ${
                 active
                   ? "bg-[#2563eb] text-white font-bold shadow-sm"
@@ -552,7 +558,10 @@ export function McpLivePlayground() {
             </button>
             <button
               type="button"
-              onClick={() => setNonce((n) => n + 1)}
+              onClick={() => {
+                setNonce((n) => n + 1);
+                trackEvent("mcp_rerun_tool", { tool: activeTool.id });
+              }}
               className="btn bg-[#2563eb] text-white hover:bg-[#1d4ed8] text-xs font-bold px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5" /> Re-Run Tool
@@ -577,7 +586,7 @@ export function McpLivePlayground() {
       {/* Split JSON-RPC Request & Response */}
       <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-line">
         {/* Request Panel */}
-        <div className="p-5 sm:p-6 bg-[#070b14]">
+        <div className="p-4 sm:p-6 bg-[#070b14] overflow-hidden">
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <Terminal className="w-4 h-4 text-sky-400" />
@@ -603,13 +612,13 @@ export function McpLivePlayground() {
               )}
             </button>
           </div>
-          <pre className="text-xs font-mono text-[#f8fafc] overflow-x-auto leading-relaxed">
+          <pre className="text-xs font-mono text-[#f8fafc] overflow-x-auto break-words whitespace-pre leading-relaxed p-2 rounded-lg bg-black/40">
             <code className="text-[#f8fafc]">{JSON.stringify(jsonRpcRequest, null, 2)}</code>
           </pre>
         </div>
 
         {/* Response Panel */}
-        <div className="p-5 sm:p-6 bg-[#070b14]">
+        <div className="p-4 sm:p-6 bg-[#070b14] overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <ArrowRight className="w-4 h-4 text-emerald-400" />
@@ -644,7 +653,7 @@ export function McpLivePlayground() {
               </button>
             </div>
           </div>
-          <pre className="text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed">
+          <pre className="text-xs font-mono text-emerald-300 overflow-x-auto break-words whitespace-pre leading-relaxed p-2 rounded-lg bg-black/40">
             <code className="text-emerald-300">
               {JSON.stringify(responseView === "rpc" ? jsonRpcResponse : toolResult, null, 2)}
             </code>
