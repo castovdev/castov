@@ -20,7 +20,12 @@ import {
   UserIcon,
   KeyboardIcon,
   AlertTriangleIcon,
+  Zap,
+  Lock,
+  Pin,
+  Layers,
 } from "lucide-react";
+import { useUserSession } from "@/hooks/use-user-session";
 import { AI_TOOLS } from "@/lib/ai-tools";
 import { AI_HUB_LIVE } from "@/lib/flags";
 import { TOOLS } from "@/content/tools";
@@ -57,6 +62,16 @@ const MCP_STDIO_JSON_CONFIG = `{
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const { user, displayName } = useUserSession();
+  const [pinnedSlugs] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("castov-pinned-tools");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [nowMs, setNowMs] = useState(() => Date.now());
   const router = useRouter();
 
@@ -297,6 +312,64 @@ export function CommandPalette() {
           <Command.Empty className="p-6 text-center text-sm text-muted">
             No results found. Try typing &apos;mcp&apos;, &apos;uuid&apos;, or paste a timestamp/JWT.
           </Command.Empty>
+
+          {/* Authenticated Developer Shortcuts */}
+          {user && (
+            <Command.Group heading={`Developer Workspace (@${displayName})`} className="text-xs font-semibold text-accent px-2 py-1 mb-1">
+              <Command.Item
+                value="developer dashboard overview account workspace"
+                onSelect={() => runCommand(() => router.push("/account"))}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+              >
+                <Zap className="w-4 h-4 text-accent" />
+                <span className="font-semibold text-accent">⚡ Go to Developer Dashboard</span>
+                <span className="text-xs text-muted ml-auto">/account &rarr;</span>
+              </Command.Item>
+              <Command.Item
+                value="zero knowledge env vault secrets aes encryption e2ee"
+                onSelect={() => runCommand(() => router.push("/account?tab=vault"))}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+              >
+                <Lock className="w-4 h-4 text-emerald-400" />
+                <span className="font-semibold text-emerald-400">🔐 Open Zero-Knowledge Env Vault</span>
+                <span className="text-xs text-muted ml-auto">AES-256-GCM &rarr;</span>
+              </Command.Item>
+              <Command.Item
+                value="mcp stacks presets cursor claude windsurf save"
+                onSelect={() => runCommand(() => router.push("/account?tab=mcp_stacks"))}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+              >
+                <Layers className="w-4 h-4 text-purple-400" />
+                <span className="font-semibold text-purple-400">🛠️ Manage My Saved MCP Stacks</span>
+                <span className="text-xs text-muted ml-auto">Cloud Sync &rarr;</span>
+              </Command.Item>
+            </Command.Group>
+          )}
+
+          {/* Pinned Tools at top of results */}
+          {pinnedSlugs.length > 0 && (
+            <Command.Group heading="📌 Pinned Tools (Quick Access)" className="text-xs font-semibold text-accent px-2 py-1 mb-1">
+              {TOOLS.filter((t) => pinnedSlugs.includes(t.slug)).map((tool) => (
+                <Command.Item
+                  key={`pinned-${tool.slug}`}
+                  value={`pinned ${tool.name} ${tool.category}`}
+                  onSelect={() => runCommand(() => router.push(`/${tool.slug}`))}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors mt-1"
+                >
+                  <Pin className="w-3.5 h-3.5 text-accent shrink-0" />
+                  <div className="flex flex-col pointer-events-none">
+                    <span className="font-semibold text-fg">{tool.name}</span>
+                    <span className="text-xs text-muted font-normal capitalize">
+                      {tool.category.replace("-", " ")}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-accent/15 text-accent ml-auto">
+                    Pinned
+                  </span>
+                </Command.Item>
+              ))}
+            </Command.Group>
+          )}
 
           {/* Smart Omni-Detector & Auto-Preview Cards */}
           {hasInlineActions && (

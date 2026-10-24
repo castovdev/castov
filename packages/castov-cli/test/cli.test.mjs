@@ -941,3 +941,25 @@ test("castov login, whoami, and logout workflow", async () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+
+test("castov vault CLI: shows help and requires login/passphrase", async () => {
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const helpRes = run(["vault", "--help"]);
+  assert.equal(helpRes.status, 0);
+  assert.match(helpRes.stdout, /castov vault pull/);
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "castov-vault-test-"));
+  try {
+    const res = spawnSync(process.execPath, [CLI, "vault", "pull", "my-vault", "--pass", "secret"], {
+      encoding: "utf8",
+      env: { ...process.env, NO_COLOR: "1", CASTOV_CONFIG_DIR: tmpDir },
+    });
+    assert.notEqual(res.status, 0);
+    assert.match(res.stderr, /not logged in/i);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});

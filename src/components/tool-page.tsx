@@ -14,6 +14,7 @@ import { PinButton } from "./pinned-tools";
 import { ShareButton } from "./share-button";
 import { ProofOfPrivacyBadge } from "./proof-of-privacy-badge";
 import { ToolPipelineMenu } from "./tool-pipeline-menu";
+import { ToolAuthCloudBadge, ToolSaveSnippetButton, ToolHistoryBanner } from "./tool-auth-actions";
 import { ADS } from "@/lib/site";
 import { AdSensePlaceholder } from "./adsense-placeholder";
 
@@ -67,9 +68,11 @@ export function ToolPage({ tool }: { tool: Tool }) {
               {tool.category.replace("-", " ").toUpperCase()}
             </span>
             <ProofOfPrivacyBadge />
+            <ToolAuthCloudBadge />
           </div>
           <div className="flex items-center gap-2">
             <ToolPipelineMenu currentSlug={tool.slug} />
+            <ToolSaveSnippetButton slug={tool.slug} toolName={tool.name} />
             <ShareButton title={tool.name} />
             <PinButton slug={tool.slug} />
           </div>
@@ -80,6 +83,7 @@ export function ToolPage({ tool }: { tool: Tool }) {
 
       <section aria-label={`${tool.name} tool`} className="card p-5 sm:p-8 mb-12 border-line/60 shadow-sm">
         <ToolInterface slug={tool.slug} />
+        <ToolHistoryBanner />
       </section>
 
       <div className={`grid gap-12 ${ADS.client ? "lg:grid-cols-[1fr_300px]" : ""} items-start`}>

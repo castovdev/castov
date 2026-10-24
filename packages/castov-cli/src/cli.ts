@@ -198,6 +198,7 @@ ${bold("Commands")}
   ${cyan("login")} --token <token>       Authenticate CLI with Personal Access Token (PAT)
   ${cyan("logout")}                       Remove stored credentials and log out
   ${cyan("whoami")}                       Check current authentication status
+  ${cyan("vault")} pull <name> [--pass <p>] Pull and decrypt Zero-Knowledge .env vault
 
 ${bold("Global Options")}
   -h, --help           Show help (run "castov <command> --help" for command details)
@@ -241,6 +242,22 @@ ${bold("castov whoami")} — display active authentication status and credential
 
 ${bold("Usage")}
   castov whoami
+`,
+
+  vault: `
+${bold("castov vault pull")} — pull and decrypt Zero-Knowledge .env vault
+
+${bold("Usage")}
+  castov vault pull <vault-name> [options]
+
+${bold("Options")}
+  -p, --pass <passphrase>    Decryption passphrase (will prompt securely if omitted)
+  -o, --out <file>           Output file destination (e.g. .env.local). If omitted, prints to terminal
+  -h, --help                 Show help for vault command
+
+${bold("Examples")}
+  castov vault pull prod-api --pass "my-passphrase" --out .env.local
+  castov vault pull staging
 `,
 
   fix: `
@@ -610,6 +627,8 @@ async function main(argv: string[]): Promise<void> {
       write: { type: "boolean", short: "w" },
       help: { type: "boolean", short: "h" },
       token: { type: "string", short: "t" },
+      pass: { type: "string", short: "p" },
+      out: { type: "string", short: "o" },
     },
   });
 
@@ -1033,6 +1052,90 @@ async function main(argv: string[]): Promise<void> {
         out.push(`Customize more stacks at: https://www.castov.com/cursorrules`);
       } else {
         out.push(template.trim());
+      }
+      break;
+    }
+
+    case "vault": {
+      const subCommand = positionals[0];
+      if (subCommand !== "pull") {
+        throw new UsageError(`unknown sub-command "${subCommand || ""}" for "castov vault". Expected "castov vault pull <vault-name>".`);
+      }
+      const vaultName = (positionals[1] || "").toLowerCase().trim();
+      if (!vaultName) {
+        throw new UsageError(`missing vault name.\n\nUsage:\n  castov vault pull <vault-name> [--pass <passphrase>] [--out <file>]`);
+      }
+
+      const cfg = readCliConfig();
+      if (!cfg || !cfg.token) {
+        throw new UsageError(`not logged in. Run "castov login" to connect your Personal Access Token first.\nGenerate one at: https://castov.com/account?cli_auth=true`);
+      }
+
+      let passphrase = (values.pass as string | undefined);
+      if (!passphrase && process.stdin.isTTY) {
+        const readline = await import("node:readline/promises");
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        try {
+          passphrase = await rl.question(bold(`Enter passphrase for vault "${vaultName}": `));
+        } finally {
+          rl.close();
+        }
+      }
+
+      if (!passphrase) {
+        throw new UsageError(`passphrase is required to decrypt vault "${vaultName}". Use --pass <passphrase> or enter when prompted.`);
+      }
+
+      out.push(`${cyan("🔐 Fetching encrypted vault:")} "${bold(vaultName)}" from Castov Cloud...`);
+      const apiUrl = cfg.apiUrl || "https://castov.com";
+      const res = await fetch(`${apiUrl}/api/vault?slug=${encodeURIComponent(vaultName)}`, {
+        headers: {
+          Authorization: `Bearer ${cfg.token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errJson = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(errJson?.error || `Failed to fetch vault (HTTP ${res.status})`);
+      }
+
+      const data = (await res.json()) as { ok: boolean; vault: { ciphertext: string; iv: string; salt: string; name: string } };
+      if (!data.ok || !data.vault) {
+        throw new Error(`Vault "${vaultName}" returned invalid response.`);
+      }
+
+      // Decrypt using node:crypto (AES-256-GCM + PBKDF2)
+      const { createDecipheriv, pbkdf2Sync } = await import("node:crypto");
+      const saltBuf = Buffer.from(data.vault.salt, "base64");
+      const ivBuf = Buffer.from(data.vault.iv, "base64");
+      const cipherBuf = Buffer.from(data.vault.ciphertext, "base64");
+
+      const derivedKey = pbkdf2Sync(passphrase, saltBuf, 100000, 32, "sha256");
+      const tagLength = 16;
+      if (cipherBuf.length < tagLength) {
+        throw new Error("Ciphertext too short to contain authentication tag.");
+      }
+      const authTag = cipherBuf.subarray(cipherBuf.length - tagLength);
+      const actualCiphertext = cipherBuf.subarray(0, cipherBuf.length - tagLength);
+
+      let decryptedText = "";
+      try {
+        const decipher = createDecipheriv("aes-256-gcm", derivedKey, ivBuf);
+        decipher.setAuthTag(authTag);
+        decryptedText = Buffer.concat([decipher.update(actualCiphertext), decipher.final()]).toString("utf8");
+      } catch {
+        throw new Error("Decryption failed. Incorrect passphrase or corrupted vault payload.");
+      }
+
+      const outFile = values.out as string | undefined;
+      if (outFile) {
+        const targetPath = join(process.cwd(), outFile);
+        writeFileSync(targetPath, decryptedText, "utf8");
+        out.push(`${green("✓ Successfully decrypted and saved to")} ${bold(targetPath)}`);
+      } else {
+        out.push(`${green("✓ Successfully decrypted")} ${bold(data.vault.name || vaultName)}:\n`);
+        out.push(decryptedText);
+        out.push(`\n${dim("Tip: Pass --out <filename> to save directly to a file.")}`);
       }
       break;
     }

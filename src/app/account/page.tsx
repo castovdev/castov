@@ -36,9 +36,11 @@ import {
   RefreshCw,
   Layers,
   BarChart3,
+  Mail,
 } from "lucide-react";
 import { DashboardMcpStacks } from "@/components/dashboard-mcp-stacks";
 import { DashboardAnalytics } from "@/components/dashboard-analytics";
+import { DashboardEnvVault } from "@/components/dashboard-env-vault";
 
 interface SavedConfig {
   id: string;
@@ -123,8 +125,15 @@ function AccountDashboard() {
   const isAdmin = Boolean(user?.email && user.email.toLowerCase().trim() === OWNER_EMAIL);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "pinned" | "snippets" | "preferences" | "activity" | "backup" | "security" | "byok" | "mcp_stacks" | "analytics"
-  >(() => (isCliAuth ? "preferences" : "overview"));
+    "overview" | "pinned" | "snippets" | "preferences" | "activity" | "backup" | "security" | "byok" | "mcp_stacks" | "vault" | "analytics"
+  >(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "vault") return "vault";
+    if (tabParam === "mcp_stacks") return "mcp_stacks";
+    if (tabParam === "snippets") return "snippets";
+    if (tabParam === "preferences") return "preferences";
+    return isCliAuth ? "preferences" : "overview";
+  });
 
   // Pinned tools state
   const [pinnedSlugs, setPinnedSlugs] = useState<ToolSlug[]>([]);
@@ -884,6 +893,7 @@ function AccountDashboard() {
           { id: "security", label: "Zero-Knowledge", icon: Shield },
           { id: "byok", label: "BYOK AI Keys", icon: Key },
           { id: "mcp_stacks", label: "MCP Stacks", icon: Layers },
+          { id: "vault", label: "Env Vault (E2EE)", icon: Lock },
           ...(isAdmin ? [{ id: "analytics", label: "Admin Analytics", icon: BarChart3 }] : []),
         ].map((tab) => {
           const Icon = tab.icon;
@@ -1248,6 +1258,71 @@ function AccountDashboard() {
       {/* TAB: DEVELOPER PREFERENCES & CLI TOKEN */}
       {activeTab === "preferences" && (
         <div className="space-y-6">
+          {/* Email & Release Notifications */}
+          <div className="rounded-2xl border border-line bg-card p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-accent/10 text-accent">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-fg">Email &amp; Release Notifications</h3>
+                  <p className="text-xs text-muted">Receive major CLI upgrades, security advisories, and ecosystem updates.</p>
+                </div>
+              </div>
+              <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 font-semibold">
+                1-Click Active
+              </span>
+            </div>
+
+            <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-3.5 rounded-xl border border-line bg-field flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-fg">Product Releases &amp; Tools</p>
+                  <p className="text-[11px] text-muted">New browser tools, CLI updates &amp; templates</p>
+                </div>
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  onChange={async (_e) => {
+                    if (user?.email) {
+                      await fetch("/api/newsletter/subscribe", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: user.email, source: "account_preferences" }),
+                      });
+                    }
+                  }}
+                  className="w-4 h-4 accent-accent rounded cursor-pointer"
+                />
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-line bg-field flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-fg">Security &amp; MCP Advisories</p>
+                  <p className="text-[11px] text-muted">Model Context Protocol patches &amp; CVE alerts</p>
+                </div>
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  onChange={async (_e) => {
+                    if (user?.email) {
+                      await fetch("/api/newsletter/subscribe", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: user.email, source: "account_security_advisories" }),
+                      });
+                    }
+                  }}
+                  className="w-4 h-4 accent-accent rounded cursor-pointer"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-muted font-mono">
+              Account email: <span className="text-fg font-semibold">{user?.email || "Connected via GitHub"}</span> • Zero-spam guarantee.
+            </p>
+          </div>
+
           {/* Defaults Form */}
           <div className="rounded-2xl border border-line bg-card p-6 space-y-6">
             <div>
@@ -1865,6 +1940,9 @@ function AccountDashboard() {
           </form>
         </div>
       )}
+
+      {/* TAB: ZERO-KNOWLEDGE ENV VAULT */}
+      {activeTab === "vault" && <DashboardEnvVault />}
 
       {/* TAB: CLOUD MCP STACKS */}
       {activeTab === "mcp_stacks" && <DashboardMcpStacks />}

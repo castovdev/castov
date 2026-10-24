@@ -9,7 +9,7 @@ import { ArrowRight, Terminal, ShieldCheck, Workflow, Command, Zap, Code } from 
 import { HeroQuickConvert } from "@/components/hero-quick-convert";
 import { PinnedToolsTray } from "@/components/pinned-tools";
 import { InstallationDistributionSection } from "@/components/installation-distribution-section";
-import { HomeWelcomeBanner, HomeWorkspaceLink, HomeBottomCta } from "@/components/home-personalized-view";
+import { HomeWelcomeBanner, HomeBottomCta, HomeBentoVaultCard, HomePinnedQuickBar } from "@/components/home-personalized-view";
 
 export const metadata: Metadata = {
   ...buildMetadata({
@@ -185,26 +185,7 @@ export default function HomePage() {
             </div>
 
             {/* 5. Cloud Sync & Team Vaults */}
-            <div className="bg-bg border border-line hover:border-amber-500/40 p-7 rounded-3xl transition-all shadow-sm group md:col-span-2 lg:col-span-2">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                    <Zap className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-bold text-fg">E2EE Cloud Sync &amp; Team Vaults</h3>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 font-semibold">GitHub OAuth</span>
-                    </div>
-                    <p className="text-xs text-muted mt-0.5">Zero-friction leverage unlocked on registration</p>
-                  </div>
-                </div>
-                <HomeWorkspaceLink />
-              </div>
-              <p className="text-sm text-muted leading-relaxed">
-                Connect your GitHub account to sync pinned utilities, presets, and dev preferences across all your machines. Collaborate with teammates using RSA-OAEP encrypted Team Vaults to share <code className="text-fg bg-field px-1 rounded">.env</code> files without cleartext exposure in chat channels.
-              </p>
-            </div>
+            <HomeBentoVaultCard />
           </div>
         </div>
       </section>
@@ -291,6 +272,7 @@ export default function HomePage() {
               From time manipulation to cryptography, everything is beautifully structured and instantly accessible.
             </p>
           </div>
+          <HomePinnedQuickBar />
           <PinnedToolsTray />
           <CategorySection />
         </div>
