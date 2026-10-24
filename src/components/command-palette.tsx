@@ -24,8 +24,26 @@ import {
 import { AI_TOOLS } from "@/lib/ai-tools";
 import { AI_HUB_LIVE } from "@/lib/flags";
 import { TOOLS } from "@/content/tools";
-import { parseTimestamp } from "@/lib/time/timestamp";
 import { toIsoUtc } from "@/lib/time/format";
+import { describeCron, parseCron, nextRuns } from "@/lib/time";
+import { ArrowRight, Workflow } from "lucide-react";
+
+function formatRelativeTime(ms: number, nowMs: number): string {
+  const diffSec = Math.round((ms - nowMs) / 1000);
+  const absSec = Math.abs(diffSec);
+  if (absSec < 45) return "just now";
+  if (absSec < 90) return diffSec > 0 ? "in 1 minute" : "1 minute ago";
+  if (absSec < 3600) {
+    const mins = Math.round(absSec / 60);
+    return diffSec > 0 ? `in ${mins} minutes` : `${mins} minutes ago`;
+  }
+  if (absSec < 86400) {
+    const hrs = Math.round(absSec / 3600);
+    return diffSec > 0 ? `in ${hrs} hours` : `${hrs} hours ago`;
+  }
+  const days = Math.round(absSec / 86400);
+  return diffSec > 0 ? `in ${days} days` : `${days} days ago`;
+}
 
 const MCP_STDIO_JSON_CONFIG = `{
   "mcpServers": {
@@ -39,17 +57,22 @@ const MCP_STDIO_JSON_CONFIG = `{
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const router = useRouter();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        setNowMs(Date.now());
         setOpen((prev) => !prev);
       }
     };
 
-    const openPalette = () => setOpen(true);
+    const openPalette = () => {
+      setNowMs(Date.now());
+      setOpen(true);
+    };
 
     document.addEventListener("keydown", down);
     window.addEventListener("open-command-palette", openPalette);
@@ -75,21 +98,128 @@ export function CommandPalette() {
 
   const rawSearch = search.trim();
 
-  // Smart inline parsing
-  const isNumber = /^\d+$/.test(rawSearch);
-  const parsedTime = isNumber ? parseTimestamp(rawSearch, "auto") : null;
-  const isUuid = rawSearch.toLowerCase() === "uuid";
-  const isMcpQuery = ["mcp", "claude", "cursor", "windsurf"].includes(rawSearch.toLowerCase());
+  // 1. Unix Timestamp Detection (10-digit seconds or 13-digit ms)
+  const isTimestamp = /^\d{10}(\d{3})?$/.test(rawSearch);
+  let timestampData: { ms: number; utc: string; local: string; relative: string; isMs: boolean } | null = null;
+  if (isTimestamp) {
+    const num = Number(rawSearch);
+    const ms = rawSearch.length === 10 ? num * 1000 : num;
+    if (!isNaN(ms) && ms > 0 && ms < 4102444800000) {
+      timestampData = {
+        ms,
+        utc: toIsoUtc(ms),
+        local: new Date(ms).toLocaleString(),
+        relative: formatRelativeTime(ms, nowMs),
+        isMs: rawSearch.length === 13,
+      };
+    }
+  }
 
-  // JWT Detection
-  const isJwt = rawSearch.startsWith("eyJ") && rawSearch.split(".").length >= 2;
-  let jwtPayloadPreview = "";
+  // 2. JWT Detection (3 parts starting with eyJ)
+  const jwtParts = rawSearch.split(".");
+  const isJwt = (jwtParts.length === 3 || jwtParts.length === 2) && rawSearch.startsWith("eyJ");
+  let jwtData: {
+    alg: string;
+    sub?: string;
+    iss?: string;
+    isExpired: boolean;
+    ttlText: string;
+    payloadStr: string;
+  } | null = null;
   if (isJwt) {
     try {
-      const parts = rawSearch.split(".");
-      const base64Url = parts[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      jwtPayloadPreview = atob(base64);
+      const b64Header = jwtParts[0].replace(/-/g, "+").replace(/_/g, "/");
+      const b64Payload = jwtParts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const header = JSON.parse(atob(b64Header));
+      const payload = JSON.parse(atob(b64Payload));
+      const nowSec = Math.floor(nowMs / 1000);
+      const exp = typeof payload.exp === "number" ? payload.exp : null;
+      const isExpired = exp !== null ? exp < nowSec : false;
+      let ttlText = "No expiration";
+      if (exp !== null) {
+        const diff = exp - nowSec;
+        if (diff > 0) {
+          ttlText = `Valid for ${formatRelativeTime(exp * 1000, nowMs).replace("in ", "")}`;
+        } else {
+          ttlText = `Expired ${formatRelativeTime(exp * 1000, nowMs)}`;
+        }
+      }
+      jwtData = {
+        alg: header.alg || "Unknown",
+        sub: payload.sub,
+        iss: payload.iss,
+        isExpired,
+        ttlText,
+        payloadStr: JSON.stringify(payload, null, 2),
+      };
+    } catch {
+      // not valid JWT
+    }
+  }
+
+  // 3. Cron Expression Detection (5 tokens)
+  const cronTokens = rawSearch.trim().split(/\s+/);
+  let cronData: { description: string; nextRunIso: string; nextRunRelative: string } | null = null;
+  if (cronTokens.length === 5) {
+    const parsedCron = parseCron(rawSearch.trim());
+    if (parsedCron.ok) {
+      const desc = describeCron(parsedCron.value);
+      const runs = nextRuns(parsedCron.value, nowMs, 1);
+      if (runs.length > 0) {
+        cronData = {
+          description: desc,
+          nextRunIso: toIsoUtc(runs[0]),
+          nextRunRelative: formatRelativeTime(runs[0], nowMs),
+        };
+      }
+    }
+  }
+
+  // 4. JSON Payload Detection
+  let jsonData: { keyCount: number; formatted: string; isArray: boolean } | null = null;
+  if (
+    (rawSearch.startsWith("{") && rawSearch.endsWith("}")) ||
+    (rawSearch.startsWith("[") && rawSearch.endsWith("]"))
+  ) {
+    try {
+      const parsed = JSON.parse(rawSearch);
+      if (typeof parsed === "object" && parsed !== null) {
+        jsonData = {
+          keyCount: Array.isArray(parsed) ? parsed.length : Object.keys(parsed).length,
+          formatted: JSON.stringify(parsed, null, 2),
+          isArray: Array.isArray(parsed),
+        };
+      }
+    } catch {
+      // not JSON
+    }
+  }
+
+  // 5. Base64 String Detection (Pure base64 or b64 prefix)
+  const isBase64Prefix = rawSearch.toLowerCase().startsWith("b64 ");
+  const base64Str = isBase64Prefix ? rawSearch.slice(4) : "";
+  let base64Encoded = "";
+  try {
+    if (isBase64Prefix) base64Encoded = btoa(base64Str);
+  } catch {
+    // ignore
+  }
+
+  let plainBase64Decoded: string | null = null;
+  if (
+    !isTimestamp &&
+    !isJwt &&
+    !jsonData &&
+    !isBase64Prefix &&
+    rawSearch.length >= 8 &&
+    rawSearch.length % 4 === 0 &&
+    /^[A-Za-z0-9+/]+={0,2}$/.test(rawSearch)
+  ) {
+    try {
+      const dec = atob(rawSearch);
+      if (dec && /^[\x20-\x7E\s]+$/.test(dec)) {
+        plainBase64Decoded = dec;
+      }
     } catch {
       // ignore
     }
@@ -103,15 +233,9 @@ export function CommandPalette() {
     rawSearch.includes("Cannot find module") ||
     rawSearch.toLowerCase().startsWith("error:");
 
-  // Base64 detection
-  const isBase64Encode = rawSearch.toLowerCase().startsWith("b64 ");
-  const base64Str = isBase64Encode ? rawSearch.slice(4) : "";
-  let base64Encoded = "";
-  try {
-    if (isBase64Encode) base64Encoded = btoa(base64Str);
-  } catch {
-    // invalid input for btoa
-  }
+  // Uuid & Mcp Query
+  const isUuid = rawSearch.toLowerCase() === "uuid";
+  const isMcpQuery = ["mcp", "claude", "cursor", "windsurf"].includes(rawSearch.toLowerCase());
 
   // Color Hex detection
   const isHex = /^#([0-9A-F]{3}){1,2}$/i.test(rawSearch);
@@ -130,12 +254,15 @@ export function CommandPalette() {
   const urlEncoded = isUrl ? encodeURIComponent(urlStr) : "";
 
   const hasInlineActions =
+    Boolean(timestampData) ||
+    Boolean(jwtData) ||
+    Boolean(cronData) ||
+    Boolean(jsonData) ||
+    Boolean(plainBase64Decoded) ||
     isUuid ||
     isMcpQuery ||
-    isJwt ||
     isErrorLog ||
-    (parsedTime && parsedTime.ok) ||
-    isBase64Encode ||
+    isBase64Prefix ||
     isHex ||
     isUrl;
 
@@ -171,25 +298,180 @@ export function CommandPalette() {
             No results found. Try typing &apos;mcp&apos;, &apos;uuid&apos;, or paste a timestamp/JWT.
           </Command.Empty>
 
-          {/* Inline Compute Tools */}
+          {/* Smart Omni-Detector & Auto-Preview Cards */}
           {hasInlineActions && (
-            <Command.Group heading="Smart Actions &amp; Auto-Detection" className="text-xs font-medium text-muted/60 px-2 py-1">
-              {isJwt && (
+            <Command.Group heading="⚡ Smart Omni-Detector (Instant Auto-Preview)" className="text-xs font-medium text-muted/60 px-2 py-1">
+              {/* 1. Timestamp Detection Card */}
+              {timestampData && (
+                <div className="p-3 mb-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-fg space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ClockIcon className="w-4 h-4 text-emerald-400" />
+                      <span className="font-bold text-xs text-emerald-400">Unix Epoch Timestamp Detected</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                        {timestampData.isMs ? "Milliseconds (13-digit)" : "Seconds (10-digit)"}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono text-muted">{timestampData.relative}</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono bg-card/90 p-2.5 rounded-lg border border-line">
+                    <div>
+                      <span className="text-muted block text-[10px]">UTC Time</span>
+                      <span className="text-fg font-semibold select-all truncate block">{timestampData.utc}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted block text-[10px]">Local Time</span>
+                      <span className="text-fg font-semibold select-all truncate block">{timestampData.local}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(timestampData.utc)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-card border border-line text-xs font-medium hover:bg-hover text-fg cursor-pointer"
+                    >
+                      <CopyIcon className="w-3 h-3 text-emerald-400" />
+                      <span>Copy UTC</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => runCommand(() => router.push(`/timestamp-to-date#timestamp=${rawSearch}`))}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-accent text-accent-fg text-xs font-medium hover:bg-accent-hover ml-auto cursor-pointer"
+                    >
+                      <span>Open in Timestamp Converter</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. JWT Detection Card */}
+              {jwtData && (
+                <div className="p-3 mb-2 rounded-xl border border-purple-500/30 bg-purple-500/10 text-fg space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CodeIcon className="w-4 h-4 text-purple-400" />
+                      <span className="font-bold text-xs text-purple-400">JSON Web Token (JWT) Detected</span>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                        jwtData.isExpired ? "bg-red-500/20 text-red-400" : "bg-emerald-500/20 text-emerald-400"
+                      }`}>
+                        {jwtData.isExpired ? "EXPIRED" : "VALID"}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono text-muted">{jwtData.ttlText}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs font-mono bg-card/90 p-2.5 rounded-lg border border-line">
+                    <div>
+                      <span className="text-muted block text-[10px]">Algorithm</span>
+                      <span className="text-fg font-semibold">{jwtData.alg}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted block text-[10px]">Subject (sub)</span>
+                      <span className="text-fg font-semibold truncate block">{jwtData.sub || "None"}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted block text-[10px]">Issuer (iss)</span>
+                      <span className="text-fg font-semibold truncate block">{jwtData.iss || "None"}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(jwtData.payloadStr)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-card border border-line text-xs font-medium hover:bg-hover text-fg cursor-pointer"
+                    >
+                      <CopyIcon className="w-3 h-3 text-purple-400" />
+                      <span>Copy Payload JSON</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => runCommand(() => router.push(`/jwt-decoder#token=${encodeURIComponent(rawSearch)}`))}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-accent text-accent-fg text-xs font-medium hover:bg-accent-hover ml-auto cursor-pointer"
+                    >
+                      <span>Open in JWT Decoder</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. Cron Expression Card */}
+              {cronData && (
+                <div className="p-3 mb-2 rounded-xl border border-blue-500/30 bg-blue-500/10 text-fg space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ClockIcon className="w-4 h-4 text-blue-400" />
+                      <span className="font-bold text-xs text-blue-400">Cron Schedule Expression</span>
+                    </div>
+                    <span className="text-xs font-mono text-muted">Next run {cronData.nextRunRelative}</span>
+                  </div>
+                  <div className="bg-card/90 p-2.5 rounded-lg border border-line space-y-1">
+                    <p className="text-xs font-semibold text-fg">{cronData.description}</p>
+                    <p className="text-[11px] font-mono text-muted truncate">Upcoming run (UTC): {cronData.nextRunIso}</p>
+                  </div>
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(cronData.description)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-card border border-line text-xs font-medium hover:bg-hover text-fg cursor-pointer"
+                    >
+                      <CopyIcon className="w-3 h-3 text-blue-400" />
+                      <span>Copy Explanation</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => runCommand(() => router.push(`/cron-generator#expression=${encodeURIComponent(rawSearch)}`))}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-accent text-accent-fg text-xs font-medium hover:bg-accent-hover ml-auto cursor-pointer"
+                    >
+                      <span>Open in Cron Generator</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* 4. JSON Payload Quick Actions */}
+              {jsonData && (
+                <>
+                  <Command.Item
+                    value={`${rawSearch} json viewer format open`}
+                    onSelect={() => runCommand(() => router.push(`/json-viewer#json=${encodeURIComponent(rawSearch)}`))}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors mt-1"
+                  >
+                    <CodeIcon className="w-4 h-4 text-accent shrink-0" />
+                    <span className="font-semibold text-accent">Format &amp; Open in JSON Viewer</span>
+                    <span className="text-xs font-mono text-muted ml-2">
+                      ({jsonData.keyCount} {jsonData.isArray ? "items" : "keys"})
+                    </span>
+                    <span className="text-xs text-muted ml-auto shrink-0">Press Enter &rarr;</span>
+                  </Command.Item>
+                  <Command.Item
+                    value={`${rawSearch} json to typescript interfaces pipeline`}
+                    onSelect={() => runCommand(() => router.push(`/json-to-ts#json=${encodeURIComponent(rawSearch)}`))}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors"
+                  >
+                    <Workflow className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="font-semibold text-emerald-400">Convert directly to TypeScript Interfaces</span>
+                    <span className="text-xs text-muted ml-auto shrink-0">Open Pipeline &rarr;</span>
+                  </Command.Item>
+                </>
+              )}
+
+              {/* 5. Plain Base64 Quick Action */}
+              {plainBase64Decoded && (
                 <Command.Item
-                  value={search}
-                  onSelect={() => runCommand(() => router.push(`/jwt-decoder#token=${encodeURIComponent(rawSearch)}`))}
+                  value={`${rawSearch} base64 decode`}
+                  onSelect={() => copyToClipboard(plainBase64Decoded)}
                   className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors mt-1"
                 >
-                  <CodeIcon className="w-4 h-4 text-purple-400 shrink-0" />
-                  <span className="font-semibold text-purple-400">Decode JWT Token</span>
-                  {jwtPayloadPreview && (
-                    <span className="text-xs text-muted font-mono truncate max-w-xs ml-2">
-                      {jwtPayloadPreview.slice(0, 45)}...
-                    </span>
-                  )}
-                  <span className="text-xs text-muted ml-auto shrink-0">Open in JWT Decoder &rarr;</span>
+                  <TypeIcon className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="font-semibold text-amber-400">Decoded Base64:</span>
+                  <span className="text-xs text-fg font-mono truncate max-w-xs">{plainBase64Decoded}</span>
+                  <span className="text-xs text-muted ml-auto shrink-0">Press Enter to copy</span>
                 </Command.Item>
               )}
+
+              {/* Terminal Error Action */}
               {isErrorLog && (
                 <Command.Item
                   value={search}
@@ -201,6 +483,8 @@ export function CommandPalette() {
                   <span className="text-xs text-muted ml-auto shrink-0">Diagnose with Castov Fix &rarr;</span>
                 </Command.Item>
               )}
+
+              {/* MCP Query Action */}
               {isMcpQuery && (
                 <Command.Item
                   value={`${rawSearch} copy npx command mcp server`}
@@ -212,6 +496,8 @@ export function CommandPalette() {
                   <span className="text-xs text-muted ml-auto">Press Enter to copy command</span>
                 </Command.Item>
               )}
+
+              {/* UUID Generator Action */}
               {isUuid && (
                 <Command.Item
                   value="generate uuid"
@@ -223,18 +509,9 @@ export function CommandPalette() {
                   <span className="text-xs text-muted ml-auto">Press Enter to copy</span>
                 </Command.Item>
               )}
-              {parsedTime && parsedTime.ok && (
-                <Command.Item
-                  value={search}
-                  onSelect={() => copyToClipboard(toIsoUtc(parsedTime.value.ms))}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg cursor-pointer aria-selected:bg-hover aria-selected:text-accent transition-colors mt-1"
-                >
-                  <ClockIcon className="w-4 h-4 text-emerald-500" />
-                  <span className="font-semibold">{toIsoUtc(parsedTime.value.ms)}</span>
-                  <span className="text-xs text-muted ml-auto">Press Enter to copy ISO</span>
-                </Command.Item>
-              )}
-              {isBase64Encode && base64Encoded && (
+
+              {/* Base64 Prefix Encode */}
+              {isBase64Prefix && base64Encoded && (
                 <Command.Item
                   value={search}
                   onSelect={() => copyToClipboard(base64Encoded)}
@@ -245,6 +522,8 @@ export function CommandPalette() {
                   <span className="text-xs text-muted ml-auto shrink-0">Press Enter to copy Base64</span>
                 </Command.Item>
               )}
+
+              {/* URL Encode */}
               {isUrl && urlEncoded && (
                 <Command.Item
                   value={search}
@@ -256,6 +535,8 @@ export function CommandPalette() {
                   <span className="text-xs text-muted ml-auto shrink-0">Press Enter to copy</span>
                 </Command.Item>
               )}
+
+              {/* Hex Color */}
               {isHex && rgbColor && (
                 <Command.Item
                   value={search}
