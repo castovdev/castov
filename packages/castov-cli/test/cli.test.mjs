@@ -835,3 +835,53 @@ test("castov mcp: extended suite (cron, timezone, secret, jwt_decode, hash, scan
   assert.equal(scanObj.findingCount, 1);
   assert.equal(scanObj.findings[0].type, "AWS Access Key ID");
 });
+
+
+test("castov login, whoami, and logout workflow", async () => {
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "castov-test-"));
+  try {
+    const customRun = (args) =>
+      spawnSync(process.execPath, [CLI, ...args], {
+        encoding: "utf8",
+        env: { ...process.env, NO_COLOR: "1", CASTOV_CONFIG_DIR: tmpDir },
+      });
+
+    // 1. Initial status: Not logged in
+    const initialWhoami = customRun(["whoami"]);
+    assert.equal(initialWhoami.status, 0);
+    assert.match(initialWhoami.stdout, /Not logged in/);
+
+    // 2. Missing token error
+    const noToken = customRun(["login"]);
+    assert.equal(noToken.status, 2);
+    assert.match(noToken.stderr, /missing token/);
+
+    // 3. Successful login with --token
+    const sampleToken = "cst_live_57528c970fe37e7a707e31cd47d560f1";
+    const loginRes = customRun(["login", "--token", sampleToken]);
+    assert.equal(loginRes.status, 0);
+    assert.match(loginRes.stdout, /Successfully authenticated/);
+
+    // 4. Whoami returns authenticated
+    const afterWhoami = customRun(["whoami"]);
+    assert.equal(afterWhoami.status, 0);
+    assert.match(afterWhoami.stdout, /Authenticated/);
+    assert.match(afterWhoami.stdout, /cst_live_/);
+
+    // 5. Logout removes credentials
+    const logoutRes = customRun(["logout"]);
+    assert.equal(logoutRes.status, 0);
+    assert.match(logoutRes.stdout, /Successfully logged out/);
+
+    // 6. After logout: Not logged in
+    const finalWhoami = customRun(["whoami"]);
+    assert.equal(finalWhoami.status, 0);
+    assert.match(finalWhoami.stdout, /Not logged in/);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});

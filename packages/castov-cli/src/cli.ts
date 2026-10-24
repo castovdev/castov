@@ -3,7 +3,8 @@ import { parseArgs } from "node:util";
 import { createRequire } from "node:module";
 import { randomBytes, createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync, writeFileSync, lstatSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync, lstatSync, existsSync, mkdirSync, unlinkSync } from "node:fs";
+import { homedir } from "node:os";
 import { join, relative, extname } from "node:path";
 import {
   castov,
@@ -30,6 +31,57 @@ const yellow = paint(33);
 const red = (s: string) => (process.stderr.isTTY && !process.env.NO_COLOR ? `\x1b[31m${s}\x1b[0m` : s);
 
 class UsageError extends Error {}
+
+// ---------------------------------------------------------------------------
+// Castov CLI Config & Authentication Persistence
+// ---------------------------------------------------------------------------
+function getConfigDir(): string {
+  const custom = process.env.CASTOV_CONFIG_DIR;
+  if (custom) return custom;
+  return join(homedir(), ".castov");
+}
+
+function getConfigPath(): string {
+  return join(getConfigDir(), "config.json");
+}
+
+interface CastovCliConfig {
+  token: string;
+  apiUrl?: string;
+  loggedInAt?: string;
+}
+
+function readCliConfig(): CastovCliConfig | null {
+  try {
+    const file = getConfigPath();
+    if (!existsSync(file)) return null;
+    const content = readFileSync(file, "utf8");
+    return JSON.parse(content);
+  } catch {
+    return null;
+  }
+}
+
+function writeCliConfig(config: CastovCliConfig): void {
+  const dir = getConfigDir();
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true, mode: 0o700 });
+  }
+  writeFileSync(getConfigPath(), JSON.stringify(config, null, 2), { mode: 0o600 });
+}
+
+function removeCliConfig(): boolean {
+  try {
+    const file = getConfigPath();
+    if (existsSync(file)) {
+      unlinkSync(file);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Built-in Port Encyclopedia (Instant Offline Lookup)
@@ -127,6 +179,9 @@ ${bold("Commands")}
   ${cyan("now")}                          Current Unix timestamp + ISO
   ${cyan("unix")} <ts|iso>                Convert Unix <-> ISO 8601
   ${cyan("jwt")} <token>                  Decode a JWT locally (no verification)
+  ${cyan("login")} --token <token>       Authenticate CLI with Personal Access Token (PAT)
+  ${cyan("logout")}                       Remove stored credentials and log out
+  ${cyan("whoami")}                       Check current authentication status
 
 ${bold("Global Options")}
   -h, --help           Show help (run "castov <command> --help" for command details)
@@ -144,6 +199,34 @@ ${bold("Examples")}
 `;
 
 const COMMAND_HELP: Record<string, string> = {
+  login: `
+${bold("castov login")} — authenticate Castov CLI with your Personal Access Token (PAT)
+
+${bold("Usage")}
+  castov login --token <token>
+  castov login <token>
+
+${bold("Options")}
+  -t, --token <token>   Personal Access Token generated in https://castov.com/account
+
+${bold("Examples")}
+  castov login --token cst_live_57528c970fe37e7a707e31cd47d560f1
+`,
+
+  logout: `
+${bold("castov logout")} — remove stored authentication credentials from your machine
+
+${bold("Usage")}
+  castov logout
+`,
+
+  whoami: `
+${bold("castov whoami")} — display active authentication status and credentials path
+
+${bold("Usage")}
+  castov whoami
+`,
+
   fix: `
 ${bold("castov fix")} — diagnose terminal errors and stack traces with instant 1-line solutions
 
@@ -510,12 +593,69 @@ async function main(argv: string[]): Promise<void> {
       len: { type: "string", short: "l" },
       write: { type: "boolean", short: "w" },
       help: { type: "boolean", short: "h" },
+      token: { type: "string", short: "t" },
     },
   });
 
   const out: string[] = [];
 
   switch (command) {
+    case "login": {
+      const token = (values.token as string | undefined) ?? positionals[0];
+      if (!token || !token.trim()) {
+        throw new UsageError(
+          `missing token for "castov login".\n\nUsage:\n  castov login --token <token>\n  castov login <token>\n\nGenerate your Personal Access Token in your browser at:\n  https://castov.com/account (Preferences & CLI)`
+        );
+      }
+      const trimmedToken = token.trim();
+      writeCliConfig({
+        token: trimmedToken,
+        apiUrl: "https://castov.com",
+        loggedInAt: new Date().toISOString(),
+      });
+      const masked =
+        trimmedToken.length > 15
+          ? `${trimmedToken.slice(0, 9)}${"•".repeat(Math.max(8, trimmedToken.length - 13))}${trimmedToken.slice(-4)}`
+          : trimmedToken;
+      out.push(green(`✔ Successfully authenticated with Castov Developer Workspace!`));
+      out.push(`  ${bold("Token:")}   ${masked}`);
+      out.push(`  ${bold("Config:")}  ${getConfigPath()}`);
+      out.push(`  ${bold("Status:")}  Logged in to https://castov.com`);
+      break;
+    }
+
+    case "logout": {
+      const removed = removeCliConfig();
+      if (removed) {
+        out.push(green(`✔ Successfully logged out. Removed configuration from ${getConfigPath()}`));
+      } else {
+        out.push(`No active authentication session found.`);
+      }
+      break;
+    }
+
+    case "whoami":
+    case "status": {
+      const cfg = readCliConfig();
+      if (!cfg || !cfg.token) {
+        out.push(`Not logged in.`);
+        out.push(`Run ${cyan("castov login --token <token>")} to authenticate.`);
+      } else {
+        const masked =
+          cfg.token.length > 15
+            ? `${cfg.token.slice(0, 9)}${"•".repeat(Math.max(8, cfg.token.length - 13))}${cfg.token.slice(-4)}`
+            : cfg.token;
+        out.push(green(`✔ Authenticated`));
+        out.push(`  ${bold("Token:")}        ${masked}`);
+        if (cfg.loggedInAt) {
+          out.push(`  ${bold("Logged In:")}    ${cfg.loggedInAt}`);
+        }
+        out.push(`  ${bold("Server:")}       ${cfg.apiUrl || "https://castov.com"}`);
+        out.push(`  ${bold("Config Path:")}  ${getConfigPath()}`);
+      }
+      break;
+    }
+
     case "ts": {
       const rawVal = positionals[0] ?? (await readStdin());
       if (!rawVal) throw new UsageError(`missing <value> for "castov ts". Run "castov ts --help".`);
