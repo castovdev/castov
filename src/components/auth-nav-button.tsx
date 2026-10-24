@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Cloud,
   LayoutDashboard,
+  ChevronDown,
 } from "lucide-react";
 import { getTool, type ToolSlug } from "@/content/tools";
 
@@ -224,19 +225,9 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
     );
   }
 
-  // DESKTOP VIEW: LOGGED IN WITH DASHBOARD PILL & DROPDOWN
+  // DESKTOP VIEW: LOGGED IN SINGLE UNIFIED ACCOUNT & DASHBOARD BUTTON
   return (
-    <div className="flex items-center gap-2">
-      <Link
-        href="/account"
-        className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 text-xs font-semibold rounded-lg bg-card border border-accent/30 text-accent hover:bg-field transition-colors shadow-xs"
-        title="Open Developer Dashboard"
-      >
-        <LayoutDashboard className="w-3.5 h-3.5" />
-        <span>Dashboard</span>
-      </Link>
-
-      <div className="relative" ref={menuRef}>
+    <div className="relative shrink-0" ref={menuRef}>
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
@@ -258,9 +249,10 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
               {userInitial}
             </div>
           )}
-          <span className="max-w-[100px] truncate text-xs font-medium hidden md:inline">
+          <span className="max-w-[130px] truncate text-xs font-medium hidden sm:inline">
             {displayName}
           </span>
+          <ChevronDown className="w-3.5 h-3.5 text-muted shrink-0 transition-transform duration-200" style={{ transform: open ? 'rotate(180deg)' : 'none' }} />
         </button>
 
         {open && (
@@ -341,7 +333,6 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
             </button>
           </div>
         )}
-      </div>
     </div>
   );
 }
