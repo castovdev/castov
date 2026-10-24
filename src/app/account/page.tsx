@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { Suspense, useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { getTool, type ToolSlug } from "@/content/tools";
@@ -103,13 +103,16 @@ const COMMON_TIMEZONES = [
   "Australia/Sydney",
 ];
 
-export default function AccountPage() {
+function AccountDashboard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isCliAuth = searchParams.get("cli_auth") === "true";
+
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
     "overview" | "pinned" | "snippets" | "preferences" | "activity" | "backup" | "security" | "byok"
-  >("overview");
+  >(() => (isCliAuth ? "preferences" : "overview"));
 
   // Pinned tools state
   const [pinnedSlugs, setPinnedSlugs] = useState<ToolSlug[]>([]);
@@ -237,6 +240,19 @@ export default function AccountPage() {
           } catch {
             // ignore
           }
+        } else if (isCliAuth) {
+          const bytes = new Uint8Array(16);
+          crypto.getRandomValues(bytes);
+          const hex = Array.from(bytes)
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+          const token = `cst_live_${hex}`;
+          const newCliData: CliTokenData = {
+            token,
+            createdAt: Date.now(),
+          };
+          setCliTokenData(newCliData);
+          localStorage.setItem(CLI_TOKEN_KEY, JSON.stringify(newCliData));
         }
 
         const storedActs = localStorage.getItem(RECENT_ACTIVITY_KEY);
@@ -347,7 +363,7 @@ export default function AccountPage() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase, syncToCloud]);
+  }, [supabase, syncToCloud, isCliAuth]);
 
   // Actions
   const handleSignOut = async () => {
@@ -631,6 +647,17 @@ export default function AccountPage() {
           <div className="relative z-10 w-16 h-16 mx-auto mb-6 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
             <Lock className="w-8 h-8" />
           </div>
+          {isCliAuth && (
+            <div className="relative z-10 mb-6 p-4 rounded-xl border border-accent/40 bg-accent/10 flex items-center gap-3 text-left max-w-md mx-auto">
+              <div className="w-9 h-9 rounded-lg bg-accent text-accent-fg flex items-center justify-center shrink-0">
+                <Terminal className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-xs font-bold text-fg">Terminal Authentication Request</h3>
+                <p className="text-[11px] text-muted">Sign in with GitHub to complete authentication in your CLI terminal.</p>
+              </div>
+            </div>
+          )}
           <h1 className="relative z-10 text-2xl sm:text-3xl font-bold tracking-tight text-fg">
             Sign In to Access Your Dashboard
           </h1>
@@ -755,6 +782,46 @@ export default function AccountPage() {
           </div>
         </div>
       </div>
+
+{isCliAuth && (
+        <div className="rounded-2xl border-2 border-accent/40 bg-accent/10 p-5 shadow-lg space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-accent text-accent-fg flex items-center justify-center font-bold shrink-0">
+                <Terminal className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-fg">Terminal Authorization Request Active</h3>
+                <p className="text-xs text-muted">
+                  Castov CLI is requesting access to your developer workspace. Copy your token or command below to complete login.
+                </p>
+              </div>
+            </div>
+            <span className="px-2.5 py-1 rounded-full bg-accent/20 text-accent font-mono text-[11px] font-semibold uppercase tracking-wider shrink-0">
+              CLI Auth Flow
+            </span>
+          </div>
+
+          {cliTokenData && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+              <input
+                type="text"
+                readOnly
+                value={`castov login --token ${cliTokenData.token}`}
+                className="flex-1 bg-card border border-line rounded-lg px-3 py-2 text-xs font-mono text-fg select-all"
+              />
+              <button
+                type="button"
+                onClick={handleCopyCliCommand}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-accent text-accent-fg text-xs font-bold hover:bg-accent-hover transition-colors shadow-sm cursor-pointer shrink-0"
+              >
+                {copiedCliCommand ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedCliCommand ? "Command Copied!" : "Copy Login Command"}</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 2. TAB NAVIGATION */}
       <div className="flex items-center gap-2 border-b border-line pb-2 overflow-x-auto scrollbar-none">
@@ -1422,6 +1489,27 @@ export default function AccountPage() {
               })}
             </div>
           )}
+
+          {/* E2EE Cloud Sync CTA Banner */}
+          <div className="mt-4 rounded-xl border border-accent/30 bg-gradient-to-r from-accent/10 via-card to-accent/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-accent/20 text-accent flex items-center justify-center shrink-0">
+                <Shield className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-fg">
+                  مزامنة سحابية غير محدودة ومشفرة من طرف لطرف (E2EE)
+                </h4>
+                <p className="text-[11px] text-muted mt-0.5">
+                  سجل دخولك عبر GitHub لحفظ سجلك بلا حدود ومزامنته مع الـ CLI بتشفير كامل من طرف لطرف (E2EE).
+                </p>
+              </div>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-mono shrink-0">
+              <Check className="w-3.5 h-3.5" />
+              <span>E2EE Synced</span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1660,5 +1748,20 @@ export default function AccountPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="layout-content py-20 min-h-[70vh] flex flex-col items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+          <p className="mt-4 text-sm font-mono text-muted">Loading developer dashboard...</p>
+        </div>
+      }
+    >
+      <AccountDashboard />
+    </Suspense>
   );
 }

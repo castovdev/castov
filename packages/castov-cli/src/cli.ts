@@ -32,6 +32,22 @@ const red = (s: string) => (process.stderr.isTTY && !process.env.NO_COLOR ? `\x1
 
 class UsageError extends Error {}
 
+function openBrowser(url: string): boolean {
+  try {
+    const platform = process.platform;
+    if (platform === "win32") {
+      execFileSync("cmd.exe", ["/c", "start", "", url], { stdio: "ignore" });
+    } else if (platform === "darwin") {
+      execFileSync("open", [url], { stdio: "ignore" });
+    } else {
+      execFileSync("xdg-open", [url], { stdio: "ignore" });
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Castov CLI Config & Authentication Persistence
 // ---------------------------------------------------------------------------
@@ -601,10 +617,30 @@ async function main(argv: string[]): Promise<void> {
 
   switch (command) {
     case "login": {
-      const token = (values.token as string | undefined) ?? positionals[0];
+      let token = (values.token as string | undefined) ?? positionals[0];
+      if (!token || !token.trim()) {
+        const authUrl = "https://castov.com/account?cli_auth=true";
+        if (process.stdout.isTTY && !process.env.CASTOV_NO_BROWSER) {
+          process.stdout.write(`\n🌐 Opening Castov in your default browser...\n   ${cyan(authUrl)}\n\n`);
+          openBrowser(authUrl);
+        }
+        if (process.stdin.isTTY) {
+          const readline = await import("node:readline/promises");
+          const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+          try {
+            const entered = await rl.question(bold("Paste your Personal Access Token (cst_live_...): "));
+            if (entered && entered.trim()) {
+              token = entered.trim();
+            }
+          } finally {
+            rl.close();
+          }
+        }
+      }
+
       if (!token || !token.trim()) {
         throw new UsageError(
-          `missing token for "castov login".\n\nUsage:\n  castov login --token <token>\n  castov login <token>\n\nGenerate your Personal Access Token in your browser at:\n  https://castov.com/account (Preferences & CLI)`
+          `missing token for "castov login".\n\nUsage:\n  castov login --token <token>\n  castov login -t <token>\n  castov login <token>\n\nGenerate or copy your Personal Access Token at:\n  https://castov.com/account?cli_auth=true`
         );
       }
       const trimmedToken = token.trim();

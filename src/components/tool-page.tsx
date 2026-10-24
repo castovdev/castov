@@ -12,6 +12,8 @@ import { ToolInterface } from "./tool-interface";
 import { ToolTracker } from "./tool-tracker";
 import { PinButton } from "./pinned-tools";
 import { ShareButton } from "./share-button";
+import { ProofOfPrivacyBadge } from "./proof-of-privacy-badge";
+import { ToolPipelineMenu } from "./tool-pipeline-menu";
 import { ADS } from "@/lib/site";
 import { AdSensePlaceholder } from "./adsense-placeholder";
 
@@ -59,11 +61,15 @@ export function ToolPage({ tool }: { tool: Tool }) {
       />
 
       <div className="mt-6 mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent">
-            {tool.category.replace("-", " ").toUpperCase()}
-          </span>
+        <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-xs font-semibold text-accent">
+              {tool.category.replace("-", " ").toUpperCase()}
+            </span>
+            <ProofOfPrivacyBadge />
+          </div>
           <div className="flex items-center gap-2">
+            <ToolPipelineMenu currentSlug={tool.slug} />
             <ShareButton title={tool.name} />
             <PinButton slug={tool.slug} />
           </div>
