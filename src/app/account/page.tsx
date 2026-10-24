@@ -107,12 +107,20 @@ const COMMON_TIMEZONES = [
   "Australia/Sydney",
 ];
 
+const OWNER_EMAIL = (
+  process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+  "abdelmalikbenidir@gmail.com"
+)
+  .toLowerCase()
+  .trim();
+
 function AccountDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isCliAuth = searchParams.get("cli_auth") === "true";
 
   const [user, setUser] = useState<User | null>(null);
+  const isAdmin = Boolean(user?.email && user.email.toLowerCase().trim() === OWNER_EMAIL);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
     "overview" | "pinned" | "snippets" | "preferences" | "activity" | "backup" | "security" | "byok" | "mcp_stacks" | "analytics"
@@ -209,6 +217,9 @@ function AccountDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!mounted) return;
       setUser(user);
+      if (user?.email?.toLowerCase().trim() !== OWNER_EMAIL) {
+        setActiveTab((prev) => (prev === "analytics" ? "overview" : prev));
+      }
       setLoading(false);
 
       // Local storage values
@@ -873,7 +884,7 @@ function AccountDashboard() {
           { id: "security", label: "Zero-Knowledge", icon: Shield },
           { id: "byok", label: "BYOK AI Keys", icon: Key },
           { id: "mcp_stacks", label: "MCP Stacks", icon: Layers },
-          { id: "analytics", label: "Admin Analytics", icon: BarChart3 },
+          ...(isAdmin ? [{ id: "analytics", label: "Admin Analytics", icon: BarChart3 }] : []),
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -1859,7 +1870,7 @@ function AccountDashboard() {
       {activeTab === "mcp_stacks" && <DashboardMcpStacks />}
 
       {/* TAB: ADMIN ANALYTICS */}
-      {activeTab === "analytics" && <DashboardAnalytics />}
+      {isAdmin && activeTab === "analytics" && <DashboardAnalytics />}
     </div>
   );
 }

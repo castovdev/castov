@@ -1,8 +1,32 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
 import { getEventsBuffer } from "../track/route";
+
+const OWNER_EMAIL = (
+  process.env.ADMIN_EMAIL ||
+  process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
+  "abdelmalikbenidir@gmail.com"
+)
+  .toLowerCase()
+  .trim();
 
 export async function GET() {
   try {
+    // 1. Strict Owner Authentication Guard
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const userEmail = user?.email?.toLowerCase().trim();
+    if (!user || !userEmail || userEmail !== OWNER_EMAIL) {
+      return NextResponse.json(
+        { ok: false, error: "Forbidden: Owner access only" },
+        { status: 403 }
+      );
+    }
+
+    // 2. Compute telemetry metrics
     const events = getEventsBuffer();
 
     const stats = {
