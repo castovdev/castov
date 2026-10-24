@@ -14,7 +14,6 @@ import { LLM_MODELS } from '@/lib/llm-specs-registry';
 import { HTTP_STATUS_CODES } from '@/lib/http-statuses';
 import { VS_COMPARISONS } from '@/lib/vs-registry';
 import { SITE } from '@/lib/site';
-import { CRON_PRESETS } from '@/lib/time/cron-presets';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -169,7 +168,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   sitemapEntries.push(
     { url: `${baseUrl}/status`, lastModified: getLastMod('src/app/status/page.tsx'), changeFrequency: 'hourly', priority: 0.9 },
-    { url: `${baseUrl}/curl-converter`, lastModified: getLastMod('src/app/curl-converter/page.tsx'), changeFrequency: 'monthly', priority: 0.8 }
+    { url: `${baseUrl}/curl-converter`, lastModified: getLastMod('src/app/curl-converter/page.tsx'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/llm`, lastModified: getLastMod('src/app/llm/page.tsx'), changeFrequency: 'weekly', priority: 0.9 }
   );
 
   CLOUD_SERVICES.forEach((cs) => {

@@ -23,7 +23,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:seo": "node scripts/check-build.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run test && npm run build && npm run check:seo"
+    "audit:links": "node scripts/scan-all-links.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run audit:links && npm run build && npm run check:seo"
   },
   "engines": {
     "node": ">=20.9.0"

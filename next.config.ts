@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      { source: '/unix', destination: '/unix-timestamp-converter', permanent: true },
       { source: '/timezones/UTC', destination: '/utc-converter', permanent: true },
       { source: '/timezones/:tz', destination: '/timezones', permanent: true },
       { source: '/ai/vercel-ai-sdk-generator', destination: '/ai/vercel-ai-sdk-code-generator', permanent: true },

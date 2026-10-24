@@ -70,7 +70,7 @@ export const GUIDES: Guide[] = [
     metaDescription: "A deep dive into the Model Context Protocol (MCP), explaining how it standardizes context injection for AI editors like Cursor and Claude Desktop.",
     summary: "The Model Context Protocol (MCP) is an open standard that allows developers to securely expose local resources, databases, and APIs to AI assistants. Learn how it turns isolated LLMs into context-aware agents.",
     readingMinutes: 5,
-    tools: ["mcp-config-builder"],
+    tools: ["universal-config-sync", "p2p-ghost-tunnel"],
     sections: [
       {
         heading: "What is MCP?",
@@ -93,7 +93,7 @@ export const GUIDES: Guide[] = [
     metaDescription: "Maximize your AI coding efficiency by crafting the ultimate .cursorrules file for context-aware code generation in the Cursor IDE.",
     summary: "AI code editors like Cursor are only as smart as the context they are given. A well-crafted .cursorrules file instructs the AI on your exact tech stack, architecture rules, and formatting preferences.",
     readingMinutes: 4,
-    tools: ["cursorrules-generator"],
+    tools: ["universal-config-sync"],
     sections: [
       {
         heading: "The Importance of Project Context",
@@ -139,7 +139,7 @@ export const GUIDES: Guide[] = [
     metaDescription: "Move beyond simple prompts. Learn advanced engineering patterns like Chain-of-Thought, Few-Shot prompting, and React (Reasoning and Acting) loops.",
     summary: "Prompt engineering has evolved into a rigid software discipline. Master the architectural patterns of prompting to yield deterministic, high-quality code from unpredictable LLMs.",
     readingMinutes: 7,
-    tools: ["vercel-ai-sdk-code-generator"],
+    tools: ["mock-data-studio", "token-visualizer"],
     sections: [
       {
         heading: "Chain of Thought (CoT)",
@@ -164,7 +164,7 @@ export const GUIDES: Guide[] = [
     metaDescription: "Learn how Regular Expressions are parsed into Abstract Syntax Trees (AST) under the hood and how visualizers can help you write better patterns.",
     summary: "Regular Expressions are notoriously hard to read. By breaking them down into an Abstract Syntax Tree (AST), developers can easily debug, understand, and optimize complex patterns.",
     readingMinutes: 4,
-    tools: ["regex-explainer"],
+    tools: ["regex-genetic-evolution"],
     sections: [
       {
         heading: "What is an Abstract Syntax Tree?",
@@ -474,7 +474,7 @@ export const GUIDES: Guide[] = [
       "A complete guide to Linux file permissions, octal notation (777, 755, 644), owner/group/other access rights, and production security rules.",
     summary: "How Linux file permissions work, why octal numbers like 755 and 644 are calculated, and why chmod 777 is a dangerous anti-pattern.",
     readingMinutes: 6,
-    tools: ["chmod-calculator", "cron-generator"],
+    tools: ["env-vault", "cron-generator"],
     sections: [
       {
         heading: "The Permission Triad: Owner, Group, and Others",
@@ -517,7 +517,7 @@ export const GUIDES: Guide[] = [
       "Understand JSON Web Tokens (JWT) architecture: header, payload, signature, exp/iat claims, algorithm-none attacks, and secure token verification.",
     summary: "How JSON Web Tokens work under the hood, how to properly handle exp/iat expiration claims, and critical vulnerabilities to avoid in production.",
     readingMinutes: 5,
-    tools: ["jwt-debugger", "base64-encoder-decoder"],
+    tools: ["jwt-decoder", "base64-encoder-decoder"],
     sections: [
       {
         heading: "Anatomy of a JWT: Three Base64Url Segments",
