@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CategorySection } from "@/components/category-section";
 import { FaqSection } from "@/components/faq-section";
 import { HOME_FAQ } from "@/content/home";
-import { buildMetadata, faqJsonLd, websiteJsonLd } from "@/lib/seo";
+import { buildMetadata, faqJsonLd, websiteJsonLd, webApplicationJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { ArrowRight, Terminal, ShieldCheck, Workflow, Command, Zap, Code } from "lucide-react";
 import { HeroQuickConvert } from "@/components/hero-quick-convert";
@@ -12,24 +12,34 @@ import { InstallationDistributionSection } from "@/components/installation-distr
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: "Castov | Free Developer Tools: Timestamps, Time Zones, JSON & More",
-    description: "Fast, simple, privacy-friendly tools for timestamps, dates, time zones, formats, and developer workflows.",
+    title: "Castov | Developer Tools & MCP Server (100% Client-Side, Offline & CLI)",
+    description: "Fast, 100% client-side developer platform: Web + CLI + MCP Server for Cursor and Claude. Zero-data logging, JSON to TypeScript, Cron multi-timezone, and cryptographic pipelines.",
     path: "/",
   }),
   openGraph: {
     ...buildMetadata({
-      title: "Castov | Free Developer Tools: Timestamps, Time Zones, JSON & More",
-      description: "Fast, simple, privacy-friendly tools for timestamps, dates, time zones, formats, and developer workflows.",
+      title: "Castov | Developer Tools & MCP Server (100% Client-Side, Offline & CLI)",
+      description: "Fast, 100% client-side developer platform: Web + CLI + MCP Server for Cursor and Claude. Zero-data logging, JSON to TypeScript, Cron multi-timezone, and cryptographic pipelines.",
       path: "/",
     }).openGraph,
-    title: "Castov | Free Developer Tools: Timestamps, Time Zones, JSON & More",
+    title: "Castov | Developer Tools & MCP Server (100% Client-Side, Offline & CLI)",
   },
 };
 
 export default function HomePage() {
   return (
     <div className="bg-bg min-h-screen text-fg font-sans selection:bg-accent/20">
-      <JsonLd data={[websiteJsonLd(), faqJsonLd(HOME_FAQ)]} />
+      <JsonLd
+        data={[
+          websiteJsonLd(),
+          faqJsonLd(HOME_FAQ),
+          webApplicationJsonLd({
+            name: "Castov Developer Platform",
+            description: "100% Client-Side Developer Tools, Native CLI, and MCP Server for Cursor & Claude. Zero-data logging, JSON to TypeScript, Cron, and cryptographic pipelines.",
+            path: "/",
+          }),
+        ]}
+      />
 
       {/* --- HERO SECTION --- */}
       <section className="relative pt-28 pb-24 lg:pt-36 lg:pb-32 overflow-hidden border-b border-line">
@@ -38,33 +48,60 @@ export default function HomePage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-accent/20 blur-[100px] rounded-full opacity-50 pointer-events-none" />
 
         <div className="container relative mx-auto px-4 text-center max-w-5xl z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-field/80 backdrop-blur-sm border border-line text-sm font-semibold mb-8 text-fg shadow-sm cursor-default hover:bg-hover transition-colors">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-field/90 backdrop-blur-md border border-emerald-500/30 text-xs font-mono mb-8 text-fg shadow-xs cursor-default">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            Castov Engine v2.0 is Live
+            <span className="text-emerald-400 font-semibold">100% Client-Side</span>
+            <span className="text-muted">•</span>
+            <span>Zero-Data Logging</span>
+            <span className="text-muted">•</span>
+            <span>Works 100% Offline</span>
           </div>
           
-          <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-fg mb-8 leading-[1.15]">
-            Free Developer Tools: <br />
-            <span className="bg-gradient-to-r from-accent via-accent to-success bg-clip-text text-transparent">Time, JSON, Encoding &amp; More</span>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-fg mb-6 leading-[1.12]">
+            The Complete Developer Toolkit <br />
+            <span className="bg-gradient-to-r from-accent via-blue-400 to-emerald-400 bg-clip-text text-transparent">
+              Web + CLI + AI (MCP)
+            </span>
           </h1>
           
-          <p className="text-lg lg:text-xl text-muted max-w-3xl mx-auto mb-10 leading-relaxed">
-            Free browser-based developer tools. Most tools run entirely in your browser; sharing, collaboration, P2P signaling, and selected cloud features may use external or encrypted infrastructure.
+          <p className="text-base sm:text-lg lg:text-xl text-muted max-w-3xl mx-auto mb-8 leading-relaxed">
+            All your mission-critical utilities executed locally in your browser, terminal, and AI agents.
+            Zero server tracking, sub-millisecond transforms, and seamless multi-stage pipelines.
           </p>
+
+          {/* Fast Omnibox & Ecosystem Pill */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 max-w-2xl mx-auto mb-10 text-xs font-mono">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-line shadow-xs">
+              <Command className="w-3.5 h-3.5 text-accent" />
+              <span>Smart Omnibox:</span>
+              <kbd className="px-1.5 py-0.5 rounded bg-field border border-line text-[11px] font-bold text-fg">Ctrl + K</kbd>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-line shadow-xs">
+              <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Terminal CLI:</span>
+              <code className="text-fg font-bold">npx castov</code>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-line shadow-xs">
+              <Workflow className="w-3.5 h-3.5 text-purple-400" />
+              <span>Cursor &amp; Claude:</span>
+              <code className="text-accent font-bold">castov mcp</code>
+            </div>
+          </div>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Link href="/tools" className="group flex items-center justify-center gap-2 bg-accent text-accent-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-hover transition-all w-full sm:w-auto shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:shadow-[0_0_25px_rgba(37,99,235,0.4)]">
-              Explore Tools <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            <Link href="/tools" className="group flex items-center justify-center gap-2 bg-accent text-accent-fg px-8 py-3.5 rounded-xl font-bold text-base sm:text-lg hover:bg-accent-hover transition-all w-full sm:w-auto shadow-[0_0_20px_rgba(37,99,235,0.25)] hover:shadow-[0_0_25px_rgba(37,99,235,0.4)]">
+              Explore 61 Tools <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="/mcp" className="flex items-center justify-center gap-2 bg-card border border-accent/40 text-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-field transition-colors w-full sm:w-auto shadow-sm">
-              <ShieldCheck size={20} className="text-emerald-400" />
-              <span>MCP Server (10 Tools)</span>
+            <Link href="/mcp" className="flex items-center justify-center gap-2 bg-card border border-accent/40 text-fg px-8 py-3.5 rounded-xl font-bold text-base sm:text-lg hover:bg-field transition-colors w-full sm:w-auto shadow-sm">
+              <ShieldCheck size={18} className="text-emerald-400" />
+              <span>MCP Server (13 Tools)</span>
             </Link>
-            <Link href="/developer" className="flex items-center justify-center gap-2 bg-card border border-line text-fg px-8 py-4 rounded-xl font-bold text-lg hover:bg-field transition-colors w-full sm:w-auto shadow-sm">
-              Read Documentation
+            <Link href="/cli" className="flex items-center justify-center gap-2 bg-card border border-line text-fg px-8 py-3.5 rounded-xl font-bold text-base sm:text-lg hover:bg-field transition-colors w-full sm:w-auto shadow-sm">
+              <Terminal size={18} className="text-muted" />
+              <span>CLI Guide</span>
             </Link>
           </div>
 
@@ -73,87 +110,104 @@ export default function HomePage() {
         </div>
       </section>
 
-            {/* --- THE ECOSYSTEM SHOWCASE --- */}
+            {/* --- THE 5 COMPETITIVE WEAPONS GRID --- */}
       <section className="py-24 border-b border-line bg-card relative overflow-hidden">
         <div className="container mx-auto px-4 max-w-7xl relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-6 text-fg">A complete ecosystem, not just a website.</h2>
-            <p className="text-muted text-lg lg:text-xl max-w-3xl mx-auto">
-              Castov integrates directly into your workflow. From the browser to the terminal, and right inside your IDE.
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs font-mono font-semibold text-accent mb-3">
+              Built for Speed, Privacy &amp; AI
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4 text-fg">
+              Why Developers Choose Castov
+            </h2>
+            <p className="text-muted text-base sm:text-lg max-w-2xl mx-auto">
+              Five architectural decisions that make Castov the preferred toolkit for modern software teams.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Cmd+K */}
-            <div className="bg-bg border border-line p-8 rounded-3xl hover:border-accent/50 transition-colors shadow-sm group">
-              <div className="w-14 h-14 rounded-2xl bg-field flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Command className="text-fg w-7 h-7" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* 1. Zero-Data Logging */}
+            <div className="bg-bg border border-line hover:border-emerald-500/40 p-7 rounded-3xl transition-all shadow-sm group">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-fg">Global Command Center</h3>
-              <p className="text-muted leading-relaxed">
-                Press <kbd className="px-2 py-0.5 bg-field rounded border border-line mx-1 font-mono text-sm">Cmd+K</kbd> anywhere. Inline-compute UUIDs, format dates, and navigate instantly without leaving your keyboard.
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-xl font-bold text-fg">Zero-Data Logging</h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-semibold">WebCrypto</span>
+              </div>
+              <p className="text-sm text-muted leading-relaxed">
+                100% of cryptography, JWT inspection, JSON formatting, and timestamp parsing executes in local browser memory. Not a single keystroke is sent to external servers.
               </p>
             </div>
 
-            {/* SDK, CLI & MCP */}
-            <div className="bg-bg border border-line p-8 rounded-3xl hover:border-primary/50 transition-colors shadow-sm group flex flex-col justify-between">
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Terminal className="text-primary w-7 h-7" />
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <h3 className="text-2xl font-bold text-fg">MCP Server &amp; CLI</h3>
-                  <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-mono font-semibold">npm v1.4.0</span>
-                </div>
-                <p className="text-muted leading-relaxed mb-6">
-                  Connect 10 Glama Grade-A certified local tools to Claude, Cursor, and Windsurf (<code className="text-fg bg-field px-1 rounded">npx castov mcp</code>) or run utilities in terminal.
-                </p>
+            {/* 2. Tool Pipelines */}
+            <div className="bg-bg border border-line hover:border-accent/40 p-7 rounded-3xl transition-all shadow-sm group">
+              <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                <Workflow className="w-6 h-6" />
               </div>
-              <div className="flex items-center gap-4 pt-4 border-t border-line">
-                <Link href="/mcp" className="text-sm font-semibold text-accent hover:underline">
-                  MCP Setup &rarr;
-                </Link>
-                <Link href="/cli" className="text-sm font-semibold text-primary hover:underline">
-                  CLI Guide &rarr;
-                </Link>
-                <a
-                  href="https://www.npmjs.com/package/castov"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-semibold text-muted hover:text-fg"
-                >
-                  npm &rarr;
-                </a>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-xl font-bold text-fg">Tool Pipelines ("Pipe to...")</h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-accent/15 text-accent font-semibold">Chaining</span>
               </div>
+              <p className="text-sm text-muted leading-relaxed">
+                Pass outputs seamlessly across utilities in one click: JSON directly to TypeScript interfaces, Cron schedules into world timezones, and diffs to schema generators without clipboard juggling.
+              </p>
             </div>
 
-            {/* VS Code */}
-            <div className="bg-bg border border-line p-8 rounded-3xl hover:border-[#007ACC]/50 transition-colors shadow-sm group md:col-span-2 lg:col-span-1 flex flex-col justify-between">
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-[#007ACC]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Code className="text-[#007ACC] w-7 h-7" />
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <h3 className="text-2xl font-bold text-fg">VS Code Extensions</h3>
-                  <span className="text-xs bg-[#007ACC]/15 text-[#007ACC] px-2 py-0.5 rounded-full font-mono font-semibold">13 Tools</span>
-                </div>
-                <p className="text-muted leading-relaxed mb-6">
-                  13 specialized extensions for supply-chain security, MCP debugging, token cost tracking, webhook catching, and offline dev utilities directly in your editor.
-                </p>
+            {/* 3. Web + CLI + MCP Ecosystem */}
+            <div className="bg-bg border border-line hover:border-purple-500/40 p-7 rounded-3xl transition-all shadow-sm group">
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                <Terminal className="w-6 h-6" />
               </div>
-              <div className="flex items-center gap-3 pt-4 border-t border-line">
-                <a
-                  href="https://marketplace.visualstudio.com/publishers/Castov"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-semibold text-[#007ACC] hover:underline"
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-xl font-bold text-fg">Unified Ecosystem</h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 font-semibold">Web • CLI • MCP</span>
+              </div>
+              <p className="text-sm text-muted leading-relaxed">
+                The exact same 13 utilities work on the Web, in your local terminal via <code className="text-fg bg-field px-1 rounded">castov</code>, and inside Cursor or Claude via our Grade-A certified Model Context Protocol server.
+              </p>
+            </div>
+
+            {/* 4. Encrypted Share Links */}
+            <div className="bg-bg border border-line hover:border-blue-500/40 p-7 rounded-3xl transition-all shadow-sm group">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                <Code className="w-6 h-6" />
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-xl font-bold text-fg">Encrypted URL Shares</h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-semibold">Zero-Server</span>
+              </div>
+              <p className="text-sm text-muted leading-relaxed">
+                Share inputs, diffs, and settings with teammates instantly. Payloads are compressed into the URL hash fragment (<code className="text-fg bg-field px-1 rounded">#</code>) so servers never see what you shared.
+              </p>
+            </div>
+
+            {/* 5. Cloud Sync & Team Vaults */}
+            <div className="bg-bg border border-line hover:border-amber-500/40 p-7 rounded-3xl transition-all shadow-sm group md:col-span-2 lg:col-span-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                    <Zap className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-bold text-fg">E2EE Cloud Sync &amp; Team Vaults</h3>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 font-semibold">GitHub OAuth</span>
+                    </div>
+                    <p className="text-xs text-muted mt-0.5">Zero-friction leverage unlocked on registration</p>
+                  </div>
+                </div>
+                <Link
+                  href="/account"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent text-accent-fg text-xs font-bold hover:bg-accent-hover transition-colors shadow-xs shrink-0"
                 >
-                  Marketplace &rarr;
-                </a>
-                <Link href="/extension" className="text-sm font-semibold text-muted hover:text-fg">
-                  Browse All 13 &rarr;
+                  <span>Connect Workspace</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
+              <p className="text-sm text-muted leading-relaxed">
+                Connect your GitHub account to sync pinned utilities, presets, and dev preferences across all your machines. Collaborate with teammates using RSA-OAEP encrypted Team Vaults to share <code className="text-fg bg-field px-1 rounded">.env</code> files without cleartext exposure in chat channels.
+              </p>
             </div>
           </div>
         </div>

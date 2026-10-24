@@ -356,6 +356,9 @@ test("castov mcp: protocol handshake and tools/list in framed mode", async (t) =
     "castov_jwt_decode",
     "castov_hash",
     "castov_scan_secrets",
+    "castov_json_to_ts_pipeline",
+    "castov_cron_timezone_pipeline",
+    "castov_jwt_inspect_pipeline",
   ]);
 });
 
@@ -366,7 +369,7 @@ test("castov mcp: handles ndjson mode and replies in ndjson", async (t) => {
   client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) + "\n");
   const [res] = await promise;
   assert.equal(res.id, 1);
-  assert.equal(res.result.tools.length, 10);
+  assert.equal(res.result.tools.length, 13);
 });
 
 test("castov mcp: tools/call handles valid inputs correctly", async (t) => {
@@ -477,7 +480,7 @@ test("castov mcp: handles header sent byte-by-byte", async (t) => {
 
   const [res] = await promise;
   assert.equal(res.id, 801);
-  assert.equal(res.result.tools.length, 10);
+  assert.equal(res.result.tools.length, 13);
 });
 
 test("castov mcp: splits multi-byte UTF-8 emoji across chunk boundaries", async (t) => {
@@ -836,6 +839,59 @@ test("castov mcp: extended suite (cron, timezone, secret, jwt_decode, hash, scan
   assert.equal(scanObj.findings[0].type, "AWS Access Key ID");
 });
 
+
+test("castov mcp: pipeline tools (json_to_ts, cron_timezone, jwt_inspect)", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 3, timeoutMs, setTracked);
+
+  client.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 401,
+    method: "tools/call",
+    params: {
+      name: "castov_json_to_ts_pipeline",
+      arguments: { json: '{"user": {"name": "Alice", "age": 30}, "tags": ["admin"]}', rootName: "UserProfile" }
+    }
+  }) + "\n");
+
+  client.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 402,
+    method: "tools/call",
+    params: {
+      name: "castov_cron_timezone_pipeline",
+      arguments: { expression: "0 9 * * 1-5", baseTimezone: "UTC" }
+    }
+  }) + "\n");
+
+  const sampleJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkNhc3RvdiIsImV4cCI6MTkwMDAwMDAwMH0.signature";
+  client.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 403,
+    method: "tools/call",
+    params: {
+      name: "castov_jwt_inspect_pipeline",
+      arguments: { token: sampleJwt }
+    }
+  }) + "\n");
+
+  const [rJsonTs, rCronTz, rJwtInspect] = await promise;
+
+  const jsonTsObj = JSON.parse(rJsonTs.result.content[0].text);
+  assert.equal(jsonTsObj.success, true);
+  assert.equal(jsonTsObj.rootInterface, "UserProfile");
+  assert.match(jsonTsObj.typeScriptInterfaces, /interface UserProfile/);
+
+  const cronTzObj = JSON.parse(rCronTz.result.content[0].text);
+  assert.equal(cronTzObj.success, true);
+  assert.equal(cronTzObj.upcomingRunsMatrix.length, 5);
+  assert.ok(cronTzObj.upcomingRunsMatrix[0]["America/New_York"]);
+
+  const jwtInspectObj = JSON.parse(rJwtInspect.result.content[0].text);
+  assert.equal(jwtInspectObj.success, true);
+  assert.equal(jwtInspectObj.tokenType, "JWT");
+  assert.equal(jwtInspectObj.claimsStatus.isExpired, false);
+});
 
 test("castov login, whoami, and logout workflow", async () => {
   const fs = await import("node:fs");

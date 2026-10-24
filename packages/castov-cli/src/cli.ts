@@ -1046,6 +1046,52 @@ async function main(argv: string[]): Promise<void> {
         openWorldHint: false,
       };
 
+function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", indent = "  "): string {
+  if (typeof obj !== "object" || obj === null) {
+    return `export type ${rootName} = ${typeof obj};\n`;
+  }
+
+  let extraInterfaces = "";
+  const visited = new Set<string>();
+
+  const buildInterface = (name: string, target: Record<string, unknown>): string => {
+    let code = `export interface ${name} {\n`;
+    for (const [key, val] of Object.entries(target)) {
+      const sanitizedKey = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
+      if (val === null) {
+        code += `${indent}${sanitizedKey}: any;\n`;
+      } else if (Array.isArray(val)) {
+        if (val.length > 0 && typeof val[0] === "object" && val[0] !== null) {
+          const itemTypeName = `${name}_${key.charAt(0).toUpperCase() + key.slice(1)}Item`;
+          if (!visited.has(itemTypeName)) {
+            visited.add(itemTypeName);
+            extraInterfaces += buildInterface(itemTypeName, val[0] as Record<string, unknown>) + "\n";
+          }
+          code += `${indent}${sanitizedKey}: ${itemTypeName}[];\n`;
+        } else if (val.length > 0) {
+          code += `${indent}${sanitizedKey}: ${typeof val[0]}[];\n`;
+        } else {
+          code += `${indent}${sanitizedKey}: any[];\n`;
+        }
+      } else if (typeof val === "object") {
+        const subTypeName = `${name}_${key.charAt(0).toUpperCase() + key.slice(1)}`;
+        if (!visited.has(subTypeName)) {
+          visited.add(subTypeName);
+          extraInterfaces += buildInterface(subTypeName, val as Record<string, unknown>) + "\n";
+        }
+        code += `${indent}${sanitizedKey}: ${subTypeName};\n`;
+      } else {
+        code += `${indent}${sanitizedKey}: ${typeof val};\n`;
+      }
+    }
+    code += `}\n`;
+    return code;
+  };
+
+  const root = buildInterface(rootName, obj as Record<string, unknown>);
+  return extraInterfaces ? `${root}\n${extraInterfaces.trim()}\n` : root;
+}
+
       const MCP_TOOLS = [
         {
           name: "castov_timestamp",
@@ -1181,6 +1227,47 @@ async function main(argv: string[]): Promise<void> {
               content: { type: "string", description: "Code snippet, configuration file text, or git diff to audit for hardcoded secrets" },
             },
             required: ["content"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_json_to_ts_pipeline",
+          description: "Full developer pipeline: validate JSON (raw or base64), format, analyze structure, and generate strongly-typed TypeScript interfaces.",
+          annotations: { title: "JSON to TypeScript Pipeline", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              json: { type: "string", description: "JSON string or Base64-encoded JSON to convert" },
+              rootName: { type: "string", description: "Optional root interface name (default: 'RootObject')" },
+            },
+            required: ["json"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_cron_timezone_pipeline",
+          description: "Cron schedule & multi-timezone pipeline: explain cron expression and calculate next 5 upcoming executions simultaneously converted across UTC, Local, America/New_York (EST/EDT), Europe/Paris (CET/CEST), and Asia/Tokyo (JST).",
+          annotations: { title: "Cron Multi-Timezone Pipeline", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              expression: { type: "string", description: "5-field cron expression, e.g. '0 9 * * 1-5' or '*/15 * * * *'" },
+              baseTimezone: { type: "string", description: "Optional base timezone (defaults to 'UTC', e.g. 'America/New_York')" },
+            },
+            required: ["expression"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_jwt_inspect_pipeline",
+          description: "Comprehensive JWT inspection pipeline: decode header & payload, check signature algorithm, evaluate timestamp claims (iat, exp, nbf), calculate remaining TTL, and detect security vulnerabilities.",
+          annotations: { title: "JWT Security & Inspection Pipeline", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              token: { type: "string", description: "Encoded JWT string (header.payload.signature)" },
+            },
+            required: ["token"],
             additionalProperties: false,
           },
         },
@@ -1475,6 +1562,155 @@ async function main(argv: string[]): Promise<void> {
                   null,
                   2
                 );
+              }
+            } else if (toolName === "castov_json_to_ts_pipeline") {
+              if (typeof args.json !== "string" || !args.json.trim() || args.json.length > 1048576) {
+                toolText = "Error: 'json' must be a non-empty string up to 1 MB.";
+                isError = true;
+              } else {
+                let rawInput = args.json.trim();
+                if (!rawInput.startsWith("{") && !rawInput.startsWith("[")) {
+                  try {
+                    const decoded = Buffer.from(rawInput, "base64").toString("utf8");
+                    if (decoded.startsWith("{") || decoded.startsWith("[")) {
+                      rawInput = decoded.trim();
+                    }
+                  } catch {
+                    // Not valid base64, proceed with raw
+                  }
+                }
+                try {
+                  const parsed = JSON.parse(rawInput);
+                  const rootName = typeof args.rootName === "string" && /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(args.rootName.trim())
+                    ? args.rootName.trim()
+                    : "RootObject";
+                  const interfaces = generateTsInterfacesFromObject(parsed, rootName);
+                  toolText = JSON.stringify(
+                    {
+                      success: true,
+                      rootInterface: rootName,
+                      keyCount: typeof parsed === "object" && parsed !== null ? Object.keys(parsed).length : 0,
+                      formattedJson: JSON.stringify(parsed, null, 2),
+                      typeScriptInterfaces: interfaces,
+                    },
+                    null,
+                    2
+                  );
+                } catch (err: any) {
+                  toolText = `Error: Invalid JSON payload - ${err?.message || "parse failed"}`;
+                  isError = true;
+                }
+              }
+            } else if (toolName === "castov_cron_timezone_pipeline") {
+              if (typeof args.expression !== "string" || !args.expression.trim() || args.expression.length > 128) {
+                toolText = "Error: missing or invalid 'expression' argument (expected 5-field cron expression).";
+                isError = true;
+              } else {
+                const baseTz = typeof args.baseTimezone === "string" && args.baseTimezone.trim() ? args.baseTimezone.trim() : "UTC";
+                try {
+                  const explained = explainCron(args.expression.trim(), baseTz);
+                  const runs = explained.nextRuns || [];
+                  const TARGET_ZONES = [
+                    { id: "UTC", label: "UTC" },
+                    { id: "America/New_York", label: "New York (US Eastern)" },
+                    { id: "Europe/London", label: "London (GMT/BST)" },
+                    { id: "Europe/Paris", label: "Paris (CET/CEST)" },
+                    { id: "Asia/Tokyo", label: "Tokyo (JST)" },
+                  ];
+
+                  const matrix = runs.map((run) => {
+                    const isoRun = run.iso;
+                    const row: Record<string, string> = { sourceIso: isoRun };
+                    for (const tz of TARGET_ZONES) {
+                      try {
+                        const converted = convertTz(isoRun.replace("T", " ").slice(0, 16), baseTz, tz.id);
+                        row[tz.id] = `${converted.toFormatted} (${converted.toAbbreviation})`;
+                      } catch {
+                        row[tz.id] = isoRun;
+                      }
+                    }
+                    return row;
+                  });
+
+                  toolText = JSON.stringify(
+                    {
+                      success: true,
+                      expression: args.expression.trim(),
+                      baseTimezone: baseTz,
+                      explanation: explained.description,
+                      upcomingRunsMatrix: matrix,
+                    },
+                    null,
+                    2
+                  );
+                } catch (err: any) {
+                  toolText = `Error: ${err?.message || "invalid cron expression or timezone"}`;
+                  isError = true;
+                }
+              }
+            } else if (toolName === "castov_jwt_inspect_pipeline") {
+              if (typeof args.token !== "string" || !args.token.trim() || args.token.length > 16384) {
+                toolText = "Error: 'token' must be a non-empty JWT string.";
+                isError = true;
+              } else {
+                try {
+                  const decoded = castov.jwtDecode(args.token.trim());
+                  const header = (decoded.header as Record<string, unknown>) || {};
+                  const payload = (decoded.payload as Record<string, unknown>) || {};
+                  const nowSec = Math.floor(Date.now() / 1000);
+
+                  const alg = typeof header.alg === "string" ? header.alg : "unknown";
+                  const isAlgNone = alg.toLowerCase() === "none";
+                  const isSymmetric = alg.startsWith("HS");
+
+                  const exp = typeof payload.exp === "number" ? payload.exp : null;
+                  const iat = typeof payload.iat === "number" ? payload.iat : null;
+                  const nbf = typeof payload.nbf === "number" ? payload.nbf : null;
+
+                  const isExpired = exp !== null ? exp < nowSec : null;
+                  const ttlSeconds = exp !== null ? exp - nowSec : null;
+                  const issuedAgoSeconds = iat !== null ? nowSec - iat : null;
+                  const notYetActive = nbf !== null ? nbf > nowSec : false;
+
+                  const securityFlags: string[] = [];
+                  if (isAlgNone) securityFlags.push("CRITICAL: Token algorithm is set to 'none' (unsigned)");
+                  if (isExpired) securityFlags.push("EXPIRED: Token has exceeded its expiration timestamp");
+                  if (notYetActive) securityFlags.push("NOT_YET_ACTIVE: Token nbf timestamp is in the future");
+                  if (exp === null) securityFlags.push("WARNING: Token does not have an 'exp' (expiration) claim");
+
+                  toolText = JSON.stringify(
+                    {
+                      success: true,
+                      algorithm: alg,
+                      tokenType: header.typ || "JWT",
+                      claimsStatus: {
+                        isExpired,
+                        ttlSeconds,
+                        timeRemainingFormatted: ttlSeconds !== null
+                          ? ttlSeconds > 0
+                            ? `${Math.floor(ttlSeconds / 60)}m ${ttlSeconds % 60}s`
+                            : `Expired ${Math.abs(ttlSeconds)}s ago`
+                          : "No expiry specified",
+                        issuedAtIso: iat ? new Date(iat * 1000).toISOString() : null,
+                        expiresAtIso: exp ? new Date(exp * 1000).toISOString() : null,
+                        notBeforeIso: nbf ? new Date(nbf * 1000).toISOString() : null,
+                        issuedAgoSeconds,
+                      },
+                      securityAssessment: {
+                        isSecureAlgorithm: !isAlgNone,
+                        keyCategory: isSymmetric ? "HMAC Shared Secret" : "Asymmetric Key Pair (RSA/ECDSA)",
+                        flags: securityFlags,
+                      },
+                      header,
+                      payload,
+                    },
+                    null,
+                    2
+                  );
+                } catch (err: any) {
+                  toolText = `Error: ${err?.message || "failed to inspect JWT"}`;
+                  isError = true;
+                }
               }
             } else {
               toolText = `Error: Unknown tool "${toolName}".`;

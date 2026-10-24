@@ -136,6 +136,8 @@ function AccountDashboard() {
   const [showCliToken, setShowCliToken] = useState(false);
   const [copiedCliToken, setCopiedCliToken] = useState(false);
   const [copiedCliCommand, setCopiedCliCommand] = useState(false);
+  const [mcpClient, setMcpClient] = useState<"cursor" | "claude">("cursor");
+  const [copiedMcpConfig, setCopiedMcpConfig] = useState(false);
 
   // Recent Activity
   const [recentActivity, setRecentActivity] = useState<RecentActivityItem[]>([]);
@@ -480,6 +482,38 @@ function AccountDashboard() {
     navigator.clipboard.writeText(command);
     setCopiedCliCommand(true);
     setTimeout(() => setCopiedCliCommand(false), 2000);
+  };
+
+  const cursorMcpConfig = JSON.stringify(
+    {
+      mcpServers: {
+        castov: {
+          command: "castov",
+          args: ["mcp"],
+        },
+      },
+    },
+    null,
+    2
+  );
+
+  const claudeMcpConfig = JSON.stringify(
+    {
+      mcpServers: {
+        castov: {
+          command: "npx",
+          args: ["-y", "castov", "mcp"],
+        },
+      },
+    },
+    null,
+    2
+  );
+
+  const handleCopyMcpConfig = (cfg: string) => {
+    navigator.clipboard.writeText(cfg);
+    setCopiedMcpConfig(true);
+    setTimeout(() => setCopiedMcpConfig(false), 2000);
   };
 
   // 3. Activity Log Clear
@@ -1416,6 +1450,73 @@ function AccountDashboard() {
                 <p className="text-[11px] text-muted mt-0.5">Click &quot;Generate CLI Token&quot; above to connect your local development environment.</p>
               </div>
             )}
+          </div>
+
+          {/* AI Agents & Model Context Protocol (MCP) Setup */}
+          <div className="rounded-2xl border border-line bg-card p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-purple-400" />
+                  <h2 className="text-lg font-bold text-fg">AI Agents &amp; Model Context Protocol (MCP)</h2>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-semibold">
+                    13 Tools (10 Core + 3 Pipelines)
+                  </span>
+                </div>
+                <p className="text-xs text-muted mt-0.5">
+                  Connect Castov directly to Cursor IDE or Claude Desktop. Allow your AI agent to format JSON, explain cron across timezones, and audit JWT tokens locally.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-1.5 p-1 bg-field rounded-xl border border-line self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setMcpClient("cursor")}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    mcpClient === "cursor"
+                      ? "bg-card text-fg shadow-xs border border-line"
+                      : "text-muted hover:text-fg"
+                  }`}
+                >
+                  Cursor (~/.cursor/mcp.json)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMcpClient("claude")}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    mcpClient === "claude"
+                      ? "bg-card text-fg shadow-xs border border-line"
+                      : "text-muted hover:text-fg"
+                  }`}
+                >
+                  Claude Desktop
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-1">
+              <div className="p-4 rounded-xl border border-line bg-field/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-muted font-mono">
+                    {mcpClient === "cursor" ? "~/.cursor/mcp.json" : "claude_desktop_config.json"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyMcpConfig(mcpClient === "cursor" ? cursorMcpConfig : claudeMcpConfig)}
+                    className="inline-flex items-center gap-1 text-xs text-accent font-semibold hover:underline cursor-pointer"
+                  >
+                    {copiedMcpConfig ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedMcpConfig ? "Config Copied!" : "Copy MCP JSON"}</span>
+                  </button>
+                </div>
+                <pre className="p-3 rounded-lg bg-card border border-line text-xs font-mono text-fg overflow-x-auto select-all">
+                  {mcpClient === "cursor" ? cursorMcpConfig : claudeMcpConfig}
+                </pre>
+                <p className="text-[11px] text-muted">
+                  Paste this snippet inside your editor config. Your AI assistant will automatically discover tools such as `castov_json_to_ts_pipeline`, `castov_cron_timezone_pipeline`, and `castov_jwt_inspect_pipeline`.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
