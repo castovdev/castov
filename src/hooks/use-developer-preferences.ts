@@ -11,7 +11,7 @@ export interface DeveloperPreferences {
 const PREFERENCES_KEY = "castov_developer_preferences";
 
 const DEFAULT_PREFERENCES: DeveloperPreferences = {
-  timezone: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC" : "UTC",
+  timezone: "UTC",
   indentStyle: "2",
   defaultLanguage: "typescript",
 };
