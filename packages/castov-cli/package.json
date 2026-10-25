@@ -50,7 +50,7 @@
   "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
   "type": "module",
   "bin": {
-    "castov": "./dist/cli.js"
+    "castov": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -63,7 +63,7 @@
   "scripts": {
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "npm run clean && tsc -p tsconfig.json",
-    "test": "node --test test/cli.test.mjs",
+    "test": "node --test test/cli.test.mjs test/audit.test.mjs",
     "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {

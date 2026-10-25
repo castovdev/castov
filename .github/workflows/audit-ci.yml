@@ -1,0 +1,40 @@
+name: Castov Multi-Platform CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-cross-platform:
+    name: Test on ${{ matrix.os }} (Node ${{ matrix.node-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [20.x, 22.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: packages/castov-cli/package-lock.json
+
+      - name: Install dependencies
+        working-directory: packages/castov-cli
+        run: npm ci || npm install
+
+      - name: Build Castov CLI
+        working-directory: packages/castov-cli
+        run: npm run build
+
+      - name: Run Test Suite (Core CLI + Audit CAS-001..007)
+        working-directory: packages/castov-cli
+        run: npm test

@@ -14,6 +14,7 @@ import {
   cron as explainCron,
   tz as convertTz,
 } from "castov-sdk";
+import { runAudit } from "./audit/engine.js";
 
 const require = createRequire(import.meta.url);
 const { version } = require("../package.json") as { version: string };
@@ -181,6 +182,7 @@ ${bold("Commands")}
   ${cyan("secret")} [--len <bytes>]       Generate cryptographic .env secrets (256-bit Hex, Base64URL, API keys)
   ${cyan("cidr")} <ip/prefix|/prefix>     Calculate IPv4 subnet mask, wildcard, usable IP range, and host count
   ${cyan("scan")} [dir]                   Scan project directory for leaked API keys, JWTs, and private keys
+  ${cyan("audit")} [path] [options]       Audit AI agent configs, MCP servers, and credentials locally
   ${cyan("rules")} [stack] [--write]      Generate .cursorrules / CLAUDE.md AI coding guidelines
   ${cyan("mcp")}                          Start stdio Model Context Protocol (MCP) server for Claude / Cursor
   ${cyan("ts")} <value>                   Unix seconds or milliseconds (auto-detect) -> UTC, ISO, local
@@ -322,6 +324,31 @@ ${bold("Usage")}
 ${bold("Examples")}
   castov scan
   castov scan ./src
+`,
+
+  audit: `
+${bold("castov audit")} — audit AI coding agent configs, MCP servers, and credentials locally (100% offline)
+
+${bold("Usage")}
+  castov audit [path] [options]
+
+${bold("Options")}
+  --include-user-configs    Audit global user configs in home directory (disabled by default)
+  --format <fmt>            Output format: text, json, sarif, md (default: text)
+  --output <file>           Save report output to file
+  --fail-on <severity>      Exit with code 1 if findings >= threshold (critical, high, medium, low, none. default: high)
+  --ignore-rule <id>        Ignore specific rule (repeatable, e.g. --ignore-rule CAS-004)
+  --max-depth <n>           Directory scan depth (default: 6)
+  --no-git                  Disable git status integration
+  --baseline <file>         Compare against baseline report
+  --save-baseline <file>    Save baseline report
+  --client-name <name>      Customer or client name for executive Markdown report
+  --quiet                   Suppress non-essential terminal output
+
+${bold("Examples")}
+  castov audit
+  castov audit ./my-project --format md --output audit-report.md
+  castov audit . --fail-on critical --format json
 `,
 
   rules: `
@@ -629,6 +656,18 @@ async function main(argv: string[]): Promise<void> {
       token: { type: "string", short: "t" },
       pass: { type: "string", short: "p" },
       out: { type: "string", short: "o" },
+      "include-user-configs": { type: "boolean" },
+      format: { type: "string" },
+      output: { type: "string" },
+      "fail-on": { type: "string" },
+      "ignore-rule": { type: "string", multiple: true },
+      "max-depth": { type: "string" },
+      "no-git": { type: "boolean" },
+      baseline: { type: "string" },
+      "save-baseline": { type: "string" },
+      "client-name": { type: "string" },
+      quiet: { type: "boolean", short: "q" },
+      "use-gitleaks": { type: "boolean" },
     },
   });
 
@@ -1037,6 +1076,58 @@ async function main(argv: string[]): Promise<void> {
       }
       out.push(`Encrypt & share .env files safely: https://www.castov.com/env-vault`);
       break;
+    }
+
+    case "audit": {
+      const targetPath = positionals[0] || ".";
+      const format = (values.format as "text" | "json" | "sarif" | "md" | undefined) || "text";
+      if (!["text", "json", "sarif", "md"].includes(format)) {
+        throw new UsageError(`invalid --format "${format}". Supported formats: text, json, sarif, md.`);
+      }
+
+      const failOn = (values["fail-on"] as "critical" | "high" | "medium" | "low" | "none" | undefined) || "high";
+      if (!["critical", "high", "medium", "low", "none"].includes(failOn)) {
+        throw new UsageError(`invalid --fail-on "${failOn}". Supported levels: critical, high, medium, low, none.`);
+      }
+
+      const maxDepth = values["max-depth"] ? parseInt(values["max-depth"] as string, 10) : 6;
+      if (isNaN(maxDepth) || maxDepth < 0) {
+        throw new UsageError(`invalid --max-depth "${values["max-depth"]}". Expected non-negative integer.`);
+      }
+
+      try {
+        const { result, formatted } = runAudit({
+          targetPath,
+          includeUserConfigs: Boolean(values["include-user-configs"]),
+          format,
+          outputFile: values.output as string | undefined,
+          failOn,
+          ignoreRules: (values["ignore-rule"] as string[] | undefined) || [],
+          maxDepth,
+          noGit: Boolean(values["no-git"]),
+          baselineFile: values.baseline as string | undefined,
+          saveBaselineFile: values["save-baseline"] as string | undefined,
+          clientName: values["client-name"] as string | undefined,
+          quiet: Boolean(values.quiet),
+          useGitleaks: Boolean(values["use-gitleaks"]),
+        }, version);
+
+        if (!values.output) {
+          process.stdout.write(formatted + "\n");
+        } else {
+          process.stdout.write(green(`✓ Audit report successfully written to ${values.output}\n`));
+        }
+
+        if (result.exitCode !== 0) {
+          process.exit(result.exitCode);
+        }
+        return;
+      } catch (err: unknown) {
+        if (err instanceof UsageError) throw err;
+        const msg = err instanceof Error ? err.message : String(err);
+        process.stderr.write(red(`castov audit internal error: ${msg}\n`));
+        process.exit(3);
+      }
     }
 
     case "rules": {

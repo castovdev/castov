@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "secure-filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem@0.6.2", "./src"],
+      "env": {
+        "GITHUB_TOKEN": "${env:GITHUB_PAT}",
+        "SESSION_ID": "c37e0b03-60bf-4a48-8117-e654d264a73f",
+        "COMMIT_SHA": "a435dd1e23f5b78901234567890abcdef1234567",
+        "CHECKSUM": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "autoApprove": ["read_file"]
+    },
+    "secure-database": {
+      "command": "node",
+      "args": ["bin/db-mcp.js@v1.0.0"],
+      "env": {
+        "DATABASE_URL": "${env:PROD_DATABASE_URL}"
+      }
+    },
+    "secure-remote": {
+      "url": "https://api.internal-cloud.net/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:REMOTE_AUTH_TOKEN}",
+        "X-Digest": "eyJhbGciOiJub25lIn0"
+      }
+    },
+    "local-dev-server": {
+      "url": "http://localhost:8080/mcp"
+    }
+  }
+}
