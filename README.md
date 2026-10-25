@@ -36,6 +36,20 @@ Modern AI agents and developer workflows suffer from two critical flaws:
 
 Everything runs **100% locally**. No external analytics, no telemetry, and zero cloud roundtrips.
 
+### 📊 Castov vs Existing Solutions
+
+| Feature / Capability | ⚡ Castov | 🕵️ CyberChef | 🛠️ DevToys | 🚀 Raycast | 📦 IT-Tools |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **100% Client-Side Web Crypto** | ✅ **Yes** | ✅ Yes | ❌ Native Only | ❌ Mac Only | ✅ Yes |
+| **Model Context Protocol (MCP)** | ✅ **Grade A Server** | ❌ No | ❌ No | ❌ Proprietary | ❌ No |
+| **Terminal CLI (`npx castov`)** | ✅ **Built-in** | ❌ No | ❌ Separate | ❌ Mac GUI | ❌ No |
+| **Zero Server Payload Logging** | ✅ **Air-Gap Safe** | ✅ Yes | ✅ Yes | ⚠️ Telemetry | ✅ Yes |
+| **Cross-Platform (Web/OS/Docker)**| ✅ **Universal** | ⚠️ Web Only | ⚠️ Desktop Only | ❌ macOS Only | ⚠️ Web Only |
+| **AI Editor Integration (Cursor/Claude)** | ✅ **Native** | ❌ No | ❌ No | ❌ No | ❌ No |
+| **Process / Port Killer (`EADDRINUSE`)** | ✅ **Built-in** | ❌ No | ❌ No | ⚠️ Extension | ❌ No |
+| **Secret & API Key Leak Scanner** | ✅ **Built-in** | ❌ No | ❌ No | ❌ No | ❌ No |
+| **Open Source (MIT)** | ✅ **Yes** | ✅ Apache 2.0 | ✅ MIT | ❌ Proprietary | ✅ GPL-3.0 |
+
 ---
 
 ## 🤖 AI Agent Setup (Model Context Protocol - MCP)
@@ -261,6 +275,15 @@ To run tests across packages:
 ```bash
 npm run test
 ```
+
+---
+
+## 🤝 Contributing
+
+Contributions from developers worldwide are welcomed and celebrated! Whether it's adding a new client-side tool, optimizing CLI performance, or improving documentation:
+
+- Check out our **[Contributing Guide](./CONTRIBUTING.md)** to learn how to add a new tool in 5 minutes.
+- Check existing issues or open a discussion for feature suggestions.
 
 ---
 
