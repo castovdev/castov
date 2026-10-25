@@ -285,7 +285,7 @@ export default function ExtensionPage() {
               <div className="pt-2">
                 <a
                   href="/api/download/extension"
-                  download="castov-vscode-0.1.4.vsix"
+                  download="castov-vscode-0.1.5.vsix"
                   className="btn btn-secondary w-full justify-center text-xs font-bold py-2.5 flex items-center gap-2"
                 >
                   <Download className="w-3.5 h-3.5" />
