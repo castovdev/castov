@@ -16,6 +16,7 @@ import { GgufVramEstimator } from "@/components/ai-tools/GgufVramEstimator";
 import { JsonlDatasetFormatter } from "@/components/ai-tools/JsonlDatasetFormatter";
 import { ClaudeSystemPromptBuilder } from "@/components/ai-tools/claude-system-prompt-builder";
 import { RagChunkSizeCalculator } from "@/components/ai-tools/RagChunkSizeCalculator";
+import { ToolAuthCloudBadge, ToolSaveSnippetButton, ToolHistoryBanner } from "@/components/tool-auth-actions";
 
 export function generateStaticParams() {
   const params = [];
@@ -147,6 +148,10 @@ function ToolPageView({ tool }: { tool: AiTool }) {
         </div>
 
         <header className="mb-12 max-w-3xl">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <ToolAuthCloudBadge />
+            <ToolSaveSnippetButton slug={tool.slug} toolName={tool.name} />
+          </div>
           
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-fg mb-4">
             {tool.name}
@@ -180,6 +185,7 @@ function ToolPageView({ tool }: { tool: AiTool }) {
           ) : (
             <ToolForm tool={tool} />
           )}
+          <ToolHistoryBanner />
         </section>
 
         <section aria-labelledby="pseo-heading" className="max-w-3xl prose prose-invert prose-tf">

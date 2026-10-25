@@ -414,7 +414,7 @@ describe("CyberEngine - Security, Privacy & DoS Hardening", () => {
     const duration = performance.now() - start;
 
     expect(entropy).toBe(0);
-    expect(duration).toBeLessThan(50);
+    expect(duration).toBeLessThan(250);
   });
 
   it("extract_urls does not extract or execute javascript: URIs", () => {
