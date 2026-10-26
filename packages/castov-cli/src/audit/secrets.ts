@@ -7,9 +7,11 @@
  *
  * Contextual Safe-Value Rules (isSafeOrVariableReference):
  * - Variable references must match the ENTIRE value (no partial substring bypass).
- * - 40/64-char hex strings are NEVER safe if the key name contains SECRET, KEY, TOKEN, PASSWORD, PASS, CREDENTIAL, or AUTH;
+ * - If a variable reference uses default fallback syntax `${VAR:-default}`, the `default` part
+ *   is recursively analyzed as a normal value (so a literal secret in `default` is NOT safe and triggers a finding).
+ * - 40/64-char hex strings are NEVER safe if the key/context contains SECRET, KEY, TOKEN, PASSWORD, PASS, CREDENTIAL, or AUTH;
  *   they are only safe in revision/commit/sha/digest/hash contexts or Docker @sha256: digests.
- * - UUIDs are NEVER safe if the key name contains SECRET, KEY, TOKEN, PASSWORD, PASS, CREDENTIAL, or AUTH.
+ * - UUIDs are NEVER safe if the key/context contains SECRET, KEY, TOKEN, PASSWORD, PASS, CREDENTIAL, or AUTH.
  * - localhost URLs are inspected for userinfo and query parameters; any secret-like query parameter or userinfo marks it unsafe.
  */
 
@@ -39,17 +41,43 @@ export function maskSecret(val: string): string {
 }
 
 /**
- * Checks whether a value is a pure, full-string environment/input variable reference or placeholder.
- * Does NOT allow partial matches mixed with literal secrets (e.g., "Bearer real_secret ${X}").
+ * Extract the default fallback value from a `${VAR:-default}` or `${env:VAR:-default}` expression, if present.
+ * Returns null if the string is not a `${...:-...}` expression.
  */
-export function isPureVariableReferenceOrPlaceholder(val: string): boolean {
+export function extractDefaultFromVarSubstitution(val: string): { varName: string; defaultValue: string } | null {
+  if (!val || typeof val !== "string") return null;
+  const trimmed = val.trim();
+  const match = /^(?:(?:Bearer|Basic)\s+)?\$\{([A-Za-z0-9_.:/]+):-([\s\S]*)\}$/i.exec(trimmed);
+  if (!match) return null;
+  return {
+    varName: match[1],
+    defaultValue: match[2],
+  };
+}
+
+/**
+ * Checks whether a value is a pure, full-string environment/input variable reference WITHOUT a literal secret default,
+ * or an explicit non-secret placeholder.
+ * Does NOT allow partial matches mixed with literal secrets (e.g., "Bearer real_secret ${X}").
+ * For `${VAR:-default}`, returns true ONLY if `default` is empty or a safe placeholder/variable reference.
+ */
+export function isPureVariableReferenceOrPlaceholder(val: string, keyOrContext?: string): boolean {
   if (!val || typeof val !== "string") return true;
   const trimmed = val.trim();
   if (!trimmed) return true;
 
-  // Full-value variable reference: ${env:VAR}, ${input:VAR}, ${VAR}, ${VAR:-default}, $VAR, %VAR%
+  // Check ${VAR:-default} first: analyze the part after ":-" as a normal value!
+  const withDefault = extractDefaultFromVarSubstitution(trimmed);
+  if (withDefault !== null) {
+    const defVal = withDefault.defaultValue.trim();
+    if (!defVal) return true; // ${VAR:-} has empty default -> safe
+    // Recursively check if the default value itself is safe in this key/context
+    return isSafeOrVariableReference(defVal, keyOrContext || withDefault.varName);
+  }
+
+  // Full-value variable reference WITHOUT ":-" fallback: ${env:VAR}, ${input:VAR}, ${VAR}, $VAR, %VAR%
   // Optionally prefixed ONLY by "Bearer " or "Basic " with no other literal characters
-  if (/^(?:(?:Bearer|Basic)\s+)?\$\{[A-Za-z0-9_.:/-]+\}$/i.test(trimmed)) return true;
+  if (/^(?:(?:Bearer|Basic)\s+)?\$\{[A-Za-z0-9_.:/]+\}$/i.test(trimmed)) return true;
   if (/^(?:(?:Bearer|Basic)\s+)?\$[A-Za-z_][A-Za-z0-9_]*$/i.test(trimmed)) return true;
   if (/^(?:(?:Bearer|Basic)\s+)?%[A-Za-z_][A-Za-z0-9_]*%$/i.test(trimmed)) return true;
 
@@ -64,7 +92,7 @@ export function isPureVariableReferenceOrPlaceholder(val: string): boolean {
 
 /**
  * Context-aware check for safe non-secret values:
- * - Full-string variable references (${env:X}, ${input:X}, ${X}, $VAR, %VAR%)
+ * - Full-string variable references (${env:X}, ${input:X}, ${X}, $VAR, %VAR%), with `${VAR:-default}` inspecting `default`
  * - Docker image @sha256:<64-hex> digests
  * - 40/64-char hex ONLY when key/context is revision/commit/sha/digest/hash and NOT a sensitive key name
  * - UUIDs ONLY when key/context does NOT contain SECRET/KEY/TOKEN/PASSWORD/PASS/CREDENTIAL/AUTH
@@ -78,8 +106,18 @@ export function isSafeOrVariableReference(val: string, keyOrContext?: string): b
   const ctx = (keyOrContext || "").trim();
   const isSensitiveKey = ctx.length > 0 && SENSITIVE_KEY_REGEX.test(ctx);
 
+  // If ${VAR:-default}, evaluate the default value directly with context
+  const withDefault = extractDefaultFromVarSubstitution(trimmed);
+  if (withDefault !== null) {
+    const defVal = withDefault.defaultValue.trim();
+    if (!defVal) return true;
+    const effectiveCtx = ctx || withDefault.varName;
+    if (matchesKnownProviderPattern(defVal) !== null) return false;
+    return isSafeOrVariableReference(defVal, effectiveCtx);
+  }
+
   // 1. Full-string variable references or placeholders
-  if (isPureVariableReferenceOrPlaceholder(trimmed)) {
+  if (isPureVariableReferenceOrPlaceholder(trimmed, ctx)) {
     return true;
   }
 
@@ -118,7 +156,7 @@ export function isSafeOrVariableReference(val: string, keyOrContext?: string): b
       }
       // Inspect query parameters
       for (const [qKey, qVal] of parsed.searchParams.entries()) {
-        if (!qVal || isPureVariableReferenceOrPlaceholder(qVal)) continue;
+        if (!qVal || isPureVariableReferenceOrPlaceholder(qVal, qKey)) continue;
         if (SENSITIVE_KEY_REGEX.test(qKey)) {
           return false;
         }
@@ -278,7 +316,6 @@ function matchesKnownProviderPattern(text: string): SecretMatch | null {
         if (isPureVariableReferenceOrPlaceholder(match[1])) {
           continue;
         }
-        // Mask the URI safely so neither password nor full URI is exposed
         const raw = match[0];
         return {
           patternName: pat.name,
@@ -309,6 +346,14 @@ export function detectSecrets(text: string, keyOrContext?: string): SecretMatch[
   if (!text || typeof text !== "string") return [];
   const trimmed = text.trim();
   if (!trimmed) return [];
+
+  // If the value is a ${VAR:-default} expression, analyze the default portion directly!
+  const withDefault = extractDefaultFromVarSubstitution(trimmed);
+  if (withDefault !== null) {
+    const defVal = withDefault.defaultValue.trim();
+    if (!defVal) return [];
+    return detectSecrets(defVal, keyOrContext || withDefault.varName);
+  }
 
   if (isSafeOrVariableReference(trimmed, keyOrContext)) return [];
 
@@ -348,7 +393,7 @@ export function detectSecrets(text: string, keyOrContext?: string): SecretMatch[
         });
       }
       for (const [qKey, qVal] of parsed.searchParams.entries()) {
-        if (!qVal || isPureVariableReferenceOrPlaceholder(qVal)) continue;
+        if (!qVal || isPureVariableReferenceOrPlaceholder(qVal, qKey)) continue;
         if (SENSITIVE_KEY_REGEX.test(qKey) && qVal.trim().length >= 6) {
           matches.push({
             patternName: `Secret in URL query parameter (${qKey})`,
@@ -369,7 +414,7 @@ export function detectSecrets(text: string, keyOrContext?: string): SecretMatch[
   const bearerMatch = /^(?:Bearer|Basic)\s+(.+)$/i.exec(trimmed);
   if (bearerMatch) {
     const tokenPart = bearerMatch[1].trim();
-    if (!isPureVariableReferenceOrPlaceholder(tokenPart) && tokenPart.length >= 6) {
+    if (!isPureVariableReferenceOrPlaceholder(tokenPart, keyOrContext) && tokenPart.length >= 6) {
       matches.push({
         patternName: "Hardcoded Authorization Bearer/Basic Token",
         provider: "HTTP Auth",

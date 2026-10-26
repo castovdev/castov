@@ -1,7 +1,13 @@
 import { readdirSync, lstatSync, readFileSync, existsSync } from "node:fs";
 import { join, basename, relative } from "node:path";
 import { execFileSync } from "node:child_process";
-import { PROJECT_MCP_CONFIG_PATHS, getUserMcpConfigPaths } from "../data/client-configs.js";
+import {
+  PROJECT_MCP_CONFIG_PATHS,
+  CLAUDE_CODE_PROJECT_SETTINGS_PATHS,
+  getClaudeCodeUserSettingsPath,
+  VERIFIED_CURSOR_IGNORE_FILE,
+  getUserMcpConfigPaths,
+} from "../data/client-configs.js";
 import { parseJsonc } from "./jsonc.js";
 import type { ParsedConfigFile, McpServerConfig, Finding, AgentRuleFile } from "./types.js";
 
@@ -26,13 +32,26 @@ export interface DiscoveredEnvFile {
   isGitIgnored?: boolean;
 }
 
+export interface DiscoveredClaudeSettings {
+  filePath: string;
+  scope: "project" | "user";
+  denyRules: string[];
+}
+
 export interface DiscoveryResult {
   configFiles: ParsedConfigFile[];
   agentRuleFiles: AgentRuleFile[];
   envFiles: DiscoveredEnvFile[];
   hasGitignore: boolean;
   gitignoreContent: string;
+  hasCursorIgnore: boolean;
+  cursorIgnoreContent: string;
+  hasClaudeIgnore: boolean;
+  claudeIgnorePath?: string;
+  claudeSettings: DiscoveredClaudeSettings[];
+  /** @deprecated kept for backwards compatibility in tests; equals hasCursorIgnore */
   hasAgentIgnore: boolean;
+  /** @deprecated kept for backwards compatibility in tests; equals cursorIgnoreContent */
   agentIgnoreContent: string;
   scannedFiles: string[];
   parseErrors: Finding[];
@@ -82,6 +101,19 @@ export function extractServersBlock(parsedJson: unknown): Record<string, McpServ
 }
 
 /**
+ * Extract `permissions.deny` string array from a parsed Claude Code settings.json file
+ */
+export function extractClaudeDenyRules(parsedJson: unknown): string[] {
+  if (!parsedJson || typeof parsedJson !== "object" || Array.isArray(parsedJson)) return [];
+  const rec = parsedJson as Record<string, unknown>;
+  const perms = rec.permissions;
+  if (!perms || typeof perms !== "object" || Array.isArray(perms)) return [];
+  const deny = (perms as Record<string, unknown>).deny;
+  if (!Array.isArray(deny)) return [];
+  return deny.filter((r): r is string => typeof r === "string");
+}
+
+/**
  * Discovers project-level and optional user-level MCP, environment files, and AI agent rule files.
  */
 export function discoverConfigFiles(
@@ -114,22 +146,70 @@ export function discoverConfigFiles(
     }
   }
 
-  // Check AI Agent Ignore files (.cursorignore, .claudeignore, .aiignore, .windsurfignore, .copilotignore)
-  const AGENT_IGNORE_FILES = [".cursorignore", ".claudeignore", ".aiignore", ".windsurfignore", ".copilotignore"];
-  let hasAgentIgnore = false;
-  const agentIgnoreChunks: string[] = [];
-  for (const igFile of AGENT_IGNORE_FILES) {
-    const igPath = join(targetDir, igFile);
-    if (existsSync(igPath)) {
+  // 1. Check Verified Cursor Ignore file (.cursorignore)
+  // Verbatim Quote: "Control which directories and files Cursor can access using a .cursorignore file in your root directory... Environment files: **/.env , **/.env.*"
+  // Source: https://cursor.com/docs/context/ignore-files (Fetched: 2026-10-26)
+  let hasCursorIgnore = false;
+  let cursorIgnoreContent = "";
+  const cursorIgnorePath = join(targetDir, VERIFIED_CURSOR_IGNORE_FILE);
+  if (existsSync(cursorIgnorePath)) {
+    try {
+      cursorIgnoreContent = readFileSync(cursorIgnorePath, "utf8");
+      hasCursorIgnore = true;
+    } catch {
+      // ignore
+    }
+  }
+
+  // 2. Check .claudeignore presence (NOT respected by Claude Code — triggers warning finding in CAS-008)
+  let hasClaudeIgnore = false;
+  let claudeIgnorePath: string | undefined;
+  const candidateClaudeIgnore = join(targetDir, ".claudeignore");
+  if (existsSync(candidateClaudeIgnore)) {
+    hasClaudeIgnore = true;
+    claudeIgnorePath = candidateClaudeIgnore;
+  }
+
+  // 3. Check Verified Claude Code settings.json files for `permissions.deny`
+  // Verbatim Quote: "Shared project .claude/settings.json... Project local .claude/settings.local.json... ~/.claude/settings.json"
+  // Source: https://code.claude.com/docs/en/settings (Fetched: 2026-10-26)
+  const claudeSettings: DiscoveredClaudeSettings[] = [];
+  for (const relSettingsPath of CLAUDE_CODE_PROJECT_SETTINGS_PATHS) {
+    const fullSettingsPath = join(targetDir, relSettingsPath);
+    if (existsSync(fullSettingsPath)) {
       try {
-        agentIgnoreChunks.push(readFileSync(igPath, "utf8"));
-        hasAgentIgnore = true;
+        const raw = readFileSync(fullSettingsPath, "utf8");
+        const { data } = parseJsonc(raw);
+        if (data) {
+          claudeSettings.push({
+            filePath: fullSettingsPath,
+            scope: "project",
+            denyRules: extractClaudeDenyRules(data),
+          });
+        }
       } catch {
         // ignore
       }
     }
   }
-  const agentIgnoreContent = agentIgnoreChunks.join("\n");
+  if (options.includeUserConfigs) {
+    const userClaudeSettings = getClaudeCodeUserSettingsPath();
+    if (existsSync(userClaudeSettings)) {
+      try {
+        const raw = readFileSync(userClaudeSettings, "utf8");
+        const { data } = parseJsonc(raw);
+        if (data) {
+          claudeSettings.push({
+            filePath: userClaudeSettings,
+            scope: "user",
+            denyRules: extractClaudeDenyRules(data),
+          });
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
 
   // Helper to test if a file is tracked in git (completely offline check)
   const isTrackedByGit = (fullPath: string): boolean => {
@@ -338,8 +418,13 @@ export function discoverConfigFiles(
     envFiles,
     hasGitignore,
     gitignoreContent,
-    hasAgentIgnore,
-    agentIgnoreContent,
+    hasCursorIgnore,
+    cursorIgnoreContent,
+    hasClaudeIgnore,
+    claudeIgnorePath,
+    claudeSettings,
+    hasAgentIgnore: hasCursorIgnore,
+    agentIgnoreContent: cursorIgnoreContent,
     scannedFiles,
     parseErrors,
   };

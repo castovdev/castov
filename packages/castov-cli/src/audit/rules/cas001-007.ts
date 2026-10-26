@@ -2,8 +2,9 @@ import type { ParsedConfigFile, McpServerConfig, Finding } from "../types.js";
 import { detectSecrets, isSafeOrVariableReference, SENSITIVE_KEY_NAMES, maskSecret } from "../secrets.js";
 
 /**
- * Client-specific remediation messages (Requirement B):
+ * Client-specific remediation messages (Requirement B & Round 3 item 4):
  * - Assertive syntax recommendations ONLY where a live verbatim documentation quote proves the syntax.
+ * - For Claude Code, recommends "${KEY}" only (without ":-default" to avoid encouraging literal default secrets).
  * - Does NOT mix Cline with VS Code.
  * - Uses neutral guidance wherever upstream docs do not explicitly document variable interpolation syntax.
  */
@@ -31,7 +32,7 @@ export function getClientSpecificRemediation(clientName: string | undefined, fil
   }
 
   // 3. Claude Code (.mcp.json or ~/.claude.json)
-  // Verbatim Quote: "Claude Code supports environment variable expansion in .mcp.json files... Supported syntax ${VAR} : expands to the value of environment variable VAR ${VAR:-default} : expands to VAR if set, otherwise uses default"
+  // Verbatim Quote: "Claude Code supports environment variable expansion in .mcp.json files... Supported syntax ${VAR} : expands to the value of environment variable VAR"
   // Source: https://code.claude.com/docs/en/mcp (Fetched: 2026-10-26)
   if (
     normClient === "claude code" ||
@@ -40,7 +41,7 @@ export function getClientSpecificRemediation(clientName: string | undefined, fil
     normPath.endsWith("/.claude.json") ||
     normPath === ".claude.json"
   ) {
-    return `Use "\${${keyName}}" or "\${${keyName}:-default}" and keep the secret outside the file and outside git (Docs: https://code.claude.com/docs/en/mcp).`;
+    return `Use "\${${keyName}}" in Claude Code config (.mcp.json / ~/.claude.json) and keep the secret outside the file and outside git (Docs: https://code.claude.com/docs/en/mcp).`;
   }
 
   // 4. Neutral fallback for clients without verified inline variable interpolation syntax (Claude Desktop, Cline, Zed, etc.)
@@ -49,8 +50,9 @@ export function getClientSpecificRemediation(clientName: string | undefined, fil
 
 function sanitizeArgsForEvidence(args: string[]): string {
   return args
-    .map((a) => {
-      const m = detectSecrets(a);
+    .map((a, idx) => {
+      const prevContext = idx > 0 && String(args[idx - 1]).startsWith("-") ? String(args[idx - 1]) : undefined;
+      const m = detectSecrets(a, prevContext);
       if (m.length > 0) return m[0].masked;
       return a;
     })
@@ -75,7 +77,7 @@ export function runRulesCas001To007(configFile: ParsedConfigFile): Finding[] {
 }
 
 /**
- * CAS-001: Hardcoded Secret in Server Config
+ * CAS-001: Hardcoded Secret in Server Config (env, args with previous-arg context, headers, url)
  */
 function checkCas001(configFile: ParsedConfigFile, serverName: string, config: McpServerConfig, findings: Finding[]) {
   const filePath = configFile.filePath;
@@ -115,27 +117,58 @@ function checkCas001(configFile: ParsedConfigFile, serverName: string, config: M
           suggestedFix: getClientSpecificRemediation(clientName, filePath, k),
           file: filePath,
           serverName,
-          keyName: `env.${k}`,
+          keyName: `args_or_env.${k}`,
           evidenceMasked: `env.${k}=${maskSecret(v)}`,
         });
       }
     }
   }
 
-  // 2. Check command arguments
+  // 2. Check command arguments (Requirement 5: use preceding arg element as context for the next value, plus --key=value)
   if (Array.isArray(config.args)) {
     for (let i = 0; i < config.args.length; i++) {
       const arg = String(config.args[i]);
-      if (isSafeOrVariableReference(arg)) continue;
 
-      const matched = detectSecrets(arg);
+      // Case A: --flag=value or -k=value within single arg element
+      const eqIdx = arg.startsWith("-") ? arg.indexOf("=") : -1;
+      if (eqIdx > 0) {
+        const flagPart = arg.slice(0, eqIdx);
+        const valPart = arg.slice(eqIdx + 1);
+        if (!isSafeOrVariableReference(valPart, flagPart)) {
+          const matched = detectSecrets(valPart, flagPart);
+          if (matched.length > 0) {
+            findings.push({
+              ruleId: "CAS-001",
+              severity: matched[0].isKnownProvider ? "critical" : "high",
+              title: `Hardcoded secret in command argument (${flagPart})`,
+              whyItMatters: `Exposes ${matched[0].patternName} on CLI argument list, making it visible in system process tables and config files.`,
+              suggestedFix: getClientSpecificRemediation(clientName, filePath, "SECRET_ARG"),
+              file: filePath,
+              serverName,
+              keyName: `args[${i}]`,
+              evidenceMasked: `args[${i}]=${flagPart}=${matched[0].masked}`,
+            });
+          }
+        }
+        continue;
+      }
+
+      // Case B: Standalone arg, using preceding arg (if it is a flag like --api-key) as context
+      const prevArg = i > 0 ? String(config.args[i - 1]).trim() : "";
+      const prevContext = prevArg.startsWith("-") ? prevArg.replace(/^-+/, "") : undefined;
+
+      if (isSafeOrVariableReference(arg, prevContext)) continue;
+
+      const matched = detectSecrets(arg, prevContext);
       if (matched.length > 0) {
         findings.push({
           ruleId: "CAS-001",
-          severity: "critical",
-          title: `Hardcoded secret in command args`,
+          severity: matched[0].isKnownProvider ? "critical" : "high",
+          title: prevContext
+            ? `Hardcoded secret in command args after --${prevContext}`
+            : `Hardcoded secret in command args`,
           whyItMatters: `Exposes ${matched[0].patternName} on CLI argument list, making it visible in system process tables and config files.`,
-          suggestedFix: getClientSpecificRemediation(clientName, filePath, "SECRET_ARG"),
+          suggestedFix: getClientSpecificRemediation(clientName, filePath, prevContext ? prevContext.toUpperCase().replace(/[^A-Z0-9_]/g, "_") : "SECRET_ARG"),
           file: filePath,
           serverName,
           keyName: `args[${i}]`,
@@ -213,12 +246,12 @@ function checkCas002(filePath: string, serverName: string, config: McpServerConf
   const cmd = config.command?.toLowerCase() || "";
   const args = (config.args || []).map((a) => String(a));
 
-  const RUNNERS = new Set(["npx", "pnpm", "bunx", "uvx", "pipx"]);
+  const RUNNERS = new Set(["npx", "pnpm", "bunx", "uvx", "pipx", "dlx"]);
 
   if (RUNNERS.has(cmd)) {
     let pkgArg = "";
     for (const a of args) {
-      if (a === "-y" || a === "--yes" || a === "run" || a.startsWith("-")) continue;
+      if (a === "-y" || a === "--yes" || a === "run" || a === "dlx" || a.startsWith("-")) continue;
       pkgArg = a;
       break;
     }
@@ -249,7 +282,7 @@ function checkCas002(filePath: string, serverName: string, config: McpServerConf
       for (let i = runIdx + 1; i < args.length; i++) {
         const arg = args[i];
         if (arg.startsWith("-")) {
-          if (["-v", "-p", "-e", "--env", "--name"].includes(arg)) i++;
+          if (["-v", "--volume", "-p", "-e", "--env", "--name", "--network"].includes(arg)) i++;
           continue;
         }
         const isLatest = arg.endsWith(":latest");
@@ -285,14 +318,14 @@ function checkCas003(filePath: string, serverName: string, config: McpServerConf
   const SHELLS = new Set(["sh", "bash", "zsh", "cmd", "cmd.exe", "powershell", "powershell.exe", "pwsh"]);
 
   if (SHELLS.has(cmd)) {
-    const hasEvalFlag = args.some((a) => a === "-c" || a.toLowerCase() === "-command");
+    const hasEvalFlag = args.some((a) => a === "-c" || a.toLowerCase() === "-command" || a.toLowerCase() === "/c");
     if (hasEvalFlag) {
       findings.push({
         ruleId: "CAS-003",
         severity: "high",
         title: `Shell wrapper with embedded command execution (${cmd})`,
         whyItMatters: `Running tools through a shell command string introduces arbitrary command injection and shell escape vulnerabilities.`,
-        suggestedFix: `Invoke target binaries directly as "command" without shell wrappers (-c / -Command).`,
+        suggestedFix: `Invoke target binaries directly as "command" without shell wrappers (-c / -Command / /c).`,
         file: filePath,
         serverName,
         keyName: "command",
@@ -422,7 +455,7 @@ function checkCas005(filePath: string, serverName: string, config: McpServerConf
 }
 
 /**
- * CAS-006: Docker Container Risks
+ * CAS-006: Docker Container Risks (--privileged, docker.sock, root volume mount -v /:/, --network host)
  */
 function checkCas006(filePath: string, serverName: string, config: McpServerConfig, findings: Finding[]) {
   const cmd = (config.command || "").toLowerCase();
@@ -445,7 +478,7 @@ function checkCas006(filePath: string, serverName: string, config: McpServerConf
     });
   }
 
-  if (fullArgs.includes("/var/run/docker.sock")) {
+  if (fullArgs.includes("/var/run/docker.sock") || fullArgs.includes("docker.sock")) {
     findings.push({
       ruleId: "CAS-006",
       severity: "critical",
@@ -459,7 +492,7 @@ function checkCas006(filePath: string, serverName: string, config: McpServerConf
     });
   }
 
-  if (fullArgs.includes("-v /:/") || fullArgs.includes("--volume /:/")) {
+  if (fullArgs.includes("-v /:/") || fullArgs.includes("--volume /:/") || args.some((a) => /^\/:\/[^:\s]+/.test(a))) {
     findings.push({
       ruleId: "CAS-006",
       severity: "high",

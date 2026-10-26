@@ -82,8 +82,17 @@ export function runAudit(options: AuditOptions, toolVersion = "1.5.0"): { result
   }
 
   // 3. Run CAS-008 through CAS-016
-  // CAS-008: .env present without agent ignore mechanism (Medium)
-  const cas008Findings = checkCas008(discovery.envFiles, discovery.hasAgentIgnore, discovery.agentIgnoreContent);
+  // CAS-008: .env AI agent context protection (Cursor .cursorignore / Claude Code permissions.deny) & unrespected .claudeignore
+  const cas008Findings = checkCas008(
+    discovery.envFiles,
+    discovery.hasCursorIgnore,
+    discovery.cursorIgnoreContent,
+    {
+      hasClaudeIgnore: discovery.hasClaudeIgnore,
+      claudeIgnorePath: discovery.claudeIgnorePath,
+      claudeSettings: discovery.claudeSettings,
+    }
+  );
   for (const f of cas008Findings) {
     if (!ignoreSet.has("CAS-008")) rawFindings.push(f);
   }

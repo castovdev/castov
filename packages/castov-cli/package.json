@@ -55,6 +55,7 @@
   "files": [
     "dist",
     "README.md",
+    "RULES.md",
     "LICENSE"
   ],
   "engines": {

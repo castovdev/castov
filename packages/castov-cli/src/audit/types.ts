@@ -162,10 +162,10 @@ export const ALL_RULES_METADATA: Record<string, RuleDefinition> = {
   },
   "CAS-008": {
     id: "CAS-008",
-    title: ".env Present Without AI Agent Ignore Mechanism",
+    title: ".env Unprotected from AI Context or Unrespected .claudeignore",
     severity: "medium",
-    whyItMatters: "Plaintext .env files without an agent ignore file (.cursorignore, .claudeignore, .aiignore) can be indexed or read into LLM context.",
-    suggestedFix: "Add .env* to .cursorignore / .claudeignore to prevent AI coding agents from ingesting local secrets.",
+    whyItMatters: "Plaintext .env files without a verified agent block (Cursor .cursorignore or Claude Code permissions.deny in .claude/settings.json) can be read into LLM context. Note that .claudeignore is not respected by Claude Code.",
+    suggestedFix: "Add permissions.deny Read(./.env) / Read(./.env.*) in .claude/settings.json for Claude Code, add .env* to .cursorignore for Cursor, and keep secrets outside the project directory.",
     securitySeverity: 5.5,
   },
   "CAS-009": {

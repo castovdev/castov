@@ -1127,7 +1127,8 @@ async function main(argv: string[]): Promise<void> {
         if (err instanceof UsageError) throw err;
         const msg = err instanceof Error ? err.message : String(err);
         process.stderr.write(red(`castov audit internal error: ${msg}\n`));
-        process.exit(3);
+        process.exitCode = 3;
+        return;
       }
     }
 
@@ -1552,11 +1553,15 @@ function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", i
 
       const fatal = (mode: Mode, message: string) => {
         dead = true;
-        setTimeout(() => process.exit(1), 1000).unref();
+        process.exitCode = 1;
+        process.stdin.pause();
         sendRpc(
           { jsonrpc: "2.0", id: null, error: { code: -32700, message } },
           mode,
-          () => process.exit(1)
+          () => {
+            process.exitCode = 1;
+            process.stdin.destroy();
+          }
         );
       };
 
@@ -2112,5 +2117,5 @@ function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", i
 main(process.argv.slice(2)).catch((err: unknown) => {
   const msg = err instanceof Error ? err.message : String(err);
   process.stderr.write(red(`castov: ${msg}`) + "\n");
-  process.exit(err instanceof UsageError || (err as { code?: string })?.code?.startsWith("ERR_PARSE_ARGS") ? 2 : 1);
+  process.exitCode = err instanceof UsageError || (err as { code?: string })?.code?.startsWith("ERR_PARSE_ARGS") ? 2 : 1;
 });

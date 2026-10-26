@@ -2,11 +2,12 @@ import { existsSync } from "node:fs";
 import { relative, resolve, dirname } from "node:path";
 import { createHash } from "node:crypto";
 import type { Finding, ParsedConfigFile, AgentRuleFile, BaselineServerEntry, McpServerConfig } from "../types.js";
+import type { DiscoveredClaudeSettings } from "../discovery.js";
 import { detectSecrets, isSafeOrVariableReference } from "../secrets.js";
 
-/**
- * Helper to test if .env is matched in ignore file lines (.gitignore, .cursorignore, .claudeignore, etc.)
- */
+// Helper to test if an env file is matched in Cursor's verified .cursorignore file.
+// Verbatim Quote: "Control which directories and files Cursor can access using a .cursorignore file in your root directory... Environment files: **/.env , **/.env.*"
+// Source: https://cursor.com/docs/context/ignore-files (Fetched: 2026-10-26)
 export function checkIsEnvIgnored(fileName: string, ignoreText: string): boolean {
   if (!ignoreText) return false;
   const lines = ignoreText
@@ -20,12 +21,13 @@ export function checkIsEnvIgnored(fileName: string, ignoreText: string): boolean
       pattern === ".env*" ||
       pattern === "**/.env*" ||
       pattern === "**/.env" ||
+      pattern === "**/.env.*" ||
       pattern === "*.env" ||
       pattern === ".env.*"
     ) {
       return true;
     }
-    if (pattern === fileName || pattern === `/${fileName}` || pattern === `**/${fileName}`) {
+    if (pattern === fileName || pattern === `/${fileName}` || pattern === `**/${fileName}` || pattern === `./${fileName}`) {
       return true;
     }
   }
@@ -33,32 +35,100 @@ export function checkIsEnvIgnored(fileName: string, ignoreText: string): boolean
 }
 
 /**
- * CAS-008: .env present without a known AI agent ignore mechanism (.cursorignore, .claudeignore, .aiignore)
- * Severity: Medium
+ * Check if Claude Code `permissions.deny` rules in `.claude/settings.json` / `.claude/settings.local.json` / `~/.claude/settings.json`
+ * block reading the given `.env` file.
+ * Verbatim Quote: '"permissions" : { "allow" : [ "Bash(npm run lint)" , "Bash(npm run test *)" ], "deny" : [ "Read(./.env)" , "Read(./.env.*)" ] }'
+ * Source: https://code.claude.com/docs/en/settings (Fetched: 2026-10-26)
+ */
+export function checkIsEnvDeniedInClaudeSettings(
+  fileName: string,
+  claudeSettings: DiscoveredClaudeSettings[] = []
+): boolean {
+  for (const s of claudeSettings) {
+    for (const rawRule of s.denyRules) {
+      const m = /^Read\((.+)\)$/i.exec(rawRule.trim());
+      if (!m) continue;
+      const pat = m[1].trim().replace(/^\.\//, "");
+      if (
+        pat === ".env" ||
+        pat === ".env*" ||
+        pat === "**/.env" ||
+        pat === "**/.env*" ||
+        pat === fileName ||
+        pat === `**/${fileName}`
+      ) {
+        if (pat === ".env" && fileName !== ".env") continue;
+        return true;
+      }
+      if ((pat === ".env.*" || pat === "**/.env.*") && fileName.startsWith(".env.")) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+export interface Cas008Options {
+  hasClaudeIgnore?: boolean;
+  claudeIgnorePath?: string;
+  claudeSettings?: DiscoveredClaudeSettings[];
+}
+
+/**
+ * CAS-008: .env AI Agent Context Exposure & Unrespected .claudeignore
+ * - Claude Code does NOT respect `.claudeignore` (documented in official issues and absent from https://code.claude.com/docs/en/settings).
+ *   Instead, Claude Code requires `permissions.deny` (e.g. `Read(./.env)`, `Read(./.env.*)`) in `.claude/settings.json`.
+ *   If `.claudeignore` is present, emits a finding ("ملف تجاهل غير محترم من Claude Code (.claudeignore)").
+ * - For Cursor, `.cursorignore` is verified via https://cursor.com/docs/context/ignore-files.
+ * - Unverified ignore files (.aiignore, .windsurfignore, .copilotignore) are NOT relied upon.
+ * - Remediation explicitly recommends keeping secrets outside the project directory (e.g., OS keychain or external secret manager).
  */
 export function checkCas008(
   envFiles: { filePath: string; fileName: string }[],
-  hasAgentIgnore: boolean,
-  agentIgnoreContent: string
+  hasCursorIgnore: boolean,
+  cursorIgnoreContent: string,
+  options: Cas008Options = {}
 ): Finding[] {
   const findings: Finding[] = [];
+  const { hasClaudeIgnore = false, claudeIgnorePath, claudeSettings = [] } = options;
 
+  // 1. If .claudeignore is present, warn that Claude Code does not respect it
+  if (hasClaudeIgnore && claudeIgnorePath) {
+    findings.push({
+      ruleId: "CAS-008",
+      severity: "medium",
+      title: `ملف تجاهل غير محترم من Claude Code (.claudeignore)`,
+      whyItMatters: `Claude Code does not honor ".claudeignore" for blocking file reads. Relying on ".claudeignore" leaves ".env" and secret files accessible to the agent.`,
+      suggestedFix: `Configure "permissions.deny": ["Read(./.env)", "Read(./.env.*)"] in ".claude/settings.json" (or "~/.claude/settings.json") as documented at https://code.claude.com/docs/en/settings, and store sensitive secrets outside the project directory.`,
+      file: claudeIgnorePath,
+      keyName: ".claudeignore:unrespected",
+      evidenceMasked: `unrespected_ignore_file: .claudeignore`,
+    });
+  }
+
+  // 2. Check each non-template .env file for verified agent protection
   for (const env of envFiles) {
     if (env.fileName === ".env.example" || env.fileName === ".env.template" || env.fileName === ".env.sample") {
       continue;
     }
 
-    const isIgnoredByAgent = hasAgentIgnore && checkIsEnvIgnored(env.fileName, agentIgnoreContent);
-    if (!isIgnoredByAgent) {
+    const isProtectedByCursorIgnore = hasCursorIgnore && checkIsEnvIgnored(env.fileName, cursorIgnoreContent);
+    const isProtectedByClaudeDeny = checkIsEnvDeniedInClaudeSettings(env.fileName, claudeSettings);
+
+    // Protected only if covered by Cursor's verified .cursorignore OR Claude Code's verified permissions.deny
+    // (Unless .claudeignore is present without Claude Code permissions.deny, which is NEVER sufficient protection)
+    const isProtected = (isProtectedByCursorIgnore || isProtectedByClaudeDeny) && !(hasClaudeIgnore && !isProtectedByClaudeDeny);
+
+    if (!isProtected) {
       findings.push({
         ruleId: "CAS-008",
         severity: "medium",
-        title: `Environment file "${env.fileName}" is not excluded by an AI agent ignore file`,
-        whyItMatters: `Plaintext "${env.fileName}" exists in the workspace without a matching rule in .cursorignore, .claudeignore, or .aiignore, allowing AI coding agents to index or read local secrets into prompt context.`,
-        suggestedFix: `Create a .cursorignore or .claudeignore file and add ".env*" to block AI agents from reading environment files.`,
+        title: `Environment file "${env.fileName}" is not protected from AI agent context ingestion`,
+        whyItMatters: `Plaintext "${env.fileName}" exists in the workspace without a verified agent access block (Cursor ".cursorignore" or Claude Code "permissions.deny" in ".claude/settings.json"). Note that ".claudeignore" is not respected by Claude Code.`,
+        suggestedFix: `For Claude Code, add "permissions": { "deny": ["Read(./.env)", "Read(./.env.*)"] } in ".claude/settings.json" (https://code.claude.com/docs/en/settings). For Cursor, add "${env.fileName}" to ".cursorignore" (https://cursor.com/docs/context/ignore-files). Best practice: keep real secrets outside the project directory entirely.`,
         file: env.filePath,
         keyName: env.fileName,
-        evidenceMasked: `agent_ignore_missing: ${env.fileName}`,
+        evidenceMasked: `agent_context_unprotected: ${env.fileName}`,
       });
     }
   }
@@ -128,7 +198,7 @@ export function checkCas009(
             severity: "high",
             title: `Hardcoded secret in ${env.fileName} (${k})`,
             whyItMatters: `File "${env.fileName}" contains a literal credential (${secrets[0].patternName}).`,
-            suggestedFix: `Keep literal secrets out of tracked or unignored files and replace with placeholders in templates.`,
+            suggestedFix: `Keep literal secrets out of tracked or unignored files, store secrets outside the project directory, and replace with placeholders in templates.`,
             file: env.filePath,
             line: i + 1,
             keyName: k,
@@ -193,7 +263,6 @@ export function normalizeUrlWithoutSecrets(rawUrl?: string): string {
     const querySkeleton = queryKeys.length > 0 ? `?${queryKeys.join("&")}` : "";
     return `${parsed.protocol}//${parsed.host}${parsed.pathname}${querySkeleton}`;
   } catch {
-    // If not a valid URL, strip anything after '?' and mask any detected secret
     const base = trimmed.split("?")[0];
     const matched = detectSecrets(base);
     if (matched.length > 0) return "<SECRET_URL>";
@@ -216,9 +285,11 @@ export function computeNormalizedServerEntry(
   const scope = cfg.scope;
   const command = (server.command || "").trim();
 
-  const normalizedArgs = (server.args || []).map((arg) => {
-    const s = String(arg);
-    if (!isSafeOrVariableReference(s) && detectSecrets(s).length > 0) {
+  const rawArgs = (server.args || []).map((a) => String(a));
+  const normalizedArgs = rawArgs.map((s, idx) => {
+    const prevArg = idx > 0 ? rawArgs[idx - 1].trim() : "";
+    const prevContext = prevArg.startsWith("-") ? prevArg.replace(/^-+/, "") : undefined;
+    if (!isSafeOrVariableReference(s, prevContext) && detectSecrets(s, prevContext).length > 0) {
       return "<SECRET>";
     }
     return s;
@@ -293,7 +364,6 @@ export function checkCas011(
   const findings: Finding[] = [];
   if (!baselineServers) return findings;
 
-  // 1. Check current servers against baseline (detect modified or newly added servers)
   for (const [key, curr] of Object.entries(currentServers)) {
     const prev = baselineServers[key];
     const absFile = resolve(targetDir, curr.file);
@@ -328,7 +398,6 @@ export function checkCas011(
     }
   }
 
-  // 2. Check for servers present in baseline that were removed
   for (const [key, prev] of Object.entries(baselineServers)) {
     if (!currentServers[key]) {
       const absFile = resolve(targetDir, prev.file);
@@ -505,7 +574,6 @@ export function detectHiddenUnicode(text: string): { type: string; codePoint: st
     const cp = text.codePointAt(i)!;
     if (cp > 0xffff) i++; // advance past surrogate pair
 
-    // Zero-width characters
     if ((cp >= 0x200b && cp <= 0x200d) || cp === 0x2060 || cp === 0xfeff) {
       return {
         type: "Zero-Width Hidden Character",
@@ -513,7 +581,6 @@ export function detectHiddenUnicode(text: string): { type: string; codePoint: st
       };
     }
 
-    // Bidi control characters
     if ((cp >= 0x202a && cp <= 0x202e) || (cp >= 0x2066 && cp <= 0x2069)) {
       return {
         type: "Bidirectional (Bidi) Override/Isolate Character",
@@ -521,7 +588,6 @@ export function detectHiddenUnicode(text: string): { type: string; codePoint: st
       };
     }
 
-    // Unicode Tag characters (U+E0000 .. U+E007F)
     if (cp >= 0xe0000 && cp <= 0xe007f) {
       return {
         type: "Unicode Tag Smuggling Character",

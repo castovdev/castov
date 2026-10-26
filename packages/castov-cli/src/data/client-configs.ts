@@ -55,6 +55,36 @@ export const PROJECT_MCP_CONFIG_PATHS = [
 ];
 
 /**
+ * Verified Claude Code Settings paths for checking `permissions.deny` rules (CAS-008).
+ * Verbatim Quote:
+ *   - "Claude Code reads settings from JSON settings files such as ~/.claude/settings.json ."
+ *   - "Shared project .claude/settings.json Everyone working in the folder that contains it."
+ *   - "Project local .claude/settings.local.json You, in this one project only."
+ *   - '"permissions" : { "allow" : [ "Bash(npm run lint)" , "Bash(npm run test *)" ], "deny" : [ "Read(./.env)" , "Read(./.env.*)" ] }'
+ * Source: https://code.claude.com/docs/en/settings
+ * Fetched: 2026-10-26
+ */
+export const CLAUDE_CODE_PROJECT_SETTINGS_PATHS = [
+  ".claude/settings.json",
+  ".claude/settings.local.json",
+];
+
+export function getClaudeCodeUserSettingsPath(home = homedir()): string {
+  // Verbatim Quote: "to stop it reading .env files, add this to ~/.claude/settings.json"
+  // Source: https://code.claude.com/docs/en/settings (Fetched: 2026-10-26)
+  return join(home, ".claude", "settings.json");
+}
+
+// Verified AI Agent Ignore File for Cursor (.cursorignore).
+// Verbatim Quote: "Control which directories and files Cursor can access using a .cursorignore file in your root directory. Cursor blocks access to files listed in .cursorignore from: Code accessible by Agent and Tab... Environment files: **/.env , **/.env.*"
+// Source: https://cursor.com/docs/context/ignore-files
+// Fetched: 2026-10-26
+// Note: .claudeignore is NOT respected by Claude Code (documented in official issues and absent from https://code.claude.com/docs/en/settings);
+// Claude Code uses `permissions.deny` in `.claude/settings.json` instead.
+// Other ignore files (.aiignore, .windsurfignore, .copilotignore) are TODO-VERIFY and NOT relied upon as verified protection.
+export const VERIFIED_CURSOR_IGNORE_FILE = ".cursorignore";
+
+/**
  * Resolves user-level (global) configuration files based on current operating system.
  * Only included when the user explicitly passes --include-user-configs.
  */
@@ -139,7 +169,7 @@ export function getUserMcpConfigPaths(platform: NodeJS.Platform = process.platfo
 
   // 4. Cline CLI (~/.cline/data/settings/cline_mcp_settings.json)
   // Verbatim Quote: "CLI: ~/.cline/data/settings/cline_mcp_settings.json (override with the CLINE_MCP_SETTINGS_PATH env var)"
-  // Source: https://docs.cline.bot/mcp/mcp-overview
+  // Source: https://docs.cline.bot/mcp/configuring-mcp-servers
   // Fetched: 2026-10-26
   configs.push({
     clientName: "Cline",
@@ -148,15 +178,14 @@ export function getUserMcpConfigPaths(platform: NodeJS.Platform = process.platfo
     pathPattern: join(home, ".cline", "data", "settings", "cline_mcp_settings.json"),
     format: "json",
     verbatimQuote: "CLI: ~/.cline/data/settings/cline_mcp_settings.json (override with the CLINE_MCP_SETTINGS_PATH env var)",
-    sourceDoc: "https://docs.cline.bot/mcp/mcp-overview",
+    sourceDoc: "https://docs.cline.bot/mcp/configuring-mcp-servers",
     verifiedAt: "2026-10-26",
     isVerified: true,
   });
 
-  // 5. Cline IDE Extension (macOS, Windows, Linux)
-  // Verbatim Quote: "macOS: ~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json Windows: %APPDATA%/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json Linux: ~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json"
-  // Source: https://github.com/cline/linear-mcp
-  // Fetched: 2026-10-26
+  // 5. Cline IDE Extension (TODO-VERIFY: Official Cline docs at https://docs.cline.bot/mcp/configuring-mcp-servers
+  // only document opening cline_mcp_settings.json via the IDE UI ("click Configure MCP Servers") and do not state
+  // the OS-specific globalStorage filesystem paths verbatim. Marked isVerified: false per TODO-VERIFY policy.)
   if (platform === "darwin") {
     configs.push({
       clientName: "Cline",
@@ -164,10 +193,10 @@ export function getUserMcpConfigPaths(platform: NodeJS.Platform = process.platfo
       platform: "darwin",
       pathPattern: join(home, "Library", "Application Support", "Code", "User", "globalStorage", "saoudrizwan.claude-dev", "settings", "cline_mcp_settings.json"),
       format: "json",
-      verbatimQuote: "macOS: ~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json",
-      sourceDoc: "https://github.com/cline/linear-mcp",
+      verbatimQuote: "TODO-VERIFY: Official docs at https://docs.cline.bot/mcp/configuring-mcp-servers only describe UI button ('Configure MCP Servers'), not the globalStorage path",
+      sourceDoc: "https://docs.cline.bot/mcp/configuring-mcp-servers",
       verifiedAt: "2026-10-26",
-      isVerified: true,
+      isVerified: false,
     });
   } else if (platform === "win32") {
     const appData = process.env.APPDATA || join(home, "AppData", "Roaming");
@@ -177,10 +206,10 @@ export function getUserMcpConfigPaths(platform: NodeJS.Platform = process.platfo
       platform: "win32",
       pathPattern: join(appData, "Code", "User", "globalStorage", "saoudrizwan.claude-dev", "settings", "cline_mcp_settings.json"),
       format: "json",
-      verbatimQuote: "Windows: %APPDATA%/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json",
-      sourceDoc: "https://github.com/cline/linear-mcp",
+      verbatimQuote: "TODO-VERIFY: Official docs at https://docs.cline.bot/mcp/configuring-mcp-servers only describe UI button ('Configure MCP Servers'), not the globalStorage path",
+      sourceDoc: "https://docs.cline.bot/mcp/configuring-mcp-servers",
       verifiedAt: "2026-10-26",
-      isVerified: true,
+      isVerified: false,
     });
   } else if (platform === "linux") {
     configs.push({
@@ -189,10 +218,10 @@ export function getUserMcpConfigPaths(platform: NodeJS.Platform = process.platfo
       platform: "linux",
       pathPattern: join(home, ".config", "Code", "User", "globalStorage", "saoudrizwan.claude-dev", "settings", "cline_mcp_settings.json"),
       format: "json",
-      verbatimQuote: "Linux: ~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json",
-      sourceDoc: "https://github.com/cline/linear-mcp",
+      verbatimQuote: "TODO-VERIFY: Official docs at https://docs.cline.bot/mcp/configuring-mcp-servers only describe UI button ('Configure MCP Servers'), not the globalStorage path",
+      sourceDoc: "https://docs.cline.bot/mcp/configuring-mcp-servers",
       verifiedAt: "2026-10-26",
-      isVerified: true,
+      isVerified: false,
     });
   }
 
