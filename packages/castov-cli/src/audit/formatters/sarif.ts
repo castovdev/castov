@@ -126,7 +126,7 @@ export function formatSarifOutput(result: AuditResult): string {
           driver: {
             name: "Castov",
             version: result.toolVersion,
-            informationUri: "https://www.castov.com",
+            informationUri: "https://castov.com",
             rules: rulesList,
           },
         },

@@ -174,7 +174,7 @@ export const VS_COMPARISONS: VsComparison[] = [
       },
       {
         name: "Share .env Configs with Zero-Knowledge Encryption",
-        text: "Open `https://www.castov.com/env-vault` to encrypt `.env` blocks in-browser via WebCrypto AES-256-GCM.",
+        text: "Open `https://castov.com/env-vault` to encrypt `.env` blocks in-browser via WebCrypto AES-256-GCM.",
       },
     ],
     faqs: [
@@ -253,7 +253,7 @@ export const VS_COMPARISONS: VsComparison[] = [
       },
       {
         name: "Use the Offline Browser Inspector",
-        text: "Bookmark `https://www.castov.com/jwt-decoder` for instant client-side inspection with automatic `iat`/`exp` date conversion.",
+        text: "Bookmark `https://castov.com/jwt-decoder` for instant client-side inspection with automatic `iat`/`exp` date conversion.",
       },
     ],
     faqs: [
@@ -279,7 +279,7 @@ export const VS_COMPARISONS: VsComparison[] = [
       "Crontab.guru is a classic minimalist web tool for 5-field cron syntax. Castov goes further by adding explicit IANA timezone simulation (`America/New_York`, `UTC`, `Asia/Tokyo`), next-5 execution ISO-8601 timestamps, terminal CLI execution (`npx castov cron`), and native MCP agent verification (`castov_cron`).",
     castovCommand: 'npx castov cron "*/15 * * * *" --json',
     mcpCommand: "npx -y castov@latest mcp",
-    castovToolUrl: "/cron-expression-generator",
+    castovToolUrl: "/cron-generator",
     castovToolName: "Timezone-Aware Cron Generator & Explainer",
     rows: [
       {
@@ -326,7 +326,7 @@ export const VS_COMPARISONS: VsComparison[] = [
       },
       {
         name: "Explore Interactive Cron Reference Pages",
-        text: "Use `https://www.castov.com/cron` and `https://www.castov.com/cron-expression-generator` to build and share schedules.",
+        text: "Use `https://castov.com/cron` and `https://castov.com/cron-generator` to build and share schedules.",
       },
     ],
     faqs: [
@@ -394,7 +394,7 @@ export const VS_COMPARISONS: VsComparison[] = [
       },
       {
         name: "Test All 10 Tools in the Browser Playground",
-        text: "Visit `https://www.castov.com/mcp` to inspect live JSON-RPC 2.0 requests and responses for all 10 tools.",
+        text: "Visit `https://castov.com/mcp` to inspect live JSON-RPC 2.0 requests and responses for all 10 tools.",
       },
       {
         name: "Use the Same Engine in Your Terminal",

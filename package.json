@@ -3,9 +3,9 @@
   "version": "1.5.0",
   "private": true,
   "license": "MIT",
-  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "author": "Abdelmalik Benidir / Castov <https://castov.com>",
   "description": "Castov — Developer Tools Platform with 61 Browser Tools, Local CLI & Glama Grade A MCP Server (No Behavioral Telemetry)",
-  "homepage": "https://www.castov.com",
+  "homepage": "https://castov.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/castovdev/castov.git"

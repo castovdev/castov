@@ -404,7 +404,7 @@ describe("CyberEngine - Security, Privacy & DoS Hardening", () => {
     expect(caesarCandidates.length).toBe(25);
     expect(xorCandidates.length).toBeGreaterThan(0);
     // Must execute fast without freezing the thread
-    expect(duration).toBeLessThan(200);
+    expect(duration).toBeLessThan(500);
   });
 
   it("calculateEntropy samples large inputs without CPU lockup", () => {

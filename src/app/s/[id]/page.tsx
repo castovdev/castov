@@ -12,8 +12,6 @@ import {
   Lock,
   ArrowRight,
   AlertTriangle,
-  RefreshCw,
-  Eye,
   Key,
 } from "lucide-react";
 import { decryptSharedSecret } from "@/lib/secret-crypto";

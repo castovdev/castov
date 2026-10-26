@@ -92,7 +92,9 @@ writeFileSync(
 process.on("exit", () => {
   try {
     rmSync(RUNTIME_VULN_DIR, { recursive: true, force: true });
-  } catch {}
+  } catch {
+    // Ignore cleanup errors on exit
+  }
 });
 
 const run = (args, cwd = process.cwd()) =>

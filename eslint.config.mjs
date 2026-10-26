@@ -5,15 +5,18 @@ import globals from 'globals';
 const eslintConfig = [
   {
     ignores: [
-      'node_modules/**',
-      '.next/**',
-      'dist/**',
-      'packages/*/dist/**',
-      'build/**',
-      'out/**',
-      'coverage/**',
-      '*.tsbuildinfo',
+      '**/node_modules/**',
+      '**/.next/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/out/**',
+      '**/coverage/**',
+      '**/*.tsbuildinfo',
       'next-env.d.ts',
+      'temp/**',
+      'temp2/**',
+      'castov-vscode/**',
+      'script.js',
     ],
   },
   js.configs.recommended,
@@ -39,6 +42,8 @@ const eslintConfig = [
     rules: {
       'no-undef': 'off',
       'no-unused-vars': 'off',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/purity': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Terminal, Copy, Check, ArrowRight, Code2 } from "lucide-react";
+import { Terminal, Copy, Check } from "lucide-react";
 
 type TargetLang = "javascript" | "python" | "go" | "rust";
 

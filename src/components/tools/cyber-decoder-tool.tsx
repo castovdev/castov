@@ -16,13 +16,9 @@ import {
   Check,
   Search,
   Activity,
-  Binary,
   Shield,
   FileCode,
   Sliders,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
   Info,
   AlertTriangle,
   X,
@@ -42,9 +38,7 @@ import {
   PRESET_RECIPES,
   SAMPLE_INPUTS,
   type RecipeStep,
-  type OperationDef,
   type OperationId,
-  type MagicDetection,
   type BruteForceCandidate,
 } from "@/lib/cyber-engine";
 

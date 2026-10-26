@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   ShieldAlert,
   ArrowRight,
-  ExternalLink,
   Code2,
   Terminal,
   Check,

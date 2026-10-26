@@ -57,7 +57,7 @@ describe("Sitemap Integrity & Verification", () => {
     for (const s of sitemaps) {
       expect(s).toBeDefined();
       expect(s!.startsWith(SITE.url)).toBe(true);
-      expect(s!).toMatch(/^https:\/\/www\.castov\.com\/sitemap.*\.xml$/);
+      expect(s!).toMatch(/^https:\/\/castov\.com\/sitemap.*\.xml$/);
     }
   });
 

@@ -50,7 +50,7 @@ const SCHEMA_JSON_LD = {
         { "@type": "WebPage", "name": "Code Converters", "url": `${SITE.url}/convert` },
         { "@type": "WebPage", "name": "Regex Patterns Lab", "url": `${SITE.url}/regex-patterns` },
         { "@type": "WebPage", "name": "Error Fix Encyclopedia", "url": `${SITE.url}/error-fixes` },
-        { "@type": "TechPulseRadar", "name": "Tech Pulse Radar", "url": `${SITE.url}/tech-trends` },
+        { "@type": "WebPage", "name": "Tech Pulse Radar", "url": `${SITE.url}/tech-trends` },
         { "@type": "WebPage", "name": "AI Developer Hub", "url": `${SITE.url}/ai` },
         { "@type": "WebPage", "name": "Timestamps & Timezones", "url": `${SITE.url}/timestamps` },
         { "@type": "WebPage", "name": "Developer Guides", "url": `${SITE.url}/guides` }

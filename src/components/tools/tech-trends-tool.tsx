@@ -28,6 +28,7 @@ import {
   TechTrendsResponse,
   TrendItem,
 } from "@/lib/tech-trends-types";
+import { getTechTrendTopic } from "@/lib/tech-trends-registry";
 import {
   FALLBACK_GITHUB_REPOS,
   FALLBACK_HACKER_NEWS,
@@ -312,13 +313,15 @@ export function TechTrendsTool() {
                     {count}
                   </span>
                 </button>
-                <a
-                  href={`/tech-trends/${encodeURIComponent(keyword.toLowerCase())}`}
-                  title={`Open dedicated #${keyword} trend radar page`}
-                  className="px-2 py-1 text-[10px] font-mono text-accent hover:bg-hover border-l border-line no-underline"
-                >
-                  ↗
-                </a>
+                {getTechTrendTopic(keyword) && (
+                  <a
+                    href={`/tech-trends/${encodeURIComponent(keyword.toLowerCase())}`}
+                    title={`Open dedicated #${keyword} trend radar page`}
+                    className="px-2 py-1 text-[10px] font-mono text-accent hover:bg-hover border-l border-line no-underline"
+                  >
+                    ↗
+                  </a>
+                )}
               </div>
             );
           })}

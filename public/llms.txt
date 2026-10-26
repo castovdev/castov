@@ -1,6 +1,6 @@
 # Castov — AI & LLM Technical Reference (llms.txt)
 
-> Castov (https://www.castov.com) is a developer-tools and DevSecOps platform built for software developers, DevOps engineers, AI coding-agent users, MCP clients, CLI users, and VS Code users. The platform provides browser-based interactive developer tools, local Model Context Protocol (MCP) tools, local terminal CLI utilities, a TypeScript SDK, a VS Code extension, developer error-fix guides, and technical reference registries.
+> Castov (https://castov.com) is a developer-tools and DevSecOps platform built for software developers, DevOps engineers, AI coding-agent users, MCP clients, CLI users, and VS Code users. The platform provides browser-based interactive developer tools, local Model Context Protocol (MCP) tools, local terminal CLI utilities, a TypeScript SDK, a VS Code extension, developer error-fix guides, and technical reference registries.
 
 ---
 
@@ -41,24 +41,24 @@ Experimental Labs are included in the browser-tool total only when confirmed by 
 
 ## Primary URLs
 
-- Homepage: https://www.castov.com/
-- Browser tools directory: https://www.castov.com/tools
-- MCP documentation: https://www.castov.com/mcp
-- Developer hub: https://www.castov.com/developer
-- CLI documentation: https://www.castov.com/cli
-- VS Code Extension: https://www.castov.com/extension
-- Privacy Policy: https://www.castov.com/privacy
-- Terms of Use: https://www.castov.com/terms
-- P2P Ghost Tunnel: https://www.castov.com/p2p-ghost-tunnel
-- Developer Canvas: https://www.castov.com/canvas
-- Env Vault: https://www.castov.com/env-vault
-- Error-fix guides: https://www.castov.com/error-fixes
-- Developer guides: https://www.castov.com/guides
-- Ports reference: https://www.castov.com/ports
-- CIDR reference: https://www.castov.com/cidr
-- Chmod reference: https://www.castov.com/chmod
-- HTTP status reference: https://www.castov.com/http-status
-- Sitemap: https://www.castov.com/sitemap.xml
+- Homepage: https://castov.com/
+- Browser tools directory: https://castov.com/tools
+- MCP documentation: https://castov.com/mcp
+- Developer hub: https://castov.com/developer
+- CLI documentation: https://castov.com/cli
+- VS Code Extension: https://castov.com/extension
+- Privacy Policy: https://castov.com/privacy
+- Terms of Use: https://castov.com/terms
+- P2P Ghost Tunnel: https://castov.com/p2p-ghost-tunnel
+- Developer Canvas: https://castov.com/canvas
+- Env Vault: https://castov.com/env-vault
+- Error-fix guides: https://castov.com/error-fixes
+- Developer guides: https://castov.com/guides
+- Ports reference: https://castov.com/ports
+- CIDR reference: https://castov.com/cidr
+- Chmod reference: https://castov.com/chmod
+- HTTP status reference: https://castov.com/http-status
+- Sitemap: https://castov.com/sitemap.xml
 
 ---
 
@@ -82,34 +82,34 @@ Developer Canvas synchronizes workflow data directly between browser peers using
 ## Browser Tool Categories
 
 ### Time and Dates
-- Unix Timestamp Converter: https://www.castov.com/unix-timestamp-converter
-- Timezone Converter: https://www.castov.com/timezone-converter
-- World Clock: https://www.castov.com/world-clock
-- Date Difference Calculator: https://www.castov.com/date-difference
+- Unix Timestamp Converter: https://castov.com/unix-timestamp-converter
+- Timezone Converter: https://castov.com/timezone-converter
+- World Clock: https://castov.com/world-clock
+- Date Difference Calculator: https://castov.com/date-difference
 
 ### Developer Utilities
-- JSON Formatter and Validator: https://www.castov.com/json-formatter
-- JWT Decoder: https://www.castov.com/jwt-decoder
-- UUID Generator: https://www.castov.com/uuid-generator
-- Base64 Encoder and Decoder: https://www.castov.com/base64-encoder-decoder
-- Diff Checker: https://www.castov.com/diff-checker
-- Cron Generator: https://www.castov.com/cron-generator
+- JSON Formatter and Validator: https://castov.com/json-formatter
+- JWT Decoder: https://castov.com/jwt-decoder
+- UUID Generator: https://castov.com/uuid-generator
+- Base64 Encoder and Decoder: https://castov.com/base64-encoder-decoder
+- Diff Checker: https://castov.com/diff-checker
+- Cron Generator: https://castov.com/cron-generator
 
 ---
 
 ## Experimental Labs
 
 The following 10 experimental tools are included within the 61 browser tools total:
-- P2P Ghost Tunnel: https://www.castov.com/p2p-ghost-tunnel
-- Developer Canvas: https://www.castov.com/canvas
-- Env Vault: https://www.castov.com/env-vault
-- Quantum Simulator: https://www.castov.com/quantum
-- NexusGrid: https://www.castov.com/nexus-grid
-- Fetch Mock Generator: https://www.castov.com/fetch-mock-generator
-- Steganography Env Vault: https://www.castov.com/steganography-env-vault
-- 3D JSON Galaxy: https://www.castov.com/3d-json-galaxy
-- Regex Genetic Evolution: https://www.castov.com/regex-genetic-evolution
-- AST Conflict Telepathy: https://www.castov.com/ast-conflict-telepathy
+- P2P Ghost Tunnel: https://castov.com/p2p-ghost-tunnel
+- Developer Canvas: https://castov.com/canvas
+- Env Vault: https://castov.com/env-vault
+- Quantum Simulator: https://castov.com/quantum
+- NexusGrid: https://castov.com/nexus-grid
+- Fetch Mock Generator: https://castov.com/fetch-mock-generator
+- Steganography Env Vault: https://castov.com/steganography-env-vault
+- 3D JSON Galaxy: https://castov.com/3d-json-galaxy
+- Regex Genetic Evolution: https://castov.com/regex-genetic-evolution
+- AST Conflict Telepathy: https://castov.com/ast-conflict-telepathy
 
 ---
 
@@ -143,12 +143,12 @@ Castov CLI is a local terminal toolkit with no Castov cloud execution during nor
 - **CLI Version**: v1.4.0
 - **CLI Package**: https://www.npmjs.com/package/castov
 - **CLI Install Command**: `npm install -g castov` or run directly with `npx castov`
-- **CLI Documentation**: https://www.castov.com/cli
+- **CLI Documentation**: https://castov.com/cli
 - **SDK Version**: v1.0.0
 - **SDK Package**: https://www.npmjs.com/package/castov-sdk
 - **SDK Install Command**: `npm install castov-sdk`
 - **VS Code Extension Version**: v0.1.4
-- **VS Code Extension Documentation**: https://www.castov.com/extension
+- **VS Code Extension Documentation**: https://castov.com/extension
 
 ---
 
@@ -156,12 +156,12 @@ Castov CLI is a local terminal toolkit with no Castov cloud execution during nor
 
 Error-fix guides are interactive documentation pages and are not additional browser tools. Castov provides 69 interactive guides covering framework hydration mismatches, network/CORS errors, database connection limits, and container binding issues.
 
-- Error-fix guides: https://www.castov.com/error-fixes
-- Ports registry: https://www.castov.com/ports
-- CIDR subnet reference: https://www.castov.com/cidr
-- Chmod permissions reference: https://www.castov.com/chmod
-- HTTP status codes reference: https://www.castov.com/http-status
-- Developer guides: https://www.castov.com/guides
+- Error-fix guides: https://castov.com/error-fixes
+- Ports registry: https://castov.com/ports
+- CIDR subnet reference: https://castov.com/cidr
+- Chmod permissions reference: https://castov.com/chmod
+- HTTP status codes reference: https://castov.com/http-status
+- Developer guides: https://castov.com/guides
 
 ---
 
@@ -181,15 +181,15 @@ Error-fix guides are interactive documentation pages and are not additional brow
 
 ## Canonical Sources
 
-- Browser tool count: https://www.castov.com/tools
-- MCP capabilities and tool list: https://www.castov.com/mcp
-- Developer products and versions: https://www.castov.com/developer
-- Privacy and data handling: https://www.castov.com/privacy
-- P2P Ghost Tunnel behavior: https://www.castov.com/p2p-ghost-tunnel
-- Developer Canvas behavior: https://www.castov.com/canvas
-- Env Vault behavior: https://www.castov.com/env-vault
-- Error-fix content: https://www.castov.com/error-fixes
-- Full URL discovery: https://www.castov.com/sitemap.xml
+- Browser tool count: https://castov.com/tools
+- MCP capabilities and tool list: https://castov.com/mcp
+- Developer products and versions: https://castov.com/developer
+- Privacy and data handling: https://castov.com/privacy
+- P2P Ghost Tunnel behavior: https://castov.com/p2p-ghost-tunnel
+- Developer Canvas behavior: https://castov.com/canvas
+- Env Vault behavior: https://castov.com/env-vault
+- Error-fix content: https://castov.com/error-fixes
+- Full URL discovery: https://castov.com/sitemap.xml
 
 ---
 

@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { clearInMemoryPrivateKey } from "@/lib/team-key-session";
 import type { User } from "@supabase/supabase-js";
 import { getTool, type ToolSlug } from "@/content/tools";
 import {
@@ -393,6 +394,7 @@ function AccountDashboard() {
 
   // Actions
   const handleSignOut = async () => {
+    if (user?.id) clearInMemoryPrivateKey(user.id);
     await supabase.auth.signOut();
     router.push("/");
     router.refresh();
@@ -471,7 +473,7 @@ function AccountDashboard() {
   };
 
   // 2. Castov CLI Token Handlers
-  const handleGenerateCliToken = () => {
+  const handleGenerateCliToken = async () => {
     const array = new Uint8Array(16);
     if (typeof crypto !== "undefined" && crypto.getRandomValues) {
       crypto.getRandomValues(array);
@@ -486,9 +488,50 @@ function AccountDashboard() {
     };
     setCliTokenData(data);
     localStorage.setItem(CLI_TOKEN_KEY, JSON.stringify(data));
+
+    // Persist SHA-256 hash to Supabase user_api_keys if authenticated
+    if (user && typeof crypto !== "undefined" && crypto.subtle) {
+      try {
+        const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+        const keyHash = Array.from(new Uint8Array(hashBuf))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+
+        await supabase.from("user_api_keys").insert([
+          {
+            user_id: user.id,
+            key_hash: keyHash,
+            key_prefix: token.slice(0, 16),
+            name: "Personal Access Token",
+            scopes: ["vault:read", "vault:write"],
+            revoked: false,
+          },
+        ]);
+      } catch {
+        // Table not yet migrated or offline
+      }
+    }
   };
 
-  const handleRevokeCliToken = () => {
+  const handleRevokeCliToken = async () => {
+    if (cliTokenData?.token && user && typeof crypto !== "undefined" && crypto.subtle) {
+      try {
+        const hashBuf = await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(cliTokenData.token)
+        );
+        const keyHash = Array.from(new Uint8Array(hashBuf))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+
+        await supabase
+          .from("user_api_keys")
+          .update({ revoked: true, revoked_at: new Date().toISOString() })
+          .eq("key_hash", keyHash);
+      } catch {
+        // ignore
+      }
+    }
     setCliTokenData(null);
     localStorage.removeItem(CLI_TOKEN_KEY);
   };

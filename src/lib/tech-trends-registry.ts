@@ -45,7 +45,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "llm",
     tagline: "Open-weights inference engines, quantization, fine-tuning, and local LLM tooling",
     summary: "Live pulse on open-weights language models, GGUF/WebGPU inference engines, tokenizers, and structured output pipelines.",
-    relatedToolPath: "/ai-token-counter",
+    relatedToolPath: "/token-visualizer",
     relatedToolLabel: "LLM Token & Cost Counter",
   },
   {
@@ -81,7 +81,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "rust",
     tagline: "Memory-safe systems tooling, high-speed compilers, CLI utilities, and async runtimes",
     summary: "Explore the fastest-rising Rust crates, Cargo tools, Tokio microservices, and systems engineering debates updated hourly.",
-    relatedToolPath: "/convert/json-to-rust-serde",
+    relatedToolPath: "/convert/json-to-rust",
     relatedToolLabel: "JSON to Rust Serde Converter",
   },
   {
@@ -105,7 +105,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "python",
     tagline: "AI data pipelines, high-speed Rust-backed Python tooling (uv/Ruff), and async APIs",
     summary: "Live feed of viral Python repositories, FastAPI architectures, Pydantic models, and machine learning utilities.",
-    relatedToolPath: "/convert/json-to-pydantic",
+    relatedToolPath: "/convert/json-to-python-pydantic",
     relatedToolLabel: "JSON to Python Pydantic",
   },
   {
@@ -129,7 +129,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "zig",
     tagline: "Zero-hidden-control-flow systems programming, C cross-compilation, and comptime",
     summary: "Track breakthrough Zig repositories, custom allocators, game engines, and next-generation JavaScript/WASM bundlers.",
-    relatedToolPath: "/chmod-calculator",
+    relatedToolPath: "/chmod",
     relatedToolLabel: "Systems Chmod Calculator",
   },
   {
@@ -165,7 +165,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "react",
     tagline: "React Compiler, headless component primitives, state management, and design systems",
     summary: "Live radar of the most starred React UI libraries, hooks, animation engines, and frontend performance discussions.",
-    relatedToolPath: "/svg-to-jsx",
+    relatedToolPath: "/svg-animator",
     relatedToolLabel: "SVG to React JSX Converter",
   },
   {
@@ -177,7 +177,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "svelte",
     tagline: "Fine-grained reactivity with Svelte Runes, SvelteKit full-stack apps, and zero-VDOM speed",
     summary: "Explore trending Svelte 5 and SvelteKit repositories, reactive UI kits, and compiler-optimized web applications.",
-    relatedToolPath: "/html-formatter",
+    relatedToolPath: "/code-to-image",
     relatedToolLabel: "HTML & Markup Formatter",
   },
   {
@@ -189,7 +189,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "astro",
     tagline: "Islands architecture, zero-JS-by-default static sites, and Server Islands",
     summary: "Track popular Astro themes, integrations, MDX content pipelines, and high-Lighthouse-score web architectures.",
-    relatedToolPath: "/markdown-preview",
+    relatedToolPath: "/github-readme-generator",
     relatedToolLabel: "Markdown Live Preview",
   },
   {
@@ -213,7 +213,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "bun",
     tagline: "All-in-one JavaScript/TypeScript runtime, bundler, test runner, and package manager",
     summary: "Monitor trending libraries and benchmarks built for Bun, Deno, and modern high-throughput JavaScript servers.",
-    relatedToolPath: "/package-json-analyzer",
+    relatedToolPath: "/npm",
     relatedToolLabel: "package.json Dependency Auditor",
   },
   {
@@ -225,7 +225,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "docker",
     tagline: "Multi-stage container builds, Compose stacks, distroless images, and OCI runtimes",
     summary: "Hourly updated Docker repositories, self-hosted Compose templates, container security scanners, and DevOps guides.",
-    relatedToolPath: "/docker-run-to-compose",
+    relatedToolPath: "/convert/docker-run-to-compose",
     relatedToolLabel: "Docker Run to Compose Converter",
   },
   {
@@ -237,7 +237,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "kubernetes",
     tagline: "Container orchestration, Helm charts, GitOps (ArgoCD/Flux), and eBPF service meshes",
     summary: "Follow the top-trending Kubernetes controllers, K8s cluster management tools, and cloud-native infrastructure repositories.",
-    relatedToolPath: "/yaml-formatter",
+    relatedToolPath: "/universal-config-sync",
     relatedToolLabel: "Kubernetes YAML Validator",
   },
   {
@@ -297,7 +297,7 @@ export const TECH_TREND_TOPICS: TechTrendTopic[] = [
     hnQuery: "sqlite",
     tagline: "Embedded edge databases (LibSQL/Turso), sync engines, and offline-first CRDTs",
     summary: "Live stream of SQLite innovations, in-browser WASM databases, and conflict-free replicated data types (CRDTs).",
-    relatedToolPath: "/sql-formatter",
+    relatedToolPath: "/sqlite-fiddle",
     relatedToolLabel: "SQL Query Formatter",
   },
   {

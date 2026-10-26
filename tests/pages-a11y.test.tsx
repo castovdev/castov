@@ -170,8 +170,8 @@ describe("other pages", () => {
 
   it("home page has the requested sections", () => {
     render(<HomePage />);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(/Developer Tools/i);
-    expect(screen.getByRole("link", { name: /Explore Tools/i })).toHaveAttribute("href", "/tools");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(/Developer Toolkit/i);
+    expect(screen.getByRole("link", { name: /Explore .*Tools/i })).toHaveAttribute("href", "/tools");
     for (const h of ["Frequently Asked Questions", "Explore Our Toolkit"]) {
       expect(screen.getAllByRole("heading", { level: 2, name: h })[0]).toBeInTheDocument();
     }

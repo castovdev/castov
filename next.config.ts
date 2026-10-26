@@ -23,6 +23,12 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.castov.com' }],
+        destination: 'https://castov.com/:path*',
+        permanent: true,
+      },
       { source: '/unix', destination: '/unix-timestamp-converter', permanent: true },
       { source: '/regex-explainer', destination: '/regex-genetic-evolution', permanent: true },
       { source: '/timezones/UTC', destination: '/utc-converter', permanent: true },

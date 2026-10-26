@@ -232,7 +232,7 @@ export async function fetchNpmPackageReport(
       weeklyDownloads,
       hasTypes,
     };
-  } catch (err) {
+  } catch {
     return null;
   }
 }

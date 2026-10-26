@@ -1,7 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Copy, Check, Play, Pause } from "lucide-react";
+
+function sanitizeSvg(raw: string): string {
+  return raw
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/<foreignObject[\s\S]*?>[\s\S]*?<\/foreignObject>/gi, "")
+    .replace(/<(iframe|object|embed|applet|meta|link|base)[^>]*>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/(?:href|xlink:href|src|action|formaction)\s*=\s*(?:"\s*(?:javascript|data):[^"]*"|'\s*(?:javascript|data):[^']*'|(?:\s*(?:javascript|data):[^\s>]+))/gi, "");
+}
 
 type AnimationPreset = "stroke-draw" | "pulse-glow" | "morph-spin" | "float-shadow";
 
@@ -313,7 +322,9 @@ export function AnimatedIcon() {
             <div
               className="w-48 h-48 animated-svg flex items-center justify-center transition-all"
               style={{ color: strokeColor }}
-              dangerouslySetInnerHTML={{ __html: svgCode }}
+              dangerouslySetInnerHTML={{
+                __html: useMemo(() => sanitizeSvg(svgCode), [svgCode]),
+              }}
             />
           </div>
         </div>

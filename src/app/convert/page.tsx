@@ -129,7 +129,7 @@ export default function ConvertHubPage() {
             </p>
           </div>
           <div className="inline-flex items-center gap-2 text-xs font-medium text-accent bg-accent/10 px-3 py-1.5 rounded-full border border-accent/20 self-start sm:self-auto">
-            <span>20 Specialized Engines</span>
+            <span>{CODE_CONVERTERS.length} Specialized Engines</span>
           </div>
         </div>
 

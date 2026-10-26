@@ -1,16 +1,16 @@
 # Castov — Complete LLM & AI Agent Technical Reference (llms-full.txt)
 
-> Castov (https://www.castov.com) is a deterministic developer-tools and DevSecOps platform built for software developers, DevOps engineers, AI coding agents, and terminal power users. The ecosystem features a Glama Grade A Model Context Protocol (MCP) Server (`v1.4.0`), a local CLI (`npx castov` v1.4.0), a pure TypeScript SDK (`castov-sdk` v1.0.0), a VS Code Extension (`castov-vscode` v0.1.4), 61 browser developer tools (including 10 experimental Labs), 69 error-fix guides, and extensive technical reference registries.
+> Castov (https://castov.com) is a deterministic developer-tools and DevSecOps platform built for software developers, DevOps engineers, AI coding agents, and terminal power users. The ecosystem features a Glama Grade A Model Context Protocol (MCP) Server (`v1.4.0`), a local CLI (`npx castov` v1.4.0), a pure TypeScript SDK (`castov-sdk` v1.0.0), a VS Code Extension (`castov-vscode` v0.1.4), 61 browser developer tools (including 10 experimental Labs), 69 error-fix guides, and extensive technical reference registries.
 
-- **Canonical Website**: https://www.castov.com
-- **Compact LLM Reference**: https://www.castov.com/llms.txt
-- **MCP Server Hub & Interactive Playground**: https://www.castov.com/mcp
-- **Developer Hub**: https://www.castov.com/developer
-- **CLI Documentation**: https://www.castov.com/cli
-- **VS Code Extension**: https://www.castov.com/extension
-- **Browser Utilities Directory**: https://www.castov.com/tools
-- **Error Fix Guides**: https://www.castov.com/error-fixes
-- **Privacy Policy**: https://www.castov.com/privacy
+- **Canonical Website**: https://castov.com
+- **Compact LLM Reference**: https://castov.com/llms.txt
+- **MCP Server Hub & Interactive Playground**: https://castov.com/mcp
+- **Developer Hub**: https://castov.com/developer
+- **CLI Documentation**: https://castov.com/cli
+- **VS Code Extension**: https://castov.com/extension
+- **Browser Utilities Directory**: https://castov.com/tools
+- **Error Fix Guides**: https://castov.com/error-fixes
+- **Privacy Policy**: https://castov.com/privacy
 - **GitHub Repository**: https://github.com/castovdev/castov
 - **Author & License**: Abdelmalik Benidir / Castov (MIT License)
 

@@ -3,27 +3,23 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
-  Terminal,
   Copy,
   Check,
   Zap,
   ArrowRight,
   Shield,
-  Layers,
 } from "lucide-react";
 
 interface InstantTerminalFixBoxProps {
   slug: string;
-  category: string;
+  category?: string;
   diagnosticCommands: string[];
-  errorMessage: string;
+  errorMessage?: string;
 }
 
 export function InstantTerminalFixBox({
   slug,
-  category,
   diagnosticCommands,
-  errorMessage,
 }: InstantTerminalFixBoxProps) {
   const [activeTab, setActiveTab] = useState<"cli" | "posix" | "windows" | "diag">("cli");
   const [copied, setCopied] = useState(false);

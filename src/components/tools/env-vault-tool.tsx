@@ -86,8 +86,13 @@ export function EnvVaultTool() {
       try {
         const clientVaultId = crypto.randomUUID();
         const supabase = createClient();
-        const { error } = await supabase.from('env_vaults').insert([{ id: clientVaultId, encrypted_payload: payloadBase64 }]);
-        if (!error) {
+        let insertErr: unknown = null;
+        const { error: sharedErr } = await supabase.from('shared_env_vaults').insert([{ id: clientVaultId, encrypted_payload: payloadBase64 }]);
+        if (sharedErr) {
+          const { error: legacyErr } = await supabase.from('env_vaults').insert([{ id: clientVaultId, encrypted_payload: payloadBase64 }]);
+          insertErr = legacyErr;
+        }
+        if (!insertErr) {
           setEncryptedLink(`${origin}/env-vault?id=${clientVaultId}`);
         } else {
           setEncryptedLink(zeroKnowledgeLink);
@@ -129,7 +134,16 @@ export function EnvVaultTool() {
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (uuidRegex.test(payloadBase64)) {
         const supabase = createClient();
-        const { data, error } = await supabase.rpc('get_env_vault_payload', { target_id: payloadBase64 });
+        let data: string | null = null;
+        let error: unknown = null;
+        const { data: sharedData, error: sharedErr } = await supabase.rpc('get_shared_env_vault_payload', { target_id: payloadBase64 });
+        if (!sharedErr && sharedData) {
+          data = sharedData;
+        } else {
+          const { data: legacyData, error: legacyErr } = await supabase.rpc('get_env_vault_payload', { target_id: payloadBase64 });
+          data = legacyData;
+          error = legacyErr;
+        }
         if (error || !data) {
           throw new Error("Vault not found or expired.");
         }

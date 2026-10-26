@@ -25,9 +25,13 @@ function cleanupExpired(windowMs: number) {
     }
   }
 
-  // Hard safety limit on map size
+  // Hard safety limit on map size (evict oldest entries rather than clearing all limits)
   if (RATE_LIMIT_STORE.size > STORE_MAX_SIZE) {
-    RATE_LIMIT_STORE.clear();
+    let deleted = 0;
+    for (const k of RATE_LIMIT_STORE.keys()) {
+      RATE_LIMIT_STORE.delete(k);
+      if (++deleted >= 1000) break;
+    }
   }
 }
 

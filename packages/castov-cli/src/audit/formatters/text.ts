@@ -1,12 +1,4 @@
-import type { AuditResult, Finding, Severity } from "../types.js";
-
-const SEVERITY_ORDER: Record<Severity, number> = {
-  critical: 0,
-  high: 1,
-  medium: 2,
-  low: 3,
-  info: 4,
-};
+import type { AuditResult } from "../types.js";
 
 export function formatTextOutput(result: AuditResult, useColor = true): string {
   const lines: string[] = [];

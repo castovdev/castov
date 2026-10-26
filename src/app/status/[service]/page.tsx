@@ -5,11 +5,7 @@ import {
   Activity, 
   ExternalLink, 
   AlertTriangle, 
-  CheckCircle2, 
-  ArrowRight, 
-  Clock, 
   ShieldCheck, 
-  Terminal 
 } from "lucide-react";
 import { CLOUD_SERVICES, getCloudService } from "@/lib/cloud-status-registry";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, FaqItem } from "@/lib/seo";

@@ -7,7 +7,6 @@ import {
   Package,
   Layers,
   FileCode,
-  Download,
   AlertTriangle,
   ExternalLink,
   CheckCircle2,

@@ -170,7 +170,7 @@ test("castov port: inspects known port and outputs reference link", () => {
   assert.equal(r.status, 0);
   assert.match(r.stdout, /Port 5432/);
   assert.match(r.stdout, /PostgreSQL/);
-  assert.match(r.stdout, /https:\/\/www\.castov\.com\/ports\/5432/);
+  assert.match(r.stdout, /https:\/\/castov\.com\/ports\/5432/);
 });
 
 test("castov secret: generates cryptographic secrets", () => {
@@ -179,7 +179,7 @@ test("castov secret: generates cryptographic secrets", () => {
   assert.match(r.stdout, /256-bit Entropy/);
   assert.match(r.stdout, /AUTH_SECRET=/);
   assert.match(r.stdout, /sk_live_/);
-  assert.match(r.stdout, /https:\/\/www\.castov\.com\/env-vault/);
+  assert.match(r.stdout, /https:\/\/castov\.com\/env-vault/);
 });
 
 test("castov cidr: calculates IPv4 subnet mask and usable host range", () => {
@@ -188,14 +188,14 @@ test("castov cidr: calculates IPv4 subnet mask and usable host range", () => {
   assert.match(r.stdout, /255\.255\.255\.0/);
   assert.match(r.stdout, /192\.168\.1\.1 - 192\.168\.1\.254/);
   assert.match(r.stdout, /254/);
-  assert.match(r.stdout, /https:\/\/www\.castov\.com\/cidr\/24/);
+  assert.match(r.stdout, /https:\/\/castov\.com\/cidr\/24/);
 });
 
 test("castov scan: scans directory offline", () => {
   const r = run(["scan", "./test"]);
   assert.equal(r.status, 0);
   assert.match(r.stdout, /Castov Local Secret Scanner/);
-  assert.match(r.stdout, /https:\/\/www\.castov\.com\/env-vault/);
+  assert.match(r.stdout, /https:\/\/castov\.com\/env-vault/);
 });
 
 test("castov fix & rules: diagnoses errors and generates AI rules", () => {
@@ -206,7 +206,7 @@ test("castov fix & rules: diagnoses errors and generates AI rules", () => {
   const rRules = run(["rules", "rust"]);
   assert.equal(rRules.status, 0);
   assert.match(rRules.stdout, /Rust Systems/);
-  assert.match(rRules.stdout, /https:\/\/www\.castov\.com\/cursorrules/);
+  assert.match(rRules.stdout, /https:\/\/castov\.com\/cursorrules/);
 });
 
 test("global --help and --version", () => {

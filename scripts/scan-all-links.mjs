@@ -77,7 +77,9 @@ try {
   for (const t of aiTools) {
     validRoutes.add(`/ai/${t.slug}`);
   }
-} catch {}
+} catch {
+  // Ignore if ai-tools.json is absent
+}
 
 // LLM Models: src/lib/llm-specs-registry.ts
 const llmSlugs = extractSlugsFromRegistry(

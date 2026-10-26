@@ -52,7 +52,7 @@ export default function TeamWorkspaceDetail() {
 
   // Modal State for Passphrase Unlock
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"unlock" | "recovery">("unlock");
+  const [modalMode] = useState<"unlock" | "recovery">("unlock");
   const [modalError, setModalError] = useState("");
   const [isModalProcessing, setIsModalProcessing] = useState(false);
   const pendingActionRef = useRef<(() => Promise<void>) | null>(null);
@@ -101,7 +101,7 @@ export default function TeamWorkspaceDetail() {
         const inMemoryKey = getInMemoryPrivateKey(currentUid);
         if (inMemoryKey) {
           // Decrypt Team Key into memory (extractable: false)
-          const tk = await decryptTeamKey(myMemberRecord.encrypted_team_key, inMemoryKey, false);
+          const tk = await decryptTeamKey(myMemberRecord.encrypted_team_key, inMemoryKey, true);
           setTeamKey(tk);
         } else {
           // Fetch security record to prompt passphrase
@@ -142,7 +142,7 @@ export default function TeamWorkspaceDetail() {
       // Decrypt Team Key
       const myMemberRecord = members.find((m) => m.user_id === userId);
       if (myMemberRecord) {
-        const tk = await decryptTeamKey(myMemberRecord.encrypted_team_key, inMemoryPrivKey, false);
+        const tk = await decryptTeamKey(myMemberRecord.encrypted_team_key, inMemoryPrivKey, true);
         setTeamKey(tk);
       }
 
@@ -178,7 +178,7 @@ export default function TeamWorkspaceDetail() {
 
       const myMemberRecord = members.find((m) => m.user_id === userId);
       if (myMemberRecord) {
-        const tk = await decryptTeamKey(myMemberRecord.encrypted_team_key, inMemoryPrivKey, false);
+        const tk = await decryptTeamKey(myMemberRecord.encrypted_team_key, inMemoryPrivKey, true);
         setTeamKey(tk);
       }
 

@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import {
   Download,
   Terminal,
@@ -10,7 +9,6 @@ import {
   Shield,
   KeyRound,
   FileCode,
-  ArrowRight,
   Blocks,
   Coins,
   Sparkles,

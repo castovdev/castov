@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Terminal, Code2, Zap } from "lucide-react";
+import { Terminal } from "lucide-react";
 import { CurlConverterTool } from "@/components/tools/curl-converter-tool";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, FaqItem } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";

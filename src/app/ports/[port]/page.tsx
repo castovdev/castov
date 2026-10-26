@@ -5,7 +5,7 @@ import { NETWORK_PORTS, getPortByNumber } from "@/lib/network-ports-registry";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, howToJsonLd, softwareAppJsonLd, techArticleJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { SponsorSlot } from "@/components/sponsor-slot";
-import { ShieldAlert, Terminal, Server, Container } from "lucide-react";
+import { Terminal } from "lucide-react";
 
 export function generateStaticParams() {
   return NETWORK_PORTS.map((p) => ({ port: String(p.port) }));

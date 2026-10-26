@@ -1,4 +1,4 @@
-import type { AuditResult, Finding } from "../types.js";
+import type { AuditResult } from "../types.js";
 
 export function formatMarkdownReport(result: AuditResult, clientName?: string): string {
   const lines: string[] = [];

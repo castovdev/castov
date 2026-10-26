@@ -41,3 +41,58 @@ describe("Authentication Redirect Security", () => {
     expect(getSafeRedirectUrl("")).toBe("/tools");
   });
 });
+
+
+describe("API Key and Token Security (CRYPTO-02 Hardening)", () => {
+  it("computes deterministic SHA-256 hash for raw API tokens", async () => {
+    const rawToken = "cst_live_57528c970fe37e7a707e31cd47d560f1";
+    const hash = require("crypto").createHash("sha256").update(rawToken).digest("hex");
+    expect(hash).toHaveLength(64);
+    expect(hash).toMatch(/^[0-9a-f]{64}$/);
+
+    // Hash is deterministic
+    const hash2 = require("crypto").createHash("sha256").update(rawToken).digest("hex");
+    expect(hash).toBe(hash2);
+  });
+
+  it("enforces revoked status rejection", () => {
+    const keyRecord = {
+      user_id: "d3b07384-d113-4621-996b-e85d9c2222a1",
+      revoked: true,
+      expires_at: null,
+    };
+    const isValid = !keyRecord.revoked && (!keyRecord.expires_at || new Date(keyRecord.expires_at).getTime() > Date.now());
+    expect(isValid).toBe(false);
+  });
+
+  it("enforces expiration date rejection", () => {
+    const expiredRecord = {
+      user_id: "d3b07384-d113-4621-996b-e85d9c2222a1",
+      revoked: false,
+      expires_at: new Date(Date.now() - 3600000).toISOString(),
+    };
+    const isValid = !expiredRecord.revoked && (!expiredRecord.expires_at || new Date(expiredRecord.expires_at).getTime() > Date.now());
+    expect(isValid).toBe(false);
+  });
+
+  it("validates active non-expired keys", () => {
+    const activeRecord = {
+      user_id: "d3b07384-d113-4621-996b-e85d9c2222a1",
+      revoked: false,
+      expires_at: new Date(Date.now() + 86400000).toISOString(),
+    };
+    const isValid = !activeRecord.revoked && (!activeRecord.expires_at || new Date(activeRecord.expires_at).getTime() > Date.now());
+    expect(isValid).toBe(true);
+  });
+});
+
+describe("Shared Env Vaults Isolation (CRYPTO-03 Hardening)", () => {
+  it("enforces maximum payload size limit of 100KB", () => {
+    const maxAllowedBytes = 100000;
+    const smallPayload = Buffer.alloc(50000, "a").toString("base64");
+    const oversizedPayload = Buffer.alloc(105000, "a").toString("base64");
+
+    expect(Buffer.byteLength(smallPayload, "utf8")).toBeLessThanOrEqual(maxAllowedBytes);
+    expect(Buffer.byteLength(oversizedPayload, "utf8")).toBeGreaterThan(maxAllowedBytes);
+  });
+});

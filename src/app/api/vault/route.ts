@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limiter";
@@ -23,7 +24,38 @@ async function getAuthenticatedUserId(request: Request): Promise<string | null> 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.slice(7).trim();
     if (token.startsWith("cst_live_") && token.length >= 16) {
-      // Use token-derived identity
+      const keyHash = createHash("sha256").update(token).digest("hex");
+
+      // Verify against Supabase user_api_keys table
+      try {
+        const supabase = await createClient();
+        const { data: keyRecord, error: keyErr } = await supabase
+          .from("user_api_keys")
+          .select("user_id, revoked, expires_at")
+          .eq("key_hash", keyHash)
+          .maybeSingle();
+
+        if (!keyErr && keyRecord) {
+          if (keyRecord.revoked) {
+            return null; // Key was explicitly revoked
+          }
+          if (keyRecord.expires_at && new Date(keyRecord.expires_at).getTime() < Date.now()) {
+            return null; // Key has expired
+          }
+          // Asynchronously update last_used_at
+          supabase
+            .from("user_api_keys")
+            .update({ last_used_at: new Date().toISOString() })
+            .eq("key_hash", keyHash)
+            .then();
+
+          return keyRecord.user_id; // Return real user_id (UUID)
+        }
+      } catch {
+        // Fallback if table not migrated or offline
+      }
+
+      // Legacy fallback for backward compatibility during migration window
       return `cli_${token.slice(9, 25)}`;
     }
   }

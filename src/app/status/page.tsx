@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Activity, ShieldAlert, ArrowRight, ExternalLink } from "lucide-react";
+import { Activity, ArrowRight } from "lucide-react";
 import { CLOUD_SERVICES } from "@/lib/cloud-status-registry";
 import { buildMetadata, breadcrumbJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";

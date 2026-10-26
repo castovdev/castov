@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import {
   Flame,
   Star,
@@ -22,34 +23,15 @@ import { buildMetadata, breadcrumbJsonLd, faqJsonLd, FaqItem } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 
 export const revalidate = 3600; // Refresh live trend pages hourly (ISR)
-export const dynamicParams = true; // Allow any emerging keyword slug to generate a live SEO page on demand
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return TECH_TREND_TOPICS.map((t) => ({ topic: t.slug }));
 }
 
-function resolveTopicMeta(rawSlug: string): TechTrendTopic {
+function resolveTopicMeta(rawSlug: string): TechTrendTopic | undefined {
   const clean = decodeURIComponent(rawSlug).toLowerCase().trim();
-  const known = getTechTrendTopic(clean);
-  if (known) return known;
-
-  const display = clean
-    .split(/[-_]+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-
-  return {
-    slug: clean,
-    name: `${display} Developer Trends & Open Source`,
-    category: "Web & Frameworks",
-    githubQuery: clean,
-    devtoTag: clean.replace(/[^a-z0-9]/g, ""),
-    hnQuery: clean,
-    tagline: `Real-time GitHub repositories, Hacker News discussions, and engineering articles for ${display}`,
-    summary: `Track the fastest-growing open-source ${display} repositories on GitHub, top community discussions on Hacker News, and practical engineering tutorials on Dev.to.`,
-    relatedToolPath: "/tools",
-    relatedToolLabel: "Castov Developer Suite",
-  };
+  return getTechTrendTopic(clean);
 }
 
 async function fetchTopicGitHub(query: string): Promise<GitHubRepoItem[]> {
@@ -150,6 +132,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { topic } = await params;
   const info = resolveTopicMeta(topic);
+  if (!info) return {};
 
   return buildMetadata({
     title: `${info.name} – Trending GitHub Repos, Hacker News & Guides`,
@@ -165,6 +148,7 @@ export default async function TechTrendTopicPage({
 }) {
   const { topic } = await params;
   const info = resolveTopicMeta(topic);
+  if (!info) notFound();
 
   const [repos, articles, hnStories] = await Promise.all([
     fetchTopicGitHub(info.githubQuery),

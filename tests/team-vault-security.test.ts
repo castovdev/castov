@@ -131,7 +131,7 @@ describe("Team Vault Cryptographic Engine (Phase 2 Hardened Security)", () => {
 
   it("supports multi-recipient asymmetric sharing between Alice and Bob", async () => {
     // Alice setup
-    const aliceKeyPair = await generateUserKeyPair();
+    const _aliceKeyPair = await generateUserKeyPair();
     const teamKey = await generateTeamKey(true);
 
     // Bob setup on his own device

@@ -41,13 +41,13 @@
     "hash",
     "jwt"
   ],
-  "homepage": "https://www.castov.com",
+  "homepage": "https://castov.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/castovdev/castov.git"
   },
   "license": "MIT",
-  "author": "Abdelmalik Benidir / Castov <https://www.castov.com>",
+  "author": "Abdelmalik Benidir / Castov <https://castov.com>",
   "type": "module",
   "bin": {
     "castov": "dist/cli.js"

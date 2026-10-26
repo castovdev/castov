@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRightLeft, Sparkles, Layers, ArrowRight, Code2 } from "lucide-react";
+import { ArrowRightLeft, Layers, ArrowRight, Code2 } from "lucide-react";
 import { buildMetadata, webPageJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";

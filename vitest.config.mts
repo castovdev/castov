@@ -5,7 +5,9 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve(import.meta.dirname, "src") } },
   test: {
     environment: "node",
-    env: { NEXT_PUBLIC_SITE_URL: "https://www.castov.com", NEXT_PUBLIC_CONTACT_EMAIL: "contact@castov.com" },
+    env: { NEXT_PUBLIC_SITE_URL: "https://castov.com", NEXT_PUBLIC_CONTACT_EMAIL: "contact@castov.com" },
+    maxWorkers: 2,
+    isolate: false,
     globalSetup: ["./tests/global-setup.ts"],
     setupFiles: ["./tests/setup.ts"],
     include: ["tests/**/*.test.{ts,tsx}"],

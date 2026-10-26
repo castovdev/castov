@@ -7,7 +7,7 @@ export const isProduction = process.env.NODE_ENV === "production";
 /** Resolved once. In production the value must come from NEXT_PUBLIC_SITE_URL (see scripts/check-env.mjs). */
 function resolveSiteUrl(): string {
   const value = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  const raw = value || "https://www.castov.com";
+  const raw = value || "https://castov.com";
   return raw.replace(/\/+$/, "");
 }
 

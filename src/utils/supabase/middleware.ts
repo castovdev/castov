@@ -39,7 +39,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // 1. Private Routes Protection (Team vaults require login)
-  const protectedRoutes = ['/env-vault/team'];
+  const protectedRoutes = ['/env-vault/team', '/account'];
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route));
 
   if (isProtectedRoute && !user) {

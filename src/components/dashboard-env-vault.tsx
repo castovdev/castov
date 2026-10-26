@@ -15,7 +15,6 @@ import {
   EyeOff,
   AlertCircle,
   Flame,
-  Share2,
   Clock,
 } from "lucide-react";
 import { encryptSecretForSharing } from "@/lib/secret-crypto";

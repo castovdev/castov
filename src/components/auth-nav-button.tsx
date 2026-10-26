@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import { clearInMemoryPrivateKey } from "@/lib/team-key-session";
 import type { User } from "@supabase/supabase-js";
 import {
   User as UserIcon,
@@ -88,6 +89,7 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
 
   const handleSignOut = async () => {
     setOpen(false);
+    if (user?.id) clearInMemoryPrivateKey(user.id);
     if (onAction) onAction();
     await supabase.auth.signOut();
     if (typeof window !== "undefined") {

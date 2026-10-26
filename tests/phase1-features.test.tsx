@@ -69,7 +69,7 @@ describe("Env Vault Origin & Safe Sharing Mechanics", () => {
     const emptyOrigin = "";
     const resolved = (typeof window !== "undefined" && emptyOrigin) ? emptyOrigin : SITE.url;
     expect(resolved).toBe(SITE.url);
-    expect(resolved).toBe("https://www.castov.com");
+    expect(resolved).toBe("https://castov.com");
   });
 
   it("verifies zero-knowledge fragment structure preserves client-side payload", () => {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Cpu, DollarSign, HardDrive, Terminal, Zap, ArrowRight, ShieldCheck } from "lucide-react";
+import { Cpu, DollarSign, HardDrive, Terminal } from "lucide-react";
 import { LLM_MODELS, getLlmModel } from "@/lib/llm-specs-registry";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, FaqItem } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
