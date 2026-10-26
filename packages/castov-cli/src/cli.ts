@@ -1113,14 +1113,15 @@ async function main(argv: string[]): Promise<void> {
         }, version);
 
         if (!values.output) {
-          process.stdout.write(formatted + "\n");
+          process.stdout.write(formatted + "\n", () => {
+            process.exitCode = result.exitCode;
+          });
         } else {
-          process.stdout.write(green(`✓ Audit report successfully written to ${values.output}\n`));
+          process.stdout.write(green(`✓ Audit report successfully written to ${values.output}\n`), () => {
+            process.exitCode = result.exitCode;
+          });
         }
-
-        if (result.exitCode !== 0) {
-          process.exit(result.exitCode);
-        }
+        process.exitCode = result.exitCode;
         return;
       } catch (err: unknown) {
         if (err instanceof UsageError) throw err;
