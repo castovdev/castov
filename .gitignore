@@ -17,3 +17,7 @@ npm token.png
 *.token*
 *.key
 *.pem
+
+# Generated sample audit workspace & reports
+sample/
+packages/castov-cli/sample/

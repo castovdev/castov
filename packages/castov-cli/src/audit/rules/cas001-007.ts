@@ -1,28 +1,60 @@
 import type { ParsedConfigFile, McpServerConfig, Finding } from "../types.js";
-import { detectSecrets, isVariableReference, SENSITIVE_KEY_NAMES, maskSecret } from "../secrets.js";
+import { detectSecrets, isSafeOrVariableReference, SENSITIVE_KEY_NAMES, maskSecret } from "../secrets.js";
 
 /**
- * Audit Rules CAS-001 through CAS-007 for MCP Server configurations.
+ * Client-specific remediation messages (Requirement B):
+ * - Assertive syntax recommendations ONLY where a live verbatim documentation quote proves the syntax.
+ * - Does NOT mix Cline with VS Code.
+ * - Uses neutral guidance wherever upstream docs do not explicitly document variable interpolation syntax.
  */
 export function getClientSpecificRemediation(clientName: string | undefined, filePath: string, keyName: string): string {
-  const norm = ((clientName || "") + " " + filePath).toLowerCase();
+  const normPath = filePath.replace(/\\/g, "/").toLowerCase();
+  const normClient = (clientName || "").toLowerCase();
 
-  if (norm.includes("cursor")) {
-    return `Cursor supports environment variable expansion: replace with "\${env:${keyName}}" and export ${keyName} in your environment or workspace .env. (Docs: https://docs.cursor.com/context/model-context-protocol)`;
+  // 1. Cursor (.cursor/mcp.json or ~/.cursor/mcp.json)
+  // Verbatim Quote: "Cursor resolves variables in these fields: command, args, env, url, and headers. Supported syntax: ${env:NAME} environment variables"
+  // Source: https://cursor.com/docs/mcp (Fetched: 2026-10-26)
+  if (normClient === "cursor" || normPath.includes("/.cursor/mcp.json") || normPath.endsWith(".cursor/mcp.json")) {
+    return `Use "\${env:${keyName}}" in Cursor mcp.json and keep the secret outside the file and outside git (Docs: https://cursor.com/docs/mcp).`;
   }
-  if (norm.includes("cline") || norm.includes("code/user") || norm.includes(".vscode")) {
-    return `VS Code / Cline supports environment variable expansion: replace with "\${env:${keyName}}" and set ${keyName} in your local process environment. (Docs: https://github.com/cline/cline/blob/main/docs/mcp.md)`;
+
+  // 2. VS Code (.vscode/mcp.json) — Strictly separated from Cline
+  // Verbatim Quote: "Environment-variable references | ${env:NAME}" and '{"API_KEY": "${input:api-key}"}'
+  // Source: https://code.visualstudio.com/docs/agents/reference/mcp-configuration.md (Fetched: 2026-10-26)
+  if (
+    (normClient === "vs code" || normPath.includes("/.vscode/mcp.json") || normPath.endsWith(".vscode/mcp.json")) &&
+    !normClient.includes("cline") &&
+    !normPath.includes("cline") &&
+    !normPath.includes("saoudrizwan.claude-dev")
+  ) {
+    return `Use "\${input:${keyName}}" or "\${env:${keyName}}" in .vscode/mcp.json and keep the secret outside the file and outside git (Docs: https://code.visualstudio.com/docs/agents/reference/mcp-configuration).`;
   }
-  if (norm.includes("claude_desktop") || norm.includes("claude desktop")) {
-    return `Claude Desktop does NOT support \${env:...} expansion in claude_desktop_config.json. Set ${keyName} in your operating system environment before launching Claude Desktop, and do not commit this config file. (Docs: https://modelcontextprotocol.io/quickstart/user)`;
+
+  // 3. Claude Code (.mcp.json or ~/.claude.json)
+  // Verbatim Quote: "Claude Code supports environment variable expansion in .mcp.json files... Supported syntax ${VAR} : expands to the value of environment variable VAR ${VAR:-default} : expands to VAR if set, otherwise uses default"
+  // Source: https://code.claude.com/docs/en/mcp (Fetched: 2026-10-26)
+  if (
+    normClient === "claude code" ||
+    normPath.endsWith("/.mcp.json") ||
+    normPath === ".mcp.json" ||
+    normPath.endsWith("/.claude.json") ||
+    normPath === ".claude.json"
+  ) {
+    return `Use "\${${keyName}}" or "\${${keyName}:-default}" and keep the secret outside the file and outside git (Docs: https://code.claude.com/docs/en/mcp).`;
   }
-  if (norm.includes("claude code") || norm.includes(".claude.json")) {
-    return `Claude Code CLI reads system environment variables directly. Export ${keyName} in your shell profile (~/.zshrc, ~/.bashrc) instead of saving plaintext tokens in .claude.json. (Docs: https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview)`;
-  }
-  if (norm.includes("zed")) {
-    return `Zed editor context servers inherit variables from your shell environment. Export ${keyName} in your shell configuration instead of storing plaintext credentials in settings.json. (Docs: https://zed.dev/docs/ai/mcp)`;
-  }
-  return `Replace hardcoded secret with environment variable reference: "\${env:${keyName}}" or inject from system environment.`;
+
+  // 4. Neutral fallback for clients without verified inline variable interpolation syntax (Claude Desktop, Cline, Zed, etc.)
+  return `Keep the secret outside the configuration file and outside git version control, and use the client's documented mechanism for passing environment variables.`;
+}
+
+function sanitizeArgsForEvidence(args: string[]): string {
+  return args
+    .map((a) => {
+      const m = detectSecrets(a);
+      if (m.length > 0) return m[0].masked;
+      return a;
+    })
+    .join(" ");
 }
 
 export function runRulesCas001To007(configFile: ParsedConfigFile): Finding[] {
@@ -30,39 +62,12 @@ export function runRulesCas001To007(configFile: ParsedConfigFile): Finding[] {
   const { filePath, servers } = configFile;
 
   for (const [serverName, config] of Object.entries(servers)) {
-    // -------------------------------------------------------------------------
-    // CAS-001: Hardcoded Secret in Server Config (env, args, headers, url query)
-    // -------------------------------------------------------------------------
     checkCas001(configFile, serverName, config, findings);
-
-    // -------------------------------------------------------------------------
-    // CAS-002: Unpinned Runtime Launcher
-    // -------------------------------------------------------------------------
     checkCas002(filePath, serverName, config, findings);
-
-    // -------------------------------------------------------------------------
-    // CAS-003: Shell Wrapper or Embedded Script
-    // -------------------------------------------------------------------------
     checkCas003(filePath, serverName, config, findings);
-
-    // -------------------------------------------------------------------------
-    // CAS-004: Remote Server Security & Data Flow
-    // -------------------------------------------------------------------------
     checkCas004(filePath, serverName, config, findings);
-
-    // -------------------------------------------------------------------------
-    // CAS-005: Broad Filesystem Scope
-    // -------------------------------------------------------------------------
     checkCas005(filePath, serverName, config, findings);
-
-    // -------------------------------------------------------------------------
-    // CAS-006: Docker Container Risks
-    // -------------------------------------------------------------------------
     checkCas006(filePath, serverName, config, findings);
-
-    // -------------------------------------------------------------------------
-    // CAS-007: Auto-Approve / Always-Allow Tool Permissions
-    // -------------------------------------------------------------------------
     checkCas007(filePath, serverName, config, findings);
   }
 
@@ -79,25 +84,27 @@ function checkCas001(configFile: ParsedConfigFile, serverName: string, config: M
   // 1. Check environment variables
   if (config.env && typeof config.env === "object") {
     for (const [k, v] of Object.entries(config.env)) {
-      if (typeof v !== "string" || isVariableReference(v)) continue;
+      if (typeof v !== "string" || isSafeOrVariableReference(v, k)) continue;
 
-      // Check known provider secret patterns first
-      const matched = detectSecrets(v);
+      const matched = detectSecrets(v, k);
       if (matched.length > 0) {
+        const isCritical = matched[0].isKnownProvider;
         findings.push({
           ruleId: "CAS-001",
-          severity: "critical",
-          title: `Hardcoded known provider secret in env.${k}`,
-          whyItMatters: `Exposes live credentials directly in plain text configuration (${matched[0].patternName}). Anyone with access to the repo can steal these credentials.`,
+          severity: isCritical ? "critical" : "high",
+          title: isCritical
+            ? `Hardcoded known provider secret in env.${k}`
+            : `Hardcoded secret in env.${k}`,
+          whyItMatters: `Exposes credential directly in plain text configuration (${matched[0].patternName}).`,
           suggestedFix: getClientSpecificRemediation(clientName, filePath, k),
           file: filePath,
           serverName,
+          keyName: `env.${k}`,
           evidenceMasked: `env.${k}=${matched[0].masked}`,
         });
         continue;
       }
 
-      // Check sensitive key names with non-placeholder literal values
       const isSensitiveName = SENSITIVE_KEY_NAMES.some((n) => k.toUpperCase().includes(n));
       if (isSensitiveName && v.trim().length >= 8) {
         findings.push({
@@ -108,6 +115,7 @@ function checkCas001(configFile: ParsedConfigFile, serverName: string, config: M
           suggestedFix: getClientSpecificRemediation(clientName, filePath, k),
           file: filePath,
           serverName,
+          keyName: `env.${k}`,
           evidenceMasked: `env.${k}=${maskSecret(v)}`,
         });
       }
@@ -118,18 +126,19 @@ function checkCas001(configFile: ParsedConfigFile, serverName: string, config: M
   if (Array.isArray(config.args)) {
     for (let i = 0; i < config.args.length; i++) {
       const arg = String(config.args[i]);
-      if (isVariableReference(arg)) continue;
+      if (isSafeOrVariableReference(arg)) continue;
 
       const matched = detectSecrets(arg);
       if (matched.length > 0) {
         findings.push({
           ruleId: "CAS-001",
           severity: "critical",
-          title: `Hardcoded known provider secret in command args`,
-          whyItMatters: `Exposes ${matched[0].patternName} on CLI argument list, making it visible in system process tables (ps aux) and config files.`,
-          suggestedFix: `Pass credentials via secure environment variables rather than command-line arguments.`,
+          title: `Hardcoded secret in command args`,
+          whyItMatters: `Exposes ${matched[0].patternName} on CLI argument list, making it visible in system process tables and config files.`,
+          suggestedFix: getClientSpecificRemediation(clientName, filePath, "SECRET_ARG"),
           file: filePath,
           serverName,
+          keyName: `args[${i}]`,
           evidenceMasked: `args[${i}]=${matched[0].masked}`,
         });
       }
@@ -139,17 +148,18 @@ function checkCas001(configFile: ParsedConfigFile, serverName: string, config: M
   // 3. Check headers in remote configs
   if (config.headers && typeof config.headers === "object") {
     for (const [hk, hv] of Object.entries(config.headers)) {
-      if (typeof hv !== "string" || isVariableReference(hv)) continue;
-      const matched = detectSecrets(hv);
+      if (typeof hv !== "string" || isSafeOrVariableReference(hv, hk)) continue;
+      const matched = detectSecrets(hv, hk);
       if (matched.length > 0) {
         findings.push({
           ruleId: "CAS-001",
-          severity: "critical",
+          severity: matched[0].isKnownProvider ? "critical" : "high",
           title: `Hardcoded credential in headers.${hk}`,
-          whyItMatters: `Hardcoded authentication header ${hk} exposes tokens in repository files.`,
+          whyItMatters: `Hardcoded authentication header ${hk} exposes tokens in configuration files.`,
           suggestedFix: getClientSpecificRemediation(clientName, filePath, hk),
           file: filePath,
           serverName,
+          keyName: `headers.${hk}`,
           evidenceMasked: `headers.${hk}=${matched[0].masked}`,
         });
       } else if (hk.toLowerCase().includes("auth") && hv.trim().length >= 8) {
@@ -161,33 +171,37 @@ function checkCas001(configFile: ParsedConfigFile, serverName: string, config: M
           suggestedFix: getClientSpecificRemediation(clientName, filePath, hk),
           file: filePath,
           serverName,
+          keyName: `headers.${hk}`,
           evidenceMasked: `headers.${hk}=${maskSecret(hv)}`,
         });
       }
     }
   }
 
-  // 4. Check URL query parameters
+  // 4. Check URL userinfo and query parameters
   if (config.url && typeof config.url === "string") {
-    try {
-      const parsedUrl = new URL(config.url);
-      if (parsedUrl.search) {
-        const matched = detectSecrets(parsedUrl.search);
-        if (matched.length > 0) {
-          findings.push({
-            ruleId: "CAS-001",
-            severity: "critical",
-            title: `Hardcoded secret in URL query parameters`,
-            whyItMatters: `Sensitive credentials exposed in URL query string are logged in server access logs and intermediate proxies.`,
-            suggestedFix: `Pass credentials in Authorization request headers instead of URL query parameters.`,
-            file: filePath,
-            serverName,
-            evidenceMasked: `url=${parsedUrl.origin}${parsedUrl.pathname}?${matched[0].masked}`,
-          });
+    if (!isSafeOrVariableReference(config.url, "url")) {
+      const matched = detectSecrets(config.url, "url");
+      if (matched.length > 0) {
+        let safeOriginPath = "url";
+        try {
+          const parsedUrl = new URL(config.url);
+          safeOriginPath = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}`;
+        } catch {
+          safeOriginPath = "url";
         }
+        findings.push({
+          ruleId: "CAS-001",
+          severity: matched[0].isKnownProvider ? "critical" : "high",
+          title: `Hardcoded secret in server URL (${matched[0].patternName})`,
+          whyItMatters: `Sensitive credentials embedded in URLs are logged in access logs and plaintext configuration files.`,
+          suggestedFix: getClientSpecificRemediation(clientName, filePath, "URL_TOKEN"),
+          file: filePath,
+          serverName,
+          keyName: "url",
+          evidenceMasked: `url=${safeOriginPath}?${matched[0].masked}`,
+        });
       }
-    } catch {
-      // ignore invalid URLs here, CAS-004 handles remote URL formats
     }
   }
 }
@@ -202,7 +216,6 @@ function checkCas002(filePath: string, serverName: string, config: McpServerConf
   const RUNNERS = new Set(["npx", "pnpm", "bunx", "uvx", "pipx"]);
 
   if (RUNNERS.has(cmd)) {
-    // Find the package being executed
     let pkgArg = "";
     for (const a of args) {
       if (a === "-y" || a === "--yes" || a === "run" || a.startsWith("-")) continue;
@@ -211,7 +224,6 @@ function checkCas002(filePath: string, serverName: string, config: McpServerConf
     }
 
     if (pkgArg) {
-      // Check if package has version pinning
       const hasVersion = /@\d+\.\d+/.test(pkgArg);
       const isLatest = pkgArg.endsWith("@latest");
 
@@ -220,28 +232,26 @@ function checkCas002(filePath: string, serverName: string, config: McpServerConf
           ruleId: "CAS-002",
           severity: "medium",
           title: `Unpinned package runner: ${cmd} ${pkgArg}`,
-          whyItMatters: `Executing packages without explicit version pinning (${pkgArg}) allows automatic pulling of untested or potentially compromised upstream releases (Supply Chain Attack).`,
+          whyItMatters: `Executing packages without explicit version pinning (${pkgArg}) allows automatic pulling of untested or potentially compromised upstream releases.`,
           suggestedFix: `Pin exact version: e.g. "${pkgArg.split("@")[0]}@1.2.3"`,
           file: filePath,
           serverName,
-          evidenceMasked: `${cmd} ${args.join(" ")}`,
+          keyName: "command",
+          evidenceMasked: `${cmd} ${sanitizeArgsForEvidence(args)}`,
         });
       }
     }
   }
 
-  // Check Docker launcher without tag or with :latest
   if (cmd === "docker") {
     const runIdx = args.indexOf("run");
     if (runIdx !== -1) {
-      // Find image name (last non-flag arg or after options)
       for (let i = runIdx + 1; i < args.length; i++) {
         const arg = args[i];
         if (arg.startsWith("-")) {
-          if (["-v", "-p", "-e", "--env", "--name"].includes(arg)) i++; // skip option value
+          if (["-v", "-p", "-e", "--env", "--name"].includes(arg)) i++;
           continue;
         }
-        // Found potential image
         const isLatest = arg.endsWith(":latest");
         const hasTag = arg.includes(":") || arg.includes("@sha256:");
         if (!hasTag || isLatest) {
@@ -250,9 +260,10 @@ function checkCas002(filePath: string, serverName: string, config: McpServerConf
             severity: "medium",
             title: `Unpinned Docker image: ${arg}`,
             whyItMatters: `Docker containers without explicit immutable tags or SHA256 digests can pull untrusted updates dynamically.`,
-            suggestedFix: `Specify immutable container image tag: "${arg.split(":")[0]}:v1.0.0" or sha256 digest.`,
+            suggestedFix: `Specify immutable container image tag: "${arg.split(":")[0]}:v1.0.0" or @sha256 digest.`,
             file: filePath,
             serverName,
+            keyName: "command",
             evidenceMasked: `docker run ... ${arg}`,
           });
         }
@@ -269,10 +280,10 @@ function checkCas003(filePath: string, serverName: string, config: McpServerConf
   const cmd = (config.command || "").toLowerCase();
   const args = (config.args || []).map((a) => String(a));
   const fullCmdLine = [cmd, ...args].join(" ");
+  const safeEvidence = [cmd, sanitizeArgsForEvidence(args)].join(" ").slice(0, 80);
 
   const SHELLS = new Set(["sh", "bash", "zsh", "cmd", "cmd.exe", "powershell", "powershell.exe", "pwsh"]);
 
-  // 1. Direct shell with -c / -Command
   if (SHELLS.has(cmd)) {
     const hasEvalFlag = args.some((a) => a === "-c" || a.toLowerCase() === "-command");
     if (hasEvalFlag) {
@@ -284,13 +295,13 @@ function checkCas003(filePath: string, serverName: string, config: McpServerConf
         suggestedFix: `Invoke target binaries directly as "command" without shell wrappers (-c / -Command).`,
         file: filePath,
         serverName,
-        evidenceMasked: fullCmdLine.slice(0, 80),
+        keyName: "command",
+        evidenceMasked: safeEvidence,
       });
       return;
     }
   }
 
-  // 2. Arguments piping curl/wget to shell or containing eval / backticks / subshells
   const hasPipeToShell = /(?:curl|wget)\b[^\n|]+\|\s*(?:sh|bash|zsh|pwsh|powershell)/i.test(fullCmdLine);
   const hasSubshell = /\$\([^)]+\)/.test(fullCmdLine) || /`[^`]+`/.test(fullCmdLine);
   const hasEval = /\beval\b/.test(fullCmdLine);
@@ -304,7 +315,8 @@ function checkCas003(filePath: string, serverName: string, config: McpServerConf
       suggestedFix: `Pre-install verified binaries locally and call them directly.`,
       file: filePath,
       serverName,
-      evidenceMasked: fullCmdLine.slice(0, 80),
+      keyName: "args",
+      evidenceMasked: safeEvidence,
     });
   }
 }
@@ -327,24 +339,24 @@ function checkCas004(filePath: string, serverName: string, config: McpServerConf
     parsed.hostname === "localhost" ||
     parsed.hostname === "127.0.0.1" ||
     parsed.hostname === "::1" ||
+    parsed.hostname === "[::1]" ||
     parsed.hostname.endsWith(".localhost");
 
-  // 1. Unencrypted HTTP to non-localhost
   if (parsed.protocol === "http:" && !isLocalhost) {
     findings.push({
       ruleId: "CAS-004",
       severity: "high",
       title: `Unencrypted remote HTTP MCP server (${parsed.hostname})`,
-      whyItMatters: `Remote MCP server communicates over plaintext HTTP, exposing all prompts, code context, and tool responses to Man-in-the-Middle interception.`,
+      whyItMatters: `Remote MCP server communicates over plaintext HTTP, exposing all prompts, code context, and tool responses to interception.`,
       suggestedFix: `Upgrade endpoint to TLS/HTTPS: "https://${parsed.host}${parsed.pathname}"`,
       file: filePath,
       serverName,
+      keyName: "url",
       evidenceMasked: `url=${parsed.protocol}//${parsed.host}${parsed.pathname}`,
     });
     return;
   }
 
-  // 2. HTTPS without visible authentication headers
   if (parsed.protocol === "https:" && !isLocalhost) {
     const headers = config.headers || {};
     const hasAuth = Object.keys(headers).some((h) =>
@@ -356,15 +368,15 @@ function checkCas004(filePath: string, serverName: string, config: McpServerConf
         ruleId: "CAS-004",
         severity: "medium",
         title: `Remote HTTPS server without visible authorization header`,
-        whyItMatters: `Remote endpoint ${parsed.hostname} does not declare authentication headers, which may indicate unauthenticated access or credential leakage via unmonitored cookies.`,
-        suggestedFix: `Configure an explicit Authorization header with environment variable substitution.`,
+        whyItMatters: `Remote endpoint ${parsed.hostname} does not declare authentication headers.`,
+        suggestedFix: `Configure an explicit Authorization header using your client's documented variable reference mechanism.`,
         file: filePath,
         serverName,
+        keyName: "headers",
         evidenceMasked: `url=${parsed.origin}${parsed.pathname}`,
       });
     }
 
-    // 3. Info: Data flow to third party
     findings.push({
       ruleId: "CAS-004",
       severity: "info",
@@ -373,6 +385,7 @@ function checkCas004(filePath: string, serverName: string, config: McpServerConf
       suggestedFix: `Verify third-party data processing agreement and privacy policy.`,
       file: filePath,
       serverName,
+      keyName: "url.remote",
       evidenceMasked: `remote_host=${parsed.hostname}`,
     });
   }
@@ -386,7 +399,6 @@ function checkCas005(filePath: string, serverName: string, config: McpServerConf
 
   for (const arg of args) {
     const trimmed = arg.trim();
-    // Broad directory patterns
     const isRoot = trimmed === "/" || trimmed === "C:\\" || trimmed === "C:/" || trimmed === "c:\\" || trimmed === "c:/";
     const isHome = trimmed === "~" || trimmed === "$HOME" || trimmed === "%USERPROFILE%" || trimmed === "%HOMEPATH%";
     const isBroadUnix = trimmed.startsWith("/home") || trimmed.startsWith("/Users");
@@ -397,10 +409,11 @@ function checkCas005(filePath: string, serverName: string, config: McpServerConf
         ruleId: "CAS-005",
         severity: "high",
         title: `Broad filesystem scope argument: "${trimmed}"`,
-        whyItMatters: `Granting access to the filesystem root ("${trimmed}") allows the AI model and external tools to read all private user documents, SSH keys, credentials, and system files.`,
+        whyItMatters: `Granting access to the filesystem root or home directory ("${trimmed}") allows reading private user documents, SSH keys, and system files.`,
         suggestedFix: `Restrict tool directory scope to the current workspace project: "./"`,
         file: filePath,
         serverName,
+        keyName: "args.scope",
         evidenceMasked: `arg=${trimmed}`,
       });
       break;
@@ -418,16 +431,16 @@ function checkCas006(filePath: string, serverName: string, config: McpServerConf
   const args = (config.args || []).map((a) => String(a));
   const fullArgs = args.join(" ");
 
-  // Critical: --privileged or docker.sock binding
   if (args.includes("--privileged")) {
     findings.push({
       ruleId: "CAS-006",
       severity: "critical",
       title: `Docker container running in privileged mode (--privileged)`,
-      whyItMatters: `Privileged containers disable all security isolation, granting full root access to host devices and kernel capabilities.`,
+      whyItMatters: `Privileged containers disable security isolation, granting full root access to host devices and kernel capabilities.`,
       suggestedFix: `Remove --privileged and grant only strictly required capabilities (--cap-add).`,
       file: filePath,
       serverName,
+      keyName: "args.privileged",
       evidenceMasked: `docker ... --privileged`,
     });
   }
@@ -441,11 +454,11 @@ function checkCas006(filePath: string, serverName: string, config: McpServerConf
       suggestedFix: `Remove docker.sock volume mount to maintain host container boundary isolation.`,
       file: filePath,
       serverName,
+      keyName: "args.docker_sock",
       evidenceMasked: `volume mount: /var/run/docker.sock`,
     });
   }
 
-  // High: host root volume mount or host network/pid
   if (fullArgs.includes("-v /:/") || fullArgs.includes("--volume /:/")) {
     findings.push({
       ruleId: "CAS-006",
@@ -455,6 +468,7 @@ function checkCas006(filePath: string, serverName: string, config: McpServerConf
       suggestedFix: `Mount only project directory: "-v ./:/app"`,
       file: filePath,
       serverName,
+      keyName: "args.root_mount",
       evidenceMasked: `-v /:/`,
     });
   }
@@ -468,6 +482,7 @@ function checkCas006(filePath: string, serverName: string, config: McpServerConf
       suggestedFix: `Use bridge network isolation with explicit port bindings.`,
       file: filePath,
       serverName,
+      keyName: "args.network_host",
       evidenceMasked: `--network host`,
     });
   }
@@ -482,7 +497,6 @@ function checkCas007(filePath: string, serverName: string, config: McpServerConf
 
   const SENSITIVE_ACTIONS = ["write", "edit", "execute", "exec", "terminal", "bash", "shell", "delete", "remove", "rm"];
 
-  // 1. Wildcard approval
   if (autoApprove === true || (Array.isArray(autoApprove) && autoApprove.includes("*"))) {
     findings.push({
       ruleId: "CAS-007",
@@ -492,12 +506,12 @@ function checkCas007(filePath: string, serverName: string, config: McpServerConf
       suggestedFix: `Remove wildcard and require human-in-the-loop confirmation for dangerous operations.`,
       file: filePath,
       serverName,
+      keyName: "autoApprove",
       evidenceMasked: `autoApprove: *`,
     });
     return;
   }
 
-  // 2. Specific tools approved
   if (Array.isArray(autoApprove) && autoApprove.length > 0) {
     const dangerousTools = autoApprove.filter((tool) =>
       SENSITIVE_ACTIONS.some((act) => String(tool).toLowerCase().includes(act))
@@ -512,6 +526,7 @@ function checkCas007(filePath: string, serverName: string, config: McpServerConf
         suggestedFix: `Enforce interactive confirmation for destructive tools: [${dangerousTools.join(", ")}]`,
         file: filePath,
         serverName,
+        keyName: "autoApprove",
         evidenceMasked: `autoApprove: [${dangerousTools.join(", ")}]`,
       });
     } else {
@@ -523,6 +538,7 @@ function checkCas007(filePath: string, serverName: string, config: McpServerConf
         suggestedFix: `Audit approved tools to ensure read-only safety.`,
         file: filePath,
         serverName,
+        keyName: "autoApprove",
         evidenceMasked: `autoApprove: [${autoApprove.slice(0, 3).join(", ")}${autoApprove.length > 3 ? "..." : ""}]`,
       });
     }

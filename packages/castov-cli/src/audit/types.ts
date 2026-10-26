@@ -10,6 +10,7 @@ export interface Finding {
   line?: number;
   column?: number;
   serverName?: string;
+  keyName?: string;
   evidenceMasked?: string;
   fingerprint?: string;
   isBaselineSuppressed?: boolean;
@@ -34,6 +35,7 @@ export interface McpServerConfig {
   autoApprove?: string[] | boolean;
   alwaysAllow?: string[] | boolean;
   transport?: string;
+  description?: string;
   [key: string]: unknown;
 }
 
@@ -60,6 +62,7 @@ export interface AuditOptions {
   failOn?: "critical" | "high" | "medium" | "low" | "none";
   ignoreRules?: string[];
   maxDepth?: number;
+  maxEnvVars?: number;
   noGit?: boolean;
   baselineFile?: string;
   saveBaselineFile?: string;
@@ -68,11 +71,21 @@ export interface AuditOptions {
   useGitleaks?: boolean;
 }
 
+export interface BaselineServerEntry {
+  client: string;
+  scope: "project" | "user";
+  serverName: string;
+  file: string; // relative path with '/'
+  definitionHash: string;
+  coreExecutionHash: string;
+}
+
 export interface BaselineData {
   schemaVersion: "1.0.0";
   createdAt: string;
   targetPath: string;
   fingerprints: string[];
+  servers?: Record<string, BaselineServerEntry>;
 }
 
 export interface AuditResult {
@@ -95,8 +108,8 @@ export const ALL_RULES_METADATA: Record<string, RuleDefinition> = {
     id: "CAS-001",
     title: "Hardcoded Secret in Server Config",
     severity: "critical",
-    whyItMatters: "Exposes live credentials directly in plain text configuration files committed to source control.",
-    suggestedFix: "Replace hardcoded secret with client-specific environment variable references.",
+    whyItMatters: "Exposes live credentials directly in plain text configuration files.",
+    suggestedFix: "Keep secrets outside configuration files and git, and use the client's documented variable reference mechanism.",
     securitySeverity: 9.5,
   },
   "CAS-002": {
@@ -149,66 +162,74 @@ export const ALL_RULES_METADATA: Record<string, RuleDefinition> = {
   },
   "CAS-008": {
     id: "CAS-008",
-    title: ".env File Committed or Unignored",
-    severity: "high",
-    whyItMatters: "Plaintext .env files in project root risk accidental git commits and leakage into AI context.",
-    suggestedFix: "Add .env to .gitignore and remove it from git tracking if tracked.",
-    securitySeverity: 8.2,
+    title: ".env Present Without AI Agent Ignore Mechanism",
+    severity: "medium",
+    whyItMatters: "Plaintext .env files without an agent ignore file (.cursorignore, .claudeignore, .aiignore) can be indexed or read into LLM context.",
+    suggestedFix: "Add .env* to .cursorignore / .claudeignore to prevent AI coding agents from ingesting local secrets.",
+    securitySeverity: 5.5,
   },
   "CAS-009": {
     id: "CAS-009",
-    title: "Missing .env.example or Leaked Secret in Example",
-    severity: "medium",
-    whyItMatters: "Projects without .env.example confuse onboarding, while example files with real secrets leak credentials.",
-    suggestedFix: "Provide a .env.example with dummy values, ensuring no real keys are committed.",
-    securitySeverity: 5.0,
+    title: "Literal Secret in Config or Git-Tracked/Unignored .env",
+    severity: "high",
+    whyItMatters: "Hardcoded secrets in environment/config files or .env files tracked/unignored by Git risk leaking credentials into version history.",
+    suggestedFix: "Add .env* to .gitignore, remove tracked .env files with git rm --cached, and replace literal secrets with placeholders.",
+    securitySeverity: 8.5,
   },
   "CAS-010": {
     id: "CAS-010",
-    title: "AI Rule File Credential Leak or Dangerous Instruction",
-    severity: "high",
-    whyItMatters: "Rules files (.cursorrules, CLAUDE.md) ingested by AI agents may contain leaked keys or instructions disabling security guardrails.",
-    suggestedFix: "Remove plaintext keys and dangerous override directives from AI guideline files.",
-    securitySeverity: 7.9,
+    title: "Duplicate or Conflicting MCP Server Definition",
+    severity: "low",
+    whyItMatters: "Duplicate server names across project and user scopes lead to ambiguous tool dispatch and unexpected overrides.",
+    suggestedFix: "Rename conflicting MCP servers to ensure unique identifiers across scopes.",
+    securitySeverity: 3.0,
   },
   "CAS-011": {
     id: "CAS-011",
-    title: "Conflicting MCP Server Names",
-    severity: "medium",
-    whyItMatters: "Duplicate server names across project and user configs lead to ambiguous tool dispatch and unexpected overrides.",
-    suggestedFix: "Rename conflicting MCP servers to ensure unique identifiers.",
-    securitySeverity: 4.5,
+    title: "MCP Server Baseline Drift (Potential Rug Pull)",
+    severity: "high",
+    whyItMatters: "A server's executable command, arguments, endpoint URL, or presence changed relative to the approved security baseline.",
+    suggestedFix: "Review the server configuration diff against the approved baseline before running the tool.",
+    securitySeverity: 8.2,
   },
   "CAS-012": {
     id: "CAS-012",
-    title: "Syntax Error or Unparseable Config",
-    severity: "medium",
-    whyItMatters: "Configuration file contains syntax errors or invalid formatting preventing tool loading.",
+    title: "Unparseable Configuration File",
+    severity: "info",
+    whyItMatters: "Configuration file contains syntax errors or invalid formatting preventing tool analysis and loading.",
     suggestedFix: "Fix JSON syntax errors, ensure balanced brackets and valid quotes.",
-    securitySeverity: 4.0,
+    securitySeverity: 2.0,
   },
   "CAS-013": {
     id: "CAS-013",
     title: "Insecure or Deprecated Transport",
     severity: "medium",
     whyItMatters: "Using unencrypted or deprecated transport protocols allows eavesdropping on agent-tool communications.",
-    suggestedFix: "Use standard stdio or TLS-secured SSE transport protocols.",
+    suggestedFix: "Use standard stdio or TLS-secured HTTPS/WSS transport protocols.",
     securitySeverity: 6.0,
   },
   "CAS-014": {
     id: "CAS-014",
     title: "Missing or Unresolvable Command Binary",
     severity: "low",
-    whyItMatters: "The command specified for the MCP server cannot be found on PATH, causing agent startup failures.",
-    suggestedFix: "Ensure executable is installed and available in the system PATH.",
+    whyItMatters: "The command path specified for the MCP server does not exist on disk, causing startup failures.",
+    suggestedFix: "Ensure the target executable path exists and is built before launching the MCP server.",
     securitySeverity: 2.5,
   },
   "CAS-015": {
     id: "CAS-015",
     title: "Excessive Environment Variable Pass-Through",
-    severity: "medium",
-    whyItMatters: "Passing wildcard or entire host environment to child tools can leak unrelated system credentials.",
+    severity: "low",
+    whyItMatters: "Passing wildcard or excessive environment variables to child tools violates least privilege and increases secret exposure surface.",
     suggestedFix: "Explicitly declare only the minimal required environment variables.",
-    securitySeverity: 6.5,
+    securitySeverity: 3.5,
+  },
+  "CAS-016": {
+    id: "CAS-016",
+    title: "Hidden Unicode/Bidi Characters or Override Heuristics in AI Rules",
+    severity: "high",
+    whyItMatters: "Zero-width, bidirectional control, or tag characters and prompt override directives in AI rule files can hide malicious instructions from human reviewers.",
+    suggestedFix: "Strip all hidden Unicode/Bidi/Tag characters and remove unsafe guardrail bypass instructions.",
+    securitySeverity: 8.8,
   },
 };

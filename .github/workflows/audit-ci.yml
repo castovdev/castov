@@ -2,9 +2,14 @@ name: Castov Multi-Platform CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, audit-hardening ]
   pull_request:
     branches: [ main ]
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
 
 jobs:
   test-cross-platform:
@@ -35,6 +40,19 @@ jobs:
         working-directory: packages/castov-cli
         run: npm run build
 
-      - name: Run Test Suite (Core CLI + Audit CAS-001..007)
+      - name: Run Test Suite (Core CLI + Audit CAS-001..016)
         working-directory: packages/castov-cli
         run: npm test
+
+      - name: Generate Sample SARIF Report
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
+        working-directory: packages/castov-cli
+        run: npm run gen:sample
+
+      - name: Upload SARIF to GitHub Code Scanning (Optional Verification)
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: packages/castov-cli/sample/audit-report.sarif
+          category: castov-audit-sample

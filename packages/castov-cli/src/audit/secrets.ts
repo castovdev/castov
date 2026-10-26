@@ -1,13 +1,16 @@
 /**
  * Secret Detection & Strict Masking Engine.
- * 
- * Masking Guarantee:
+ *
+ * Masking Rules:
  * - If length < 16: masked completely as `… (${len} chars)`
  * - If length >= 16: first 4 chars + `… (${len} chars)`
- * 
- * False-Positive Immunity:
- * - Immune to UUIDs (v4, v7), Git commit SHAs, localhost URLs, standard base64/hex digests,
- *   and environment variable substitutions (${env:X}, ${input:X}, $VAR).
+ *
+ * Contextual Safe-Value Rules (isSafeOrVariableReference):
+ * - Variable references must match the ENTIRE value (no partial substring bypass).
+ * - 40/64-char hex strings are NEVER safe if the key name contains SECRET, KEY, TOKEN, PASSWORD, PASS, CREDENTIAL, or AUTH;
+ *   they are only safe in revision/commit/sha/digest/hash contexts or Docker @sha256: digests.
+ * - UUIDs are NEVER safe if the key name contains SECRET, KEY, TOKEN, PASSWORD, PASS, CREDENTIAL, or AUTH.
+ * - localhost URLs are inspected for userinfo and query parameters; any secret-like query parameter or userinfo marks it unsafe.
  */
 
 export interface SecretPattern {
@@ -16,6 +19,10 @@ export interface SecretPattern {
   regex: RegExp;
   isKnownProvider: boolean;
 }
+
+export const SENSITIVE_KEY_REGEX = /(?:SECRET|KEY|TOKEN|PASSWORD|PASS|CREDENTIAL|AUTH)/i;
+export const SAFE_HASH_CONTEXT_REGEX = /(?:revision|commit|sha|digest|hash|checksum)/i;
+export const SAFE_UUID_CONTEXT_REGEX = /(?:^id$|_id$|^uuid$|session|trace|request|correlation|workspace|project|tenant|org|user_id|client_id)/i;
 
 /**
  * Strict Masking Utility:
@@ -32,36 +39,98 @@ export function maskSecret(val: string): string {
 }
 
 /**
- * Recognizes safe non-secret values to prevent false positives:
- * - Standard UUIDs
- * - Standalone hex digests / git commit SHAs
- * - Localhost URLs
- * - Environment variable substitution expressions (${env:X}, ${input:X}, $VAR, %VAR%)
+ * Checks whether a value is a pure, full-string environment/input variable reference or placeholder.
+ * Does NOT allow partial matches mixed with literal secrets (e.g., "Bearer real_secret ${X}").
  */
-export function isSafeOrVariableReference(val: string): boolean {
+export function isPureVariableReferenceOrPlaceholder(val: string): boolean {
   if (!val || typeof val !== "string") return true;
   const trimmed = val.trim();
+  if (!trimmed) return true;
 
-  // 1. Variable references (Full or with common prefixes like 'Bearer')
-  if (/\$\{[^}]+\}/.test(trimmed)) return true; // contains ${env:VAR}, ${input:VAR}
-  if (/^(?:Bearer\s+)?\$[A-Z0-9_]+$/i.test(trimmed)) return true; // $VAR or Bearer $VAR
-  if (/^%[A-Z0-9_]+%$/i.test(trimmed)) return true; // %VAR%
-  if (/^<[^>]+>$/.test(trimmed)) return true; // <YOUR_KEY_HERE>
-  if (/^(?:placeholder|your[-_]?key|todo|xxx+|\*{4,})$/i.test(trimmed)) return true;
+  // Full-value variable reference: ${env:VAR}, ${input:VAR}, ${VAR}, ${VAR:-default}, $VAR, %VAR%
+  // Optionally prefixed ONLY by "Bearer " or "Basic " with no other literal characters
+  if (/^(?:(?:Bearer|Basic)\s+)?\$\{[A-Za-z0-9_.:/-]+\}$/i.test(trimmed)) return true;
+  if (/^(?:(?:Bearer|Basic)\s+)?\$[A-Za-z_][A-Za-z0-9_]*$/i.test(trimmed)) return true;
+  if (/^(?:(?:Bearer|Basic)\s+)?%[A-Za-z_][A-Za-z0-9_]*%$/i.test(trimmed)) return true;
 
-  // 2. Standard UUIDs (e.g. 123e4567-e89b-12d3-a456-426614174000)
-  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+  // Explicit placeholders
+  if (/^<[^>]+>$/.test(trimmed)) return true;
+  if (/^(?:placeholder|your[-_]?[a-z0-9_]*[-_]?here|your[-_]?key|todo|changeme|xxx+|\*{4,})$/i.test(trimmed)) {
     return true;
   }
 
-  // 3. Standalone Git commit SHA-1 (40 hex chars) or SHA-256 (64 hex chars) without secret prefixes
+  return false;
+}
+
+/**
+ * Context-aware check for safe non-secret values:
+ * - Full-string variable references (${env:X}, ${input:X}, ${X}, $VAR, %VAR%)
+ * - Docker image @sha256:<64-hex> digests
+ * - 40/64-char hex ONLY when key/context is revision/commit/sha/digest/hash and NOT a sensitive key name
+ * - UUIDs ONLY when key/context does NOT contain SECRET/KEY/TOKEN/PASSWORD/PASS/CREDENTIAL/AUTH
+ * - Localhost URLs ONLY when they have no userinfo and no secret-like query parameters
+ */
+export function isSafeOrVariableReference(val: string, keyOrContext?: string): boolean {
+  if (!val || typeof val !== "string") return true;
+  const trimmed = val.trim();
+  if (!trimmed) return true;
+
+  const ctx = (keyOrContext || "").trim();
+  const isSensitiveKey = ctx.length > 0 && SENSITIVE_KEY_REGEX.test(ctx);
+
+  // 1. Full-string variable references or placeholders
+  if (isPureVariableReferenceOrPlaceholder(trimmed)) {
+    return true;
+  }
+
+  // 2. Docker image @sha256: digest reference (e.g. image@sha256:64hex)
+  if (!isSensitiveKey && /^(?:[a-z0-9._/-]+)?@sha256:[0-9a-f]{64}$/i.test(trimmed)) {
+    return true;
+  }
+
+  // 3. 40-char (SHA-1) or 64-char (SHA-256) hex strings:
+  // Never safe if key name is sensitive. Safe ONLY in revision/commit/sha/digest/hash contexts.
   if (/^[0-9a-f]{40}$/i.test(trimmed) || /^[0-9a-f]{64}$/i.test(trimmed)) {
-    return true;
+    if (isSensitiveKey) return false;
+    if (ctx.length > 0 && SAFE_HASH_CONTEXT_REGEX.test(ctx)) {
+      return true;
+    }
+    return false;
   }
 
-  // 4. Localhost or 127.0.0.1 URLs without credentials
-  if (/^https?:\/\/(?:localhost|127\.0\.0\.1|::1)(?::\d+)?(?:\/.*)?$/i.test(trimmed)) {
-    return true;
+  // 4. Standard UUIDs (v4/v7):
+  // Never safe if key name contains SECRET, KEY, TOKEN, PASSWORD, PASS, CREDENTIAL, or AUTH.
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+    if (isSensitiveKey) return false;
+    if (!ctx || SAFE_UUID_CONTEXT_REGEX.test(ctx) || SAFE_HASH_CONTEXT_REGEX.test(ctx)) {
+      return true;
+    }
+    return false;
+  }
+
+  // 5. Localhost URLs (http/https/ws/wss): inspect userinfo and query string
+  if (/^(?:https?|wss?):\/\/(?:localhost|127\.0\.0\.1|\[::1\]|::1)(?::\d+)?(?:\/.*)?$/i.test(trimmed)) {
+    try {
+      const parsed = new URL(trimmed);
+      // Reject if URL has username or password in userinfo
+      if (parsed.username || parsed.password) {
+        return false;
+      }
+      // Inspect query parameters
+      for (const [qKey, qVal] of parsed.searchParams.entries()) {
+        if (!qVal || isPureVariableReferenceOrPlaceholder(qVal)) continue;
+        if (SENSITIVE_KEY_REGEX.test(qKey)) {
+          return false;
+        }
+        // Also reject if query param value matches any known provider secret or long token
+        if (matchesKnownProviderPattern(qVal) !== null) {
+          return false;
+        }
+      }
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   return false;
@@ -70,7 +139,7 @@ export function isSafeOrVariableReference(val: string): boolean {
 export const isVariableReference = isSafeOrVariableReference;
 
 /**
- * Reused & expanded secret detection patterns
+ * Known provider and structural secret patterns
  */
 export const SECRET_PATTERNS: SecretPattern[] = [
   // 1. AWS Access Key ID
@@ -84,7 +153,7 @@ export const SECRET_PATTERNS: SecretPattern[] = [
   {
     name: "Stripe Live Secret Key",
     provider: "Stripe",
-    regex: /\b(?:sk_live|rk_live)_[0-9a-zA-Z]{24,}\b/,
+    regex: /\b(?:sk|rk)_live_[0-9a-zA-Z]{24,}\b/,
     isKnownProvider: true,
   },
   // 3. OpenAI API Key
@@ -152,10 +221,10 @@ export const SECRET_PATTERNS: SecretPattern[] = [
   {
     name: "Database Connection URI with Password",
     provider: "Database",
-    regex: /(?:postgres|postgresql|mysql|mongodb(?:\+srv)?|redis|rediss):\/\/[^:]+:[^@\s]{3,}@[^\s"']+/,
+    regex: /(?:postgres|postgresql|mysql|mongodb(?:\+srv)?|redis|rediss):\/\/[^:\s/]+:([^@\s]{3,})@[^\s"']+/,
     isKnownProvider: true,
   },
-  // 11. JSON Web Token (JWT) - requires three valid base64 segments
+  // 11. JSON Web Token (JWT) - requires three valid base64url segments
   {
     name: "JSON Web Token (JWT)",
     provider: "JWT",
@@ -172,7 +241,7 @@ export const SECRET_PATTERNS: SecretPattern[] = [
 ];
 
 /**
- * Generic Sensitive Key Names (e.g. in env or config)
+ * Generic Sensitive Key Names (e.g. in env, headers, or query params)
  */
 export const SENSITIVE_KEY_NAMES = [
   "API_KEY",
@@ -184,8 +253,12 @@ export const SENSITIVE_KEY_NAMES = [
   "BEARER_TOKEN",
   "PASSWORD",
   "PASSWD",
+  "PASS",
   "PRIVATE_KEY",
+  "CREDENTIAL",
   "CREDENTIALS",
+  "TOKEN",
+  "AUTH",
 ];
 
 export interface SecretMatch {
@@ -196,18 +269,58 @@ export interface SecretMatch {
   masked: string;
 }
 
-/**
- * Detect secrets in a string. Returns matches with strictly masked representations.
- */
-export function detectSecrets(text: string): SecretMatch[] {
-  if (!text || typeof text !== "string") return [];
-  if (isSafeOrVariableReference(text)) return [];
-
-  const matches: SecretMatch[] = [];
-
+function matchesKnownProviderPattern(text: string): SecretMatch | null {
   for (const pat of SECRET_PATTERNS) {
     const match = pat.regex.exec(text);
     if (match) {
+      // For Database Connection URI with password capture group, verify password isn't a pure variable ref
+      if (pat.provider === "Database" && match[1]) {
+        if (isPureVariableReferenceOrPlaceholder(match[1])) {
+          continue;
+        }
+        // Mask the URI safely so neither password nor full URI is exposed
+        const raw = match[0];
+        return {
+          patternName: pat.name,
+          provider: pat.provider,
+          isKnownProvider: pat.isKnownProvider,
+          rawMatched: raw,
+          masked: maskSecret(raw),
+        };
+      }
+      const raw = match[0];
+      return {
+        patternName: pat.name,
+        provider: pat.provider,
+        isKnownProvider: pat.isKnownProvider,
+        rawMatched: raw,
+        masked: maskSecret(raw),
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * Detect secrets in a string, optionally considering the key/field name context.
+ * Returns matches with strictly masked representations.
+ */
+export function detectSecrets(text: string, keyOrContext?: string): SecretMatch[] {
+  if (!text || typeof text !== "string") return [];
+  const trimmed = text.trim();
+  if (!trimmed) return [];
+
+  if (isSafeOrVariableReference(trimmed, keyOrContext)) return [];
+
+  const matches: SecretMatch[] = [];
+
+  // 1. Check known provider patterns
+  for (const pat of SECRET_PATTERNS) {
+    const match = pat.regex.exec(trimmed);
+    if (match) {
+      if (pat.provider === "Database" && match[1]) {
+        if (isPureVariableReferenceOrPlaceholder(match[1])) continue;
+      }
       const raw = match[0];
       matches.push({
         patternName: pat.name,
@@ -216,6 +329,90 @@ export function detectSecrets(text: string): SecretMatch[] {
         rawMatched: raw,
         masked: maskSecret(raw),
       });
+    }
+  }
+
+  if (matches.length > 0) return matches;
+
+  // 2. Check URL userinfo & query parameters for embedded secrets (including localhost)
+  if (/^(?:https?|wss?):\/\//i.test(trimmed)) {
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.password && !isPureVariableReferenceOrPlaceholder(parsed.password)) {
+        matches.push({
+          patternName: "URL Userinfo Password",
+          provider: "URL",
+          isKnownProvider: false,
+          rawMatched: parsed.password,
+          masked: maskSecret(parsed.password),
+        });
+      }
+      for (const [qKey, qVal] of parsed.searchParams.entries()) {
+        if (!qVal || isPureVariableReferenceOrPlaceholder(qVal)) continue;
+        if (SENSITIVE_KEY_REGEX.test(qKey) && qVal.trim().length >= 6) {
+          matches.push({
+            patternName: `Secret in URL query parameter (${qKey})`,
+            provider: "URL Query",
+            isKnownProvider: false,
+            rawMatched: qVal,
+            masked: maskSecret(qVal),
+          });
+        }
+      }
+      if (matches.length > 0) return matches;
+    } catch {
+      // Not a valid standard URL; fall through
+    }
+  }
+
+  // 3. Check Bearer / Basic authorization strings containing literal tokens (even if mixed with ${X})
+  const bearerMatch = /^(?:Bearer|Basic)\s+(.+)$/i.exec(trimmed);
+  if (bearerMatch) {
+    const tokenPart = bearerMatch[1].trim();
+    if (!isPureVariableReferenceOrPlaceholder(tokenPart) && tokenPart.length >= 6) {
+      matches.push({
+        patternName: "Hardcoded Authorization Bearer/Basic Token",
+        provider: "HTTP Auth",
+        isKnownProvider: false,
+        rawMatched: tokenPart,
+        masked: maskSecret(tokenPart),
+      });
+      return matches;
+    }
+  }
+
+  // 4. Context-sensitive detection: when keyOrContext contains SECRET, KEY, TOKEN, PASSWORD, PASS, CREDENTIAL, or AUTH
+  const ctx = (keyOrContext || "").trim();
+  if (ctx && SENSITIVE_KEY_REGEX.test(ctx)) {
+    if (/^[0-9a-f]{40}$/i.test(trimmed) || /^[0-9a-f]{64}$/i.test(trimmed)) {
+      matches.push({
+        patternName: `Hex Secret in ${ctx}`,
+        provider: "Generic Secret",
+        isKnownProvider: false,
+        rawMatched: trimmed,
+        masked: maskSecret(trimmed),
+      });
+      return matches;
+    }
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+      matches.push({
+        patternName: `UUID Credential in ${ctx}`,
+        provider: "Generic Secret",
+        isKnownProvider: false,
+        rawMatched: trimmed,
+        masked: maskSecret(trimmed),
+      });
+      return matches;
+    }
+    if (trimmed.length >= 8) {
+      matches.push({
+        patternName: `Literal Secret in ${ctx}`,
+        provider: "Generic Secret",
+        isKnownProvider: false,
+        rawMatched: trimmed,
+        masked: maskSecret(trimmed),
+      });
+      return matches;
     }
   }
 

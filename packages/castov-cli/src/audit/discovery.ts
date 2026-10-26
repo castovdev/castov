@@ -1,5 +1,5 @@
 import { readdirSync, lstatSync, readFileSync, existsSync } from "node:fs";
-import { join, extname, basename, relative } from "node:path";
+import { join, basename, relative } from "node:path";
 import { execFileSync } from "node:child_process";
 import { PROJECT_MCP_CONFIG_PATHS, getUserMcpConfigPaths } from "../data/client-configs.js";
 import { parseJsonc } from "./jsonc.js";
@@ -32,6 +32,8 @@ export interface DiscoveryResult {
   envFiles: DiscoveredEnvFile[];
   hasGitignore: boolean;
   gitignoreContent: string;
+  hasAgentIgnore: boolean;
+  agentIgnoreContent: string;
   scannedFiles: string[];
   parseErrors: Finding[];
 }
@@ -41,13 +43,13 @@ export interface DiscoveryResult {
  */
 export function detectClientName(filePath: string): string {
   const norm = filePath.replace(/\\/g, "/").toLowerCase();
+  if (norm.includes("saoudrizwan.claude-dev") || norm.includes("cline_mcp_settings.json") || norm.includes("/.cline/")) return "Cline";
   if (norm.includes("/.cursor/") || norm.endsWith(".cursor/mcp.json")) return "Cursor";
   if (norm.includes("claude_desktop_config.json") || norm.includes("/claude/claude_desktop")) return "Claude Desktop";
-  if (norm.endsWith(".claude.json")) return "Claude Code";
-  if (norm.includes("saoudrizwan.claude-dev") || norm.includes("cline_mcp_settings.json")) return "Cline";
+  if (norm.endsWith("/.claude.json") || norm === ".claude.json" || norm.endsWith("/.mcp.json") || norm === ".mcp.json") return "Claude Code";
+  if (norm.includes("/.vscode/mcp.json") || norm.endsWith(".vscode/mcp.json")) return "VS Code";
   if (norm.includes("/.zed/") || norm.includes("/zed/settings.json")) return "Zed";
-  if (norm.includes(".windsurf")) return "Windsurf";
-  if (norm.includes("/.vscode/")) return "VS Code";
+  if (norm.includes(".windsurf") || norm.includes("windsurf/mcp_config.json")) return "Windsurf";
   return basename(filePath);
 }
 
@@ -112,6 +114,23 @@ export function discoverConfigFiles(
     }
   }
 
+  // Check AI Agent Ignore files (.cursorignore, .claudeignore, .aiignore, .windsurfignore, .copilotignore)
+  const AGENT_IGNORE_FILES = [".cursorignore", ".claudeignore", ".aiignore", ".windsurfignore", ".copilotignore"];
+  let hasAgentIgnore = false;
+  const agentIgnoreChunks: string[] = [];
+  for (const igFile of AGENT_IGNORE_FILES) {
+    const igPath = join(targetDir, igFile);
+    if (existsSync(igPath)) {
+      try {
+        agentIgnoreChunks.push(readFileSync(igPath, "utf8"));
+        hasAgentIgnore = true;
+      } catch {
+        // ignore
+      }
+    }
+  }
+  const agentIgnoreContent = agentIgnoreChunks.join("\n");
+
   // Helper to test if a file is tracked in git (completely offline check)
   const isTrackedByGit = (fullPath: string): boolean => {
     if (options.noGit) return false;
@@ -152,11 +171,12 @@ export function discoverConfigFiles(
     } catch {
       parseErrors.push({
         ruleId: "CAS-012",
-        severity: "medium",
+        severity: "info",
         title: "Unreadable configuration file",
         whyItMatters: "File exists but could not be read due to permission or I/O failure.",
         suggestedFix: "Check read permissions for this configuration file.",
         file: fullPath,
+        keyName: "parse_error",
       });
       return;
     }
@@ -186,11 +206,12 @@ export function discoverConfigFiles(
     if (error || !data) {
       parseErrors.push({
         ruleId: "CAS-012",
-        severity: "medium",
+        severity: "info",
         title: "Unparseable or invalid JSON configuration",
         whyItMatters: "Configuration file contains syntax errors or invalid formatting that may prevent the AI agent from loading tools.",
         suggestedFix: "Fix JSON syntax errors, ensure balanced brackets and valid quotes.",
         file: fullPath,
+        keyName: "parse_error",
       });
       return;
     }
@@ -317,6 +338,8 @@ export function discoverConfigFiles(
     envFiles,
     hasGitignore,
     gitignoreContent,
+    hasAgentIgnore,
+    agentIgnoreContent,
     scannedFiles,
     parseErrors,
   };

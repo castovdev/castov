@@ -64,6 +64,7 @@
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "npm run clean && tsc -p tsconfig.json",
     "test": "node --test test/cli.test.mjs test/audit.test.mjs",
+    "gen:sample": "npm run build && node scripts/gen-sample.mjs",
     "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
