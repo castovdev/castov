@@ -4,10 +4,6 @@ import { getClientIp } from "@/lib/rate-limiter";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 const MAX_BODY_BYTES = 16 * 1024; // 16 KB
-const PEPPER_SECRET =
-  process.env.TELEMETRY_PEPPER ||
-  process.env.SECRET_VAULT_KEY ||
-  "castov_mcp_pepper_2026_default_salt";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SAFE_STRING_REGEX = /^[a-zA-Z0-9_\-\. /]+$/;
@@ -16,50 +12,82 @@ const TOOL_NAME_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
 const ALLOWED_EVENT_TYPES = new Set(["initialize", "tools_aggregate", "cli_ping", "error"]);
 const ALLOWED_OS_FAMILIES = new Set(["darwin", "win32", "linux", "other"]);
 
+// STRICT ALLOWLIST for error codes: NEVER accept or store raw error messages, stack traces, or file paths
+const ALLOWED_ERROR_CODES = new Set([
+  "E_SYNTAX",
+  "E_TIMEOUT",
+  "E_VALIDATION",
+  "E_RATE_LIMIT",
+  "E_NOT_FOUND",
+  "E_INTERNAL",
+  "E_NETWORK",
+  "E_IO",
+  "E_TOOL_EXEC",
+  "E_UNKNOWN",
+]);
+
 // Known bots regex
 const BOT_USER_AGENT_REGEX =
   /googlebot|bingbot|yandex|duckduckbot|baiduspider|petalbot|semrush|ahrefs|mj12bot|dotbot|screaming\s*frog/i;
 
-// In-memory rate limiting map for install_hash and IP
-interface RateLimitEntry {
+// In-memory fallback rate limiting map (only used if remote Postgres RPC fails or in tests)
+interface MemoryRateLimitEntry {
   timestamps: number[];
 }
-const MCP_RATE_LIMIT = new Map<string, RateLimitEntry>();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 60;
+const MEMORY_RATE_LIMIT = new Map<string, MemoryRateLimitEntry>();
 
-function isRateLimited(key: string): boolean {
+function isRateLimitedInMemory(key: string, limit = 60, windowMs = 60000): boolean {
   const now = Date.now();
-  let entry = MCP_RATE_LIMIT.get(key);
+  let entry = MEMORY_RATE_LIMIT.get(key);
   if (!entry) {
     entry = { timestamps: [] };
-    MCP_RATE_LIMIT.set(key, entry);
+    MEMORY_RATE_LIMIT.set(key, entry);
   }
 
-  entry.timestamps = entry.timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  if (entry.timestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+  entry.timestamps = entry.timestamps.filter((t) => now - t < windowMs);
+  if (entry.timestamps.length >= limit) {
     return true;
   }
   entry.timestamps.push(now);
 
-  // Periodic eviction
-  if (MCP_RATE_LIMIT.size > 5000) {
-    for (const [k, v] of MCP_RATE_LIMIT.entries()) {
-      v.timestamps = v.timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-      if (v.timestamps.length === 0) MCP_RATE_LIMIT.delete(k);
+  if (MEMORY_RATE_LIMIT.size > 2000) {
+    for (const [k, v] of MEMORY_RATE_LIMIT.entries()) {
+      v.timestamps = v.timestamps.filter((t) => now - t < windowMs);
+      if (v.timestamps.length === 0) MEMORY_RATE_LIMIT.delete(k);
     }
   }
 
   return false;
 }
 
+/**
+ * Atomic persistent rate limit check via Supabase table public.mcp_rate_limits.
+ * Shared across all Vercel serverless lambda instances.
+ */
+async function checkPersistentRateLimit(key: string, limit = 60, windowSeconds = 60): Promise<boolean> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase.rpc("check_and_increment_mcp_rate_limit", {
+      p_key: key,
+      p_limit: limit,
+      p_window_seconds: windowSeconds,
+    });
+    if (!error && typeof data === "boolean") {
+      return data; // true = allowed, false = rate limited
+    }
+  } catch {
+    // fallback to memory
+  }
+  return !isRateLimitedInMemory(key, limit, windowSeconds * 1000);
+}
+
 function sha256(data: string): string {
   return crypto.createHash("sha256").update(data).digest("hex");
 }
 
-function getDailySalt(): string {
+function getDailySalt(pepperSecret: string): string {
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
-  return sha256(`${PEPPER_SECRET}:${today}`);
+  return sha256(`${pepperSecret}:${today}`);
 }
 
 interface ToolAggregateItem {
@@ -71,7 +99,16 @@ interface ToolAggregateItem {
 
 export async function POST(request: Request) {
   try {
-    // 1. Content-Length Guard
+    // 1. FAIL CLOSED: Require TELEMETRY_PEPPER environment variable
+    const pepperSecret = process.env.TELEMETRY_PEPPER;
+    if (!pepperSecret || pepperSecret.trim().length < 16) {
+      return NextResponse.json(
+        { ok: false, error: "Server telemetry unconfigured (missing TELEMETRY_PEPPER)" },
+        { status: 503 }
+      );
+    }
+
+    // 2. Content-Length & Body Size Guard (16 KB max)
     const contentLength = Number(request.headers.get("content-length") || "0");
     if (contentLength > MAX_BODY_BYTES) {
       return NextResponse.json({ ok: false, error: "Payload too large" }, { status: 413 });
@@ -93,7 +130,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Invalid payload body" }, { status: 400 });
     }
 
-    // 2. Strict Schema Validation
+    // 3. Strict Schema Validation
     const {
       event_type,
       anon_id,
@@ -107,6 +144,7 @@ export async function POST(request: Request) {
       tool_name,
       duration_ms,
       success,
+      error_code,
       tools,
     } = body;
 
@@ -121,8 +159,8 @@ export async function POST(request: Request) {
       }
     }
 
-    // Validate string fields length and charset
-    const validateField = (name: string, val: unknown, maxLen: number) => {
+    // Validate string fields length and safe charset
+    const validateField = (val: unknown, maxLen: number) => {
       if (val === undefined || val === null) return true;
       if (typeof val !== "string" || val.length > maxLen || !SAFE_STRING_REGEX.test(val)) {
         return false;
@@ -130,28 +168,29 @@ export async function POST(request: Request) {
       return true;
     };
 
-    if (!validateField("client_name", client_name, 64)) {
-      return NextResponse.json({ ok: false, error: "Invalid client_name" }, { status: 400 });
-    }
-    if (!validateField("client_version", client_version, 32)) {
-      return NextResponse.json({ ok: false, error: "Invalid client_version" }, { status: 400 });
-    }
-    if (!validateField("castov_version", castov_version, 32)) {
-      return NextResponse.json({ ok: false, error: "Invalid castov_version" }, { status: 400 });
-    }
-    if (!validateField("node_version", node_version, 32)) {
-      return NextResponse.json({ ok: false, error: "Invalid node_version" }, { status: 400 });
-    }
-    if (!validateField("command_name", command_name, 32)) {
-      return NextResponse.json({ ok: false, error: "Invalid command_name" }, { status: 400 });
-    }
-    if (!validateField("session_id", session_id, 64)) {
-      return NextResponse.json({ ok: false, error: "Invalid session_id" }, { status: 400 });
-    }
+    if (!validateField(client_name, 64)) return NextResponse.json({ ok: false, error: "Invalid client_name" }, { status: 400 });
+    if (!validateField(client_version, 32)) return NextResponse.json({ ok: false, error: "Invalid client_version" }, { status: 400 });
+    if (!validateField(castov_version, 32)) return NextResponse.json({ ok: false, error: "Invalid castov_version" }, { status: 400 });
+    if (!validateField(node_version, 32)) return NextResponse.json({ ok: false, error: "Invalid node_version" }, { status: 400 });
+    if (!validateField(command_name, 32)) return NextResponse.json({ ok: false, error: "Invalid command_name" }, { status: 400 });
+    if (!validateField(session_id, 64)) return NextResponse.json({ ok: false, error: "Invalid session_id" }, { status: 400 });
 
     let sanitizedOs: string = "other";
     if (typeof os_family === "string" && ALLOWED_OS_FAMILIES.has(os_family.toLowerCase())) {
       sanitizedOs = os_family.toLowerCase();
+    }
+
+    // Strict Error Event validation: allowlist code only, zero raw messages or stack traces accepted
+    let sanitizedErrorCode: string | null = null;
+    if (event_type === "error") {
+      if (error_code !== undefined && error_code !== null) {
+        if (typeof error_code !== "string" || !ALLOWED_ERROR_CODES.has(error_code)) {
+          return NextResponse.json({ ok: false, error: `Invalid error_code. Allowed: ${Array.from(ALLOWED_ERROR_CODES).join(", ")}` }, { status: 400 });
+        }
+        sanitizedErrorCode = error_code;
+      } else {
+        sanitizedErrorCode = "E_UNKNOWN";
+      }
     }
 
     // Validate tools array for 'tools_aggregate'
@@ -190,16 +229,15 @@ export async function POST(request: Request) {
       }
     }
 
-    // 3. Client IP & Bot Filtering
+    // 4. Client IP & Bot Filtering
     const clientIp = getClientIp(request);
     const userAgent = request.headers.get("user-agent") || "";
 
     if (BOT_USER_AGENT_REGEX.test(userAgent)) {
-      // Silently ignore bots without erroring
       return NextResponse.json({ ok: true, ignored: "bot" });
     }
 
-    // 4. Owner & Internal Traffic Exclusion (env-configurable)
+    // 5. Owner & Internal Traffic Exclusion (env-configurable)
     const excludedIps = (process.env.TELEMETRY_EXCLUDE_IPS || "")
       .split(",")
       .map((s) => s.trim().toLowerCase())
@@ -209,9 +247,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, ignored: "excluded_ip" });
     }
 
-    // 5. Identity & Cryptographic Hashing
-    // install_hash = SHA-256(anon_id + server_pepper)
-    const installHash = anon_id ? sha256(`${anon_id}:${PEPPER_SECRET}`) : null;
+    // 6. Identity & Cryptographic Hashing
+    // install_hash = SHA-256(anon_id + TELEMETRY_PEPPER)
+    const installHash = anon_id ? sha256(`${anon_id}:${pepperSecret}`) : null;
 
     if (installHash) {
       const excludedHashes = (process.env.TELEMETRY_EXCLUDE_INSTALL_HASHES || "")
@@ -224,19 +262,24 @@ export async function POST(request: Request) {
       }
     }
 
-    // visitor_hash = SHA-256(IP + User-Agent + daily_rotating_salt)
-    const visitorHash = sha256(`${clientIp}:${userAgent}:${getDailySalt()}`);
+    // visitor_hash = SHA-256(IP + User-Agent + daily_salt)
+    const visitorHash = sha256(`${clientIp}:${userAgent}:${getDailySalt(pepperSecret)}`);
     const sessionIdHash = session_id ? sha256(String(session_id)) : null;
 
-    // 6. Rate Limiting per IP & per install_hash
-    if (isRateLimited(`ip:${clientIp}`)) {
-      return NextResponse.json({ ok: false, error: "Rate limit exceeded" }, { status: 429 });
-    }
-    if (installHash && isRateLimited(`install:${installHash}`)) {
+    // 7. Persistent Rate Limiting across serverless instances (60 requests / minute)
+    const ipAllowed = await checkPersistentRateLimit(`ip:${clientIp}`, 60, 60);
+    if (!ipAllowed) {
       return NextResponse.json({ ok: false, error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    // 7. Insert Into Database (Never trust client timestamps, use server now())
+    if (installHash) {
+      const installAllowed = await checkPersistentRateLimit(`install:${installHash}`, 60, 60);
+      if (!installAllowed) {
+        return NextResponse.json({ ok: false, error: "Rate limit exceeded" }, { status: 429 });
+      }
+    }
+
+    // 8. Insert Into Database (Never trust client timestamps, use server now())
     try {
       const supabase = createAdminClient();
 
@@ -248,6 +291,7 @@ export async function POST(request: Request) {
           client_name: client_name || "unknown",
           client_version: client_version || null,
           tool_name: t.tool_name,
+          error_code: null,
           castov_version: castov_version || "1.5.0",
           os_family: sanitizedOs,
           node_version: node_version || null,
@@ -271,15 +315,16 @@ export async function POST(request: Request) {
           client_name: client_name || null,
           client_version: client_version || null,
           tool_name: typeof tool_name === "string" && TOOL_NAME_REGEX.test(tool_name) ? tool_name : null,
+          error_code: sanitizedErrorCode,
           castov_version: castov_version || "1.5.0",
           os_family: sanitizedOs,
           node_version: node_version || null,
           command_name: command_name || null,
           session_id_hash: sessionIdHash,
           call_count: 1,
-          error_count: success === false ? 1 : 0,
+          error_count: success === false || event_type === "error" ? 1 : 0,
           total_duration_ms: typeof duration_ms === "number" && duration_ms >= 0 ? Math.min(duration_ms, 100_000_000) : 0,
-          success: success !== false,
+          success: success !== false && event_type !== "error",
         };
 
         const { error: dbError } = await supabase.from("mcp_telemetry_events").insert(singleRow);
@@ -292,7 +337,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 });
   }
 }

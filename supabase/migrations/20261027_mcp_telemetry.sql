@@ -2,7 +2,7 @@
 -- Migration: 20261027_mcp_telemetry.sql
 -- Description: Privacy-Friendly Usage Analytics for Castov MCP Server and CLI
 -- Enables tracking MCP adoption, unique installs, tool execution stats,
--- and daily aggregation with automated 90-day retention cleanup.
+-- persistent atomic rate limiting, and daily aggregation with automated 90-day retention cleanup.
 -- ==============================================================================
 
 -- 1. Raw Telemetry Events Table
@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS public.mcp_telemetry_events (
     client_name TEXT,              -- e.g. 'claude-desktop', 'cursor', 'vscode', 'cli'
     client_version TEXT,           -- client version string from initialize clientInfo
     tool_name TEXT,                -- tool name for single tool events or primary tool
+    error_code TEXT CHECK (error_code IS NULL OR error_code IN ('E_SYNTAX', 'E_TIMEOUT', 'E_VALIDATION', 'E_RATE_LIMIT', 'E_NOT_FOUND', 'E_INTERNAL', 'E_NETWORK', 'E_IO', 'E_TOOL_EXEC', 'E_UNKNOWN')),
     castov_version TEXT,           -- e.g. '1.5.0'
     os_family TEXT,                -- 'darwin', 'win32', 'linux', 'other'
     node_version TEXT,             -- 'v20.x'
@@ -53,11 +54,21 @@ CREATE TABLE IF NOT EXISTS public.mcp_daily_aggregates (
 
 CREATE INDEX IF NOT EXISTS idx_mcp_daily_aggregates_date ON public.mcp_daily_aggregates (date DESC);
 
--- 3. Enable Row-Level Security
+-- 3. Persistent Serverless Rate Limiting Table
+CREATE TABLE IF NOT EXISTS public.mcp_rate_limits (
+    key TEXT PRIMARY KEY,
+    count INTEGER NOT NULL DEFAULT 1,
+    window_start TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+CREATE INDEX IF NOT EXISTS idx_mcp_rate_limits_window ON public.mcp_rate_limits (window_start);
+
+-- 4. Enable Row-Level Security
 ALTER TABLE public.mcp_telemetry_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mcp_daily_aggregates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.mcp_rate_limits ENABLE ROW LEVEL SECURITY;
 
--- 4. Strict Security Policies: Only Service Role can insert & read
+-- 5. Strict Security Policies: Only Service Role has direct access
 DROP POLICY IF EXISTS "Service role has full access to mcp_telemetry_events" ON public.mcp_telemetry_events;
 CREATE POLICY "Service role has full access to mcp_telemetry_events"
     ON public.mcp_telemetry_events
@@ -72,7 +83,60 @@ CREATE POLICY "Service role has full access to mcp_daily_aggregates"
     USING (auth.role() = 'service_role')
     WITH CHECK (auth.role() = 'service_role');
 
--- 5. Rollup and 90-Day Retention Cleanup Function
+DROP POLICY IF EXISTS "Service role has full access to mcp_rate_limits" ON public.mcp_rate_limits;
+CREATE POLICY "Service role has full access to mcp_rate_limits"
+    ON public.mcp_rate_limits
+    FOR ALL
+    USING (auth.role() = 'service_role')
+    WITH CHECK (auth.role() = 'service_role');
+
+-- 6. Atomic Persistent Rate Limiter Function for Serverless Lambdas
+CREATE OR REPLACE FUNCTION public.check_and_increment_mcp_rate_limit(
+    p_key TEXT,
+    p_limit INT DEFAULT 60,
+    p_window_seconds INT DEFAULT 60
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_now TIMESTAMPTZ := timezone('utc'::text, now());
+    v_count INT;
+    v_window_start TIMESTAMPTZ;
+BEGIN
+    SELECT count, window_start INTO v_count, v_window_start
+    FROM public.mcp_rate_limits
+    WHERE key = p_key
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        INSERT INTO public.mcp_rate_limits (key, count, window_start)
+        VALUES (p_key, 1, v_now)
+        ON CONFLICT (key) DO UPDATE
+        SET count = 1, window_start = v_now;
+        RETURN TRUE;
+    END IF;
+
+    IF v_now - v_window_start > (p_window_seconds || ' seconds')::INTERVAL THEN
+        UPDATE public.mcp_rate_limits
+        SET count = 1, window_start = v_now
+        WHERE key = p_key;
+        RETURN TRUE;
+    END IF;
+
+    IF v_count >= p_limit THEN
+        RETURN FALSE;
+    END IF;
+
+    UPDATE public.mcp_rate_limits
+    SET count = count + 1
+    WHERE key = p_key;
+    RETURN TRUE;
+END;
+$$;
+
+-- 7. Rollup and 90-Day Retention Cleanup Function
 CREATE OR REPLACE FUNCTION public.roll_up_mcp_telemetry_daily(target_date DATE DEFAULT (CURRENT_DATE - INTERVAL '1 day')::DATE)
 RETURNS TABLE(rolled_rows INTEGER, deleted_events INTEGER)
 LANGUAGE plpgsql
@@ -133,23 +197,10 @@ BEGIN
 
     GET DIAGNOSTICS d_count = ROW_COUNT;
 
-    RETURN QUERY SELECT r_count, d_count;
-END;
-$$;
+    -- Clean stale rate limit keys older than 1 hour
+    DELETE FROM public.mcp_rate_limits
+    WHERE window_start < (timezone('utc'::text, now()) - INTERVAL '1 hour');
 
--- 6. Schedule daily cron if pg_cron extension exists
-DO $$
-BEGIN
-    IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
-        PERFORM cron.schedule(
-            'castov_mcp_telemetry_rollup',
-            '15 2 * * *', -- Daily at 02:15 UTC
-            'SELECT public.roll_up_mcp_telemetry_daily();'
-        );
-    END IF;
-EXCEPTION
-    WHEN OTHERS THEN
-        -- Safely ignore if pg_cron is not configured in this project
-        NULL;
+    RETURN QUERY SELECT r_count, d_count;
 END;
 $$;

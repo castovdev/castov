@@ -35,6 +35,36 @@ function getAnonIdPath(): string {
   return join(getCastovDir(), "anon-id");
 }
 
+function getNoticeFlagPath(): string {
+  return join(getCastovDir(), ".telemetry-notice-shown");
+}
+
+/**
+ * One-time first-run notice displayed on stderr for non-mcp commands.
+ * STRICT: NEVER displayed in 'mcp' (stdio JSON-RPC must stay pure) or 'audit'.
+ */
+export function maybeShowFirstRunNotice(command?: string): void {
+  if (!command || command === "mcp" || command === "audit") return;
+  if (isTelemetryDisabled()) return;
+
+  try {
+    const flagFile = getNoticeFlagPath();
+    if (existsSync(flagFile)) return;
+
+    process.stderr.write(
+      "Anonymous usage stats enabled. Disable with CASTOV_TELEMETRY=0. Details: https://github.com/castovdev/castov/tree/main/packages/castov-cli#telemetry\n"
+    );
+
+    const dir = getCastovDir();
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true, mode: 0o700 });
+    }
+    writeFileSync(flagFile, new Date().toISOString(), { mode: 0o600 });
+  } catch {
+    // silent
+  }
+}
+
 /**
  * Returns the persistent anonymous install ID (~/.castov/anon-id).
  * Returns null if telemetry is disabled. Never collects machine name or usernames.
@@ -225,6 +255,10 @@ export class TelemetryClient {
     };
 
     this.postJson(payload).catch(() => {});
+  }
+
+  public maybeShowFirstRunNotice(commandName?: string): void {
+    maybeShowFirstRunNotice(commandName);
   }
 
   public destroy(): void {

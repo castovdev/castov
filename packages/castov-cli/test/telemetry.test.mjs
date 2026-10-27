@@ -206,6 +206,59 @@ test("CRITICAL GUARANTEE: 'castov audit' performs ZERO network requests and NEVE
   }
 });
 
+test("First-run telemetry notice: appears once on stderr for non-mcp commands, never in mcp or audit", () => {
+  const tmp = mkdtempSync(join(tmpdir(), "castov-notice-"));
+
+  try {
+    // 1. Running 'uuid' for the first time outputs notice on stderr
+    const r1 = spawnSync(process.execPath, [DIST_CLI, "uuid"], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        CASTOV_CONFIG_DIR: tmp,
+        CASTOV_TELEMETRY: "1",
+        DO_NOT_TRACK: "0",
+        CI: "0",
+      },
+    });
+    assert.equal(r1.status, 0);
+    assert.match(r1.stderr, /Anonymous usage stats enabled/i);
+    assert.equal(existsSync(join(tmp, ".telemetry-notice-shown")), true);
+
+    // 2. Running 'uuid' second time outputs NOTHING on stderr
+    const r2 = spawnSync(process.execPath, [DIST_CLI, "uuid"], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        CASTOV_CONFIG_DIR: tmp,
+        CASTOV_TELEMETRY: "1",
+        DO_NOT_TRACK: "0",
+        CI: "0",
+      },
+    });
+    assert.equal(r2.status, 0);
+    assert.equal(r2.stderr.trim(), "");
+
+    // 3. Brand new directory running 'audit' outputs NO notice on stderr
+    const tmpAudit = mkdtempSync(join(tmpdir(), "castov-audit-notice-"));
+    const rAudit = spawnSync(process.execPath, [DIST_CLI, "audit", "--format", "json", "--fail-on", "none"], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        CASTOV_CONFIG_DIR: tmpAudit,
+        CASTOV_TELEMETRY: "1",
+        DO_NOT_TRACK: "0",
+        CI: "0",
+      },
+    });
+    assert.doesNotMatch(rAudit.stderr, /Anonymous usage stats enabled/i);
+    assert.equal(existsSync(join(tmpAudit, ".telemetry-notice-shown")), false);
+    rmSync(tmpAudit, { recursive: true, force: true });
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 test("castov audit code path NEVER imports telemetry module", () => {
   const cliCode = readFileSync(DIST_CLI, "utf8");
   // 1. Static import check: cli.ts/cli.js must NOT statically import telemetry

@@ -3,11 +3,11 @@ import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function GET(request: Request) {
   try {
-    // 1. Authorization guard via CRON_SECRET or service role
+    // 1. Authorization guard via CRON_SECRET (fails closed if unconfigured or mismatched)
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
 

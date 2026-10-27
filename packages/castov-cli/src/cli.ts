@@ -632,6 +632,7 @@ async function main(argv: string[]): Promise<void> {
       const telemetryMod = await import("./telemetry.js");
       telemetry = telemetryMod.getTelemetry();
       if (command !== "mcp") {
+        telemetry.maybeShowFirstRunNotice(command);
         telemetry.trackCliPing(command);
       }
     } catch {

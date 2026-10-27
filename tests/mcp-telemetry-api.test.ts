@@ -1,8 +1,42 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { POST } from "@/app/api/analytics/mcp/route";
 import { GET as CRON_GET } from "@/app/api/cron/telemetry-cleanup/route";
+import { GET as STATS_GET } from "@/app/api/analytics/mcp/stats/route";
+
+const VALID_TEST_PEPPER = "test_super_secure_pepper_secret_123456789";
 
 describe("POST /api/analytics/mcp - Hardened Ingestion API", () => {
+  let prevPepper: string | undefined;
+
+  beforeEach(() => {
+    prevPepper = process.env.TELEMETRY_PEPPER;
+    process.env.TELEMETRY_PEPPER = VALID_TEST_PEPPER;
+  });
+
+  afterEach(() => {
+    if (prevPepper) process.env.TELEMETRY_PEPPER = prevPepper;
+    else delete process.env.TELEMETRY_PEPPER;
+  });
+
+  it("FAIL CLOSED: rejects with 503 if TELEMETRY_PEPPER is missing or too short", async () => {
+    delete process.env.TELEMETRY_PEPPER;
+
+    const req = new Request("http://localhost/api/analytics/mcp", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        event_type: "cli_ping",
+        anon_id: "11111111-2222-4333-8444-555555555555",
+        command_name: "uuid",
+      }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(503);
+    const json = await res.json();
+    expect(json.error).toMatch(/missing TELEMETRY_PEPPER/i);
+  });
+
   it("rejects oversized body (>16KB) with status 413", async () => {
     const huge = "a".repeat(17 * 1024);
     const req = new Request("http://localhost/api/analytics/mcp", {
@@ -43,6 +77,41 @@ describe("POST /api/analytics/mcp - Hardened Ingestion API", () => {
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.error).toMatch(/UUID/i);
+  });
+
+  it("strictly enforces error_code allowlist and rejects unapproved error text with status 400", async () => {
+    const req = new Request("http://localhost/api/analytics/mcp", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        event_type: "error",
+        anon_id: "11111111-2222-4333-8444-555555555555",
+        error_code: "RAW_LEAKED_PATH_C:/Users/secret/file.ts", // invalid freeform text
+      }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toMatch(/Invalid error_code/i);
+  });
+
+  it("accepts approved error_code from allowlist (e.g. E_TIMEOUT)", async () => {
+    const req = new Request("http://localhost/api/analytics/mcp", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        event_type: "error",
+        anon_id: "11111111-2222-4333-8444-555555555555",
+        error_code: "E_TIMEOUT",
+        command_name: "mcp",
+      }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.ok).toBe(true);
   });
 
   it("silently ignores requests from known web scrapers/bots", async () => {
@@ -94,9 +163,9 @@ describe("POST /api/analytics/mcp - Hardened Ingestion API", () => {
 });
 
 describe("GET /api/cron/telemetry-cleanup - Retention Endpoint", () => {
-  it("rejects unauthorized requests if CRON_SECRET is set", async () => {
+  it("rejects unauthorized requests if CRON_SECRET is missing or wrong", async () => {
     const prevSecret = process.env.CRON_SECRET;
-    process.env.CRON_SECRET = "super_secret_cron_token";
+    process.env.CRON_SECRET = "super_secret_cron_token_123";
 
     try {
       const req = new Request("http://localhost/api/cron/telemetry-cleanup", {
@@ -108,5 +177,15 @@ describe("GET /api/cron/telemetry-cleanup - Retention Endpoint", () => {
       if (prevSecret) process.env.CRON_SECRET = prevSecret;
       else delete process.env.CRON_SECRET;
     }
+  });
+});
+
+describe("GET /api/analytics/mcp/stats - Owner-Only Telemetry Dashboard API", () => {
+  it("SERVER-SIDE OWNER GUARD: returns 404 for unauthenticated or non-owner requests", async () => {
+    const req = new Request("http://localhost/api/analytics/mcp/stats");
+    const res = await STATS_GET(req);
+    expect(res.status).toBe(404);
+    const json = await res.json();
+    expect(json.ok).toBe(false);
   });
 });
