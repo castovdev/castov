@@ -219,7 +219,7 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
     return (
       <Link
         href="/login"
-        className="inline-flex items-center gap-1.5 h-9 px-3 text-xs sm:text-sm font-medium rounded-lg bg-field hover:bg-hover border border-line text-fg transition-colors"
+        className="inline-flex items-center gap-1.5 h-9 px-3 text-xs sm:text-sm font-semibold rounded-xl bg-field/60 hover:bg-hover/80 border border-line/70 hover:border-accent/40 text-fg transition-all shadow-2xs"
       >
         <UserIcon className="w-3.5 h-3.5 text-muted" />
         <span className="hidden sm:inline">Sign In</span>
@@ -233,7 +233,7 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          className="flex h-9 items-center gap-2 rounded-lg border border-line bg-field px-2 text-sm text-fg transition-colors hover:bg-hover focus:outline-none focus:ring-2 focus:ring-accent/40 cursor-pointer"
+          className="flex h-9 items-center gap-2 rounded-xl border border-line/70 hover:border-accent/40 bg-field/60 hover:bg-hover/80 px-2.5 text-sm text-fg transition-all focus:outline-none focus:ring-2 focus:ring-accent/40 cursor-pointer shadow-2xs"
           aria-expanded={open}
           aria-haspopup="menu"
           aria-label="User menu"
@@ -260,7 +260,7 @@ export function AuthNavButton({ mobile = false, onAction }: AuthNavButtonProps) 
         {open && (
           <div
             role="menu"
-            className="absolute right-0 top-full mt-2 w-60 rounded-xl border border-line bg-card/95 backdrop-blur-xl p-1.5 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95"
+            className="absolute right-0 top-full mt-2 w-60 rounded-2xl border border-line/80 bg-card/95 backdrop-blur-2xl p-1.5 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95"
           >
             {/* User Info Header */}
             <div className="px-3 py-2 border-b border-line/60 mb-1">

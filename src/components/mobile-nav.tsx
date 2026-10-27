@@ -22,7 +22,7 @@ export function MobileNav() {
     <div className="lg:hidden">
       <button
         type="button"
-        className="btn btn-secondary btn-sm"
+        className="flex items-center justify-center h-9 w-9 rounded-xl bg-field/60 hover:bg-hover/80 border border-line/70 hover:border-accent/40 text-muted hover:text-fg transition-all shadow-2xs cursor-pointer"
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={open ? "Close menu" : "Open menu"}
@@ -44,7 +44,7 @@ export function MobileNav() {
           <div className="mb-3">
             <button
               type="button"
-              className="flex w-full items-center justify-between rounded-lg bg-field px-3.5 py-2.5 text-sm text-muted border border-line hover:bg-hover hover:text-fg transition-colors"
+              className="flex w-full items-center justify-between rounded-xl bg-field/60 px-3.5 py-2.5 text-sm text-muted border border-line/70 hover:bg-hover/80 hover:text-fg transition-all cursor-pointer"
               onClick={() => {
                 setOpen(false);
                 window.dispatchEvent(new CustomEvent("open-command-palette"));
