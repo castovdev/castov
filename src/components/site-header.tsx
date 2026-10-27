@@ -216,7 +216,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-line bg-bg/95 backdrop-blur-md transition-colors">
-      <div className="layout-content flex h-14 items-center justify-between gap-3 sm:gap-4">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between gap-2.5 sm:gap-4">
         {/* Left: Mobile Nav + Brand Identity */}
         <div className="flex items-center gap-3 shrink-0">
           <MobileNav />
@@ -465,13 +465,13 @@ export function SiteHeader() {
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
-            className="flex items-center justify-between gap-2.5 h-9 w-9 sm:w-44 md:w-48 lg:w-52 xl:w-56 px-2.5 sm:px-3 text-xs text-muted hover:text-fg rounded-xl bg-field/60 hover:bg-hover/80 border border-line/70 hover:border-accent/40 transition-all cursor-pointer whitespace-nowrap shrink-0 group shadow-2xs"
+            className="flex items-center justify-between gap-2.5 h-9 w-9 sm:w-36 md:w-40 lg:w-44 xl:w-52 px-2.5 sm:px-3 text-xs text-muted hover:text-fg rounded-xl bg-field/60 hover:bg-hover/80 border border-line/70 hover:border-accent/40 transition-all cursor-pointer whitespace-nowrap shrink-0 group shadow-2xs"
             aria-label="Search tools (Ctrl+K)"
           >
             <div className="flex items-center gap-2 min-w-0">
               <Search className="w-3.5 h-3.5 text-muted group-hover:text-accent transition-colors shrink-0" />
               <span className="hidden sm:inline font-normal text-muted truncate">
-                Search tools...
+                Search...
               </span>
             </div>
             <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md border border-line/80 bg-card/80 px-1.5 py-0.5 font-mono text-[10px] text-muted font-medium whitespace-nowrap shrink-0 shadow-2xs">
@@ -485,7 +485,7 @@ export function SiteHeader() {
             href="https://github.com/castovdev/castov"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden md:flex items-center justify-center h-9 w-9 rounded-xl bg-field/60 hover:bg-hover/80 border border-line/70 hover:border-accent/40 text-muted hover:text-fg transition-all shrink-0 cursor-pointer shadow-2xs"
+            className="hidden xl:flex items-center justify-center h-9 w-9 rounded-xl bg-field/60 hover:bg-hover/80 border border-line/70 hover:border-accent/40 text-muted hover:text-fg transition-all shrink-0 cursor-pointer shadow-2xs"
             aria-label="Castov on GitHub"
             title="View source on GitHub"
           >
