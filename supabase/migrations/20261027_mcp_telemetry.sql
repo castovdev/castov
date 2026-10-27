@@ -99,6 +99,7 @@ CREATE OR REPLACE FUNCTION public.check_and_increment_mcp_rate_limit(
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
     v_now TIMESTAMPTZ := timezone('utc'::text, now());
@@ -141,6 +142,7 @@ CREATE OR REPLACE FUNCTION public.roll_up_mcp_telemetry_daily(target_date DATE D
 RETURNS TABLE(rolled_rows INTEGER, deleted_events INTEGER)
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
     r_count INTEGER := 0;
@@ -204,3 +206,9 @@ BEGIN
     RETURN QUERY SELECT r_count, d_count;
 END;
 $$;
+
+-- 8. Lock down SECURITY DEFINER functions: service_role only
+REVOKE ALL ON FUNCTION public.check_and_increment_mcp_rate_limit(TEXT, INT, INT) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.roll_up_mcp_telemetry_daily(DATE) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.check_and_increment_mcp_rate_limit(TEXT, INT, INT) TO service_role;
+GRANT EXECUTE ON FUNCTION public.roll_up_mcp_telemetry_daily(DATE) TO service_role;

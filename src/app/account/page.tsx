@@ -112,12 +112,9 @@ const COMMON_TIMEZONES = [
   "Australia/Sydney",
 ];
 
-const OWNER_EMAIL = (
-  process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-  "abdelmalikbenidir@gmail.com"
-)
-  .toLowerCase()
-  .trim();
+// UI hint only (tab visibility). Real authorization is enforced server-side via ADMIN_EMAIL.
+// No hardcoded default: if unset, the admin tab is hidden for everyone.
+const OWNER_EMAIL = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "").toLowerCase().trim();
 
 function AccountDashboard() {
   const router = useRouter();
@@ -125,7 +122,7 @@ function AccountDashboard() {
   const isCliAuth = searchParams.get("cli_auth") === "true";
 
   const [user, setUser] = useState<User | null>(null);
-  const isAdmin = Boolean(user?.email && user.email.toLowerCase().trim() === OWNER_EMAIL);
+  const isAdmin = Boolean(OWNER_EMAIL && user?.email && user.email_confirmed_at && user.email.toLowerCase().trim() === OWNER_EMAIL);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
     "overview" | "profile" | "pinned" | "snippets" | "preferences" | "activity" | "backup" | "security" | "byok" | "mcp_stacks" | "vault" | "analytics"

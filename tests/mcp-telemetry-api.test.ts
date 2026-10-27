@@ -1,21 +1,59 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { POST } from "@/app/api/analytics/mcp/route";
 import { GET as CRON_GET } from "@/app/api/cron/telemetry-cleanup/route";
-import { GET as STATS_GET } from "@/app/api/analytics/mcp/stats/route";
+import { GET as STATS_GET, csvSafeCell } from "@/app/api/analytics/mcp/stats/route";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 const VALID_TEST_PEPPER = "test_super_secure_pepper_secret_123456789";
 
 describe("POST /api/analytics/mcp - Hardened Ingestion API", () => {
-  let prevPepper: string | undefined;
+  const saved: Record<string, string | undefined> = {};
+  const KEYS = ["TELEMETRY_PEPPER", "SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"];
 
   beforeEach(() => {
-    prevPepper = process.env.TELEMETRY_PEPPER;
+    for (const k of KEYS) saved[k] = process.env[k];
     process.env.TELEMETRY_PEPPER = VALID_TEST_PEPPER;
+    // Fake service key + unreachable URL: DB calls fail fast and are handled gracefully
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://127.0.0.1:9";
   });
 
   afterEach(() => {
-    if (prevPepper) process.env.TELEMETRY_PEPPER = prevPepper;
-    else delete process.env.TELEMETRY_PEPPER;
+    for (const k of KEYS) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+  });
+
+  it("FAIL CLOSED: rejects with 503 if SUPABASE_SERVICE_ROLE_KEY is missing (no anon fallback)", async () => {
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const req = new Request("http://localhost/api/analytics/mcp", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ event_type: "cli_ping", command_name: "uuid" }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(503);
+    const json = await res.json();
+    expect(json.error).toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
+  });
+
+  it("rejects client_name / client_version / tool_name outside strict identifier regex", async () => {
+    for (const bad of [
+      { client_name: "=HYPERLINK(evil)" },
+      { client_version: "1.0 <script>" },
+      { tool_name: "a".repeat(65) },
+      { client_name: "has space" },
+    ]) {
+      const req = new Request("http://localhost/api/analytics/mcp", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ event_type: "cli_ping", command_name: "uuid", ...bad }),
+      });
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+    }
   });
 
   it("FAIL CLOSED: rejects with 503 if TELEMETRY_PEPPER is missing or too short", async () => {
@@ -181,11 +219,49 @@ describe("GET /api/cron/telemetry-cleanup - Retention Endpoint", () => {
 });
 
 describe("GET /api/analytics/mcp/stats - Owner-Only Telemetry Dashboard API", () => {
+  it("returns 404 for everyone when ADMIN_EMAIL is unset (no hardcoded default)", async () => {
+    const prev = process.env.ADMIN_EMAIL;
+    delete process.env.ADMIN_EMAIL;
+    try {
+      const res = await STATS_GET(new Request("http://localhost/api/analytics/mcp/stats"));
+      expect(res.status).toBe(404);
+    } finally {
+      if (prev !== undefined) process.env.ADMIN_EMAIL = prev;
+    }
+  });
+
+  it("CSV export neutralizes formula-injection cells starting with = + - @", () => {
+    expect(csvSafeCell("=cmd|' /C calc'!A0")).toBe(`"'=cmd|' /C calc'!A0"`);
+    expect(csvSafeCell("+1")).toBe(`"'+1"`);
+    expect(csvSafeCell("-2")).toBe(`"'-2"`);
+    expect(csvSafeCell("@SUM(A1)")).toBe(`"'@SUM(A1)"`);
+    expect(csvSafeCell("cursor")).toBe(`"cursor"`);
+    expect(csvSafeCell('a"b')).toBe(`"a""b"`);
+  });
+
   it("SERVER-SIDE OWNER GUARD: returns 404 for unauthenticated or non-owner requests", async () => {
     const req = new Request("http://localhost/api/analytics/mcp/stats");
     const res = await STATS_GET(req);
     expect(res.status).toBe(404);
     const json = await res.json();
     expect(json.ok).toBe(false);
+  });
+});
+
+describe("Migration hardening (static check)", () => {
+  const sql = readFileSync(join(process.cwd(), "supabase/migrations/20261027_mcp_telemetry.sql"), "utf8");
+
+  it("every SECURITY DEFINER function pins search_path = ''", () => {
+    const definers = sql.match(/SECURITY DEFINER\s*\r?\nSET search_path = ''/g) || [];
+    const total = sql.match(/^SECURITY DEFINER\s*$/gm) || [];
+    expect(total.length).toBe(2);
+    expect(definers.length).toBe(total.length);
+  });
+
+  it("revokes EXECUTE from PUBLIC/anon/authenticated and grants only to service_role", () => {
+    for (const fn of ["check_and_increment_mcp_rate_limit(TEXT, INT, INT)", "roll_up_mcp_telemetry_daily(DATE)"]) {
+      expect(sql).toContain(`REVOKE ALL ON FUNCTION public.${fn} FROM PUBLIC, anon, authenticated;`);
+      expect(sql).toContain(`GRANT EXECUTE ON FUNCTION public.${fn} TO service_role;`);
+    }
   });
 });

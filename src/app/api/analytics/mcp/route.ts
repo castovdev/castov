@@ -7,7 +7,9 @@ const MAX_BODY_BYTES = 16 * 1024; // 16 KB
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SAFE_STRING_REGEX = /^[a-zA-Z0-9_\-\. /]+$/;
-const TOOL_NAME_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
+const TOOL_NAME_REGEX = /^[a-zA-Z0-9._@\/-]{1,64}$/;
+// Strict identifier regex for client_name / client_version / tool_name
+const IDENT_REGEX = /^[a-zA-Z0-9._@\/-]{1,64}$/;
 
 const ALLOWED_EVENT_TYPES = new Set(["initialize", "tools_aggregate", "cli_ping", "error"]);
 const ALLOWED_OS_FAMILIES = new Set(["darwin", "win32", "linux", "other"]);
@@ -67,6 +69,7 @@ function isRateLimitedInMemory(key: string, limit = 60, windowMs = 60000): boole
 async function checkPersistentRateLimit(key: string, limit = 60, windowSeconds = 60): Promise<boolean> {
   try {
     const supabase = createAdminClient();
+    if (!supabase) throw new Error("admin client unavailable");
     const { data, error } = await supabase.rpc("check_and_increment_mcp_rate_limit", {
       p_key: key,
       p_limit: limit,
@@ -75,8 +78,9 @@ async function checkPersistentRateLimit(key: string, limit = 60, windowSeconds =
     if (!error && typeof data === "boolean") {
       return data; // true = allowed, false = rate limited
     }
-  } catch {
-    // fallback to memory
+    console.warn("[telemetry] persistent rate limiter RPC failed; using IN-MEMORY fallback (per-instance only):", error?.message || "unexpected response");
+  } catch (err: any) {
+    console.warn("[telemetry] persistent rate limiter unavailable; using IN-MEMORY fallback (per-instance only):", err?.message || err);
   }
   return !isRateLimitedInMemory(key, limit, windowSeconds * 1000);
 }
@@ -104,6 +108,15 @@ export async function POST(request: Request) {
     if (!pepperSecret || pepperSecret.trim().length < 16) {
       return NextResponse.json(
         { ok: false, error: "Server telemetry unconfigured (missing TELEMETRY_PEPPER)" },
+        { status: 503 }
+      );
+    }
+
+    // 1b. FAIL CLOSED: Require service-role DB client (no anon-key fallback)
+    const adminDb = createAdminClient();
+    if (!adminDb) {
+      return NextResponse.json(
+        { ok: false, error: "Server telemetry unconfigured (missing SUPABASE_SERVICE_ROLE_KEY)" },
         { status: 503 }
       );
     }
@@ -168,8 +181,12 @@ export async function POST(request: Request) {
       return true;
     };
 
-    if (!validateField(client_name, 64)) return NextResponse.json({ ok: false, error: "Invalid client_name" }, { status: 400 });
-    if (!validateField(client_version, 32)) return NextResponse.json({ ok: false, error: "Invalid client_version" }, { status: 400 });
+    const validateIdent = (val: unknown) =>
+      val === undefined || val === null || (typeof val === "string" && IDENT_REGEX.test(val));
+
+    if (!validateIdent(client_name)) return NextResponse.json({ ok: false, error: "Invalid client_name" }, { status: 400 });
+    if (!validateIdent(client_version)) return NextResponse.json({ ok: false, error: "Invalid client_version" }, { status: 400 });
+    if (!validateIdent(tool_name)) return NextResponse.json({ ok: false, error: "Invalid tool_name" }, { status: 400 });
     if (!validateField(castov_version, 32)) return NextResponse.json({ ok: false, error: "Invalid castov_version" }, { status: 400 });
     if (!validateField(node_version, 32)) return NextResponse.json({ ok: false, error: "Invalid node_version" }, { status: 400 });
     if (!validateField(command_name, 32)) return NextResponse.json({ ok: false, error: "Invalid command_name" }, { status: 400 });
@@ -281,7 +298,7 @@ export async function POST(request: Request) {
 
     // 8. Insert Into Database (Never trust client timestamps, use server now())
     try {
-      const supabase = createAdminClient();
+      const supabase = adminDb;
 
       if (event_type === "tools_aggregate") {
         const rowsToInsert = validatedTools.map((t) => ({

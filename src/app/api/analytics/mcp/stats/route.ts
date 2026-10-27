@@ -1,45 +1,39 @@
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { isVerifiedOwner, getConfiguredOwnerEmail } from "@/lib/owner-auth";
 
-function constantTimeEmailMatch(a: string, b: string): boolean {
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
-  if (bufA.length !== bufB.length) return false;
-  return crypto.timingSafeEqual(bufA, bufB);
+const NOT_FOUND = () => NextResponse.json({ ok: false, error: "Not Found" }, { status: 404 });
+
+/** Neutralize CSV/formula injection: prefix cells starting with = + - @ (or tab/CR) with a quote. */
+export function csvSafeCell(value: unknown): string {
+  let s = value === null || value === undefined ? "" : String(value);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return `"${s.replace(/"/g, '""')}"`;
 }
-
-const OWNER_EMAIL = (
-  process.env.ADMIN_EMAIL ||
-  process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-  "abdelmalikbenidir@gmail.com"
-)
-  .toLowerCase()
-  .trim();
 
 export async function GET(request: Request) {
   try {
-    // 1. Strict Server-Side Owner Authentication Guard: NON-OWNERS GET 404
-    let user: any = null;
+    // 1. Strict server-side owner guard: ADMIN_EMAIL unset or non-owner => 404
+    if (!getConfiguredOwnerEmail()) return NOT_FOUND();
+
+    let user = null;
     try {
       const supabase = await createClient();
       const { data } = await supabase.auth.getUser();
       user = data.user;
     } catch {
-      // If session cookies are absent or invalid -> non-owners get 404
-      return NextResponse.json({ ok: false, error: "Not Found" }, { status: 404 });
+      return NOT_FOUND();
     }
-
-    const userEmail = user?.email?.toLowerCase().trim();
-    if (!user || !userEmail || !constantTimeEmailMatch(userEmail, OWNER_EMAIL)) {
-      return NextResponse.json({ ok: false, error: "Not Found" }, { status: 404 });
-    }
+    if (!isVerifiedOwner(user)) return NOT_FOUND();
 
     const { searchParams } = new URL(request.url);
     const format = searchParams.get("format");
 
     const adminDb = createAdminClient();
+    if (!adminDb) {
+      return NextResponse.json({ ok: false, error: "Service unavailable" }, { status: 503 });
+    }
 
     // 2. CSV Export Handler
     if (format === "csv") {
@@ -69,7 +63,7 @@ export async function GET(request: Request) {
       }
 
       const csvContent = rows
-        .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+        .map((r) => r.map((cell) => csvSafeCell(cell)).join(","))
         .join("\n");
 
       return new Response(csvContent, {

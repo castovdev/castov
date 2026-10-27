@@ -12,6 +12,9 @@ export async function GET(request: Request) {
     }
 
     const supabase = createAdminClient();
+    if (!supabase) {
+      return NextResponse.json({ ok: false, error: "Service unavailable" }, { status: 503 });
+    }
 
     // 2. Execute the roll_up_mcp_telemetry_daily function in PostgreSQL
     const { data, error } = await supabase.rpc("roll_up_mcp_telemetry_daily");
