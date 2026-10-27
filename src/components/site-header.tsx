@@ -27,6 +27,8 @@ import {
   Sparkles,
   ArrowRight,
   Layers,
+  BookOpen,
+  Cpu,
 } from "lucide-react";
 
 type MenuKey = "tools" | "labs" | null;
@@ -46,20 +48,20 @@ const TOOL_GROUPS: { heading: string; items: ToolItem[] }[] = [
       {
         href: "/env-vault",
         label: "Environment Vault",
-        desc: "Zero-knowledge client encrypted secrets & team sharing",
+        desc: "Zero-knowledge client-encrypted secrets & teams",
         icon: Shield,
         badge: "E2EE",
       },
       {
         href: "/webhook-tester",
         label: "Webhook Tester",
-        desc: "Simulate & inspect HTTP & Stripe webhooks in real time",
+        desc: "Simulate & inspect HTTP & Stripe webhooks live",
         icon: Radio,
       },
       {
         href: "/cyber-decoder",
         label: "Cyber Decoder",
-        desc: "Multi-cipher decoding, hashes, Base64 & JWT inspector",
+        desc: "Multi-cipher decoding, hashes, Base64 & JWT",
         icon: Hash,
       },
     ],
@@ -70,19 +72,19 @@ const TOOL_GROUPS: { heading: string; items: ToolItem[] }[] = [
       {
         href: "/convert",
         label: "Converters Matrix",
-        desc: "cURL to Code, JSON to TypeScript types & unit matrix",
+        desc: "cURL to code, JSON to TypeScript types & units",
         icon: ArrowRightLeft,
       },
       {
         href: "/unix-timestamp-converter",
         label: "Unix Timestamp",
-        desc: "High-precision epoch seconds, milliseconds & ISO parser",
+        desc: "High-precision epoch seconds, millis & ISO parser",
         icon: Clock,
       },
       {
         href: "/cron-generator",
         label: "Cron Generator",
-        desc: "Human-readable visual crontab expression designer",
+        desc: "Human-readable visual crontab schedule designer",
         icon: Terminal,
       },
     ],
@@ -93,7 +95,7 @@ const TOOL_GROUPS: { heading: string; items: ToolItem[] }[] = [
       {
         href: "/svg-animator",
         label: "SVG Animator Studio",
-        desc: "Real-time SVG keyframe & morphing animation studio",
+        desc: "Real-time SVG keyframe & morphing animator",
         icon: Sparkles,
       },
       {
@@ -213,7 +215,7 @@ export function SiteHeader() {
   const isLabsActive = LABS_ITEMS.some((item) => pathname?.startsWith(item.href));
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-line/60 bg-bg/85 backdrop-blur-xl supports-[backdrop-filter]:bg-bg/75 transition-colors">
+    <header className="sticky top-0 z-50 w-full border-b border-line bg-bg/95 backdrop-blur-md transition-colors">
       <div className="layout-content flex h-14 items-center justify-between gap-3 sm:gap-4">
         {/* Left: Mobile Nav + Brand Identity */}
         <div className="flex items-center gap-3 shrink-0">
@@ -236,7 +238,7 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        {/* Center: Desktop Navigation (Pills + Modern Mega-menus) */}
+        {/* Center: Desktop Navigation (Pills + Dropdowns with Image 1 styling) */}
         <nav
           ref={navContainerRef}
           className="hidden lg:flex items-center justify-center gap-1 xl:gap-1.5 flex-1 mx-2"
@@ -251,31 +253,31 @@ export function SiteHeader() {
             <Link
               href="/tools"
               onClick={() => setOpenMenu(null)}
-              className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs xl:text-sm font-medium transition-all duration-150 whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 isToolsActive
-                  ? "text-fg font-semibold bg-field/90 border border-line/80 shadow-2xs"
-                  : "text-muted hover:text-fg hover:bg-hover/70"
+                  ? "bg-accent text-accent-fg shadow-sm shadow-accent/25"
+                  : "text-fg/80 hover:text-fg hover:bg-hover"
               }`}
               aria-expanded={openMenu === "tools"}
               aria-haspopup="true"
             >
-              <Wrench className="w-3.5 h-3.5 text-muted group-hover:text-fg transition-colors" />
+              <Wrench className="w-3.5 h-3.5 shrink-0" />
               <span>Tools</span>
               <ChevronDown
-                className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${
-                  openMenu === "tools" ? "rotate-180 text-fg" : ""
+                className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 ${
+                  openMenu === "tools" ? "rotate-180" : "opacity-70"
                 }`}
               />
             </Link>
 
-            {/* Tools Mega-Menu Popover */}
+            {/* Tools Mega-Menu Popover: Solid opaque background, left-0 anchored */}
             {openMenu === "tools" && (
               <div
-                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[740px] rounded-2xl border border-line/80 bg-card/95 backdrop-blur-2xl p-4 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95 duration-150 before:content-[''] before:absolute before:-top-2.5 before:left-0 before:right-0 before:h-3"
+                className="absolute top-full left-0 mt-2.5 w-[660px] max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-card dark:bg-[#0c0d10] p-4 shadow-2xl z-[100] animate-in fade-in-0 zoom-in-95 duration-150 before:content-[''] before:absolute before:-top-3 before:left-0 before:right-0 before:h-3"
                 onMouseEnter={() => handleMouseEnter("tools")}
                 onMouseLeave={handleMouseLeave}
               >
-                <div className="grid grid-cols-3 gap-4 pb-3">
+                <div className="grid grid-cols-3 gap-3.5 pb-3">
                   {TOOL_GROUPS.map((group) => (
                     <div key={group.heading} className="space-y-1.5">
                       <p className="px-2 text-[10px] font-mono font-semibold uppercase tracking-wider text-muted">
@@ -293,10 +295,10 @@ export function SiteHeader() {
                               className={`group flex items-start gap-2.5 p-2 rounded-xl transition-all ${
                                 active
                                   ? "bg-accent/10 border border-accent/20"
-                                  : "hover:bg-hover/80"
+                                  : "hover:bg-hover/80 dark:hover:bg-white/[0.06]"
                               }`}
                             >
-                              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-field border border-line/60 text-muted group-hover:text-accent group-hover:border-accent/40 group-hover:bg-accent/10 transition-all shrink-0 mt-0.5">
+                              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-field dark:bg-white/[0.05] border border-line/60 text-muted group-hover:text-accent group-hover:border-accent/40 group-hover:bg-accent/10 transition-all shrink-0 mt-0.5">
                                 <Icon className="w-3.5 h-3.5" />
                               </div>
                               <div className="min-w-0 flex-1">
@@ -305,7 +307,7 @@ export function SiteHeader() {
                                     {tool.label}
                                   </span>
                                   {tool.badge && (
-                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-medium bg-field border border-line text-muted">
+                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-medium bg-field dark:bg-white/[0.08] border border-line text-muted">
                                       {tool.badge}
                                     </span>
                                   )}
@@ -343,14 +345,15 @@ export function SiteHeader() {
           {/* 2. MCP Server (AI Agent Protocol) */}
           <Link
             href="/mcp"
-            className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs xl:text-sm font-medium transition-all duration-150 whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
               pathname?.startsWith("/mcp")
-                ? "text-fg font-semibold bg-field/90 border border-line/80 shadow-2xs"
-                : "text-muted hover:text-fg hover:bg-hover/70"
+                ? "bg-accent text-accent-fg shadow-sm shadow-accent/25"
+                : "text-fg/80 hover:text-fg hover:bg-hover"
             }`}
           >
+            <Cpu className="w-3.5 h-3.5 shrink-0" />
             <span>MCP Server</span>
-            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">
               AI
             </span>
           </Link>
@@ -358,24 +361,26 @@ export function SiteHeader() {
           {/* 3. Converters Matrix */}
           <Link
             href="/convert"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs xl:text-sm font-medium transition-all duration-150 whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
               pathname?.startsWith("/convert")
-                ? "text-fg font-semibold bg-field/90 border border-line/80 shadow-2xs"
-                : "text-muted hover:text-fg hover:bg-hover/70"
+                ? "bg-accent text-accent-fg shadow-sm shadow-accent/25"
+                : "text-fg/80 hover:text-fg hover:bg-hover"
             }`}
           >
+            <ArrowRightLeft className="w-3.5 h-3.5 shrink-0" />
             <span>Converters</span>
           </Link>
 
           {/* 4. Engineering Guides */}
           <Link
             href="/guides"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs xl:text-sm font-medium transition-all duration-150 whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
               pathname?.startsWith("/guides")
-                ? "text-fg font-semibold bg-field/90 border border-line/80 shadow-2xs"
-                : "text-muted hover:text-fg hover:bg-hover/70"
+                ? "bg-accent text-accent-fg shadow-sm shadow-accent/25"
+                : "text-fg/80 hover:text-fg hover:bg-hover"
             }`}
           >
+            <BookOpen className="w-3.5 h-3.5 shrink-0" />
             <span>Guides</span>
           </Link>
 
@@ -388,25 +393,27 @@ export function SiteHeader() {
             <button
               type="button"
               onClick={() => setOpenMenu((k) => (k === "labs" ? null : "labs"))}
-              className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs xl:text-sm font-medium transition-all duration-150 whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 isLabsActive
-                  ? "text-fg font-semibold bg-field/90 border border-line/80 shadow-2xs"
-                  : "text-muted hover:text-fg hover:bg-hover/70"
+                  ? "bg-accent text-accent-fg shadow-sm shadow-accent/25"
+                  : "text-fg/80 hover:text-fg hover:bg-hover"
               }`}
               aria-expanded={openMenu === "labs"}
               aria-haspopup="true"
             >
+              <Radar className="w-3.5 h-3.5 shrink-0" />
               <span>Radar &amp; Hubs</span>
               <ChevronDown
-                className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${
-                  openMenu === "labs" ? "rotate-180 text-fg" : ""
+                className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 ${
+                  openMenu === "labs" ? "rotate-180" : "opacity-70"
                 }`}
               />
             </button>
 
+            {/* Radar Dropdown: Solid opaque background, right-0 anchored */}
             {openMenu === "labs" && (
               <div
-                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[480px] rounded-2xl border border-line/80 bg-card/95 backdrop-blur-2xl p-3 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95 duration-150 before:content-[''] before:absolute before:-top-2.5 before:left-0 before:right-0 before:h-3"
+                className="absolute top-full right-0 mt-2.5 w-[460px] max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-card dark:bg-[#0c0d10] p-3 shadow-2xl z-[100] animate-in fade-in-0 zoom-in-95 duration-150 before:content-[''] before:absolute before:-top-3 before:left-0 before:right-0 before:h-3"
                 onMouseEnter={() => handleMouseEnter("labs")}
                 onMouseLeave={handleMouseLeave}
               >
@@ -422,10 +429,10 @@ export function SiteHeader() {
                         className={`group flex items-start gap-2.5 p-2 rounded-xl transition-all ${
                           active
                             ? "bg-accent/10 border border-accent/20"
-                            : "hover:bg-hover/80"
+                            : "hover:bg-hover/80 dark:hover:bg-white/[0.06]"
                         }`}
                       >
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-field border border-line/60 text-muted group-hover:text-accent group-hover:border-accent/40 group-hover:bg-accent/10 transition-all shrink-0 mt-0.5">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-field dark:bg-white/[0.05] border border-line/60 text-muted group-hover:text-accent group-hover:border-accent/40 group-hover:bg-accent/10 transition-all shrink-0 mt-0.5">
                           <Icon className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0 flex-1">
