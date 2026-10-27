@@ -9,6 +9,7 @@ import type { User } from "@supabase/supabase-js";
 import { getTool, type ToolSlug } from "@/content/tools";
 import {
   User as UserIcon,
+  ChevronDown,
   Shield,
   Key,
   Folder,
@@ -798,7 +799,7 @@ function AccountDashboard() {
   const currentWsConfigs = savedConfigs.filter((c) => c.workspaceId === activeWsId);
 
   return (
-    <div className="layout-content py-8 sm:py-12 max-w-6xl mx-auto space-y-8">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
       {/* 1. HERO PROFILE CARD */}
       <div className="rounded-2xl border border-line bg-card p-6 sm:p-8 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-40 bg-accent/10 blur-3xl pointer-events-none rounded-full" />
@@ -924,41 +925,125 @@ function AccountDashboard() {
         </div>
       )}
 
-      {/* 2. TAB NAVIGATION */}
-      <div className="flex items-center gap-2 border-b border-line pb-2 overflow-x-auto scrollbar-none">
-        {[
-          { id: "overview", label: "Overview", icon: UserIcon },
-          { id: "pinned", label: `Pinned (${pinnedSlugs.length})`, icon: Star },
-          { id: "snippets", label: `Snippets (${savedConfigs.length})`, icon: Folder },
-          { id: "preferences", label: "Preferences & CLI", icon: Sliders },
-          { id: "activity", label: `Activity (${recentActivity.length})`, icon: Clock },
-          { id: "backup", label: "Backup & Portability", icon: Download },
-          { id: "security", label: "Zero-Knowledge", icon: Shield },
-          { id: "byok", label: "BYOK AI Keys", icon: Key },
-          { id: "mcp_stacks", label: "MCP Stacks", icon: Layers },
-          { id: "vault", label: "Env Vault (E2EE)", icon: Lock },
-          ...(isAdmin ? [{ id: "analytics", label: "Admin Analytics", icon: BarChart3 }] : []),
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                isActive
-                  ? "bg-accent text-accent-fg shadow-sm shadow-accent/25"
-                  : "text-muted hover:text-fg hover:bg-hover"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* 2. MAIN 2-COLUMN DASHBOARD LAYOUT (Sidebar + Main Content) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Vertical Categorized Sidebar */}
+        <aside className="lg:col-span-3 space-y-4">
+          {/* Mobile Tab Selector (Compact Select Dropdown on small screens) */}
+          <div className="lg:hidden">
+            <label htmlFor="account-tab-select" className="sr-only">
+              Select Setting Section
+            </label>
+            <div className="relative">
+              <select
+                id="account-tab-select"
+                value={activeTab}
+                onChange={(e) => setActiveTab(e.target.value as typeof activeTab)}
+                className="w-full h-11 px-3.5 pr-10 rounded-xl bg-field border border-line text-sm font-semibold text-fg appearance-none focus:outline-none focus:ring-2 focus:ring-accent cursor-pointer"
+              >
+                {[
+                  { id: "overview", label: "Overview" },
+                  { id: "activity", label: `Activity (${recentActivity.length})` },
+                  { id: "pinned", label: `Pinned Tools (${pinnedSlugs.length})` },
+                  { id: "snippets", label: `Saved Snippets (${savedConfigs.length})` },
+                  { id: "preferences", label: "Preferences & CLI" },
+                  { id: "security", label: "Zero-Knowledge" },
+                  { id: "vault", label: "Env Vault (E2EE)" },
+                  { id: "byok", label: "BYOK AI Keys" },
+                  { id: "backup", label: "Backup & Portability" },
+                  { id: "mcp_stacks", label: "MCP Stacks" },
+                  ...(isAdmin ? [{ id: "analytics", label: "Admin Analytics" }] : []),
+                ].map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+            </div>
+          </div>
 
-      {/* 3. TAB PANELS */}
+          {/* Desktop Vertical Sidebar: Categorized with icons & badges */}
+          <div className="hidden lg:block rounded-2xl border border-line bg-card/70 p-3 space-y-4 sticky top-20 shadow-xs">
+            {[
+              {
+                heading: "GENERAL",
+                tabs: [
+                  { id: "overview", label: "Overview", icon: UserIcon },
+                  { id: "activity", label: `Activity (${recentActivity.length})`, icon: Clock },
+                ],
+              },
+              {
+                heading: "WORKSPACE",
+                tabs: [
+                  { id: "pinned", label: `Pinned Tools (${pinnedSlugs.length})`, icon: Star },
+                  { id: "snippets", label: `Saved Snippets (${savedConfigs.length})`, icon: Folder },
+                  { id: "preferences", label: "Preferences & CLI", icon: Sliders },
+                ],
+              },
+              {
+                heading: "SECURITY & CLOUD",
+                tabs: [
+                  { id: "security", label: "Zero-Knowledge", icon: Shield },
+                  { id: "vault", label: "Env Vault", icon: Lock, badge: "E2EE" },
+                  { id: "byok", label: "BYOK AI Keys", icon: Key },
+                  { id: "backup", label: "Backup & Restore", icon: Download },
+                ],
+              },
+              {
+                heading: "DEVELOPER",
+                tabs: [
+                  { id: "mcp_stacks", label: "MCP Stacks", icon: Layers, badge: "MCP" },
+                  ...(isAdmin ? [{ id: "analytics", label: "Admin Analytics", icon: BarChart3 }] : []),
+                ],
+              },
+            ].map((group) => (
+              <div key={group.heading} className="space-y-1">
+                <p className="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-muted">
+                  {group.heading}
+                </p>
+                <div className="space-y-0.5">
+                  {group.tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                          isActive
+                            ? "bg-accent text-accent-fg shadow-sm shadow-accent/20"
+                            : "text-muted hover:text-fg hover:bg-hover"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 truncate">
+                          <Icon className="w-4 h-4 shrink-0" />
+                          <span className="truncate">{tab.label}</span>
+                        </div>
+                        {tab.badge && (
+                          <span
+                            className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-medium ${
+                              isActive
+                                ? "bg-accent-fg/10 text-accent-fg"
+                                : "bg-field border border-line text-muted"
+                            }`}
+                          >
+                            {tab.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        {/* Right Column: Tab Panels Content */}
+        <main className="lg:col-span-9 min-w-0">
+{/* 3. TAB PANELS */}
 
       {/* TAB: OVERVIEW */}
       {activeTab === "overview" && (
@@ -1992,6 +2077,8 @@ function AccountDashboard() {
 
       {/* TAB: ADMIN ANALYTICS */}
       {isAdmin && activeTab === "analytics" && <DashboardAnalytics />}
+            </main>
+      </div>
     </div>
   );
 }
