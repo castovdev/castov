@@ -5,7 +5,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-let cliVersion = "1.5.0";
+let cliVersion = "1.6.0";
 try {
   const pkg = require("../package.json") as { version: string };
   if (pkg?.version) cliVersion = pkg.version;

@@ -81,7 +81,7 @@ runAudit(
     failOn: "none",
     noGit: true,
   },
-  "1.5.0"
+  "1.6.0"
 );
 
 runAudit(
@@ -92,7 +92,7 @@ runAudit(
     failOn: "none",
     noGit: true,
   },
-  "1.5.0"
+  "1.6.0"
 );
 
 console.log(`Generated sample reports:\n  - ${mdOut}\n  - ${sarifOut}`);

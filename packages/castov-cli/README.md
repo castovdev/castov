@@ -199,12 +199,13 @@ castov b64 decode "aGVsbG8gd29ybGQ="
 
 ---
 
+<a id="telemetry"></a>
 ## 📊 Privacy-Friendly Usage Telemetry
 
 Castov collects minimal, privacy-friendly anonymous metrics strictly to understand aggregate adoption of the MCP server and CLI across platforms.
 
 ### What is Collected:
-- **Anonymous Install ID**: A random UUID generated client-side and saved in `~/.castov/anon-id`. It contains no hardware identifiers, MAC addresses, usernames, or paths.
+- **Anonymous Install ID**: A random UUID generated client-side and saved in `~/.castov/anon-id`. It contains no hardware identifiers, MAC addresses, usernames, or paths. On ingestion, it is hashed with a server-side pepper into an `install_hash` (the raw UUID is never stored).
 - **Runtime Metadata**: Castov CLI version, OS family (`darwin`, `win32`, `linux`), and Node.js version.
 - **MCP Session Stats**: MCP client name/version (e.g. `cursor`, `claude-desktop`) and in-memory aggregated tool call counts and durations (flushed at most once per hour or on clean exit in a single background request).
 - **Command Invocation**: The command name invoked (e.g. `uuid`, `cidr`, `mcp`).
@@ -218,6 +219,13 @@ Castov collects minimal, privacy-friendly anonymous metrics strictly to understa
 
 ### 🔒 Absolute Zero-Network Guarantee for `castov audit`:
 The `castov audit` command is completely quarantined from the telemetry pipeline. It does not import the telemetry module, makes **zero network calls**, and never generates or touches `~/.castov/anon-id`.
+
+### 🔔 One-Time First-Run Notice:
+On first run of any standard CLI command, a one-time notification is displayed on `stderr`:
+```text
+Anonymous usage stats enabled. Disable with CASTOV_TELEMETRY=0. Details: https://github.com/castovdev/castov/tree/main/packages/castov-cli#telemetry
+```
+This notice is strictly **NEVER** displayed during `castov mcp` (to prevent JSON-RPC framing corruption) or `castov audit`.
 
 ### How to Opt Out:
 You can completely disable all telemetry at any time using any of the following standard environment variables:

@@ -47,7 +47,7 @@ export function computeFindingFingerprint(targetPath: string, f: Finding): strin
   return `${f.ruleId}|${rel}|${sName}|${kName}`;
 }
 
-export function runAudit(options: AuditOptions, toolVersion = "1.5.0"): { result: AuditResult; formatted: string } {
+export function runAudit(options: AuditOptions, toolVersion = "1.6.0"): { result: AuditResult; formatted: string } {
   const targetPath = resolve(options.targetPath || ".");
   const ignoreSet = new Set((options.ignoreRules || []).map((r) => r.toUpperCase()));
   const maxEnvVars =
