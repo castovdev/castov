@@ -9,6 +9,7 @@ import type { User } from "@supabase/supabase-js";
 import { getTool, type ToolSlug } from "@/content/tools";
 import {
   User as UserIcon,
+  Globe,
   ChevronDown,
   Shield,
   Key,
@@ -127,9 +128,10 @@ function AccountDashboard() {
   const isAdmin = Boolean(user?.email && user.email.toLowerCase().trim() === OWNER_EMAIL);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "pinned" | "snippets" | "preferences" | "activity" | "backup" | "security" | "byok" | "mcp_stacks" | "vault" | "analytics"
+    "overview" | "profile" | "pinned" | "snippets" | "preferences" | "activity" | "backup" | "security" | "byok" | "mcp_stacks" | "vault" | "analytics"
   >(() => {
     const tabParam = searchParams.get("tab");
+    if (tabParam === "profile") return "profile";
     if (tabParam === "vault") return "vault";
     if (tabParam === "mcp_stacks") return "mcp_stacks";
     if (tabParam === "snippets") return "snippets";
@@ -138,6 +140,83 @@ function AccountDashboard() {
   });
 
   // Pinned tools state
+  // Public Profile State
+  const [profileUsername, setProfileUsername] = useState<string>("benidir");
+  const [profileHeadline, setProfileHeadline] = useState<string>("Full-Stack Web Architect");
+  const [profileBio, setProfileBio] = useState<string>("Building high-performance cloud architectures, zero-knowledge security suites, and AI agent tools at Castov.");
+  const [profileWebsite, setProfileWebsite] = useState<string>("https://castov.com");
+  const [profileGithub, setProfileGithub] = useState<string>("https://github.com/castovdev");
+  const [profileTwitter, setProfileTwitter] = useState<string>("https://x.com/castovdev");
+  const [profileIsPublic, setProfileIsPublic] = useState<boolean>(true);
+  const [profileSaved, setProfileSaved] = useState<boolean>(false);
+  const [profileCopied, setProfileCopied] = useState<boolean>(false);
+
+  // Load existing profile from localStorage or Supabase
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("castov-public-profile");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.username) setProfileUsername(parsed.username);
+        if (parsed.headline) setProfileHeadline(parsed.headline);
+        if (parsed.bio !== undefined) setProfileBio(parsed.bio);
+        if (parsed.websiteUrl !== undefined) setProfileWebsite(parsed.websiteUrl);
+        if (parsed.githubUrl !== undefined) setProfileGithub(parsed.githubUrl);
+        if (parsed.twitterUrl !== undefined) setProfileTwitter(parsed.twitterUrl);
+        if (parsed.isPublic !== undefined) setProfileIsPublic(parsed.isPublic);
+      } else if (user) {
+        const emailPrefix = user.email?.split("@")[0]?.toLowerCase().replace(/[^a-z0-9_-]/g, "") || "developer";
+        setProfileUsername(emailPrefix === "abdelmalikbenidir" ? "benidir" : emailPrefix);
+      }
+    } catch {
+      // ignore
+    }
+  }, [user]);
+
+  const handleSavePublicProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanedHandle = profileUsername.toLowerCase().trim().replace(/[^a-z0-9_-]/g, "");
+    if (!cleanedHandle) return;
+
+    const profileData = {
+      username: cleanedHandle,
+      headline: profileHeadline,
+      bio: profileBio,
+      websiteUrl: profileWebsite,
+      githubUrl: profileGithub,
+      twitterUrl: profileTwitter,
+      isPublic: profileIsPublic,
+      pinnedTools: pinnedSlugs,
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      localStorage.setItem("castov-public-profile", JSON.stringify(profileData));
+      if (user?.id) {
+        await supabase.from("profiles").upsert({
+          id: user.id,
+          username: cleanedHandle,
+          full_name: displayName,
+          headline: profileHeadline,
+          bio: profileBio,
+          avatar_url: avatarUrl || "",
+          website_url: profileWebsite,
+          github_url: profileGithub,
+          twitter_url: profileTwitter,
+          pinned_tools: pinnedSlugs,
+          is_public: profileIsPublic,
+          updated_at: new Date().toISOString(),
+        });
+      }
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2500);
+    } catch (err) {
+      console.warn("Could not save to remote profiles table:", err);
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2500);
+    }
+  };
+
   const [pinnedSlugs, setPinnedSlugs] = useState<ToolSlug[]>([]);
 
   // Saved configs & workspaces
@@ -867,6 +946,15 @@ function AccountDashboard() {
 
           <div className="flex items-center gap-2.5 w-full md:w-auto">
             <Link
+              href={`/user/${profileUsername || "benidir"}`}
+              className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl border border-accent/40 bg-accent/10 hover:bg-accent/20 text-sm font-semibold text-accent transition-colors"
+              title="View your public developer profile"
+            >
+              <Globe className="w-4 h-4" />
+              <span>Public Profile</span>
+              <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+            </Link>
+            <Link
               href="/env-vault/team"
               className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl border border-line bg-field hover:bg-hover text-sm font-semibold text-fg transition-colors"
             >
@@ -943,6 +1031,7 @@ function AccountDashboard() {
               >
                 {[
                   { id: "overview", label: "Overview" },
+                  { id: "profile", label: "Public Profile (@benidir)" },
                   { id: "activity", label: `Activity (${recentActivity.length})` },
                   { id: "pinned", label: `Pinned Tools (${pinnedSlugs.length})` },
                   { id: "snippets", label: `Saved Snippets (${savedConfigs.length})` },
@@ -970,6 +1059,7 @@ function AccountDashboard() {
                 heading: "GENERAL",
                 tabs: [
                   { id: "overview", label: "Overview", icon: UserIcon },
+                  { id: "profile", label: "Public Profile", icon: Globe, badge: "NEW" },
                   { id: "activity", label: `Activity (${recentActivity.length})`, icon: Clock },
                 ],
               },
@@ -1044,6 +1134,172 @@ function AccountDashboard() {
         {/* Right Column: Tab Panels Content */}
         <main className="lg:col-span-9 min-w-0">
 {/* 3. TAB PANELS */}
+
+      {/* TAB: PUBLIC DEVELOPER PROFILE */}
+      {activeTab === "profile" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-fg">Public Developer Profile</h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-accent/10 text-accent border border-accent/20">
+                  LIVE
+                </span>
+              </div>
+              <p className="text-xs text-muted mt-0.5">
+                Share your personal developer identity, showcase your daily stack, and share your workspace with the community.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    navigator.clipboard.writeText(`https://castov.com/user/${profileUsername}`);
+                    setProfileCopied(true);
+                    setTimeout(() => setProfileCopied(false), 2000);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-field border border-line text-xs font-semibold text-fg hover:bg-hover transition-colors cursor-pointer shadow-2xs"
+              >
+                {profileCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted" />}
+                <span>{profileCopied ? "Link Copied!" : "Copy Link"}</span>
+              </button>
+              <Link
+                href={`/user/${profileUsername}`}
+                target="_blank"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-accent text-accent-fg text-xs font-bold hover:bg-accent-hover transition-colors shadow-sm"
+              >
+                <span>View Profile</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Profile URL Live Preview Banner */}
+          <div className="rounded-2xl border border-line bg-card p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+                <Globe className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-mono text-muted uppercase tracking-wider">Your Public Castov URL</p>
+                <p className="text-sm sm:text-base font-bold font-mono text-fg mt-0.5 select-all">
+                  https://castov.com/user/<span className="text-accent">{profileUsername || "yourname"}</span>
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Publicly Accessible
+            </span>
+          </div>
+
+          {/* Edit Form */}
+          <form onSubmit={handleSavePublicProfile} className="rounded-2xl border border-line bg-card p-6 space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-fg">Username (URL Handle)</label>
+                <div className="flex items-center rounded-xl border border-line bg-field px-3 py-2 text-xs font-mono text-fg focus-within:ring-2 focus-within:ring-accent">
+                  <span className="text-muted mr-1">castov.com/user/</span>
+                  <input
+                    type="text"
+                    value={profileUsername}
+                    onChange={(e) => setProfileUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                    placeholder="benidir"
+                    required
+                    className="flex-1 bg-transparent border-none outline-none font-bold text-accent"
+                  />
+                </div>
+                <p className="text-[11px] text-muted">Use 3-30 letters, numbers, hyphens or underscores.</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-fg">Developer Headline</label>
+                <input
+                  type="text"
+                  value={profileHeadline}
+                  onChange={(e) => setProfileHeadline(e.target.value)}
+                  placeholder="Full-Stack Web Architect"
+                  className="w-full rounded-xl border border-line bg-field px-3 py-2 text-xs font-medium text-fg focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+                <p className="text-[11px] text-muted">Your specialty or job title shown on your profile card.</p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-fg">Bio / Summary</label>
+              <textarea
+                rows={3}
+                value={profileBio}
+                onChange={(e) => setProfileBio(e.target.value)}
+                placeholder="Building high-performance web systems and AI developer tools..."
+                className="w-full rounded-xl border border-line bg-field p-3 text-xs text-fg focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-fg">Website / Portfolio</label>
+                <input
+                  type="url"
+                  value={profileWebsite}
+                  onChange={(e) => setProfileWebsite(e.target.value)}
+                  placeholder="https://benidir.dev"
+                  className="w-full rounded-xl border border-line bg-field px-3 py-2 text-xs text-fg focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-fg">GitHub URL</label>
+                <input
+                  type="url"
+                  value={profileGithub}
+                  onChange={(e) => setProfileGithub(e.target.value)}
+                  placeholder="https://github.com/benidir"
+                  className="w-full rounded-xl border border-line bg-field px-3 py-2 text-xs text-fg focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-fg">Twitter / X URL</label>
+                <input
+                  type="url"
+                  value={profileTwitter}
+                  onChange={(e) => setProfileTwitter(e.target.value)}
+                  placeholder="https://x.com/benidir"
+                  className="w-full rounded-xl border border-line bg-field px-3 py-2 text-xs text-fg focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-line/60">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="profile-is-public"
+                  checked={profileIsPublic}
+                  onChange={(e) => setProfileIsPublic(e.target.checked)}
+                  className="h-4 w-4 rounded border-line text-accent focus:ring-accent cursor-pointer"
+                />
+                <label htmlFor="profile-is-public" className="text-xs font-medium text-fg cursor-pointer">
+                  Make Profile Public (Anyone with your link can view your developer stack)
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-accent text-accent-fg text-xs font-bold hover:bg-accent-hover transition-colors shadow-sm cursor-pointer shrink-0"
+              >
+                {profileSaved ? <Check className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+                <span>{profileSaved ? "Profile Saved!" : "Save Profile"}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* TAB: OVERVIEW */}
       {activeTab === "overview" && (
