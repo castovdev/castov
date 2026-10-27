@@ -624,6 +624,20 @@ async function main(argv: string[]): Promise<void> {
     process.stdout.write(MAIN_HELP.trim() + "\n");
     return;
   }
+
+  // CRITICAL: The "audit" command must NOT import the telemetry module under any circumstances.
+  let telemetry: any = null;
+  if (command !== "audit") {
+    try {
+      const telemetryMod = await import("./telemetry.js");
+      telemetry = telemetryMod.getTelemetry();
+      if (command !== "mcp") {
+        telemetry.trackCliPing(command);
+      }
+    } catch {
+      // Telemetry must never crash CLI execution
+    }
+  }
   if (command === "-v" || command === "--version") {
     process.stdout.write(version + "\n");
     return;
@@ -1596,6 +1610,12 @@ function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", i
               ? requestedVersion
               : "2024-11-05";
 
+          try {
+            telemetry?.trackMcpInitialize(params?.clientInfo);
+          } catch {
+            // silent
+          }
+
           sendRpc({
             jsonrpc: "2.0",
             id,
@@ -1618,6 +1638,7 @@ function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", i
             result: { tools: MCP_TOOLS },
           }, mode);
         } else if (method === "tools/call") {
+          const toolCallStart = performance.now();
           const toolName = params?.name;
           const args = params?.arguments && typeof params.arguments === "object" ? params.arguments : {};
           let toolText = "";
@@ -2000,6 +2021,15 @@ function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", i
               ...(isError ? { isError: true } : {}),
             },
           }, mode);
+
+          try {
+            const durationMs = Math.round(performance.now() - toolCallStart);
+            if (typeof toolName === "string" && telemetry) {
+              telemetry.recordToolCall(toolName, durationMs, !isError);
+            }
+          } catch {
+            // silent
+          }
         } else if (method === "notifications/initialized" || method === "notifications/cancelled") {
           // No response needed for notifications
         } else if (id !== undefined) {
@@ -2109,6 +2139,16 @@ function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", i
           const body = buffer.subarray(bodyStart, bodyStart + contentLength).toString("utf8");
           buffer = buffer.subarray(bodyStart + contentLength);
           handleRpcMessage(body, "framed");
+        }
+      });
+
+      process.stdin.on("end", () => {
+        if (telemetry) {
+          telemetry.flushToolAggregates().finally(() => {
+            process.exit(0);
+          });
+        } else {
+          process.exit(0);
         }
       });
 

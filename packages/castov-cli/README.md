@@ -199,6 +199,46 @@ castov b64 decode "aGVsbG8gd29ybGQ="
 
 ---
 
+## 📊 Privacy-Friendly Usage Telemetry
+
+Castov collects minimal, privacy-friendly anonymous metrics strictly to understand aggregate adoption of the MCP server and CLI across platforms.
+
+### What is Collected:
+- **Anonymous Install ID**: A random UUID generated client-side and saved in `~/.castov/anon-id`. It contains no hardware identifiers, MAC addresses, usernames, or paths.
+- **Runtime Metadata**: Castov CLI version, OS family (`darwin`, `win32`, `linux`), and Node.js version.
+- **MCP Session Stats**: MCP client name/version (e.g. `cursor`, `claude-desktop`) and in-memory aggregated tool call counts and durations (flushed at most once per hour or on clean exit in a single background request).
+- **Command Invocation**: The command name invoked (e.g. `uuid`, `cidr`, `mcp`).
+
+### What is NEVER Collected:
+- ❌ **No tool arguments, inputs, or parameters** (they may contain sensitive data or secrets).
+- ❌ **No execution outputs, return payloads, or results**.
+- ❌ **No source code, file contents, project paths, or git repository names**.
+- ❌ **No IP addresses** (server computes an ephemeral daily salt hash and discards raw IPs).
+- ❌ **No personal data, machine names, or environment variables**.
+
+### 🔒 Absolute Zero-Network Guarantee for `castov audit`:
+The `castov audit` command is completely quarantined from the telemetry pipeline. It does not import the telemetry module, makes **zero network calls**, and never generates or touches `~/.castov/anon-id`.
+
+### How to Opt Out:
+You can completely disable all telemetry at any time using any of the following standard environment variables:
+
+```bash
+# Option 1: Castov Telemetry Opt-Out
+export CASTOV_TELEMETRY=0
+
+# Option 2: Standard Do-Not-Track
+export DO_NOT_TRACK=1
+```
+
+Telemetry is also **automatically disabled by default in CI environments** (`CI=true`).
+
+To reset your anonymous install ID at any time:
+```bash
+rm ~/.castov/anon-id
+```
+
+---
+
 ## 🌐 Ecosystem Links
 
 - **Web Platform**: [https://www.castov.com](https://www.castov.com)
