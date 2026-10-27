@@ -103,7 +103,7 @@ await new Promise((resolve, reject) => {
       stdoutBuf = stdoutBuf.subarray(start + len);
       try {
         responses.push(JSON.parse(payload));
-      } catch (err) {
+      } catch {
         return reject(new Error("stdout contained invalid JSON payload: " + payload));
       }
 
@@ -260,7 +260,9 @@ try {
   rmSync(tempHome3, { recursive: true, force: true });
   rmSync(tempHome4a, { recursive: true, force: true });
   rmSync(tempHome4b, { recursive: true, force: true });
-} catch {}
+} catch (err) {
+  void err;
+}
 
 console.log("\n=== ALL REAL E2E TESTS PASSED SUCCESSFULLY! ===");
 console.log(`\nExpected rows created in mcp_telemetry_events on production:`);

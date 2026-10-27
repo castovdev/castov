@@ -11,7 +11,6 @@ import {
   Download,
   Users,
   Terminal,
-  Clock,
   AlertTriangle,
   CheckCircle2,
   Layers,
@@ -103,12 +102,8 @@ export function DashboardAnalytics() {
   };
 
   useEffect(() => {
-    let mounted = true;
     fetchMcpStats();
     fetchWebStats();
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   if (is404) {

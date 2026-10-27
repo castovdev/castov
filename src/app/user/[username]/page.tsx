@@ -2,9 +2,8 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { fetchProfileByUsername, type DeveloperProfile } from "@/lib/profile-service";
-import { getTool, type ToolSlug } from "@/content/tools";
+import { getTool } from "@/content/tools";
 import {
   User as UserIcon,
   Globe,
@@ -15,7 +14,6 @@ import {
   Calendar,
   Cloud,
   Terminal,
-  Shield,
   Layers,
   ArrowRight,
   Sparkles,

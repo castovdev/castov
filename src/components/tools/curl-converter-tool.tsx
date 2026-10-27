@@ -137,7 +137,7 @@ export function CurlConverterTool() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Input cURL */}
         <div className="space-y-3">
-          <label className="text-xs font-semibold text-fg flex items-center justify-between">
+          <label htmlFor="curl-input" className="text-xs font-semibold text-fg flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <Terminal className="w-3.5 h-3.5 text-accent" />
               Paste cURL Command
@@ -145,6 +145,8 @@ export function CurlConverterTool() {
             <span className="text-muted font-normal">Auto-parses methods, headers &amp; payloads</span>
           </label>
           <textarea
+            id="curl-input"
+            aria-label="cURL Command Input"
             value={curl}
             onChange={(e) => setCurl(e.target.value)}
             rows={12}

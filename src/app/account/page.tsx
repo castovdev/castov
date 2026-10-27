@@ -275,7 +275,8 @@ function AccountDashboard() {
     ) => {
       try {
         setSyncStatusText("Syncing...");
-        const { error } = await supabase.from("user_preferences").upsert({
+        const client = createClient();
+        const { error } = await client.from("user_preferences").upsert({
           user_id: u.id,
           pinned_tools: pins,
           workspaces: ws,
@@ -293,7 +294,7 @@ function AccountDashboard() {
         setSyncStatusText(null);
       }
     },
-    [supabase]
+    []
   );
 
   useEffect(() => {

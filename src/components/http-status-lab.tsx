@@ -147,9 +147,11 @@ export function HttpStatusLab({
               <CopyButton text={absoluteMockUrl} label="Copy URL" />
             </div>
             <div className="flex flex-wrap items-end gap-3">
-              <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
+              <label htmlFor="http-method-select" className="flex flex-col gap-1 text-xs font-semibold text-muted">
                 Method
                 <select
+                  id="http-method-select"
+                  aria-label="HTTP Method"
                   value={method}
                   onChange={(e) => setMethod(e.target.value as Method)}
                   className="rounded-md border border-line bg-card px-3 py-2 font-mono text-sm text-fg"
@@ -161,9 +163,11 @@ export function HttpStatusLab({
                   ))}
                 </select>
               </label>
-              <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
+              <label htmlFor="http-delay-input" className="flex flex-col gap-1 text-xs font-semibold text-muted">
                 Delay (ms)
                 <input
+                  id="http-delay-input"
+                  aria-label="Simulated Delay in milliseconds"
                   type="number"
                   min={0}
                   max={5000}

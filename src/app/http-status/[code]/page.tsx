@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const name = status.title.replace(`${code} `, '');
   return buildMetadata({
     title: `HTTP ${code} ${name}: Meaning, Causes & Fix (+ Live Mock) | Castov`,
-    description: `What HTTP ${code} ${name} means, why it happens, and how to fix it in Next.js, Express and Nginx. Test it live with a free ${code} mock endpoint.`,
+    description: `What HTTP ${code} ${name} means, why it happens, and how to fix it. Test live with a free ${code} mock endpoint.`,
     path: `/http-status/${code}`,
   });
 }

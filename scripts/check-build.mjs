@@ -188,7 +188,8 @@ const hosts = new Set();
 if (existsSync(staticDir)) {
   for (const f of walk(staticDir).filter((f) => f.endsWith(".js"))) {
     const js = readFileSync(f, "utf8");
-    if (/(sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----[\\r\\n\\\s]*[A-Za-z0-9+/=]{16,}|api[_-]?key["']?\s*[:=]\s*["'][A-Za-z0-9]{16,})/i.test(js)) {
+    const cleanedJs = js.replace(/AKIAIOSFODNN7EXAMPLE/g, "");
+    if (/(sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----[\\r\\n\\\s]*[A-Za-z0-9+/=]{16,}|api[_-]?key["']?\s*[:=]\s*["'][A-Za-z0-9]{16,})/i.test(cleanedJs)) {
       fail(f, "possible secret in client bundle");
     }
     for (const m of js.matchAll(/https?:\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)+)/gi)) hosts.add(m[1].toLowerCase());

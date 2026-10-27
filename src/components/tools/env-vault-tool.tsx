@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { LockIcon, UnlockIcon, CopyIcon, LinkIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { SITE } from "@/lib/site";
@@ -200,7 +201,7 @@ export function EnvVaultTool() {
           {mode === "encrypt" && (
             <div className="bg-card border border-line rounded-2xl p-8 shadow-sm relative overflow-hidden group">
               <h2 className="text-xl font-bold text-fg mb-2 tracking-tight">Zero-Knowledge .env Sharer</h2>
-              <p className="text-sm text-muted mb-6">Your .env file is encrypted in the browser with AES-GCM using a key derived from your password, so the server never sees your raw secrets or your password. <strong className="text-fg">This tool is not local-only:</strong> the encrypted result is uploaded to our server (Supabase) so the link can be opened on another device. See the <a href="/privacy" className="underline">Privacy Policy</a>.</p>
+              <p className="text-sm text-muted mb-6">Your .env file is encrypted in the browser with AES-GCM using a key derived from your password, so the server never sees your raw secrets or your password. <strong className="text-fg">This tool is not local-only:</strong> the encrypted result is uploaded to our server (Supabase) so the link can be opened on another device. See the <Link href="/privacy" className="underline">Privacy Policy</Link>.</p>
               
               <textarea 
                 aria-label="Environment Variables Content"
@@ -299,9 +300,9 @@ export function EnvVaultTool() {
           </div>
           <h2 className="text-2xl font-bold text-fg mb-3">Team Shared Vaults</h2>
           <p className="text-muted max-w-md mx-auto mb-8">Share encrypted .env files securely with your team using zero-knowledge RSA-OAEP + AES-GCM cryptography.</p>
-          <a href="/env-vault/team" className="inline-flex bg-primary text-white dark:text-[#050505] hover:bg-primary/90 font-bold px-8 py-3 rounded-xl transition-all shadow-sm">
+          <Link href="/env-vault/team" className="inline-flex bg-primary text-white dark:text-[#050505] hover:bg-primary/90 font-bold px-8 py-3 rounded-xl transition-all shadow-sm">
             Open Workspace
-          </a>
+          </Link>
         </div>
       )}
     </div>
