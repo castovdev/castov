@@ -130,12 +130,17 @@ export function LiveTerminalPlayground() {
   const [copiedInstall, setCopiedInstall] = useState(false);
 
   const terminalEndRef = useRef<HTMLDivElement>(null);
+  const terminalBodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    if (typeof terminalEndRef.current?.scrollIntoView === "function") {
-      terminalEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (terminalBodyRef.current) {
+      terminalBodyRef.current.scrollTop = terminalBodyRef.current.scrollHeight;
     }
   }, [history]);
 
@@ -547,6 +552,7 @@ export function LiveTerminalPlayground() {
 
         {/* Terminal Screen Body */}
         <div
+          ref={terminalBodyRef}
           onClick={() => inputRef.current?.focus()}
           className="p-4 sm:p-5 font-mono text-xs sm:text-sm min-h-[260px] max-h-[360px] overflow-y-auto space-y-3 cursor-text bg-bg/95"
         >

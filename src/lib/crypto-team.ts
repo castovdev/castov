@@ -152,23 +152,30 @@ export async function wrapPrivateKey(
 
   const kek = await deriveKeyEncryptionKey(passphrase, salt, iterations);
 
-  // Export raw PKCS#8 bytes from the temporary key
-  const pkcs8Buffer = await crypto.subtle.exportKey("pkcs8", privateKey);
+  let pkcs8Buffer: ArrayBuffer | undefined;
+  try {
+    // Export raw PKCS#8 bytes from the temporary key
+    pkcs8Buffer = await crypto.subtle.exportKey("pkcs8", privateKey);
 
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
-    kek,
-    pkcs8Buffer
-  );
+    const ciphertext = await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv },
+      kek,
+      pkcs8Buffer
+    );
 
-  return {
-    version: 1,
-    iterations,
-    salt: arrayBufferToBase64(salt.buffer as ArrayBuffer),
-    iv: arrayBufferToBase64(iv.buffer as ArrayBuffer),
-    encryptedKey: arrayBufferToBase64(ciphertext),
-    algorithm: "AES-GCM-256",
-  };
+    return {
+      version: 1,
+      iterations,
+      salt: arrayBufferToBase64(salt.buffer as ArrayBuffer),
+      iv: arrayBufferToBase64(iv.buffer as ArrayBuffer),
+      encryptedKey: arrayBufferToBase64(ciphertext),
+      algorithm: "AES-GCM-256",
+    };
+  } finally {
+    if (pkcs8Buffer) {
+      new Uint8Array(pkcs8Buffer).fill(0); // Wipe raw private key bytes
+    }
+  }
 }
 
 /**
@@ -206,25 +213,31 @@ export async function unwrapPrivateKey(
 
   const kek = await deriveKeyEncryptionKey(passphrase, salt, parsed.iterations || PBKDF2_RECOMMENDED_ITERATIONS);
 
-  let decryptedPkcs8: ArrayBuffer;
+  let decryptedPkcs8: ArrayBuffer | undefined;
   try {
-    decryptedPkcs8 = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
-      kek,
-      ciphertext
-    );
-  } catch (_e) {
-    throw new Error("Failed to decrypt private key. Incorrect passphrase or corrupted bundle.");
-  }
+    try {
+      decryptedPkcs8 = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv },
+        kek,
+        ciphertext
+      );
+    } catch (_e) {
+      throw new Error("Failed to decrypt private key. Incorrect passphrase or corrupted bundle.");
+    }
 
-  // Import directly as non-extractable private key
-  return await crypto.subtle.importKey(
-    "pkcs8",
-    decryptedPkcs8,
-    { name: "RSA-OAEP", hash: "SHA-256" },
-    false, // Non-extractable in memory
-    ["decrypt"]
-  );
+    // Import directly as non-extractable private key
+    return await crypto.subtle.importKey(
+      "pkcs8",
+      decryptedPkcs8,
+      { name: "RSA-OAEP", hash: "SHA-256" },
+      false, // Non-extractable in memory
+      ["decrypt"]
+    );
+  } finally {
+    if (decryptedPkcs8) {
+      new Uint8Array(decryptedPkcs8).fill(0); // Wipe decrypted private key bytes
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -251,17 +264,24 @@ export async function encryptTeamKeyForUser(
   userPublicKey: CryptoKey,
   keyVersion = 1
 ): Promise<EncryptedTeamKeyRecord> {
-  const rawTeamKey = await crypto.subtle.exportKey("raw", teamKey);
-  const encrypted = await crypto.subtle.encrypt(
-    { name: "RSA-OAEP" },
-    userPublicKey,
-    rawTeamKey
-  );
+  let rawTeamKey: ArrayBuffer | undefined;
+  try {
+    rawTeamKey = await crypto.subtle.exportKey("raw", teamKey);
+    const encrypted = await crypto.subtle.encrypt(
+      { name: "RSA-OAEP" },
+      userPublicKey,
+      rawTeamKey
+    );
 
-  return {
-    key_version: keyVersion,
-    encrypted_team_key: arrayBufferToBase64(encrypted),
-  };
+    return {
+      key_version: keyVersion,
+      encrypted_team_key: arrayBufferToBase64(encrypted),
+    };
+  } finally {
+    if (rawTeamKey) {
+      new Uint8Array(rawTeamKey).fill(0); // Wipe raw team key bytes
+    }
+  }
 }
 
 /**
@@ -274,24 +294,30 @@ export async function decryptTeamKey(
   extractable = false
 ): Promise<CryptoKey> {
   const encrypted = base64ToArrayBuffer(encryptedTeamKeyB64);
-  let rawTeamKey: ArrayBuffer;
+  let rawTeamKey: ArrayBuffer | undefined;
   try {
-    rawTeamKey = await crypto.subtle.decrypt(
-      { name: "RSA-OAEP" },
-      userPrivateKey,
-      encrypted
-    );
-  } catch (_e) {
-    throw new Error("Failed to decrypt team key with provided private key.");
-  }
+    try {
+      rawTeamKey = await crypto.subtle.decrypt(
+        { name: "RSA-OAEP" },
+        userPrivateKey,
+        encrypted
+      );
+    } catch (_e) {
+      throw new Error("Failed to decrypt team key with provided private key.");
+    }
 
-  return await crypto.subtle.importKey(
-    "raw",
-    rawTeamKey,
-    { name: "AES-GCM" },
-    extractable,
-    ["encrypt", "decrypt"]
-  );
+    return await crypto.subtle.importKey(
+      "raw",
+      rawTeamKey,
+      { name: "AES-GCM" },
+      extractable,
+      ["encrypt", "decrypt"]
+    );
+  } finally {
+    if (rawTeamKey) {
+      new Uint8Array(rawTeamKey).fill(0); // Wipe decrypted team key bytes
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -372,24 +398,32 @@ export async function wrapPrivateKeyWithRecoveryKey(
     recoveryKeyHex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
   );
 
-  const recoveryCryptoKey = await crypto.subtle.importKey(
-    "raw",
-    rawKeyBytes,
-    { name: "AES-GCM" },
-    false,
-    ["encrypt", "decrypt"]
-  );
+  let pkcs8: ArrayBuffer | undefined;
+  try {
+    const recoveryCryptoKey = await crypto.subtle.importKey(
+      "raw",
+      rawKeyBytes,
+      { name: "AES-GCM" },
+      false,
+      ["encrypt", "decrypt"]
+    );
 
-  const iv = crypto.getRandomValues(new Uint8Array(AES_GCM_IV_LENGTH));
-  const pkcs8 = await crypto.subtle.exportKey("pkcs8", privateKey);
+    const iv = crypto.getRandomValues(new Uint8Array(AES_GCM_IV_LENGTH));
+    pkcs8 = await crypto.subtle.exportKey("pkcs8", privateKey);
 
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
-    recoveryCryptoKey,
-    pkcs8
-  );
+    const ciphertext = await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv },
+      recoveryCryptoKey,
+      pkcs8
+    );
 
-  return `${arrayBufferToBase64(iv.buffer as ArrayBuffer)}:${arrayBufferToBase64(ciphertext)}`;
+    return `${arrayBufferToBase64(iv.buffer as ArrayBuffer)}:${arrayBufferToBase64(ciphertext)}`;
+  } finally {
+    rawKeyBytes.fill(0);
+    if (pkcs8) {
+      new Uint8Array(pkcs8).fill(0);
+    }
+  }
 }
 
 /**
@@ -408,30 +442,38 @@ export async function unwrapPrivateKeyWithRecoveryKey(
     recoveryKeyHex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
   );
 
-  const recoveryCryptoKey = await crypto.subtle.importKey(
-    "raw",
-    rawKeyBytes,
-    { name: "AES-GCM" },
-    false,
-    ["decrypt"]
-  );
+  let decryptedPkcs8: ArrayBuffer | undefined;
+  try {
+    const recoveryCryptoKey = await crypto.subtle.importKey(
+      "raw",
+      rawKeyBytes,
+      { name: "AES-GCM" },
+      false,
+      ["decrypt"]
+    );
 
-  const iv = new Uint8Array(base64ToArrayBuffer(ivB64));
-  const ciphertext = base64ToArrayBuffer(cipherB64);
+    const iv = new Uint8Array(base64ToArrayBuffer(ivB64));
+    const ciphertext = base64ToArrayBuffer(cipherB64);
 
-  const decryptedPkcs8 = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv },
-    recoveryCryptoKey,
-    ciphertext
-  );
+    decryptedPkcs8 = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv },
+      recoveryCryptoKey,
+      ciphertext
+    );
 
-  return await crypto.subtle.importKey(
-    "pkcs8",
-    decryptedPkcs8,
-    { name: "RSA-OAEP", hash: "SHA-256" },
-    false, // Non-extractable
-    ["decrypt"]
-  );
+    return await crypto.subtle.importKey(
+      "pkcs8",
+      decryptedPkcs8,
+      { name: "RSA-OAEP", hash: "SHA-256" },
+      false, // Non-extractable
+      ["decrypt"]
+    );
+  } finally {
+    rawKeyBytes.fill(0);
+    if (decryptedPkcs8) {
+      new Uint8Array(decryptedPkcs8).fill(0);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

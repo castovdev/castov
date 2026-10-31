@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* Design tokens. Light is the default theme; dark is opt-in via the header toggle. */
 :root,
 :root[data-theme="light"] {

@@ -7,18 +7,69 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { WrappedPrivateKeyBundle } from "./crypto-team";
 
-// Ephemeral in-memory key storage mapped by user ID
-const inMemoryPrivateKeys = new Map<string, CryptoKey>();
-
-export function getInMemoryPrivateKey(userId: string): CryptoKey | null {
-  return inMemoryPrivateKeys.get(userId) || null;
+interface SessionEntry {
+  key: CryptoKey;
+  expiresAt: number;
+  ttlMs: number;
+  timer: any;
 }
 
-export function setInMemoryPrivateKey(userId: string, key: CryptoKey): void {
-  inMemoryPrivateKeys.set(userId, key);
+// Default inactivity timeout: 30 minutes
+export const DEFAULT_KEY_SESSION_TTL_MS = 30 * 60 * 1000;
+
+// Ephemeral in-memory key storage mapped by user ID with automatic inactivity timeout
+const inMemoryPrivateKeys = new Map<string, SessionEntry>();
+
+export function getInMemoryPrivateKey(userId: string): CryptoKey | null {
+  const entry = inMemoryPrivateKeys.get(userId);
+  if (!entry) return null;
+
+  const now = Date.now();
+  if (now > entry.expiresAt) {
+    clearInMemoryPrivateKey(userId);
+    return null;
+  }
+
+  // Active touch: sliding expiration window on active use
+  entry.expiresAt = now + entry.ttlMs;
+  if (entry.timer) clearTimeout(entry.timer);
+  entry.timer = setTimeout(() => {
+    clearInMemoryPrivateKey(userId);
+  }, entry.ttlMs);
+  if (typeof entry.timer?.unref === "function") {
+    entry.timer.unref();
+  }
+
+  return entry.key;
+}
+
+export function setInMemoryPrivateKey(
+  userId: string,
+  key: CryptoKey,
+  ttlMs: number = DEFAULT_KEY_SESSION_TTL_MS
+): void {
+  // Clear any existing session timer
+  const existing = inMemoryPrivateKeys.get(userId);
+  if (existing?.timer) clearTimeout(existing.timer);
+
+  const timer = setTimeout(() => {
+    clearInMemoryPrivateKey(userId);
+  }, ttlMs);
+  if (typeof timer?.unref === "function") {
+    timer.unref();
+  }
+
+  inMemoryPrivateKeys.set(userId, {
+    key,
+    expiresAt: Date.now() + ttlMs,
+    ttlMs,
+    timer,
+  });
 }
 
 export function clearInMemoryPrivateKey(userId: string): void {
+  const entry = inMemoryPrivateKeys.get(userId);
+  if (entry?.timer) clearTimeout(entry.timer);
   inMemoryPrivateKeys.delete(userId);
 }
 

@@ -963,3 +963,112 @@ test("castov vault CLI: shows help and requires login/passphrase", async () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test("castov mcp: regression - castov_json_to_ts_pipeline sanitizes malicious keys against code injection", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 1, timeoutMs, setTracked);
+
+  const maliciousPayload = {
+    "x {}\nexport const pwn = 1;\ninterface Z": {
+      "nested key with spaces & chars": {
+        "value": 42
+      }
+    }
+  };
+
+  client.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 991,
+    method: "tools/call",
+    params: {
+      name: "castov_json_to_ts_pipeline",
+      arguments: { json: JSON.stringify(maliciousPayload), rootName: "SafeRoot" }
+    }
+  }) + "\n");
+
+  const [res] = await promise;
+  assert.equal(res.id, 991);
+  const data = JSON.parse(res.result.content[0].text);
+  assert.equal(data.success, true);
+  assert.doesNotMatch(data.typeScriptInterfaces, /^export const /m);
+  assert.doesNotMatch(data.typeScriptInterfaces, /interface Z\s*\{/);
+  const interfaceMatches = [...data.typeScriptInterfaces.matchAll(/export interface\s+([^\s{]+)/g)];
+  assert.ok(interfaceMatches.length >= 2);
+  for (const match of interfaceMatches) {
+    const ifaceName = match[1];
+    assert.match(ifaceName, /^[A-Za-z_$][A-Za-z0-9_$]*$/);
+  }
+});
+
+test("castov mcp: regression - deeply nested objects respect max depth without crashing", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 1, timeoutMs, setTracked);
+
+  let deepObj = { leaf: "value" };
+  for (let i = 0; i < 40; i++) {
+    deepObj = { [`level_${i}`]: deepObj };
+  }
+
+  client.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 992,
+    method: "tools/call",
+    params: {
+      name: "castov_json_to_ts_pipeline",
+      arguments: { json: JSON.stringify(deepObj), rootName: "DeepNest" }
+    }
+  }) + "\n");
+
+  const [res] = await promise;
+  assert.equal(res.id, 992);
+  const data = JSON.parse(res.result.content[0].text);
+  assert.equal(data.success, true);
+  assert.match(data.typeScriptInterfaces, /Record<string, unknown>/);
+});
+
+test("castov mcp: regression - client disconnect / broken pipe exits cleanly with code 0", async () => {
+  const p = spawn(process.execPath, [CLI, "mcp"], {
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+
+  let stderr = "";
+  p.stderr.on("data", (d) => {
+    stderr += d.toString("utf8");
+  });
+
+  const exitPromise = new Promise((resolve) => {
+    p.on("exit", (code, signal) => resolve({ code, signal }));
+  });
+
+  p.stdout.destroy();
+
+  p.stdin.on("error", () => {});
+  const big = JSON.stringify({
+    jsonrpc: "2.0",
+    id: 1,
+    method: "tools/call",
+    params: { name: "castov_hash", arguments: { text: "a".repeat(500000) } }
+  }) + "\n";
+
+  try {
+    for (let i = 0; i < 5; i++) {
+      p.stdin.write(big);
+    }
+    setTimeout(() => {
+      try { p.stdin.end(); } catch {
+        // ignore broken pipe on test teardown
+      }
+    }, 200);
+  } catch {
+    // ignore
+  }
+
+  const result = await Promise.race([
+    exitPromise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout waiting for exit")), 5000)),
+  ]);
+
+  assert.equal(result.code, 0);
+  assert.doesNotMatch(stderr, /write EPIPE/);
+  assert.doesNotMatch(stderr, /UnhandledPromiseRejection/);
+});

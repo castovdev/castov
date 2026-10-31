@@ -126,6 +126,10 @@ export async function GET(request: Request) {
     }
 
     let secret = SECRET_STORAGE.get(id);
+    if (secret && secret.expiresIn === "burn") {
+      // Atomic consume from memory map to prevent concurrent read race condition
+      SECRET_STORAGE.delete(id);
+    }
 
     // Check Supabase if not in memory
     if (!secret) {
@@ -135,9 +139,13 @@ export async function GET(request: Request) {
           .from("secret_shares")
           .select("*")
           .eq("id", id)
-          .single();
+          .maybeSingle();
 
         if (data) {
+          if (data.expires_in === "burn") {
+            // Immediately burn in database before returning payload to prevent race condition
+            await supabase.from("secret_shares").delete().eq("id", id);
+          }
           secret = {
             id: data.id,
             ciphertext: data.ciphertext,

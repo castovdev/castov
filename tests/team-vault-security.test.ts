@@ -1,4 +1,10 @@
 import { describe, it, expect } from "vitest";
+import { encryptEnvVault, decryptEnvVault } from "@/lib/vault-crypto";
+import {
+  getInMemoryPrivateKey,
+  setInMemoryPrivateKey,
+  clearInMemoryPrivateKey,
+} from "@/lib/team-key-session";
 import {
   generateUserKeyPair,
   exportPublicKey,
@@ -242,4 +248,71 @@ describe("Team Vault Cryptographic Engine (Phase 2 Hardened Security)", () => {
       unwrapPrivateKeyWithRecoveryKey(recoveryBundle, bogusRecoveryKey)
     ).rejects.toThrow();
   });
+
+  describe("Env Vault Crypto Hardening & Validation", () => {
+    it("encrypts and decrypts environment variables with PBKDF2 600,000 iterations", async () => {
+      const plaintext = "API_KEY=cst_live_998877\nDB_PASS=super_secure_vault";
+      const pass = "VaultMasterPassphrase2026!";
+
+      const encrypted = await encryptEnvVault(plaintext, pass);
+      expect(encrypted.ciphertext).toBeTruthy();
+      expect(encrypted.iv).toBeTruthy();
+      expect(encrypted.salt).toBeTruthy();
+
+      const decrypted = await decryptEnvVault(encrypted, pass);
+      expect(decrypted).toBe(plaintext);
+    });
+
+    it("rejects corrupted base64 payloads without unhandled DOMException", async () => {
+      const pass = "VaultMasterPassphrase2026!";
+      const badPayload = {
+        ciphertext: "not-valid-base64-@@@@@",
+        iv: "not-valid-iv-@@@@@",
+        salt: "not-valid-salt-@@@@@",
+      };
+
+      await expect(decryptEnvVault(badPayload, pass)).rejects.toThrow(
+        /Invalid base64 payload|corrupted/i
+      );
+    });
+
+    it("rejects truncated or malformed IV and salt buffers", async () => {
+      const pass = "VaultMasterPassphrase2026!";
+      const shortIvPayload = {
+        ciphertext: Buffer.from("a".repeat(32)).toString("base64"),
+        iv: Buffer.from("short").toString("base64"), // < 12 bytes
+        salt: Buffer.from("a".repeat(16)).toString("base64"),
+      };
+
+      await expect(decryptEnvVault(shortIvPayload, pass)).rejects.toThrow(
+        /Invalid vault payload: corrupted salt, IV, or ciphertext/i
+      );
+    });
+  });
+
+  describe("In-Memory Key Session Manager with Inactivity Expiry", () => {
+    it("stores, retrieves, and clears keys with sliding inactivity TTL", async () => {
+      const testUserId = "user_sec_audit_session_test";
+      const keyPair = await generateUserKeyPair();
+
+      // Clear any prior state
+      clearInMemoryPrivateKey(testUserId);
+      expect(getInMemoryPrivateKey(testUserId)).toBeNull();
+
+      // Store with short TTL (100ms) for deterministic test
+      setInMemoryPrivateKey(testUserId, keyPair.privateKey, 100);
+      expect(getInMemoryPrivateKey(testUserId)).toBe(keyPair.privateKey);
+
+      // Wait 150ms for TTL expiry
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(getInMemoryPrivateKey(testUserId)).toBeNull();
+
+      // Store again and test immediate explicit clear
+      setInMemoryPrivateKey(testUserId, keyPair.privateKey, 60000);
+      expect(getInMemoryPrivateKey(testUserId)).toBe(keyPair.privateKey);
+      clearInMemoryPrivateKey(testUserId);
+      expect(getInMemoryPrivateKey(testUserId)).toBeNull();
+    });
+  });
+
 });

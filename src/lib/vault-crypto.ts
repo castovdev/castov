@@ -23,12 +23,16 @@ function bufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
 }
 
 function base64ToBuffer(base64: string): Uint8Array {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
+  try {
+    const binary = atob(base64.trim());
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  } catch {
+    throw new Error("Invalid base64 payload or corrupted vault metadata.");
   }
-  return bytes;
 }
 
 async function deriveAesKey(
@@ -75,11 +79,17 @@ export async function encryptEnvVault(
   const key = await deriveAesKey(passphrase, salt);
 
   const enc = new TextEncoder();
-  const ciphertextBuffer = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
-    key,
-    enc.encode(plaintext)
-  );
+  const plaintextBytes = enc.encode(plaintext);
+  let ciphertextBuffer: ArrayBuffer;
+  try {
+    ciphertextBuffer = await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv },
+      key,
+      plaintextBytes
+    );
+  } finally {
+    plaintextBytes.fill(0);
+  }
 
   return {
     ciphertext: bufferToBase64(ciphertextBuffer),
@@ -103,6 +113,10 @@ export async function decryptEnvVault(
   const iv = base64ToBuffer(payload.iv);
   const ciphertext = base64ToBuffer(payload.ciphertext);
 
+  if (salt.length !== 16 || iv.length !== 12 || ciphertext.length < 16) {
+    throw new Error("Invalid vault payload: corrupted salt, IV, or ciphertext.");
+  }
+
   const dec = new TextDecoder();
 
   // Try 600,000 PBKDF2 iterations first (modern hardened standard)
@@ -113,7 +127,9 @@ export async function decryptEnvVault(
       key,
       ciphertext as any
     );
-    return dec.decode(decryptedBuffer);
+    const result = dec.decode(decryptedBuffer);
+    new Uint8Array(decryptedBuffer).fill(0);
+    return result;
   } catch {
     // Transparent backward compatibility for vaults derived with legacy 100,000 iterations
     try {
@@ -123,7 +139,9 @@ export async function decryptEnvVault(
         legacyKey,
         ciphertext as any
       );
-      return dec.decode(decryptedBuffer);
+      const result = dec.decode(decryptedBuffer);
+      new Uint8Array(decryptedBuffer).fill(0);
+      return result;
     } catch {
       throw new Error("Decryption failed. Incorrect passphrase or corrupted vault data.");
     }

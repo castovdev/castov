@@ -1328,40 +1328,88 @@ async function main(argv: string[]): Promise<void> {
         openWorldHint: false,
       };
 
-function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", indent = "  "): string {
+function sanitizeIdentifier(raw: string, fallback = "Item"): string {
+  let cleaned = raw.replace(/[^A-Za-z0-9_$]/g, "_").replace(/^[^A-Za-z_$]+/, "");
+  if (!cleaned) cleaned = fallback;
+  if (cleaned.length > 32) {
+    cleaned = cleaned.slice(0, 32);
+  }
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+function generateTsInterfacesFromObject(
+  obj: unknown,
+  rootName = "RootObject",
+  indent = "  ",
+  maxDepth = 32,
+  maxOutputChars = 512 * 1024
+): string {
+  const safeRootName = /^[A-Za-z_$][A-Za-z0-9_$]{0,63}$/.test(rootName) ? rootName : "RootObject";
   if (typeof obj !== "object" || obj === null) {
-    return `export type ${rootName} = ${typeof obj};\n`;
+    return `export type ${safeRootName} = ${typeof obj};\n`;
   }
 
-  let extraInterfaces = "";
-  const visited = new Set<string>();
+  const extraInterfaces: string[] = [];
+  const usedTypeNames = new Set<string>([safeRootName]);
+  let totalLength = 0;
 
-  const buildInterface = (name: string, target: Record<string, unknown>): string => {
+  const allocateTypeName = (baseHint: string): string => {
+    let clean = sanitizeIdentifier(baseHint, "SubItem");
+    if (!usedTypeNames.has(clean)) {
+      usedTypeNames.add(clean);
+      return clean;
+    }
+    let counter = 2;
+    while (usedTypeNames.has(`${clean}_${counter}`)) {
+      counter++;
+      if (counter > 10000) break;
+    }
+    const finalName = `${clean}_${counter}`;
+    usedTypeNames.add(finalName);
+    return finalName;
+  };
+
+  const buildInterface = (name: string, target: Record<string, unknown>, currentDepth: number): string => {
+    if (currentDepth > maxDepth || totalLength > maxOutputChars) {
+      return `export type ${name} = Record<string, unknown>;\n`;
+    }
+
     let code = `export interface ${name} {\n`;
     for (const [key, val] of Object.entries(target)) {
+      if (totalLength > maxOutputChars) {
+        code += `${indent}// Truncated: maximum interface output length exceeded\n`;
+        break;
+      }
       const sanitizedKey = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
+
       if (val === null) {
         code += `${indent}${sanitizedKey}: any;\n`;
       } else if (Array.isArray(val)) {
         if (val.length > 0 && typeof val[0] === "object" && val[0] !== null) {
-          const itemTypeName = `${name}_${key.charAt(0).toUpperCase() + key.slice(1)}Item`;
-          if (!visited.has(itemTypeName)) {
-            visited.add(itemTypeName);
-            extraInterfaces += buildInterface(itemTypeName, val[0] as Record<string, unknown>) + "\n";
+          if (currentDepth >= maxDepth) {
+            code += `${indent}${sanitizedKey}: Record<string, unknown>[];\n`;
+          } else {
+            const itemTypeName = allocateTypeName(`${key}Item`);
+            const subCode = buildInterface(itemTypeName, val[0] as Record<string, unknown>, currentDepth + 1);
+            extraInterfaces.push(subCode);
+            totalLength += subCode.length;
+            code += `${indent}${sanitizedKey}: ${itemTypeName}[];\n`;
           }
-          code += `${indent}${sanitizedKey}: ${itemTypeName}[];\n`;
         } else if (val.length > 0) {
           code += `${indent}${sanitizedKey}: ${typeof val[0]}[];\n`;
         } else {
           code += `${indent}${sanitizedKey}: any[];\n`;
         }
       } else if (typeof val === "object") {
-        const subTypeName = `${name}_${key.charAt(0).toUpperCase() + key.slice(1)}`;
-        if (!visited.has(subTypeName)) {
-          visited.add(subTypeName);
-          extraInterfaces += buildInterface(subTypeName, val as Record<string, unknown>) + "\n";
+        if (currentDepth >= maxDepth) {
+          code += `${indent}${sanitizedKey}: Record<string, unknown>;\n`;
+        } else {
+          const subTypeName = allocateTypeName(key);
+          const subCode = buildInterface(subTypeName, val as Record<string, unknown>, currentDepth + 1);
+          extraInterfaces.push(subCode);
+          totalLength += subCode.length;
+          code += `${indent}${sanitizedKey}: ${subTypeName};\n`;
         }
-        code += `${indent}${sanitizedKey}: ${subTypeName};\n`;
       } else {
         code += `${indent}${sanitizedKey}: ${typeof val};\n`;
       }
@@ -1370,8 +1418,8 @@ function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", i
     return code;
   };
 
-  const root = buildInterface(rootName, obj as Record<string, unknown>);
-  return extraInterfaces ? `${root}\n${extraInterfaces.trim()}\n` : root;
+  const root = buildInterface(safeRootName, obj as Record<string, unknown>, 1);
+  return extraInterfaces.length > 0 ? `${root}\n${extraInterfaces.join("\n").trim()}\n` : root;
 }
 
       const MCP_TOOLS = [
@@ -1564,15 +1612,42 @@ function generateTsInterfacesFromObject(obj: unknown, rootName = "RootObject", i
 
       type Mode = "ndjson" | "framed";
 
-      const sendRpc = (msg: unknown, mode: Mode, cb?: () => void) => {
-        const json = Buffer.from(JSON.stringify(msg), "utf8");
-        const out = mode === "framed"
-          ? Buffer.concat([Buffer.from(`Content-Length: ${json.length}\r\n\r\n`, "utf8"), json])
-          : Buffer.concat([json, Buffer.from("\n", "utf8")]);
-        process.stdout.write(out, cb);
+      let dead = false;
+
+      const handleStreamError = (err: any) => {
+        dead = true;
+        if (err && (err.code === "EPIPE" || err.code === "ERR_STREAM_DESTROYED" || err.code === "EOF")) {
+          process.exit(0);
+        }
+        process.exit(1);
       };
 
-      let dead = false;
+      process.stdout.on("error", handleStreamError);
+      process.stdin.on("error", handleStreamError);
+
+      const sendRpc = (msg: unknown, mode: Mode, cb?: () => void) => {
+        if (process.stdout.destroyed || !process.stdout.writable) {
+          cb?.();
+          return;
+        }
+        try {
+          const json = Buffer.from(JSON.stringify(msg), "utf8");
+          const out = mode === "framed"
+            ? Buffer.concat([Buffer.from(`Content-Length: ${json.length}\r\n\r\n`, "utf8"), json])
+            : Buffer.concat([json, Buffer.from("\n", "utf8")]);
+          process.stdout.write(out, (err) => {
+            if (err) {
+              dead = true;
+              cb?.();
+              return;
+            }
+            cb?.();
+          });
+        } catch {
+          dead = true;
+          cb?.();
+        }
+      };
 
       const fatal = (mode: Mode, message: string) => {
         dead = true;
