@@ -1,0 +1,26 @@
+{
+  "extName": {
+    "message": "Castov Secret Shield",
+    "description": "Name of the extension"
+  },
+  "extDescription": {
+    "message": "Intercepts and prevents pasting secrets into AI chat sites. Local and offline with zero network calls.",
+    "description": "Description of the extension"
+  },
+  "btnRedact": {
+    "message": "Paste Redacted",
+    "description": "Button to paste redacted text"
+  },
+  "btnOriginal": {
+    "message": "Paste Original",
+    "description": "Button to paste original text without redaction"
+  },
+  "btnCancel": {
+    "message": "Cancel",
+    "description": "Button to cancel paste"
+  },
+  "contextMenuDecode": {
+    "message": "Castov: Decode Selection",
+    "description": "Context menu title for decoding selected text"
+  }
+}

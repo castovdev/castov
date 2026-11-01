@@ -412,6 +412,158 @@ export const VS_COMPARISONS: VsComparison[] = [
       },
     ],
   },
+  {
+    slug: "diffchecker",
+    competitorName: "Diffchecker",
+    competitorCategory: "Code & Text Diff Comparison",
+    title: "Castov Offline Diff Checker vs Diffchecker — Zero Cloud Uploads (No Behavioral Telemetry)",
+    seoTitle: "Diffchecker Alternative (Offline & Private): Castov vs Diffchecker (2026)",
+    summary:
+      "Compare Castov's local Diff Checker (100% in-browser WebWorker diff with no behavioral telemetry) against Diffchecker.com for comparing confidential source code, JSON payloads, and sensitive documents safely.",
+    verdictSummary:
+      "Diffchecker sends your code and text to remote cloud servers to compute diffs and store history. Castov computes the entire Myers diff algorithm client-side in browser memory with zero network requests, ensuring proprietary intellectual property never leaks.",
+    castovCommand: "npx castov diff fileA.js fileB.js",
+    mcpCommand: "npx -y castov@latest mcp",
+    castovToolUrl: "/diff-checker",
+    castovToolName: "Client-Side Diff Checker",
+    rows: [
+      {
+        feature: "Execution Model & Privacy",
+        castov: "100% Client-Side in Browser Memory (Zero Cloud Uploads)",
+        competitor: "Transmits text to remote servers (potential data retention)",
+        winner: "castov",
+      },
+      {
+        feature: "Third-Party Trackers & Ads",
+        castov: "Zero trackers, zero banner ads, zero cookie banners",
+        competitor: "Heavy programmatic display ads & third-party trackers",
+        winner: "castov",
+      },
+      {
+        feature: "Offline & Air-Gapped Mode",
+        castov: "Works completely offline without an active internet connection",
+        competitor: "Requires active internet access to render diffs",
+        winner: "castov",
+      },
+      {
+        feature: "File Size Limit (Free Tier)",
+        castov: "Unlimited local memory (handles large files without paid tier)",
+        competitor: "Strict character and file size restrictions on free tier",
+        winner: "castov",
+      },
+      {
+        feature: "Public URL Sharing",
+        castov: "Focused on privacy; requires intentional local export",
+        competitor: "Generates permanent shareable public web URLs",
+        winner: "competitor",
+      },
+    ],
+    whenToUseCastov: [
+      "You are comparing proprietary source code, credentials, customer PII, or internal config files that must never leave your machine.",
+      "You work in an air-gapped or restricted enterprise environment.",
+      "You want a clean, ad-free diffing tool with zero latency.",
+    ],
+    whenToUseCompetitor: [
+      "You need to generate a publicly accessible URL to send a non-confidential diff to an external client.",
+    ],
+    howToMigrateSteps: [
+      {
+        name: "Open the Private Diff Tool",
+        text: "Navigate to `https://castov.com/diff-checker` in your browser.",
+      },
+      {
+        name: "Paste Sensitive Code or Upload Files",
+        text: "Paste your original and modified text side-by-side. The diff computes in milliseconds directly in your browser thread.",
+      },
+      {
+        name: "Verify Zero Network Traffic",
+        text: "Open Developer Tools (F12) to inspect the Network tab and confirm no data leaves your browser.",
+      },
+    ],
+    faqs: [
+      {
+        q: "Does Castov store or log my compared files?",
+        a: "No. Castov operates with a strict Zero Behavioral Telemetry policy. All diff computation runs locally in your browser memory.",
+      },
+      {
+        q: "Can I use Castov Diff Checker without an internet connection?",
+        a: "Yes. Once the page is loaded, or via Castov's offline PWA and CLI, you can compare files completely offline.",
+      },
+    ],
+  },
+  {
+    slug: "json-formatter",
+    competitorName: "JSONFormatter & Online Formatters",
+    competitorCategory: "JSON Formatting & Validation",
+    title: "Castov Private JSON Formatter vs JSONFormatter.org — Zero Ads & 100% Client-Side",
+    seoTitle: "JSON Formatter Alternative (No Ads, 100% Offline): Castov vs Online Formatters (2026)",
+    summary:
+      "Compare Castov's offline JSON Formatter & Tree Inspector against ad-heavy online tools like JSONFormatter.org and CodeBeautify for formatting large JSON payloads securely.",
+    verdictSummary:
+      "Most online JSON formatters are monetized with aggressive advertising networks, third-party cookies, and background analytics. Castov parses, formats, and validates JSON 100% in browser memory with zero tracking and zero server uploads.",
+    castovCommand: "npx castov format payload.json",
+    mcpCommand: "npx -y castov@latest mcp",
+    castovToolUrl: "/json-formatter",
+    castovToolName: "Private JSON Formatter & Tree Viewer",
+    rows: [
+      {
+        feature: "Data Privacy & Security",
+        castov: "100% Client-Side Execution (Payloads never leave browser)",
+        competitor: "Potential server-side parsing and proxy logging",
+        winner: "castov",
+      },
+      {
+        feature: "User Experience & Advertising",
+        castov: "Zero banner ads, zero popups, clean developer UI",
+        competitor: "Cluttered with ad banners, auto-playing video ads, and sponsored links",
+        winner: "castov",
+      },
+      {
+        feature: "Interactive Tree & Path Inspection",
+        castov: "Fast expandable tree view with instant JSONPath query support",
+        competitor: "Basic indentation with limited nested search",
+        winner: "castov",
+      },
+      {
+        feature: "Terminal CLI & MCP Server Integration",
+        castov: "Included in `npx castov` and Glama Grade A MCP Server for AI agents",
+        competitor: "Web-only interface with no terminal or AI tooling",
+        winner: "castov",
+      },
+    ],
+    whenToUseCastov: [
+      "You are formatting JSON that contains customer records, API tokens, database dumps, or enterprise configuration.",
+      "You want an ad-free, instant formatter that doesn't slow down your browser.",
+      "You need your AI assistant (Cursor/Claude) to format and validate JSON locally via MCP.",
+    ],
+    whenToUseCompetitor: [
+      "You are looking for niche conversions like JSON to CSV/XML specifically hosted on legacy web platforms.",
+    ],
+    howToMigrateSteps: [
+      {
+        name: "Visit Castov JSON Formatter",
+        text: "Bookmark `https://castov.com/json-formatter` for instant access.",
+      },
+      {
+        name: "Format, Validate & Beautify",
+        text: "Paste your raw JSON. It instantly beautifies, validates syntax, and highlights errors without sending bytes over the wire.",
+      },
+      {
+        name: "Use in Terminal or IDE",
+        text: "Run `npx castov format file.json` or configure the MCP server for AI coding assistants.",
+      },
+    ],
+    faqs: [
+      {
+        q: "Why is an offline JSON formatter safer than conventional online tools?",
+        a: "Many public formatters run third-party JavaScript trackers that could intercept clipboard data or transmit payloads to server logs. Castov is strictly client-side with zero telemetry.",
+      },
+      {
+        q: "What is the maximum JSON payload size Castov can handle?",
+        a: "Because parsing runs directly in V8/browser memory, Castov can process large multi-megabyte JSON payloads that crash conventional web formatters.",
+      },
+    ],
+  },
 ];
 
 export function getVsComparisonBySlug(slug: string): VsComparison | undefined {

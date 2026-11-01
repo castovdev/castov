@@ -1,0 +1,74 @@
+{
+  "manifest_version": 3,
+  "name": "Castov Secret Shield",
+  "version": "1.0.0",
+  "description": "Intercepts and redacts sensitive credentials before pasting into AI chats. Zero network, 100% offline and private.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "shield@castov.com",
+      "strict_min_version": "115.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://chatgpt.com/*",
+        "*://chat.openai.com/*",
+        "*://claude.ai/*",
+        "*://gemini.google.com/*",
+        "*://chat.deepseek.com/*",
+        "*://deepseek.com/*",
+        "*://www.deepseek.com/*",
+        "*://www.perplexity.ai/*",
+        "*://copilot.microsoft.com/*",
+        "*://copilot.cloud.microsoft/*",
+        "*://copilot.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://chatgpt.com/*",
+    "*://chat.openai.com/*",
+    "*://claude.ai/*",
+    "*://gemini.google.com/*",
+    "*://chat.deepseek.com/*",
+    "*://deepseek.com/*",
+    "*://www.deepseek.com/*",
+    "*://www.perplexity.ai/*",
+    "*://copilot.microsoft.com/*",
+    "*://copilot.cloud.microsoft/*",
+    "*://copilot.com/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'none'"
+  }
+}

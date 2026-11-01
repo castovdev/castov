@@ -1,0 +1,17 @@
+{
+  "name": "castov-secret-shield",
+  "version": "1.0.0",
+  "description": "Castov Secret Shield — Chrome Extension stopping developers from pasting secrets into AI chat sites",
+  "private": true,
+  "type": "module",
+  "author": "Abdelmalik Benidir / Castov <https://castov.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5"
+  }
+}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Castov Secret Shield</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-group">
+        <div class="shield-icon" aria-label="Castov Logo">
+          <svg viewBox="0 0 128 128" width="24" height="24" aria-hidden="true">
+            <defs>
+              <clipPath id="fTop"><polygon points="-10,-10 138,-10 138,55 -10,71" /></clipPath>
+              <clipPath id="fBot"><polygon points="-10,71 138,55 138,138 -10,138" /></clipPath>
+            </defs>
+            <path d="M 108,38 L 64,13 L 20,38 L 20,90 L 64,115 L 108,90" fill="none" stroke="#cbd5e1" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#fTop)" />
+            <path d="M 108,38 L 64,13 L 20,38 L 20,90 L 64,115 L 108,90" fill="none" stroke="#00b4f5" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#fBot)" />
+            <path d="M 46,45 L 67,64 L 46,83" fill="none" stroke="#00b4f5" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="93" cy="64" r="8.5" fill="#00b4f5" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">Castov Secret Shield</h1>
+          <p class="app-tagline">AI Paste Protection & Local Decoder</p>
+        </div>
+      </div>
+      <span class="privacy-badge">Offline Only</span>
+    </header>
+
+    <!-- Stats Hero Card -->
+    <section class="card stats-card">
+      <div class="stat-number" id="stat-weekly-count">0</div>
+      <div class="stat-label">Secrets Blocked This Week</div>
+    </section>
+
+    <!-- Main Controls -->
+    <section class="card controls-card">
+      <div class="control-row">
+        <div>
+          <div class="control-title">Shield Protection</div>
+          <div class="control-desc">Intercept paste events on AI chat websites</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-master" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="control-row">
+        <div>
+          <div class="control-title">Local Counter</div>
+          <div class="control-desc">Track local blocked counts anonymously</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-counting" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Supported Platforms List -->
+    <section class="card sites-card">
+      <div class="sites-header">
+        <span class="section-title">Protected AI Platforms</span>
+      </div>
+      <div class="sites-list" id="sites-list">
+        <!-- Injected via popup.js -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Zero Network • Local Only • Open Source</span>
+    </footer>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

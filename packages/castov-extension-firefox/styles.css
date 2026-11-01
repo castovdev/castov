@@ -1,0 +1,286 @@
+/**
+ * Castov Secret Shield - Firefox Extension Popup Styles
+ * Dark, clean, zero-external-asset stylesheet
+ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 360px;
+  background-color: #0b0f17;
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.popup-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shield-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.2px;
+}
+
+.app-tagline {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.privacy-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 3px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* Card base */
+.card {
+  background: #131b2e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+/* Hero Stats Card */
+.stats-card {
+  text-align: center;
+  background: linear-gradient(135deg, rgba(0, 180, 245, 0.08) 0%, rgba(19, 27, 46, 0.9) 100%);
+  border: 1px solid rgba(0, 180, 245, 0.25);
+  padding: 16px;
+}
+
+.stat-number {
+  font-size: 34px;
+  font-weight: 800;
+  color: #00b4f5;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.stat-label {
+  font-size: 10.5px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Controls */
+.controls-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.control-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.control-desc {
+  font-size: 10.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #334155;
+  transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 22px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+input:checked + .slider {
+  background-color: #00b4f5;
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+/* Sites List */
+.sites-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sites-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.sites-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.sites-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sites-list::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+.site-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+}
+
+.site-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.site-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.site-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #cbd5e1;
+}
+
+.site-status {
+  font-size: 10px;
+  font-weight: 600;
+  color: #38bdf8;
+}
+
+/* Small switch for sites */
+.switch-sm {
+  width: 30px;
+  height: 17px;
+}
+
+.switch-sm .slider:before {
+  height: 13px;
+  width: 13px;
+  left: 2px;
+  bottom: 2px;
+}
+
+.switch-sm input:checked + .slider:before {
+  transform: translateX(13px);
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  font-size: 10px;
+  color: #64748b;
+  padding-top: 2px;
+  letter-spacing: 0.3px;
+}
