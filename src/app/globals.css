@@ -325,15 +325,6 @@ select.input {
   font-size: inherit;
 }
 
-.theme-icon-sun {
-  display: none;
-}
-:root[data-theme="dark"] .theme-icon-moon {
-  display: none;
-}
-:root[data-theme="dark"] .theme-icon-sun {
-  display: block;
-}
 
 /* ============================================================
    PROFESSIONAL DESIGN SYSTEM — Castov v3 (Minimalist SaaS)
