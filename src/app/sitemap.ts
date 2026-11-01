@@ -4,6 +4,7 @@ import { TOOLS } from '@/content/tools';
 import { GUIDES } from '@/content/guides';
 import { AI_HUB_LIVE } from '@/lib/flags';
 import { CODE_CONVERTERS } from '@/lib/code-converters-registry';
+import { MODULAR_CONVERTERS, getModularConverter } from '@/content/converters';
 import { REGEX_PATTERNS } from '@/lib/regex-patterns-registry';
 import { ERROR_FIXES } from '@/lib/error-fixes-registry';
 import { TIMEZONE_PAIRS } from '@/lib/timezone-pairs-registry';
@@ -82,13 +83,33 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   });
 
+  // Merge modular converters and legacy converters, strictly excluding unapproved or noindex pages
+  const converterSlugs = new Set<string>();
+  for (const mod of MODULAR_CONVERTERS) {
+    if (mod.isIndexed && mod.isQualityApproved) {
+      converterSlugs.add(mod.slug);
+      sitemapEntries.push({
+        url: `${baseUrl}/convert/${mod.slug}`,
+        lastModified: getLastMod(`src/content/converters/${mod.slug}.ts`),
+        changeFrequency: 'weekly',
+        priority: 0.9,
+      });
+    }
+  }
+
   CODE_CONVERTERS.forEach((converter) => {
-    sitemapEntries.push({
-      url: `${baseUrl}/convert/${converter.slug}`,
-      lastModified: getLastMod('src/lib/code-converters-registry.ts'),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    });
+    if (!converterSlugs.has(converter.slug)) {
+      const mod = getModularConverter(converter.slug);
+      if (mod && !mod.isIndexed) return; // Skip noindex
+
+      converterSlugs.add(converter.slug);
+      sitemapEntries.push({
+        url: `${baseUrl}/convert/${converter.slug}`,
+        lastModified: getLastMod('src/lib/code-converters-registry.ts'),
+        changeFrequency: 'weekly',
+        priority: 0.8,
+      });
+    }
   });
 
   sitemapEntries.push({

@@ -15,7 +15,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/check-env.mjs",
+    "prebuild": "node scripts/check-env.mjs && node scripts/check-converter-quality.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

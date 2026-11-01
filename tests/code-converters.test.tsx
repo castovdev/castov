@@ -203,14 +203,13 @@ describe("Developer Code & Schema Converter Matrix", () => {
     });
 
     it("generates metadata for a valid converter", async () => {
-      const zodConv = getConverterBySlug("json-to-zod")!;
       const meta = await generateMetadata({
         params: Promise.resolve({ slug: "json-to-zod" }),
       });
       expect(meta.title).toEqual({
-        absolute: `${zodConv.title} | Castov`,
+        absolute: "JSON to Zod Schema Converter — Client-Side Runtime Validator | Castov",
       });
-      expect(meta.description).toContain("Convert JSON data to TypeScript Zod schemas");
+      expect(meta.description).toContain("Convert raw JSON into strict, production-ready Zod schemas");
     });
 
     it("generates fallback metadata for an unknown converter slug", async () => {
