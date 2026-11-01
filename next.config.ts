@@ -21,6 +21,14 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  async rewrites() {
+    return [
+      {
+        source: '/0c9eb8496b2547488d26ac1ffec3a82c',
+        destination: '/0c9eb8496b2547488d26ac1ffec3a82c.txt',
+      },
+    ];
+  },
   async redirects() {
     return [
       {
