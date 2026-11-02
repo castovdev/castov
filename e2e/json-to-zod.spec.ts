@@ -120,4 +120,44 @@ test.describe("Modular Converters E2E", () => {
     expect(prismaVal).toContain("posts Post[]");
     expect(prismaVal).toContain('@@index([authorId, published], map: "idx_posts_author")');
   });
+
+  test("env-to-zod renders Zod v4 schema without leaking values, switches to Zod v3, @t3-oss/env-nextjs, and .env.example, and warns on NEXT_PUBLIC_ secret", async ({ page }) => {
+    await page.goto("/convert/env-to-zod", { waitUntil: "networkidle" });
+
+    await expect(page).toHaveTitle(/\.env to Zod & T3 Env Schema Generator/i);
+
+    const outputTextarea = page.locator("textarea[readonly]");
+    await expect(outputTextarea).toBeVisible();
+    await expect(outputTextarea).toHaveValue(/export const envSchema = z\.object/, { timeout: 10000 });
+
+    const v4Out = await outputTextarea.inputValue();
+    expect(v4Out).toContain('NODE_ENV: z.enum(["development", "production", "test"]),');
+    expect(v4Out).toContain("PORT: z.coerce.number().int().positive(),");
+    expect(v4Out).toContain("DATABASE_URL: z.url(),");
+    expect(v4Out).toContain("ENABLE_RATE_LIMIT: z.stringbool(),");
+    expect(v4Out).toContain("ADMIN_EMAIL: z.email(),");
+    expect(v4Out).toContain("OPTIONAL_SENTRY_DSN: z.string().optional(),");
+    // Privacy check: dummy password and keys are not in the output
+    expect(v4Out).not.toContain("dummy_password");
+    expect(v4Out).not.toContain("sk_live_dummy_key_val");
+
+    // Switch to @t3-oss/env-nextjs (createEnv)
+    const modeSelect = page.locator("#opt-outputMode");
+    await modeSelect.selectOption("t3-env");
+    await expect(outputTextarea).toHaveValue(/createEnv\(\{/, { timeout: 10000 });
+    const t3Out = await outputTextarea.inputValue();
+    expect(t3Out).toContain("server: {");
+    expect(t3Out).toContain("client: {");
+    expect(t3Out).toContain("experimental__runtimeEnv: {");
+
+    // Click Generate .env.example button
+    await page.getByRole("button", { name: /Generate \.env\.example/i }).click();
+    await expect(outputTextarea).toHaveValue(/Safe \.env\.example Template/, { timeout: 10000 });
+
+    // Paste a NEXT_PUBLIC_ secret variable and verify security alert banner
+    await page.getByRole("button", { name: /Back to Zod Schema/i }).click();
+    const inputTextarea = page.locator("textarea").first();
+    await inputTextarea.fill("NEXT_PUBLIC_STRIPE_SECRET_KEY=sk_live_123456\nPORT=3000");
+    await expect(page.getByTestId("public-secret-warning")).toBeVisible();
+  });
 });

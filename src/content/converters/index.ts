@@ -4,6 +4,7 @@ import { jsonToTypescriptMeta } from "./json-to-typescript";
 import { curlToFetchMeta } from "./curl-to-fetch";
 import { yamlToJsonMeta } from "./yaml-to-json";
 import { sqlToPrismaMeta } from "./sql-to-prisma";
+import { envToZodMeta } from "./env-to-zod";
 
 export const MODULAR_CONVERTERS: ConverterMeta[] = [
   jsonToZodMeta,
@@ -11,6 +12,7 @@ export const MODULAR_CONVERTERS: ConverterMeta[] = [
   curlToFetchMeta,
   yamlToJsonMeta,
   sqlToPrismaMeta,
+  envToZodMeta,
 ];
 
 export function getModularConverter(slug: string): ConverterMeta | undefined {

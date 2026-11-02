@@ -19,6 +19,7 @@ const ENGINE_LOADERS: Record<string, () => Promise<{ convert: (input: string, op
   "curl-to-fetch": () => import("@/lib/converters/engines/curl-to-fetch"),
   "yaml-to-json": () => import("@/lib/converters/engines/yaml-to-json"),
   "sql-to-prisma": () => import("@/lib/converters/engines/sql-to-prisma"),
+  "env-to-zod": () => import("@/lib/converters/engines/env-to-zod"),
 };
 
 interface Props {
@@ -173,6 +174,16 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
   const inputLineCount = input ? input.split("\n").length : 0;
   const outputLineCount = output ? output.split("\n").length : 0;
   const hasSecurityWarning = output.includes("SECURITY WARNING (-k / --insecure detected)");
+  const publicSecretMatch = output.match(/PUBLIC SECRET WARNING \(([^)]+)\)/);
+  const publicSecretKeys = publicSecretMatch ? publicSecretMatch[1] : null;
+  const isEnvConverter = meta.slug === "env-to-zod";
+
+  const handleToggleEnvExample = () => {
+    setOptions((prev) => ({
+      ...prev,
+      outputMode: prev.outputMode === "env-example" ? "zod-v4" : "env-example",
+    }));
+  };
 
   return (
     <div className="w-full flex flex-col gap-4" data-engine-ready={engineReady ? "true" : "false"}>
@@ -188,7 +199,22 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {isEnvConverter && (
+            <button
+              type="button"
+              onClick={handleToggleEnvExample}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                options.outputMode === "env-example"
+                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
+                  : "bg-field border-line text-muted hover:text-fg hover:border-emerald-500/40"
+              }`}
+              title="Generate a safe .env.example template with all secret values scrubbed"
+            >
+              <span>{options.outputMode === "env-example" ? "← Back to Zod Schema" : "Generate .env.example"}</span>
+            </button>
+          )}
+
           {meta.optionsConfig && meta.optionsConfig.length > 0 && (
             <button
               type="button"
@@ -234,11 +260,14 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
             {meta.optionsConfig.map((opt) => {
               // Custom responsive col-span to give the Null Handling select comfortable width
               const colSpanClass =
-                opt.id === "nullHandling" || opt.id === "declarationStyle"
+                opt.id === "nullHandling" ||
+                opt.id === "declarationStyle" ||
+                opt.id === "t3RuntimeStyle" ||
+                opt.id === "outputMode"
                   ? "lg:col-span-4 sm:col-span-2"
                   : opt.type === "boolean"
                   ? "lg:col-span-2 sm:col-span-1"
-                  : "lg:col-span-3 sm:col-span-1";
+                  : "lg:col-span-2 sm:col-span-1";
 
               return (
                 <div key={opt.id} className={`flex flex-col gap-1.5 ${colSpanClass}`}>
@@ -372,7 +401,7 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
         </div>
       </div>
 
-      {/* 4. Security Warning Banner (-k / --insecure) */}
+      {/* 4. Security Warning Banner (-k / --insecure or NEXT_PUBLIC_ secret leak) */}
       {hasSecurityWarning && (
         <div
           role="alert"
@@ -383,6 +412,20 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
             <span className="font-bold">TLS Verification Disabled (-k / --insecure detected): </span>
             Disabling SSL/TLS certificate validation exposes network requests to Man-in-the-Middle (MitM) interception. Browser{" "}
             <code className="font-mono">fetch()</code> enforces valid HTTPS certificates and cannot bypass TLS checks from client-side code.
+          </div>
+        </div>
+      )}
+
+      {publicSecretKeys && (
+        <div
+          role="alert"
+          data-testid="public-secret-warning"
+          className="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-bold">Client Secret Exposure Warning ({publicSecretKeys}): </span>
+            Variables prefixed with <code className="font-mono">NEXT_PUBLIC_</code> are embedded directly into public browser JavaScript bundles. Never prefix secret keys, tokens, or passwords with <code className="font-mono">NEXT_PUBLIC_</code>.
           </div>
         </div>
       )}

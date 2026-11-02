@@ -4,18 +4,24 @@ import { convert as convertJsonToTs, singularize } from "@/lib/converters/engine
 import { convert as convertCurlToFetch, encodeBasicAuthUtf8 } from "@/lib/converters/engines/curl-to-fetch";
 import { convert as convertYamlToJson } from "@/lib/converters/engines/yaml-to-json";
 import { convert as convertSqlToPrisma } from "@/lib/converters/engines/sql-to-prisma";
+import {
+  convert as convertEnvToZod,
+  parseEnvFile,
+  generateSafeEnvExample,
+} from "@/lib/converters/engines/env-to-zod";
 import { jsonToTypescriptMeta } from "@/content/converters/json-to-typescript";
 import { MODULAR_CONVERTERS, getModularConverter } from "@/content/converters";
 
 describe("Modular Code Converters Architecture", () => {
   describe("Metadata, <title> Length (<60 chars), & Quality Standards", () => {
-    it("registers all 5 modular converters with quality approval and <title> under 60 chars", () => {
+    it("registers all 6 modular converters with quality approval and <title> under 60 chars", () => {
       for (const slug of [
         "json-to-zod",
         "json-to-typescript",
         "curl-to-fetch",
         "yaml-to-json",
         "sql-to-prisma",
+        "env-to-zod",
       ]) {
         const meta = getModularConverter(slug);
         expect(meta).toBeDefined();
@@ -438,6 +444,181 @@ CREATE TABLE invoice_tags (
       expect(prisma).toContain('isPaid Boolean @default(false) @map("is_paid")');
       expect(prisma).toContain("status InvoiceStatus @default(DRAFT)");
       expect(prisma).toContain("@@id([invoiceId, tagId])");
+    });
+  });
+
+  describe(".env to Zod & T3 Env Engine (Zod v4, Zod v3, @t3-oss/env-nextjs, Parser Edge Cases & Privacy)", () => {
+    it("parses export KEY=..., single/double/backtick quotes, full-line and inline comments, and preserves # inside quotes", () => {
+      const envInput = `
+# Database & Redis Section
+export DB_HOST="db.internal.local" # inline comment after double quotes
+export REDIS_PASS='p@ss#word#with#hash' # inline comment after single quotes
+BACKTICK_KEY=\`value#inside#backticks\`
+UNQUOTED_KEY=hello_world # inline comment after unquoted value
+HASH_WITHOUT_SPACE=abc#123
+`;
+      const parsed = parseEnvFile(envInput);
+      const map = new Map(parsed.entries.map((e) => [e.key, e]));
+
+      expect(map.get("DB_HOST")?.value).toBe("db.internal.local");
+      expect(map.get("DB_HOST")?.sectionComment).toBe("Database & Redis Section");
+      expect(map.get("DB_HOST")?.inlineComment).toBe("inline comment after double quotes");
+
+      expect(map.get("REDIS_PASS")?.value).toBe("p@ss#word#with#hash");
+      expect(map.get("BACKTICK_KEY")?.value).toBe("value#inside#backticks");
+      expect(map.get("UNQUOTED_KEY")?.value).toBe("hello_world");
+      // '#' not preceded by whitespace in unquoted value is kept as part of value
+      expect(map.get("HASH_WITHOUT_SPACE")?.value).toBe("abc#123");
+    });
+
+    it("parses multiline quoted values and handles duplicate keys (last value wins while recording duplicates)", () => {
+      const envInput = `
+PORT=3000
+JWT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC
+-----END PRIVATE KEY-----"
+ESCAPED_NEWLINE="line1\\nline2"
+PORT=8080
+`;
+      const parsed = parseEnvFile(envInput);
+      expect(parsed.duplicateKeys).toEqual(["PORT"]);
+
+      const portEntry = parsed.entries.find((e) => e.key === "PORT")!;
+      expect(portEntry.value).toBe("8080");
+      expect(portEntry.overriddenCount).toBe(1);
+
+      const pemEntry = parsed.entries.find((e) => e.key === "JWT_PRIVATE_KEY")!;
+      expect(pemEntry.value).toContain("-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC\n-----END PRIVATE KEY-----");
+
+      const escapedEntry = parsed.entries.find((e) => e.key === "ESCAPED_NEWLINE")!;
+      expect(escapedEntry.value).toBe("line1\nline2");
+
+      const output = convertEnvToZod(envInput, { outputMode: "zod-v4" });
+      expect(output).toContain("Duplicate keys detected (PORT)");
+      // Raw private key value must NEVER appear in the output
+      expect(output).not.toContain("MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC");
+    });
+
+    it("infers numbers, booleans, any-scheme URLs (postgresql://, redis://), emails, NODE_ENV enum, empty optional, and Sensitive comments without leaking values", () => {
+      const envInput = `
+NODE_ENV=production
+PORT=4000
+RATE_LIMIT_RATIO=0.75
+ENABLE_CACHE=true
+DEBUG_LOGGING=false
+DATABASE_URL=postgresql://admin:super_secret_pw@db.example.com:5432/prod
+REDIS_URL=redis://localhost:6379
+AMQP_URL=amqp://guest:guest@localhost:5672
+SUPPORT_EMAIL=ops@castov.com
+STRIPE_SECRET_KEY=sk_live_dummy_val_999
+WEBHOOK_SECRET=whsec_dummy_val_888
+OPTIONAL_SENTRY_DSN=
+`;
+      // 1. Zod v4 Mode
+      const v4Out = convertEnvToZod(envInput, {
+        outputMode: "zod-v4",
+        nodeEnvAsEnum: true,
+      });
+      expect(v4Out).toContain('NODE_ENV: z.enum(["development", "production", "test"]),');
+      expect(v4Out).toContain("PORT: z.coerce.number().int().positive(),");
+      expect(v4Out).toContain("RATE_LIMIT_RATIO: z.coerce.number(),");
+      expect(v4Out).toContain("ENABLE_CACHE: z.stringbool(),");
+      expect(v4Out).toContain("DEBUG_LOGGING: z.stringbool(),");
+      expect(v4Out).toContain("DATABASE_URL: z.url(),");
+      expect(v4Out).toContain("REDIS_URL: z.url(),");
+      expect(v4Out).toContain("AMQP_URL: z.url(),");
+      expect(v4Out).toContain("SUPPORT_EMAIL: z.email(),");
+      expect(v4Out).toContain("/** ⚠️ Sensitive — never log or expose to client bundles */\n  STRIPE_SECRET_KEY: z.string().min(1),");
+      expect(v4Out).toContain("/** ⚠️ Sensitive — never log or expose to client bundles */\n  WEBHOOK_SECRET: z.string().min(1),");
+      expect(v4Out).toContain("OPTIONAL_SENTRY_DSN: z.string().optional(),");
+
+      // Privacy guarantee: no secret values in output
+      expect(v4Out).not.toContain("super_secret_pw");
+      expect(v4Out).not.toContain("sk_live_dummy_val_999");
+      expect(v4Out).not.toContain("whsec_dummy_val_888");
+      expect(v4Out).not.toContain("ops@castov.com");
+
+      // 2. Toggle NODE_ENV enum off -> z.string().min(1)
+      const v4NoEnum = convertEnvToZod(envInput, {
+        outputMode: "zod-v4",
+        nodeEnvAsEnum: false,
+      });
+      expect(v4NoEnum).toContain("NODE_ENV: z.string().min(1),");
+
+      // 3. Zod v3 Mode
+      const v3Out = convertEnvToZod(envInput, {
+        outputMode: "zod-v3",
+        nodeEnvAsEnum: true,
+      });
+      expect(v3Out).toContain("DATABASE_URL: z.string().url(),");
+      expect(v3Out).toContain("SUPPORT_EMAIL: z.string().email(),");
+      expect(v3Out).toContain('ENABLE_CACHE: z.enum(["true", "false"]).transform((v) => v === "true"),');
+    });
+
+    it("generates @t3-oss/env-nextjs createEnv with server/client separation and supports both experimental__runtimeEnv and runtimeEnv", () => {
+      const envInput = `
+DATABASE_URL=postgresql://localhost:5432/app
+STRIPE_SECRET_KEY=sk_live_123456
+NEXT_PUBLIC_APP_URL=https://castov.com
+NEXT_PUBLIC_ANALYTICS_ENABLED=false
+`;
+      // Default: experimental__runtimeEnv (client-only destructuring for Next.js >= 13.4.4)
+      const t3Experimental = convertEnvToZod(envInput, {
+        outputMode: "t3-env",
+        t3RuntimeStyle: "experimental__runtimeEnv",
+      });
+      expect(t3Experimental).toContain('import { createEnv } from "@t3-oss/env-nextjs";');
+      expect(t3Experimental).toContain("server: {\n    DATABASE_URL: z.url(),");
+      expect(t3Experimental).toContain("client: {\n    NEXT_PUBLIC_APP_URL: z.url(),\n    NEXT_PUBLIC_ANALYTICS_ENABLED: z.stringbool(),\n  },");
+      expect(t3Experimental).toContain("experimental__runtimeEnv: {\n    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,\n    NEXT_PUBLIC_ANALYTICS_ENABLED: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED,\n  },");
+      expect(t3Experimental).not.toContain("DATABASE_URL: process.env.DATABASE_URL");
+
+      // Full runtimeEnv (for Next.js < 13.4.4)
+      const t3Full = convertEnvToZod(envInput, {
+        outputMode: "t3-env",
+        t3RuntimeStyle: "runtimeEnv",
+      });
+      expect(t3Full).toContain("runtimeEnv: {\n    DATABASE_URL: process.env.DATABASE_URL,\n    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,\n    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,\n    NEXT_PUBLIC_ANALYTICS_ENABLED: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED,\n  },");
+    });
+
+    it("warns when a NEXT_PUBLIC_ variable name suggests a secret (SECRET, KEY, TOKEN, PASSWORD)", () => {
+      const envInput = `
+NEXT_PUBLIC_APP_URL=https://castov.com
+NEXT_PUBLIC_STRIPE_SECRET_KEY=sk_live_123
+NEXT_PUBLIC_AUTH_TOKEN=tok_abc
+`;
+      const parsed = parseEnvFile(envInput);
+      expect(parsed.publicSecretWarnings).toEqual([
+        "NEXT_PUBLIC_STRIPE_SECRET_KEY",
+        "NEXT_PUBLIC_AUTH_TOKEN",
+      ]);
+
+      const out = convertEnvToZod(envInput, { outputMode: "zod-v4" });
+      expect(out).toContain("PUBLIC SECRET WARNING (NEXT_PUBLIC_STRIPE_SECRET_KEY, NEXT_PUBLIC_AUTH_TOKEN)");
+      expect(out).toContain("SECURITY WARNING: NEXT_PUBLIC_ exposes 'NEXT_PUBLIC_STRIPE_SECRET_KEY' to browser bundles!");
+    });
+
+    it("generates a safe .env.example with all secrets scrubbed", () => {
+      const envInput = `
+# Production Secrets
+DATABASE_URL=postgresql://admin:real_password_123@prod.db.internal:5432/live
+STRIPE_SECRET_KEY=sk_live_9988776655
+ADMIN_EMAIL=ceo@company.com
+PORT=8080
+ENABLE_TLS=true
+OPTIONAL_KEY=
+`;
+      const example = convertEnvToZod(envInput, { outputMode: "env-example" });
+      expect(example).toContain("# Production Secrets");
+      expect(example).toContain("DATABASE_URL=postgresql://user:password@localhost:5432/dbname");
+      expect(example).toContain("STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here");
+      expect(example).toContain("ADMIN_EMAIL=admin@example.com");
+      expect(example).toContain("PORT=8080");
+      expect(example).toContain("ENABLE_TLS=true");
+      expect(example).toContain("OPTIONAL_KEY=");
+      expect(example).not.toContain("real_password_123");
+      expect(example).not.toContain("sk_live_9988776655");
+      expect(example).not.toContain("ceo@company.com");
     });
   });
 });
