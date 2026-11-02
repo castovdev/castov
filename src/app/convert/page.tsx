@@ -8,6 +8,12 @@ import { FaqSection } from "@/components/faq-section";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { AdSlot } from "@/components/ad-slot";
 import { CODE_CONVERTERS } from "@/lib/code-converters-registry";
+import { MODULAR_CONVERTERS } from "@/content/converters";
+
+const ALL_CONVERTERS = [
+  ...MODULAR_CONVERTERS,
+  ...CODE_CONVERTERS.filter((c) => !MODULAR_CONVERTERS.some((m) => m.slug === c.slug)),
+];
 import { ArrowRight, Code2, Database, Network, FileCode2, Clock } from "lucide-react";
 
 export const metadata: Metadata = buildMetadata({
@@ -129,14 +135,14 @@ export default function ConvertHubPage() {
             </p>
           </div>
           <div className="inline-flex items-center gap-2 text-xs font-medium text-accent bg-accent/10 px-3 py-1.5 rounded-full border border-accent/20 self-start sm:self-auto">
-            <span>{CODE_CONVERTERS.length} Specialized Engines</span>
+            <span>{ALL_CONVERTERS.length} Specialized Engines</span>
           </div>
         </div>
 
         {/* Categories Loop */}
         <div className="space-y-12">
           {CATEGORIES.map((cat) => {
-            const catConverters = CODE_CONVERTERS.filter((c) => c.category === cat.name);
+            const catConverters = ALL_CONVERTERS.filter((c) => c.category === cat.name);
             const Icon = cat.icon;
 
             return (
@@ -165,7 +171,7 @@ export default function ConvertHubPage() {
                         <ArrowRight className="h-4 w-4 text-muted group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0 ml-2 mt-0.5" />
                       </div>
                       <p className="mt-2 text-xs text-muted line-clamp-2 leading-relaxed">
-                        {c.description}
+                        {"description" in c ? c.description : c.metaDescription}
                       </p>
                       <div className="mt-3 flex items-center gap-2 text-[11px] font-mono text-muted/80">
                         <span className="bg-field px-1.5 py-0.5 rounded border border-line uppercase">

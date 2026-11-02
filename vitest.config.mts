@@ -11,6 +11,7 @@ export default defineConfig({
     globalSetup: ["./tests/global-setup.ts"],
     setupFiles: ["./tests/setup.ts"],
     include: ["tests/**/*.test.{ts,tsx}"],
+    exclude: ["node_modules", "e2e/**", ".next/**"],
     testTimeout: 20000,
     restoreMocks: true,
   },

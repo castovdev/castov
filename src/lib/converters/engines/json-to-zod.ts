@@ -32,18 +32,20 @@ function toPascalCase(str: string): string {
     .join("");
 }
 
-function inferStringType(str: string): string {
+function inferStringType(str: string, zodVersion: "v3" | "v4"): string {
   if (ISO_DATETIME_REGEX.test(str)) {
-    return "z.string().datetime({ offset: true })";
+    return zodVersion === "v4"
+      ? "z.iso.datetime({ offset: true })"
+      : "z.string().datetime({ offset: true })";
   }
   if (EMAIL_REGEX.test(str)) {
-    return "z.string().email()";
+    return zodVersion === "v4" ? "z.email()" : "z.string().email()";
   }
   if (UUID_REGEX.test(str)) {
-    return "z.string().uuid()";
+    return zodVersion === "v4" ? "z.uuid()" : "z.string().uuid()";
   }
   if (URL_REGEX.test(str)) {
-    return "z.string().url()";
+    return zodVersion === "v4" ? "z.url()" : "z.string().url()";
   }
   return "z.string()";
 }
@@ -106,7 +108,7 @@ function inferZodType(val: any, options: Required<JsonToZodOptions>, indent: str
     return "z.undefined()";
   }
   if (typeof val === "string") {
-    return inferStringType(val);
+    return inferStringType(val, options.zodVersion);
   }
   if (typeof val === "number") {
     return Number.isInteger(val) ? "z.number().int()" : "z.number()";
@@ -169,7 +171,7 @@ export function convert(input: string, userOptions: JsonToZodOptions = {}): stri
     nullHandling: userOptions.nullHandling || "nullable",
     strictMode: Boolean(userOptions.strictMode),
     optionalHandling: userOptions.optionalHandling || "optional",
-    zodVersion: userOptions.zodVersion || "v3",
+    zodVersion: userOptions.zodVersion || "v4",
   };
 
   const schemaIdentifier = options.rootName.endsWith("Schema")

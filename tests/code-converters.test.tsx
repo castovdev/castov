@@ -196,8 +196,9 @@ describe("Developer Code & Schema Converter Matrix", () => {
   describe("Page Route, Static Params, and Metadata", () => {
     it("generates static params for all registered converters", () => {
       const params = generateStaticParams();
-      expect(params.length).toEqual(CODE_CONVERTERS.length);
+      expect(params.length).toBeGreaterThanOrEqual(CODE_CONVERTERS.length);
       expect(params.some((p) => p.slug === "json-to-zod")).toBe(true);
+      expect(params.some((p) => p.slug === "json-to-typescript")).toBe(true);
       expect(params.some((p) => p.slug === "curl-to-fetch")).toBe(true);
       expect(params.some((p) => p.slug === "docker-run-to-compose")).toBe(true);
     });

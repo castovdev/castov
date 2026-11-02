@@ -142,6 +142,33 @@ export default async function CodeConverterPage({
           <ModularCodeConverterTool meta={modular} initialOutput={modular.initialOutput} />
         </section>
 
+        {/* Example Output Reference (Static HTML <pre><code> for SEO & No-JS) */}
+        {modular.initialOutput && (
+          <section className="my-10 rounded-2xl border border-line bg-card p-6 sm:p-8" aria-labelledby="example-output-heading">
+            <h2 id="example-output-heading" className="text-xl font-bold tracking-tight text-fg mb-4">
+              Example Output ({modular.name})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-line bg-field p-4">
+                <div className="text-xs font-mono font-semibold text-muted pb-2 border-b border-line/60">
+                  SAMPLE INPUT ({modular.inputLanguage.toUpperCase()})
+                </div>
+                <pre className="mt-3 text-xs font-mono text-fg overflow-x-auto whitespace-pre p-2 bg-hover/40 rounded-lg max-h-80">
+                  <code>{modular.defaultSample}</code>
+                </pre>
+              </div>
+              <div className="rounded-xl border border-line bg-field p-4">
+                <div className="text-xs font-mono font-semibold text-accent pb-2 border-b border-line/60">
+                  GENERATED OUTPUT ({modular.outputLanguage.toUpperCase()})
+                </div>
+                <pre className="mt-3 text-xs font-mono text-fg overflow-x-auto whitespace-pre p-2 bg-hover/40 rounded-lg max-h-80">
+                  <code>{modular.initialOutput}</code>
+                </pre>
+              </div>
+            </div>
+          </section>
+        )}
+
         <AdSlot placement="content-middle" />
 
         {/* Deep Technical Guide */}
@@ -218,7 +245,7 @@ export default async function CodeConverterPage({
                         INPUT ({modular.inputLanguage.toUpperCase()})
                       </div>
                       <pre className="mt-2 text-xs font-mono text-fg overflow-x-auto whitespace-pre p-1">
-                        {ec.inputSnippet}
+                        <code>{ec.inputSnippet}</code>
                       </pre>
                     </div>
 
@@ -227,7 +254,7 @@ export default async function CodeConverterPage({
                         OUTPUT ({modular.outputLanguage.toUpperCase()})
                       </div>
                       <pre className="mt-2 text-xs font-mono text-accent overflow-x-auto whitespace-pre p-1">
-                        {ec.outputSnippet}
+                        <code>{ec.outputSnippet}</code>
                       </pre>
                     </div>
                   </div>

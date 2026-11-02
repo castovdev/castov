@@ -15,6 +15,7 @@ import type { ConverterMeta } from "@/lib/converters/types";
 // Explicit static map for dynamic imports to allow Next.js tree-shaking & code-splitting
 const ENGINE_LOADERS: Record<string, () => Promise<{ convert: (input: string, options?: any) => string }>> = {
   "json-to-zod": () => import("@/lib/converters/engines/json-to-zod"),
+  "json-to-typescript": () => import("@/lib/converters/engines/json-to-typescript"),
 };
 
 interface Props {
@@ -229,9 +230,9 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
             {meta.optionsConfig.map((opt) => {
               // Custom responsive col-span to give the Null Handling select comfortable width
               const colSpanClass =
-                opt.id === "nullHandling"
+                opt.id === "nullHandling" || opt.id === "declarationStyle"
                   ? "lg:col-span-4 sm:col-span-2"
-                  : opt.id === "strictMode"
+                  : opt.type === "boolean"
                   ? "lg:col-span-2 sm:col-span-1"
                   : "lg:col-span-3 sm:col-span-1";
 
@@ -262,7 +263,7 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
                         onChange={(e) => setOptions({ ...options, [opt.id]: e.target.checked })}
                         className="rounded border-line text-accent focus:ring-accent"
                       />
-                      <span className="text-xs text-muted">Enable .strict()</span>
+                      <span className="text-xs text-muted">Enabled</span>
                     </label>
                   ) : (
                     <input

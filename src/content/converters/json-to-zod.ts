@@ -17,22 +17,22 @@ import { z } from "zod";
 
 export const UserSchema = z.object({
   id: z.string(),
-  email: z.string().email(),
-  website: z.string().url(),
+  email: z.email(),
+  website: z.url(),
   role: z.string(),
   loginCount: z.number().int(),
   isActive: z.boolean(),
-  createdAt: z.string().datetime({ offset: true }),
+  createdAt: z.iso.datetime({ offset: true }),
   tags: z.array(z.string()),
   profile: z.object({
-    avatarUrl: z.string().url(),
+    avatarUrl: z.url(),
     bio: z.unknown().nullable(),
     twoFactorEnabled: z.boolean(),
   }),
   auditLog: z.array(z.object({
     action: z.string(),
     reason: z.string().optional(),
-    timestamp: z.string().datetime({ offset: true }),
+    timestamp: z.iso.datetime({ offset: true }),
   })),
 });
 
