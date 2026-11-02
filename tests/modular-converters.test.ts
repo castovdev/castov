@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { convert as convertJsonToZod } from "@/lib/converters/engines/json-to-zod";
 import { convert as convertJsonToTs, singularize } from "@/lib/converters/engines/json-to-typescript";
-import { convert as convertCurlToFetch } from "@/lib/converters/engines/curl-to-fetch";
+import { convert as convertCurlToFetch, encodeBasicAuthUtf8 } from "@/lib/converters/engines/curl-to-fetch";
 import { jsonToTypescriptMeta } from "@/content/converters/json-to-typescript";
 import { MODULAR_CONVERTERS, getModularConverter } from "@/content/converters";
 
@@ -177,7 +177,29 @@ describe("Modular Code Converters Architecture", () => {
     });
   });
 
-  describe("cURL to Fetch Engine (-H, -d, -X, --data-raw, -u, -F)", () => {
+  describe("cURL to Fetch Engine (-H, -d, -X, --data-raw, -u, -F, -L, -I, -b, --url, --compressed, -k)", () => {
+    it("parses real-world Chrome DevTools 'Copy as cURL' with --compressed, -b cookies, and sec-ch-ua headers", () => {
+      const chromeCurl = `curl 'https://api.castov.com/v1/projects?page=1' \\
+  -H 'accept: application/json, text/plain, */*' \\
+  -H 'accept-language: en-US,en;q=0.9,ar;q=0.8' \\
+  -H 'cache-control: no-cache' \\
+  -b 'session_token=eyJhbGciOiJIUzI1NiJ9; theme=dark' \\
+  -H 'origin: https://castov.com' \\
+  -H 'referer: https://castov.com/dashboard' \\
+  -H 'sec-ch-ua: "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"' \\
+  -H 'sec-ch-ua-mobile: ?0' \\
+  -H 'sec-ch-ua-platform: "Windows"' \\
+  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' \\
+  --compressed`;
+
+      const res = convertCurlToFetch(chromeCurl);
+      expect(res).toContain('fetch("https://api.castov.com/v1/projects?page=1"');
+      expect(res).toContain('method: "GET"');
+      expect(res).toContain('"Cookie": "session_token=eyJhbGciOiJIUzI1NiJ9; theme=dark"');
+      expect(res).toContain('"sec-ch-ua": "\\"Chromium\\";v=\\"128\\", \\"Not;A=Brand\\";v=\\"24\\", \\"Google Chrome\\";v=\\"128\\""');
+      expect(res).toContain('"origin": "https://castov.com"');
+    });
+
     it("parses -H custom headers accurately", () => {
       const cmd = `curl https://api.example.com/users -H "Accept: application/json" -H 'X-Custom-Token: abc-123'`;
       const res = convertCurlToFetch(cmd);
@@ -186,10 +208,11 @@ describe("Modular Code Converters Architecture", () => {
       expect(res).toContain('"X-Custom-Token": "abc-123"');
     });
 
-    it("parses -d payload and defaults method to POST", () => {
+    it("parses -d payload, defaults method to POST, and automatically adds Content-Type: application/x-www-form-urlencoded", () => {
       const cmd = `curl https://api.example.com/login -d "username=admin&role=superuser"`;
       const res = convertCurlToFetch(cmd);
       expect(res).toContain('method: "POST"');
+      expect(res).toContain('"Content-Type": "application/x-www-form-urlencoded"');
       expect(res).toContain('body: "username=admin&role=superuser"');
     });
 
@@ -201,17 +224,26 @@ describe("Modular Code Converters Architecture", () => {
     });
 
     it("parses --data-raw JSON payload and formats as JSON.stringify", () => {
-      const cmd = `curl https://api.example.com/events --data-raw '{"event":"signup","email":"user@domain.com"}'`;
+      const cmd = `curl https://api.example.com/events -H "Content-Type: application/json" --data-raw '{"event":"signup","email":"user@domain.com"}'`;
       const res = convertCurlToFetch(cmd);
       expect(res).toContain('method: "POST"');
       expect(res).toContain("body: JSON.stringify(");
       expect(res).toContain('"email": "user@domain.com"');
     });
 
-    it("parses -u Basic Auth into Authorization: Basic btoa(...)", () => {
-      const cmd = `curl -u "admin:s3cr3t" https://api.example.com/private`;
-      const res = convertCurlToFetch(cmd);
-      expect(res).toContain('"Authorization": `Basic ${btoa("admin:s3cr3t")}`');
+    it("parses -u Basic Auth using UTF-8 safe TextEncoder helper and handles non-ASCII characters without throwing", () => {
+      const utf8Credentials = "üser:pässwörd🔒";
+      expect(encodeBasicAuthUtf8(utf8Credentials)).toBe(
+        Buffer.from(utf8Credentials, "utf8").toString("base64")
+      );
+
+      const cmd = `curl -u "üser:pässwörd🔒" https://api.example.com/private`;
+      const browserRes = convertCurlToFetch(cmd, { targetClient: "browser-fetch" });
+      expect(browserRes).toContain("new TextEncoder().encode(credentials)");
+      expect(browserRes).toContain('"Authorization": `Basic ${encodeBasicAuth("üser:pässwörd🔒")}`');
+
+      const nodeRes = convertCurlToFetch(cmd, { targetClient: "node-fetch" });
+      expect(nodeRes).toContain('Buffer.from("üser:pässwörd🔒", "utf8").toString("base64")');
     });
 
     it("parses -F multipart FormData fields and file uploads while omitting manual multipart Content-Type", () => {
@@ -222,6 +254,29 @@ describe("Modular Code Converters Architecture", () => {
       expect(res).toContain('formData.append("attachment", new Blob([]), "report.pdf");');
       expect(res).toContain("body: formData,");
       expect(res).not.toContain("multipart/form-data");
+    });
+
+    it("supports -L (redirect: follow), -I (HEAD), -b (cookies), --url, --compressed, and -k (security warning)", () => {
+      const cmd = `curl -L -I -k --compressed --url "https://self-signed.example.com/health" -b "sid=9981"`;
+      const res = convertCurlToFetch(cmd, { targetClient: "node-fetch" });
+      expect(res).toContain("SECURITY WARNING (-k / --insecure detected)");
+      expect(res).toContain('fetch("https://self-signed.example.com/health"');
+      expect(res).toContain('method: "HEAD"');
+      expect(res).toContain('redirect: "follow"');
+      expect(res).toContain('"Cookie": "sid=9981"');
+      expect(res).toContain('"Accept-Encoding": "gzip, deflate, br"');
+    });
+
+    it("supports targetClient output switching between Browser fetch, Node.js fetch, and Axios", () => {
+      const cmd = `curl -X POST https://api.example.com/orders -u "api:key123" -H "X-Trace: 1" --data-raw '{"sku":"PRO"}'`;
+
+      const axiosRes = convertCurlToFetch(cmd, { targetClient: "axios" });
+      expect(axiosRes).toContain('import axios from "axios";');
+      expect(axiosRes).toContain("await axios.request({");
+      expect(axiosRes).toContain('method: "post"');
+      expect(axiosRes).toContain('username: "api"');
+      expect(axiosRes).toContain('password: "key123"');
+      expect(axiosRes).toContain('"sku": "PRO"');
     });
   });
 });

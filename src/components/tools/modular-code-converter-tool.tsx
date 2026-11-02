@@ -170,9 +170,10 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
 
   const inputLineCount = input ? input.split("\n").length : 0;
   const outputLineCount = output ? output.split("\n").length : 0;
+  const hasSecurityWarning = output.includes("SECURITY WARNING (-k / --insecure detected)");
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4" data-engine-ready={engineReady ? "true" : "false"}>
       {/* 1. Header Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-card border border-line shadow-2xs">
         <div className="flex items-center gap-2">
@@ -369,7 +370,22 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
         </div>
       </div>
 
-      {/* 4. Error Banner */}
+      {/* 4. Security Warning Banner (-k / --insecure) */}
+      {hasSecurityWarning && (
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-bold">TLS Verification Disabled (-k / --insecure detected): </span>
+            Disabling SSL/TLS certificate validation exposes network requests to Man-in-the-Middle (MitM) interception. Browser{" "}
+            <code className="font-mono">fetch()</code> enforces valid HTTPS certificates and cannot bypass TLS checks from client-side code.
+          </div>
+        </div>
+      )}
+
+      {/* 5. Error Banner */}
       {error && (
         <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs">
           <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />

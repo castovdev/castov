@@ -3,9 +3,9 @@ import type { ConverterMeta } from "@/lib/converters/types";
 export const curlToFetchMeta: ConverterMeta = {
   slug: "curl-to-fetch",
   name: "cURL to Fetch",
-  title: "cURL to JavaScript Fetch Converter",
+  title: "cURL to JavaScript Fetch, Node.js & Axios Converter",
   metaDescription:
-    "Convert cURL commands into modern JavaScript or TypeScript fetch() code in browser. Handles -H headers, -d / --data-raw payloads, -u Basic Auth, and -F FormData.",
+    "Convert Chrome Copy as cURL commands into Browser Fetch, Node.js Fetch, or Axios code. Handles -H, -d, --data-raw, -u UTF-8 Basic Auth, -F FormData, -b, -L, and -k.",
   category: "DevOps & Network",
   inputLanguage: "bash",
   outputLanguage: "javascript",
@@ -19,12 +19,20 @@ export const curlToFetchMeta: ConverterMeta = {
   -H "Idempotency-Key: req_88172a" \\
   --data-raw '{"amount": 2900, "currency": "usd", "automatic_payment_methods": {"enabled": true}}'`,
 
-  initialOutput: `const response = await fetch("https://api.stripe.com/v1/payment_intents", {
+  initialOutput: `// UTF-8 safe Base64 encoding for Basic Auth (avoids btoa InvalidCharacterError on non-ASCII characters)
+const encodeBasicAuth = (credentials) => {
+  const bytes = new TextEncoder().encode(credentials);
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary);
+};
+
+const response = await fetch("https://api.stripe.com/v1/payment_intents", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
     "Idempotency-Key": "req_88172a",
-    "Authorization": \`Basic \${btoa("sk_test_51Nz99a:secret")}\`,
+    "Authorization": \`Basic \${encodeBasicAuth("sk_test_51Nz99a:secret")}\`,
   },
   body: JSON.stringify({
     "amount": 2900,
@@ -44,6 +52,18 @@ console.log(data);
 `,
 
   optionsConfig: [
+    {
+      id: "targetClient",
+      label: "Target Runtime / Client",
+      type: "select",
+      defaultValue: "browser-fetch",
+      options: [
+        { label: "Browser fetch() (Standard)", value: "browser-fetch" },
+        { label: "Node.js 18+ fetch() (Buffer)", value: "node-fetch" },
+        { label: "Axios (axios.request)", value: "axios" },
+      ],
+      description: "Switch between Browser Fetch, Node.js Fetch, or Axios",
+    },
     {
       id: "syntaxStyle",
       label: "Syntax Style",
@@ -84,44 +104,58 @@ console.log(data);
 
   deepDive: {
     overview:
-      "When copying a network request as cURL from Chrome DevTools or API documentation (such as Stripe, GitHub, or OpenAI), translating shell flags into native JavaScript fetch() calls involves several subtle traps. Unlike cURL, fetch() does not reject on HTTP 4xx/5xx responses, requires explicit Base64 encoding for -u Basic Auth, and breaks multipart file uploads if you manually copy a Content-Type: multipart/form-data header alongside FormData. This converter parses shell quotes, multiline backslashes, and flags locally in your browser.",
+      "When copying a network request via 'Copy as cURL (bash)' from Chrome DevTools or API reference docs, translating shell flags into JavaScript fetch() or Axios code involves several runtime subtleties. Unlike cURL, browser fetch() enforces CORS preflight rules, does not reject on HTTP 4xx/5xx responses, throws DOMExceptions when plain btoa() encounters UTF-8 characters in -u credentials, and breaks multipart file uploads if a manual Content-Type: multipart/form-data header is copied alongside FormData. This converter parses complex shell quotes, ANSI-C strings, cookies (-b), redirects (-L), and form payloads locally in your browser.",
     whyDevelopersUseThis: [
-      "Parses shell-quoted arguments (-H, -d, --data-raw, -X, -u, -F) including multiline backslash continuations and ANSI-C $'...' strings copied from Chrome DevTools.",
-      "Automatically formats JSON request bodies passed via -d or --data-raw into readable JSON.stringify({...}) objects instead of opaque escaped strings.",
-      "Converts -u user:password flags into standard Authorization: Basic ${btoa(...)} headers.",
-      "Translates -F / --form multipart flags into native FormData instances while stripping manual multipart/form-data headers so the browser can attach the boundary token.",
+      "Parses real Chrome DevTools 'Copy as cURL' commands containing --compressed, -b cookies, sec-ch-ua client hints, multiline backslashes, and ANSI-C $'...' strings.",
+      "Automatically sets 'Content-Type: application/x-www-form-urlencoded' when -d is used without an explicit Content-Type header, matching cURL's native default.",
+      "Encodes -u Basic Auth credentials using a UTF-8 safe TextEncoder + btoa pipeline in Browser Fetch, Buffer.from(..., 'utf8') in Node.js Fetch, or native auth objects in Axios.",
+      "Detects -k / --insecure flags and displays a visible security alert explaining TLS verification risks in browser and Node.js environments.",
     ],
     commonPitfalls: [
       {
-        pitfall: "Assuming fetch() throws an error on HTTP 404 or 500",
+        pitfall: "CORS blocks requests in Browser fetch() that succeeded in terminal cURL",
         solution:
-          "The native fetch() Promise only rejects on network failure or DNS/CORS errors. An HTTP 401, 404, or 500 still resolves normally with response.ok set to false. Always check `if (!response.ok)` before calling `response.json()`.",
+          "cURL runs in your terminal and completely ignores Cross-Origin Resource Sharing (CORS) headers. When you run the exact same request inside a browser tab via fetch(), the browser sends an OPTIONS preflight request (especially when custom headers like Authorization are present) and blocks the response if Access-Control-Allow-Origin is missing. Furthermore, browsers forbid JavaScript from setting restricted headers like Cookie, Host, or User-Agent directly. Run the generated code in a Node.js backend route or API proxy if the target server does not allow browser CORS.",
+      },
+      {
+        pitfall: "Using raw btoa() on Basic Auth credentials (-u) containing UTF-8 characters",
+        solution:
+          "The browser's built-in `btoa()` function only accepts Latin1 (ISO-8859-1) code points. If a password contains Unicode characters (such as `pässwörd` or emojis), `btoa()` throws `InvalidCharacterError`. Always encode credentials into UTF-8 bytes via `new TextEncoder().encode()` before converting to Base64, or use `Buffer.from(str, 'utf8').toString('base64')` in Node.js.",
+      },
+      {
+        pitfall: "Forgetting that cURL -d defaults to application/x-www-form-urlencoded",
+        solution:
+          "When you run `curl -d 'a=1&b=2'`, cURL automatically sends `Content-Type: application/x-www-form-urlencoded`. In contrast, passing a plain string body to `fetch()` defaults to `text/plain;charset=UTF-8`, which causes many backend form parsers (like Express `urlencoded` or PHP `$_POST`) to ignore the body unless the header is explicitly added.",
       },
       {
         pitfall: "Manually setting 'Content-Type: multipart/form-data' when using FormData (-F)",
         solution:
-          "When passing a `new FormData()` instance to `fetch({ body: formData })`, you must omit the `Content-Type` header. The browser automatically sets `Content-Type: multipart/form-data; boundary=----WebKitFormBoundary...`. Setting it manually omits the boundary and causes the server parser to fail.",
-      },
-      {
-        pitfall: "Forgetting that -d implies POST even without -X POST",
-        solution:
-          "In cURL, passing `-d`, `--data`, `--data-raw`, or `-F` automatically switches the HTTP method from GET to POST unless `-G` (`--get`) or an explicit `-X` flag is provided.",
+          "When passing a `new FormData()` instance to `fetch({ body: formData })`, you must omit the `Content-Type` header so the browser can automatically append the generated `; boundary=----WebKitFormBoundary...` parameter.",
       },
     ],
   },
 
   edgeCases: [
     {
-      title: "Basic Authentication (-u / --user)",
+      title: "Chrome DevTools 'Copy as cURL' (--compressed, -b Cookies & Client Hints)",
       scenario:
-        "Converting a cURL command that uses the -u flag for HTTP Basic Authentication alongside custom headers.",
-      inputSnippet: `curl -u "client_id:client_secret" https://oauth.example.com/token -d "grant_type=client_credentials"`,
-      outputSnippet: `const response = await fetch("https://oauth.example.com/token", {\n  method: "POST",\n  headers: {\n    "Authorization": \`Basic \${btoa("client_id:client_secret")}\`,\n  },\n  body: "grant_type=client_credentials",\n});`,
+        "Converting a real Chrome DevTools cURL command containing --compressed, -b session cookies, and multiple quoted headers.",
+      inputSnippet: `curl 'https://api.example.com/v2/profile' \\\n  -H 'accept: application/json' \\\n  -H 'sec-ch-ua: "Chromium";v="128"' \\\n  -b 'session_id=xyz987; theme=dark' \\\n  --compressed`,
+      outputSnippet: `const response = await fetch("https://api.example.com/v2/profile", {\n  method: "GET",\n  headers: {\n    "accept": "application/json",\n    "sec-ch-ua": "\\"Chromium\\";v=\\"128\\"",\n    "Cookie": "session_id=xyz987; theme=dark",\n  },\n});`,
       explanation:
-        "The -u flag is converted into an Authorization header using Base64 encoding (`btoa`), and the presence of `-d` automatically infers `method: \"POST\"`.",
+        "The tokenizer unescapes nested quotes inside `sec-ch-ua`, converts `-b` into a consolidated `Cookie` header, and strips `--compressed` cleanly because browsers negotiate Brotli/Gzip decompression automatically.",
     },
     {
-      title: "Multipart Form Uploads (-F / --form)",
+      title: "Default -d Form-Urlencoded vs Explicit -k Insecure Flag",
+      scenario:
+        "Using -d without a Content-Type header alongside -L (follow redirects) and -k (--insecure).",
+      inputSnippet: `curl -L -k https://internal.example.local/login -d "user=admin&token=42"`,
+      outputSnippet: `// ⚠️ SECURITY WARNING (-k / --insecure detected):\n// cURL's -k flag disables TLS/SSL certificate verification, exposing requests to Man-in-the-Middle (MitM) attacks.\n// Browser fetch() strictly enforces HTTPS certificates and cannot bypass TLS validation from client-side code.\n\nconst response = await fetch("https://internal.example.local/login", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/x-www-form-urlencoded",\n  },\n  redirect: "follow",\n  body: "user=admin&token=42",\n});`,
+      explanation:
+        "The converter automatically injects `Content-Type: application/x-www-form-urlencoded` for `-d`, maps `-L` to `redirect: \"follow\"`, and emits a prominent warning for `-k`.",
+    },
+    {
+      title: "Multipart Form Uploads (-F / --form) & UTF-8 Basic Auth (-u)",
       scenario:
         "Uploading form fields and file attachments using -F flags.",
       inputSnippet: `curl -X POST https://api.example.com/upload -F "purpose=assistants" -F "file=@report.pdf"`,
@@ -129,37 +163,28 @@ console.log(data);
       explanation:
         "Each `-F` entry is appended to a `FormData` object, file paths prefixed with `@` generate a 3-argument `formData.append(key, blob, filename)` call, and any manual `multipart/form-data` header is omitted so the browser can inject the multipart boundary.",
     },
-    {
-      title: "Multiple -d Flags & --data-raw JSON",
-      scenario:
-        "Combining multiple -d flags into a URL-encoded body or parsing raw JSON payloads containing special characters.",
-      inputSnippet: `curl https://api.example.com/search -G -d "q=typescript" -d "limit=20"`,
-      outputSnippet: `const response = await fetch("https://api.example.com/search?q=typescript&limit=20", {\n  method: "GET",\n});`,
-      explanation:
-        "When `-G` (`--get`) is present, multiple `-d` flags are joined with `&` and appended directly to the request URL query string while preserving `method: \"GET\"`.",
-    },
   ],
 
   faqs: [
     {
+      question: "Why does my cURL command work in the terminal, but fail with a CORS error in Browser fetch()?",
+      answer:
+        "Browsers enforce the Same-Origin Policy and require the target server to return `Access-Control-Allow-Origin` headers. Terminal `curl` does not enforce CORS. If you are calling a third-party API that blocks browser requests or requires secret API keys, switch the **Target Runtime / Client** option above to **Node.js 18+ fetch()** or **Axios** and execute the request from a server-side route.",
+    },
+    {
       question: "How does this converter handle -d vs --data-raw in cURL?",
       answer:
-        "In cURL, `--data-raw` behaves identically to `-d` (`--data`) except that it treats the `@` character literally instead of reading from a local file. Both flags set the request payload and default the HTTP method to `POST`. If the payload is valid JSON, our engine formats it cleanly inside `JSON.stringify(...)`.",
+        "Both `-d` and `--data-raw` set the request payload and switch the default HTTP method to `POST`. When no explicit `Content-Type` header is provided in the cURL command, our engine automatically adds `Content-Type: application/x-www-form-urlencoded` to match cURL's specification.",
     },
     {
-      question: "Why does the generated code check 'if (!response.ok)'?",
+      question: "Why do you use TextEncoder with btoa() instead of plain btoa() for -u Basic Auth?",
       answer:
-        "Unlike Axios or cURL with `--fail`, the browser `fetch()` API does not throw an exception when the server returns an HTTP 400, 401, 404, or 500 status code. Checking `if (!response.ok)` ensures your application catches HTTP error responses before attempting to parse the body.",
+        "Standard `btoa()` throws an `InvalidCharacterError` in browsers if the username or password contains any non-ASCII UTF-8 characters (such as accented letters or symbols). Converting the string to UTF-8 bytes via `TextEncoder` first makes Base64 encoding safe for all Unicode strings.",
     },
     {
-      question: "How are -F multipart file uploads converted to Fetch?",
+      question: "Are my API keys, cookies, or Authorization headers sent to a server?",
       answer:
-        "When `-F` or `--form` flags are detected, the converter constructs a native `FormData` instance and calls `formData.append(key, value)` for each field. It also strips any explicit `Content-Type: multipart/form-data` header because `fetch()` must generate the multipart boundary string automatically.",
-    },
-    {
-      question: "Are my API keys or Authorization headers sent to a server when I paste a cURL command?",
-      answer:
-        "No. Every cURL command you paste — including Bearer tokens, session cookies, and `-u` credentials — is parsed 100% locally inside your browser using JavaScript. No network requests are made.",
+        "No. Every cURL command you paste — including Bearer tokens, `-b` session cookies, and `-u` credentials — is parsed 100% locally inside your browser using JavaScript.",
     },
   ],
 
