@@ -2,13 +2,14 @@ import { describe, it, expect } from "vitest";
 import { convert as convertJsonToZod } from "@/lib/converters/engines/json-to-zod";
 import { convert as convertJsonToTs, singularize } from "@/lib/converters/engines/json-to-typescript";
 import { convert as convertCurlToFetch, encodeBasicAuthUtf8 } from "@/lib/converters/engines/curl-to-fetch";
+import { convert as convertYamlToJson } from "@/lib/converters/engines/yaml-to-json";
 import { jsonToTypescriptMeta } from "@/content/converters/json-to-typescript";
 import { MODULAR_CONVERTERS, getModularConverter } from "@/content/converters";
 
 describe("Modular Code Converters Architecture", () => {
   describe("Metadata & Quality Standards", () => {
-    it("registers json-to-zod, json-to-typescript, and curl-to-fetch with quality approval", () => {
-      for (const slug of ["json-to-zod", "json-to-typescript", "curl-to-fetch"]) {
+    it("registers json-to-zod, json-to-typescript, curl-to-fetch, and yaml-to-json with quality approval", () => {
+      for (const slug of ["json-to-zod", "json-to-typescript", "curl-to-fetch", "yaml-to-json"]) {
         const meta = getModularConverter(slug);
         expect(meta).toBeDefined();
         expect(meta?.slug).toBe(slug);
@@ -277,6 +278,76 @@ describe("Modular Code Converters Architecture", () => {
       expect(axiosRes).toContain('username: "api"');
       expect(axiosRes).toContain('password: "key123"');
       expect(axiosRes).toContain('"sku": "PRO"');
+    });
+  });
+
+  describe("YAML to JSON Engine (Anchors/Aliases, Multi-doc, YAML 1.1 vs 1.2, Line Error Reporting)", () => {
+    it("resolves YAML anchors (&), aliases (*), and merge keys (<<) into expanded JSON objects", () => {
+      const yamlInput = `
+defaults: &def
+  timeout: 3000
+  retries: 2
+
+production:
+  <<: *def
+  retries: 5
+  region: eu-central-1
+`;
+      const parsed = JSON.parse(convertYamlToJson(yamlInput));
+      expect(parsed.production).toEqual({
+        timeout: 3000,
+        retries: 5,
+        region: "eu-central-1",
+      });
+    });
+
+    it("parses multi-document YAML streams (---) into a JSON array", () => {
+      const multiYaml = `
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-api
+`;
+      const parsed = JSON.parse(convertYamlToJson(multiYaml));
+      expect(Array.isArray(parsed)).toBe(true);
+      expect(parsed).toHaveLength(2);
+      expect(parsed[0].kind).toBe("Namespace");
+      expect(parsed[1].kind).toBe("Service");
+    });
+
+    it("differentiates YAML 1.2 vs YAML 1.1 for yes/no booleans, 0o14 octals, and ISO dates", () => {
+      const scalarYaml = `
+country: NO
+confirm: yes
+modernOctal: 0o14
+legacyOctal: 014
+releaseDate: 2026-11-02T10:00:00Z
+`;
+
+      // YAML 1.2 (Default): yes/NO stay strings, 0o14 is 12, 014 is 14
+      const v12 = JSON.parse(convertYamlToJson(scalarYaml, { yamlVersion: "1.2" }));
+      expect(v12.country).toBe("NO");
+      expect(v12.confirm).toBe("yes");
+      expect(v12.modernOctal).toBe(12);
+      expect(v12.legacyOctal).toBe(14);
+      expect(v12.releaseDate).toBe("2026-11-02T10:00:00Z");
+
+      // YAML 1.1: NO -> false, yes -> true, 014 -> 12
+      const v11 = JSON.parse(convertYamlToJson(scalarYaml, { yamlVersion: "1.1" }));
+      expect(v11.country).toBe(false);
+      expect(v11.confirm).toBe(true);
+      expect(v11.modernOctal).toBe(12);
+      expect(v11.legacyOctal).toBe(12);
+    });
+
+    it("throws a clear error message containing exact line and column numbers on invalid YAML", () => {
+      const badYaml = `server:\n  port: 8080\n   badIndent: true\n  unclosed: "hello`;
+      expect(() => convertYamlToJson(badYaml)).toThrow(/YAML Syntax Error at line \d+, column \d+/);
     });
   });
 });

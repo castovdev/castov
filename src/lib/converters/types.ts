@@ -51,6 +51,7 @@ export interface ConverterMeta {
   inputLanguage: string;
   outputLanguage: string;
   outputExtension: string;
+  copyButtonLabel?: string;
   defaultSample: string;
   initialOutput?: string;
   isQualityApproved: boolean;

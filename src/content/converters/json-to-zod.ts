@@ -9,6 +9,7 @@ export const jsonToZodMeta: ConverterMeta = {
   inputLanguage: "json",
   outputLanguage: "typescript",
   outputExtension: ".ts",
+  copyButtonLabel: "Copy Schema",
   isQualityApproved: true,
   isIndexed: true,
 
@@ -170,5 +171,5 @@ export type User = z.infer<typeof UserSchema>;
     }
   ],
 
-  relatedSlugs: ["json-to-typescript", "json-to-pydantic", "json-to-rust", "curl-to-typescript"]
+  relatedSlugs: ["json-to-typescript", "curl-to-fetch", "yaml-to-json"]
 };

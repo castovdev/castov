@@ -80,4 +80,24 @@ test.describe("Modular Converters E2E", () => {
     await expect(exampleCode).toBeVisible();
     await expect(exampleCode).toContainText('await fetch("https://api.stripe.com/v1/payment_intents"');
   });
+
+  test("yaml-to-json resolves anchors, toggles YAML 1.2 vs 1.1, and shows Copy JSON button", async ({ page }) => {
+    await page.goto("/convert/yaml-to-json", { waitUntil: "networkidle" });
+
+    await expect(page).toHaveTitle(/YAML to JSON Converter/i);
+    await expect(page.getByRole("button", { name: /Copy JSON/i })).toBeVisible();
+
+    const outputTextarea = page.locator("textarea[readonly]");
+    await expect(outputTextarea).toBeVisible();
+    await expect(outputTextarea).toHaveValue(/"countryCode": "NO"/, { timeout: 10000 });
+
+    const yaml12Value = await outputTextarea.inputValue();
+    expect(yaml12Value).toContain('"filePermissions": 493');
+    expect(yaml12Value).toContain('"driver": "json-file"');
+
+    // Switch to YAML 1.1 and verify "NO" becomes boolean false
+    const versionSelect = page.locator("#opt-yamlVersion");
+    await versionSelect.selectOption("1.1");
+    await expect(outputTextarea).toHaveValue(/"countryCode": false/, { timeout: 10000 });
+  });
 });

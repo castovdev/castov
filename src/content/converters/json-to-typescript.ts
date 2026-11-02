@@ -9,6 +9,7 @@ export const jsonToTypescriptMeta: ConverterMeta = {
   inputLanguage: "json",
   outputLanguage: "typescript",
   outputExtension: ".d.ts",
+  copyButtonLabel: "Copy Types",
   isQualityApproved: true,
   isIndexed: true,
 
@@ -178,5 +179,5 @@ export interface OrderResponseLineItem {
     }
   ],
 
-  relatedSlugs: ["json-to-zod", "json-to-pydantic", "json-to-rust", "json-to-go"]
+  relatedSlugs: ["json-to-zod", "curl-to-fetch", "yaml-to-json"]
 };

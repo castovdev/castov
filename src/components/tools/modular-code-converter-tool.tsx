@@ -17,6 +17,7 @@ const ENGINE_LOADERS: Record<string, () => Promise<{ convert: (input: string, op
   "json-to-zod": () => import("@/lib/converters/engines/json-to-zod"),
   "json-to-typescript": () => import("@/lib/converters/engines/json-to-typescript"),
   "curl-to-fetch": () => import("@/lib/converters/engines/curl-to-fetch"),
+  "yaml-to-json": () => import("@/lib/converters/engines/yaml-to-json"),
 };
 
 interface Props {
@@ -339,7 +340,7 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
                 ) : (
                   <>
                     <Copy className="h-3 w-3" />
-                    <span>Copy Schema</span>
+                    <span>{meta.copyButtonLabel || "Copy Code"}</span>
                   </>
                 )}
               </button>

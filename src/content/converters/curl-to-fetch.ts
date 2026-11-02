@@ -10,6 +10,7 @@ export const curlToFetchMeta: ConverterMeta = {
   inputLanguage: "bash",
   outputLanguage: "javascript",
   outputExtension: ".js",
+  copyButtonLabel: "Copy Code",
   isQualityApproved: true,
   isIndexed: true,
 
@@ -188,5 +189,5 @@ console.log(data);
     },
   ],
 
-  relatedSlugs: ["curl-to-python", "curl-to-axios", "json-to-typescript", "json-to-zod"],
+  relatedSlugs: ["json-to-typescript", "json-to-zod", "yaml-to-json"],
 };
