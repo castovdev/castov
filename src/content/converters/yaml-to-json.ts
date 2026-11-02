@@ -3,7 +3,7 @@ import type { ConverterMeta } from "@/lib/converters/types";
 export const yamlToJsonMeta: ConverterMeta = {
   slug: "yaml-to-json",
   name: "YAML to JSON",
-  title: "YAML to JSON Converter — YAML 1.2, Anchors & Multi-Document Parser",
+  title: "YAML to JSON Converter — YAML 1.2 & Anchors",
   metaDescription:
     "Convert YAML configurations, Kubernetes manifests, and Docker Compose files to JSON in browser. Resolves anchors/aliases, multi-document streams, and YAML 1.2 vs 1.1 scalars.",
   category: "Data Formats",
@@ -23,7 +23,8 @@ x-service-defaults: &defaults
 
 service: api-gateway
 countryCode: NO
-filePermissions: 0o755
+filePermissions: 0755
+octalExplicit: 0o755
 releaseDate: 2026-11-02T09:30:00Z
 production:
   <<: *defaults
@@ -40,7 +41,8 @@ production:
   },
   "service": "api-gateway",
   "countryCode": "NO",
-  "filePermissions": 493,
+  "filePermissions": 755,
+  "octalExplicit": 493,
   "releaseDate": "2026-11-02T09:30:00Z",
   "production": {
     "restart": "unless-stopped",
@@ -180,5 +182,5 @@ production:
     },
   ],
 
-  relatedSlugs: ["json-to-typescript", "json-to-zod", "curl-to-fetch"],
+  relatedSlugs: ["json-to-typescript", "json-to-zod", "curl-to-fetch", "sql-to-prisma"],
 };

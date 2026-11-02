@@ -60,7 +60,7 @@ export async function generateMetadata({
     };
   }
 
-  // 2. Fallback to legacy converters
+  // 2. Fallback to legacy converters (marked noindex until upgraded to modular quality standard)
   const converter = getConverterBySlug(slug);
   if (!converter) {
     return buildMetadata({
@@ -70,11 +70,16 @@ export async function generateMetadata({
     });
   }
 
-  return buildMetadata({
+  const legacyMeta = buildMetadata({
     title: `${converter.title} | Castov`,
     description: converter.description,
     path: `/convert/${converter.slug}`,
   });
+
+  return {
+    ...legacyMeta,
+    robots: { index: false, follow: true },
+  };
 }
 
 export default async function CodeConverterPage({

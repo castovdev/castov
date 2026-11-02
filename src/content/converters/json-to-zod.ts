@@ -171,5 +171,5 @@ export type User = z.infer<typeof UserSchema>;
     }
   ],
 
-  relatedSlugs: ["json-to-typescript", "curl-to-fetch", "yaml-to-json"]
+  relatedSlugs: ["json-to-typescript", "sql-to-prisma", "curl-to-fetch", "yaml-to-json"]
 };

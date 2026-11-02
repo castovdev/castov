@@ -55,10 +55,14 @@ for (const file of files) {
     errors.push(`[${slug}] Engine file not found at src/lib/converters/engines/${slug}.ts`);
   }
 
-  // Check 2: Title length
+  // Check 2: Title length (minimum 25, maximum 51 so `<title>${title} | Castov</title>` stays <= 60 chars)
   const title = titleMatch ? titleMatch[1] : "";
+  const fullHtmlTitle = `${title} | Castov`;
   if (title.length < 25) {
     errors.push(`[${slug}] Title is too short (${title.length} chars, minimum 25 required)`);
+  }
+  if (fullHtmlTitle.length > 60) {
+    errors.push(`[${slug}] Full <title> is too long (${fullHtmlTitle.length} chars: "${fullHtmlTitle}", maximum 60 allowed)`);
   }
 
   // Check 3: Meta description

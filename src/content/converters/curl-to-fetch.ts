@@ -3,7 +3,7 @@ import type { ConverterMeta } from "@/lib/converters/types";
 export const curlToFetchMeta: ConverterMeta = {
   slug: "curl-to-fetch",
   name: "cURL to Fetch",
-  title: "cURL to JavaScript Fetch, Node.js & Axios Converter",
+  title: "cURL to Fetch, Node.js & Axios Converter",
   metaDescription:
     "Convert Chrome Copy as cURL commands into Browser Fetch, Node.js Fetch, or Axios code. Handles -H, -d, --data-raw, -u UTF-8 Basic Auth, -F FormData, -b, -L, and -k.",
   category: "DevOps & Network",
@@ -189,5 +189,5 @@ console.log(data);
     },
   ],
 
-  relatedSlugs: ["json-to-typescript", "json-to-zod", "yaml-to-json"],
+  relatedSlugs: ["json-to-typescript", "json-to-zod", "yaml-to-json", "sql-to-prisma"],
 };

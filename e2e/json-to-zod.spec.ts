@@ -58,7 +58,7 @@ test.describe("Modular Converters E2E", () => {
   test("curl-to-fetch renders fetch() call with UTF-8 Basic Auth, switches targetClient to Node/Axios, and shows -k warning", async ({ page }) => {
     await page.goto("/convert/curl-to-fetch", { waitUntil: "networkidle" });
 
-    await expect(page).toHaveTitle(/cURL to JavaScript Fetch, Node\.js & Axios Converter/i);
+    await expect(page).toHaveTitle(/cURL to Fetch, Node\.js & Axios Converter/i);
 
     const outputTextarea = page.locator("textarea[readonly]");
     await expect(outputTextarea).toBeVisible();
@@ -81,7 +81,7 @@ test.describe("Modular Converters E2E", () => {
     await expect(exampleCode).toContainText('await fetch("https://api.stripe.com/v1/payment_intents"');
   });
 
-  test("yaml-to-json resolves anchors, toggles YAML 1.2 vs 1.1, and shows Copy JSON button", async ({ page }) => {
+  test("yaml-to-json resolves anchors, differentiates 0755 vs 0o755 in YAML 1.2 vs 1.1, and shows Copy JSON button", async ({ page }) => {
     await page.goto("/convert/yaml-to-json", { waitUntil: "networkidle" });
 
     await expect(page).toHaveTitle(/YAML to JSON Converter/i);
@@ -92,12 +92,32 @@ test.describe("Modular Converters E2E", () => {
     await expect(outputTextarea).toHaveValue(/"countryCode": "NO"/, { timeout: 10000 });
 
     const yaml12Value = await outputTextarea.inputValue();
-    expect(yaml12Value).toContain('"filePermissions": 493');
+    expect(yaml12Value).toContain('"filePermissions": 755');
+    expect(yaml12Value).toContain('"octalExplicit": 493');
     expect(yaml12Value).toContain('"driver": "json-file"');
 
-    // Switch to YAML 1.1 and verify "NO" becomes boolean false
+    // Switch to YAML 1.1 and verify "NO" becomes boolean false and 0755 becomes 493
     const versionSelect = page.locator("#opt-yamlVersion");
     await versionSelect.selectOption("1.1");
     await expect(outputTextarea).toHaveValue(/"countryCode": false/, { timeout: 10000 });
+    const yaml11Value = await outputTextarea.inputValue();
+    expect(yaml11Value).toContain('"filePermissions": 493');
+  });
+
+  test("sql-to-prisma renders models, enums, 1:1 and 1:n relations, and @@index", async ({ page }) => {
+    await page.goto("/convert/sql-to-prisma", { waitUntil: "networkidle" });
+
+    await expect(page).toHaveTitle(/SQL to Prisma Schema Converter/i);
+    await expect(page.getByRole("button", { name: /Copy Prisma Schema/i })).toBeVisible();
+
+    const outputTextarea = page.locator("textarea[readonly]");
+    await expect(outputTextarea).toBeVisible();
+    await expect(outputTextarea).toHaveValue(/model User \{/, { timeout: 10000 });
+
+    const prismaVal = await outputTextarea.inputValue();
+    expect(prismaVal).toContain("enum UserRole {");
+    expect(prismaVal).toContain("userProfile UserProfile?");
+    expect(prismaVal).toContain("posts Post[]");
+    expect(prismaVal).toContain('@@index([authorId, published], map: "idx_posts_author")');
   });
 });

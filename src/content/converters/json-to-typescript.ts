@@ -179,5 +179,5 @@ export interface OrderResponseLineItem {
     }
   ],
 
-  relatedSlugs: ["json-to-zod", "curl-to-fetch", "yaml-to-json"]
+  relatedSlugs: ["json-to-zod", "sql-to-prisma", "curl-to-fetch", "yaml-to-json"]
 };

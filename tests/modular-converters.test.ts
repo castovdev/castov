@@ -3,19 +3,29 @@ import { convert as convertJsonToZod } from "@/lib/converters/engines/json-to-zo
 import { convert as convertJsonToTs, singularize } from "@/lib/converters/engines/json-to-typescript";
 import { convert as convertCurlToFetch, encodeBasicAuthUtf8 } from "@/lib/converters/engines/curl-to-fetch";
 import { convert as convertYamlToJson } from "@/lib/converters/engines/yaml-to-json";
+import { convert as convertSqlToPrisma } from "@/lib/converters/engines/sql-to-prisma";
 import { jsonToTypescriptMeta } from "@/content/converters/json-to-typescript";
 import { MODULAR_CONVERTERS, getModularConverter } from "@/content/converters";
 
 describe("Modular Code Converters Architecture", () => {
-  describe("Metadata & Quality Standards", () => {
-    it("registers json-to-zod, json-to-typescript, curl-to-fetch, and yaml-to-json with quality approval", () => {
-      for (const slug of ["json-to-zod", "json-to-typescript", "curl-to-fetch", "yaml-to-json"]) {
+  describe("Metadata, <title> Length (<60 chars), & Quality Standards", () => {
+    it("registers all 5 modular converters with quality approval and <title> under 60 chars", () => {
+      for (const slug of [
+        "json-to-zod",
+        "json-to-typescript",
+        "curl-to-fetch",
+        "yaml-to-json",
+        "sql-to-prisma",
+      ]) {
         const meta = getModularConverter(slug);
         expect(meta).toBeDefined();
         expect(meta?.slug).toBe(slug);
         expect(meta?.isQualityApproved).toBe(true);
         expect(meta?.isIndexed).toBe(true);
         expect(meta?.initialOutput).toBeTruthy();
+
+        const fullHtmlTitle = `${meta!.title} | Castov`;
+        expect(fullHtmlTitle.length).toBeLessThan(60);
       }
     });
 
@@ -281,7 +291,7 @@ describe("Modular Code Converters Architecture", () => {
     });
   });
 
-  describe("YAML to JSON Engine (Anchors/Aliases, Multi-doc, YAML 1.1 vs 1.2, Line Error Reporting)", () => {
+  describe("YAML to JSON Engine (Anchors/Aliases, Multi-doc, YAML 1.1 vs 1.2 0755 vs 0o755, Line Error Reporting)", () => {
     it("resolves YAML anchors (&), aliases (*), and merge keys (<<) into expanded JSON objects", () => {
       const yamlInput = `
 defaults: &def
@@ -320,27 +330,33 @@ metadata:
       expect(parsed[1].kind).toBe("Service");
     });
 
-    it("differentiates YAML 1.2 vs YAML 1.1 for yes/no booleans, 0o14 octals, and ISO dates", () => {
+    it("differentiates YAML 1.2 vs YAML 1.1 for yes/no booleans, bare 0755 vs 0o755 octals, and ISO dates", () => {
       const scalarYaml = `
 country: NO
 confirm: yes
+filePermissions: 0755
+octalExplicit: 0o755
 modernOctal: 0o14
 legacyOctal: 014
 releaseDate: 2026-11-02T10:00:00Z
 `;
 
-      // YAML 1.2 (Default): yes/NO stay strings, 0o14 is 12, 014 is 14
+      // YAML 1.2 (Default): yes/NO stay strings, 0o755 is 493, bare 0755 is decimal 755, 0o14 is 12, bare 014 is 14
       const v12 = JSON.parse(convertYamlToJson(scalarYaml, { yamlVersion: "1.2" }));
       expect(v12.country).toBe("NO");
       expect(v12.confirm).toBe("yes");
+      expect(v12.filePermissions).toBe(755);
+      expect(v12.octalExplicit).toBe(493);
       expect(v12.modernOctal).toBe(12);
       expect(v12.legacyOctal).toBe(14);
       expect(v12.releaseDate).toBe("2026-11-02T10:00:00Z");
 
-      // YAML 1.1: NO -> false, yes -> true, 014 -> 12
+      // YAML 1.1: NO -> false, yes -> true, bare 0755 -> 493, bare 014 -> 12
       const v11 = JSON.parse(convertYamlToJson(scalarYaml, { yamlVersion: "1.1" }));
       expect(v11.country).toBe(false);
       expect(v11.confirm).toBe(true);
+      expect(v11.filePermissions).toBe(493);
+      expect(v11.octalExplicit).toBe(493);
       expect(v11.modernOctal).toBe(12);
       expect(v11.legacyOctal).toBe(12);
     });
@@ -348,6 +364,80 @@ releaseDate: 2026-11-02T10:00:00Z
     it("throws a clear error message containing exact line and column numbers on invalid YAML", () => {
       const badYaml = `server:\n  port: 8080\n   badIndent: true\n  unclosed: "hello`;
       expect(() => convertYamlToJson(badYaml)).toThrow(/YAML Syntax Error at line \d+, column \d+/);
+    });
+  });
+
+  describe("SQL to Prisma Schema Engine (CREATE TABLE, 1:1 / 1:n / n:m Relations, Enums, @default, @unique, @@index, Postgres/MySQL)", () => {
+    it("parses PostgreSQL enums, 1:1 unique FK, 1:n FK, @default, @unique, and CREATE INDEX", () => {
+      const sql = `
+CREATE TYPE user_role AS ENUM ('ADMIN', 'MEMBER');
+
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL UNIQUE,
+  role user_role NOT NULL DEFAULT 'MEMBER',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE user_profiles (
+  id SERIAL PRIMARY KEY,
+  user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  bio TEXT
+);
+
+CREATE TABLE posts (
+  id SERIAL PRIMARY KEY,
+  author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(180) NOT NULL,
+  published BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE INDEX idx_posts_author ON posts (author_id, published);
+`;
+      const prisma = convertSqlToPrisma(sql);
+      expect(prisma).toContain("enum UserRole {\n  ADMIN\n  MEMBER\n}");
+      expect(prisma).toContain("id String @id @default(uuid()) @db.Uuid");
+      expect(prisma).toContain("email String @unique @db.VarChar(255)");
+      expect(prisma).toContain("role UserRole @default(MEMBER)");
+      expect(prisma).toContain('updatedAt DateTime @updatedAt @map("updated_at")');
+      // 1:1 relation on User -> userProfile UserProfile?
+      expect(prisma).toContain("userProfile UserProfile?");
+      // 1:n relation on User -> posts Post[]
+      expect(prisma).toContain("posts Post[]");
+      // Owning @relation with onDelete: Cascade
+      expect(prisma).toContain(
+        "user User @relation(fields: [userId], references: [id], onDelete: Cascade)"
+      );
+      expect(prisma).toContain(
+        "author User @relation(fields: [authorId], references: [id], onDelete: Cascade)"
+      );
+      // @@index
+      expect(prisma).toContain('@@index([authorId, published], map: "idx_posts_author")');
+    });
+
+    it("parses n:m join tables with composite PRIMARY KEY (@@id) and MySQL types (AUTO_INCREMENT, TINYINT(1), DECIMAL, inline ENUM)", () => {
+      const sql = `
+CREATE TABLE invoices (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  amount DECIMAL(10, 2) NOT NULL,
+  is_paid TINYINT(1) NOT NULL DEFAULT 0,
+  status ENUM('DRAFT', 'PAID', 'VOID') NOT NULL DEFAULT 'DRAFT'
+);
+
+CREATE TABLE invoice_tags (
+  invoice_id BIGINT NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+  tag_id BIGINT NOT NULL,
+  PRIMARY KEY (invoice_id, tag_id)
+);
+`;
+      const prisma = convertSqlToPrisma(sql, { provider: "mysql" });
+      expect(prisma).toContain("enum InvoiceStatus {\n  DRAFT\n  PAID\n  VOID\n}");
+      expect(prisma).toContain("id BigInt @id @default(autoincrement())");
+      expect(prisma).toContain("amount Decimal @db.Decimal(10, 2)");
+      expect(prisma).toContain('isPaid Boolean @default(false) @map("is_paid")');
+      expect(prisma).toContain("status InvoiceStatus @default(DRAFT)");
+      expect(prisma).toContain("@@id([invoiceId, tagId])");
     });
   });
 });

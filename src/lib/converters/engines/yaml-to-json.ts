@@ -77,9 +77,30 @@ function transformYamlNode(node: any, isYaml11: boolean): any {
 }
 
 /**
- * Pre-processes unquoted YAML 1.1 scalars (`yes`/`no`/`on`/`off` and legacy octal `014`)
- * only when the user selects YAML 1.1 mode, while keeping quoted strings untouched.
+ * Pre-processes unquoted YAML 1.2 scalars to enforce strict YAML 1.2 Core Schema behavior:
+ * - Bare leading-zero integers like `0755` or `014` (without `0o`) are parsed as decimal `755` and `14`,
+ *   preventing js-yaml's legacy C-style octal parser (`0755` -> `493`) from firing in YAML 1.2 mode.
+ * - Explicit `0o755` and `0o14` remain standard YAML 1.2 octal (`493` and `12`).
  */
+function applyYaml12ScalarTransforms(input: string): string {
+  return input
+    .split("\n")
+    .map((line) => {
+      if (/^\s*#/.test(line)) return line;
+      return line.replace(
+        /^(\s*(?:-[ \t]+|[^:#\n]+:[ \t]+))([^'"#\n][^\n#]*?)(\s*(?:#.*)?)$/,
+        (full, prefix, rawVal, suffix) => {
+          const val = rawVal.trim();
+          // Bare leading zero integer (e.g. 0755, 014) -> decimal in YAML 1.2 Core Schema
+          if (/^[-+]?0[0-9]+$/.test(val)) {
+            return `${prefix}${parseInt(val, 10)}${suffix}`;
+          }
+          return full;
+        }
+      );
+    })
+    .join("\n");
+}
 function applyYaml11ScalarTransforms(input: string): string {
   return input
     .split("\n")
@@ -137,7 +158,9 @@ export function convert(input: string, userOptions: YamlToJsonOptions = {}): str
   };
 
   const isYaml11 = options.yamlVersion === "1.1";
-  const sourceToParse = isYaml11 ? applyYaml11ScalarTransforms(input) : input;
+  const sourceToParse = isYaml11
+    ? applyYaml11ScalarTransforms(input)
+    : applyYaml12ScalarTransforms(input);
 
   const docs: any[] = [];
   try {

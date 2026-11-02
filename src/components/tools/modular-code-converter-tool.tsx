@@ -18,6 +18,7 @@ const ENGINE_LOADERS: Record<string, () => Promise<{ convert: (input: string, op
   "json-to-typescript": () => import("@/lib/converters/engines/json-to-typescript"),
   "curl-to-fetch": () => import("@/lib/converters/engines/curl-to-fetch"),
   "yaml-to-json": () => import("@/lib/converters/engines/yaml-to-json"),
+  "sql-to-prisma": () => import("@/lib/converters/engines/sql-to-prisma"),
 };
 
 interface Props {

@@ -3,12 +3,14 @@ import { jsonToZodMeta } from "./json-to-zod";
 import { jsonToTypescriptMeta } from "./json-to-typescript";
 import { curlToFetchMeta } from "./curl-to-fetch";
 import { yamlToJsonMeta } from "./yaml-to-json";
+import { sqlToPrismaMeta } from "./sql-to-prisma";
 
 export const MODULAR_CONVERTERS: ConverterMeta[] = [
   jsonToZodMeta,
   jsonToTypescriptMeta,
   curlToFetchMeta,
   yamlToJsonMeta,
+  sqlToPrismaMeta,
 ];
 
 export function getModularConverter(slug: string): ConverterMeta | undefined {
