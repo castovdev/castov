@@ -16,6 +16,7 @@ import type { ConverterMeta } from "@/lib/converters/types";
 const ENGINE_LOADERS: Record<string, () => Promise<{ convert: (input: string, options?: any) => string }>> = {
   "json-to-zod": () => import("@/lib/converters/engines/json-to-zod"),
   "json-to-typescript": () => import("@/lib/converters/engines/json-to-typescript"),
+  "curl-to-fetch": () => import("@/lib/converters/engines/curl-to-fetch"),
 };
 
 interface Props {

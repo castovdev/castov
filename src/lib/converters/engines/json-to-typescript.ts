@@ -15,7 +15,7 @@ export interface JsonToTsOptions {
   declarationStyle?: "interface" | "type";
   extractNested?: boolean;
   readonlyProps?: boolean;
-  nullHandling?: "nullable" | "optional-nullable";
+  nullHandling?: "null" | "unknown";
 }
 
 function toPascalCase(str: string): string {
@@ -27,17 +27,74 @@ function toPascalCase(str: string): string {
     .join("");
 }
 
-function singularize(str: string): string {
-  if (str.endsWith("ies") && str.length > 3) {
-    return str.slice(0, -3) + "y";
+const IRREGULAR_PLURALS: Record<string, string> = {
+  children: "Child",
+  people: "Person",
+  men: "Man",
+  women: "Woman",
+  teeth: "Tooth",
+  feet: "Foot",
+  mice: "Mouse",
+  geese: "Goose",
+  indices: "Index",
+  matrices: "Matrix",
+  vertices: "Vertex",
+  criteria: "Criterion",
+  phenomena: "Phenomenon",
+};
+
+const UNCOUNTABLE_WORDS = new Set([
+  "data",
+  "series",
+  "species",
+  "status",
+  "metadata",
+  "news",
+  "equipment",
+  "information",
+  "rice",
+  "fish",
+  "sheep",
+  "deer",
+  "moose",
+  "chassis",
+  "corps",
+  "media",
+]);
+
+function singularizeWord(word: string): string {
+  const lower = word.toLowerCase();
+  if (UNCOUNTABLE_WORDS.has(lower)) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
   }
-  if (str.endsWith("ses") && str.length > 3) {
-    return str.slice(0, -2);
+  if (IRREGULAR_PLURALS[lower]) {
+    return IRREGULAR_PLURALS[lower];
   }
-  if (str.endsWith("s") && !str.endsWith("ss") && str.length > 1) {
-    return str.slice(0, -1);
+  if (/ies$/i.test(word) && word.length > 3) {
+    return word.slice(0, -3) + "y";
   }
-  return str + "Item";
+  if (/(?:ches|shes|xes|zes|sses)$/i.test(word) && word.length > 4) {
+    return word.slice(0, -2);
+  }
+  if (/ses$/i.test(word) && word.length > 3) {
+    return word.slice(0, -2);
+  }
+  if (/ves$/i.test(word) && word.length > 3) {
+    return word.slice(0, -3) + "f";
+  }
+  if (/s$/i.test(word) && !/(?:ss|us|is)$/i.test(word) && word.length > 1) {
+    return word.slice(0, -1);
+  }
+  return word;
+}
+
+export function singularize(str: string): string {
+  const cleaned = str.replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/[^a-zA-Z0-9]/g, " ").trim();
+  if (!cleaned) return "Item";
+  const words = cleaned.split(/\s+/);
+  const lastIdx = words.length - 1;
+  words[lastIdx] = singularizeWord(words[lastIdx]);
+  return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join("");
 }
 
 function formatKey(key: string): string {
@@ -65,7 +122,7 @@ export function convert(input: string, userOptions: JsonToTsOptions = {}): strin
         ? userOptions.extractNested === true || (userOptions.extractNested as any) === "true"
         : true,
     readonlyProps: Boolean(userOptions.readonlyProps),
-    nullHandling: userOptions.nullHandling || "nullable",
+    nullHandling: userOptions.nullHandling === "unknown" ? "unknown" : "null",
   };
 
   const extractedDeclarations: string[] = [];
@@ -102,9 +159,7 @@ export function convert(input: string, userOptions: JsonToTsOptions = {}): strin
 
     const lines = keys.map((key) => {
       const val = obj[key];
-      const isOptional =
-        optionalKeys.has(key) ||
-        (val === null && options.nullHandling === "optional-nullable");
+      const isOptional = optionalKeys.has(key);
       const propName = formatKey(key);
       const childTypeName = `${parentName}${toPascalCase(key)}`;
       const tsType = inferType(val, childTypeName, nextIndent);
@@ -173,7 +228,7 @@ export function convert(input: string, userOptions: JsonToTsOptions = {}): strin
   }
 
   function inferType(val: any, nameHint: string, indent: string): string {
-    if (val === null) return "unknown | null";
+    if (val === null) return options.nullHandling === "unknown" ? "unknown" : "null";
     if (val === undefined) return "undefined";
     if (typeof val === "string") return "string";
     if (typeof val === "number") return "number";

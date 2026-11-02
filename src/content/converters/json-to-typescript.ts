@@ -41,7 +41,7 @@ export const jsonToTypescriptMeta: ConverterMeta = {
   totalCents: number;
   currency: string;
   isTaxExempt: boolean;
-  discountCode: unknown | null;
+  discountCode: null;
   "x-request-id": string;
   customer: OrderResponseCustomer;
   lineItems: OrderResponseLineItem[];
@@ -79,6 +79,17 @@ export interface OrderResponseLineItem {
         { label: "export type = { ... }", value: "type" },
       ],
       description: "Choose between extendable interfaces or type aliases",
+    },
+    {
+      id: "nullHandling",
+      label: "Null Value Type",
+      type: "select",
+      defaultValue: "null",
+      options: [
+        { label: "null (Strict Null)", value: "null" },
+        { label: "unknown (Safe Placeholder)", value: "unknown" },
+      ],
+      description: "Type assigned to JSON properties whose sample value is null",
     },
     {
       id: "extractNested",
@@ -154,8 +165,8 @@ export interface OrderResponseLineItem {
       answer: "For object shapes, `export interface` is generally preferred because it supports declaration merging, `extends` clauses, and produces cleaner error messages in TypeScript compiler output. However, if your root JSON payload is a top-level array or primitive union, a `type` alias is required and generated automatically."
     },
     {
-      question: "Why are null values typed as 'unknown | null' instead of just 'null'?",
-      answer: "In real API samples, a property with a `null` value (such as `discountCode: null`) usually holds a `string` or `number` when populated. Typing it strictly as `null` breaks compilation as soon as you assign a real value. Using `unknown | null` prompts you to replace `unknown` with the concrete domain type while preserving null safety."
+      question: "How are JSON null values typed, and when should I switch between 'null' and 'unknown'?",
+      answer: "By default, properties with a `null` value in the JSON sample are typed strictly as `null` (e.g., `discountCode: null;`). If the property is an unpopulated field whose actual runtime type is not yet known from the sample, you can switch the Null Value Type option to `unknown` so it acts as a type-safe placeholder without resorting to `any`."
     },
     {
       question: "How does the 'Immutability (readonly)' option affect the output?",

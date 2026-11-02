@@ -41,7 +41,13 @@ export interface ConverterMeta {
   name: string;
   title: string;
   metaDescription: string;
-  category: "JSON & Schemas" | "Database & ORM" | "API & Network" | "Data Formats";
+  category:
+    | "JSON & Schemas"
+    | "Database & ORM"
+    | "API & Network"
+    | "DevOps & Network"
+    | "SQL & Database"
+    | "Data Formats";
   inputLanguage: string;
   outputLanguage: string;
   outputExtension: string;

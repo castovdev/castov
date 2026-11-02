@@ -30,7 +30,7 @@ test.describe("Modular Converters E2E", () => {
     await expect(exampleCode).toContainText("export const UserSchema = z.object");
   });
 
-  test("json-to-typescript renders OrderResponse interface and <pre><code> example output", async ({ page }) => {
+  test("json-to-typescript renders OrderResponse interface with null option toggle and <pre><code> example output", async ({ page }) => {
     await page.goto("/convert/json-to-typescript", { waitUntil: "domcontentloaded" });
 
     await expect(page).toHaveTitle(/JSON to TypeScript Interface & Type Converter/i);
@@ -40,12 +40,38 @@ test.describe("Modular Converters E2E", () => {
     await expect(outputTextarea).toHaveValue(/export interface OrderResponse/, { timeout: 10000 });
 
     const tsValue = await outputTextarea.inputValue();
+    expect(tsValue).toContain("discountCode: null;");
     expect(tsValue).toContain("export interface OrderResponseCustomer");
     expect(tsValue).toContain("notes?: string;");
+
+    // Toggle nullHandling to unknown
+    const nullSelect = page.locator("#opt-nullHandling");
+    await nullSelect.selectOption("unknown");
+    await expect(outputTextarea).toHaveValue(/discountCode: unknown;/, { timeout: 5000 });
 
     // Verify <pre><code> Example Output section
     const exampleCode = page.locator("#example-output-heading ~ div pre code").nth(1);
     await expect(exampleCode).toBeVisible();
     await expect(exampleCode).toContainText("export interface OrderResponse");
+  });
+
+  test("curl-to-fetch renders fetch() call with Basic Auth, headers, and JSON body", async ({ page }) => {
+    await page.goto("/convert/curl-to-fetch", { waitUntil: "domcontentloaded" });
+
+    await expect(page).toHaveTitle(/cURL to JavaScript Fetch Converter/i);
+
+    const outputTextarea = page.locator("textarea[readonly]");
+    await expect(outputTextarea).toBeVisible();
+    await expect(outputTextarea).toHaveValue(/await fetch\(/, { timeout: 10000 });
+
+    const fetchValue = await outputTextarea.inputValue();
+    expect(fetchValue).toContain('"Authorization": `Basic ${btoa("sk_test_51Nz99a:secret")}`');
+    expect(fetchValue).toContain('"Idempotency-Key": "req_88172a"');
+    expect(fetchValue).toContain("body: JSON.stringify(");
+
+    // Verify <pre><code> Example Output section
+    const exampleCode = page.locator("#example-output-heading ~ div pre code").nth(1);
+    await expect(exampleCode).toBeVisible();
+    await expect(exampleCode).toContainText('await fetch("https://api.stripe.com/v1/payment_intents"');
   });
 });
