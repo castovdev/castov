@@ -190,7 +190,7 @@ export function convert(input: string, userOptions: JsonToZodOptions = {}): stri
   }
 
   const versionHeader = options.zodVersion === "v4"
-    ? `// Target: Zod v4 (Compatible Syntax)\nimport { z } from "zod";`
+    ? `// Target: Zod v4 (Stable)\nimport { z } from "zod";`
     : `// Target: Zod v3 (Standard)\nimport { z } from "zod";`;
 
   return `${versionHeader}\n\n${body}\n\nexport type ${typeIdentifier} = z.infer<typeof ${schemaIdentifier}>;\n`;

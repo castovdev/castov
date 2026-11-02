@@ -46,6 +46,7 @@ export interface ConverterMeta {
   outputLanguage: string;
   outputExtension: string;
   defaultSample: string;
+  initialOutput?: string;
   isQualityApproved: boolean;
   isIndexed: boolean;
   deepDive: ConverterDeepDive;

@@ -207,7 +207,7 @@ describe("Developer Code & Schema Converter Matrix", () => {
         params: Promise.resolve({ slug: "json-to-zod" }),
       });
       expect(meta.title).toEqual({
-        absolute: "JSON to Zod Schema Converter — Client-Side Runtime Validator | Castov",
+        absolute: "JSON to Zod Schema Converter | Castov",
       });
       expect(meta.description).toContain("Convert raw JSON into strict, production-ready Zod schemas");
     });

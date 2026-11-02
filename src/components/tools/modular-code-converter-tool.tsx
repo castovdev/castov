@@ -6,7 +6,6 @@ import {
   Check,
   Download,
   RotateCcw,
-  Sparkles,
   SlidersHorizontal,
   AlertCircle,
   FileCode2,
@@ -20,18 +19,19 @@ const ENGINE_LOADERS: Record<string, () => Promise<{ convert: (input: string, op
 
 interface Props {
   meta: ConverterMeta;
+  initialOutput?: string;
 }
 
-export function ModularCodeConverterTool({ meta }: Props) {
+export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
   const inputId = useId();
   const outputId = useId();
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [input, setInput] = useState(meta.defaultSample);
-  const [output, setOutput] = useState("");
+  const [output, setOutput] = useState(initialOutput || meta.initialOutput || "");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [engineLoading, setEngineLoading] = useState(true);
+  const [engineReady, setEngineReady] = useState(false);
   const [showOptions, setShowOptions] = useState(true);
 
   // Initialize options from meta.optionsConfig
@@ -51,7 +51,6 @@ export function ModularCodeConverterTool({ meta }: Props) {
   // Dynamically load the engine on client mount
   useEffect(() => {
     let isMounted = true;
-    setEngineLoading(true);
 
     const loader = ENGINE_LOADERS[meta.slug];
     if (loader) {
@@ -59,8 +58,8 @@ export function ModularCodeConverterTool({ meta }: Props) {
         .then((mod) => {
           if (isMounted) {
             engineRef.current = mod.convert;
-            setEngineLoading(false);
-            // Run initial conversion
+            setEngineReady(true);
+            // Re-derive if input or options were altered before engine load
             try {
               const res = mod.convert(input, options);
               setOutput(res);
@@ -73,12 +72,10 @@ export function ModularCodeConverterTool({ meta }: Props) {
         .catch((err) => {
           if (isMounted) {
             setError(`Failed to load converter engine: ${err.message}`);
-            setEngineLoading(false);
           }
         });
     } else {
       setError(`Converter engine for '${meta.slug}' is not registered.`);
-      setEngineLoading(false);
     }
 
     return () => {
@@ -109,10 +106,10 @@ export function ModularCodeConverterTool({ meta }: Props) {
   );
 
   useEffect(() => {
-    if (engineRef.current && !engineLoading) {
+    if (engineRef.current && engineReady) {
       runConversion(input, options);
     }
-  }, [input, options, runConversion, engineLoading]);
+  }, [input, options, runConversion, engineReady]);
 
   // Handle Tab key inside input textarea for code-friendly indentation
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -182,7 +179,7 @@ export function ModularCodeConverterTool({ meta }: Props) {
           </div>
           <div>
             <span className="text-xs font-bold text-fg">{meta.name}</span>
-            <span className="ml-2 text-[11px] text-muted font-mono">100% Client-Side</span>
+            <span className="ml-2 text-[11px] text-muted font-mono">100% Client-Side Engine</span>
           </div>
         </div>
 
@@ -191,7 +188,7 @@ export function ModularCodeConverterTool({ meta }: Props) {
             <button
               type="button"
               onClick={() => setShowOptions(!showOptions)}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
                 showOptions
                   ? "bg-accent/15 border-accent/30 text-accent"
                   : "bg-field border-line text-muted hover:text-fg"
@@ -205,7 +202,7 @@ export function ModularCodeConverterTool({ meta }: Props) {
           <button
             type="button"
             onClick={handleResetSample}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-field border border-line text-muted hover:text-fg hover:border-accent/40 transition-colors"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-field border border-line text-muted hover:text-fg hover:border-accent/40 transition-colors cursor-pointer"
             title="Reload default sample data"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -215,7 +212,7 @@ export function ModularCodeConverterTool({ meta }: Props) {
           <button
             type="button"
             onClick={handleClear}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-field border border-line text-muted hover:text-red-400 hover:border-red-500/30 transition-colors"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-field border border-line text-muted hover:text-red-400 hover:border-red-500/30 transition-colors cursor-pointer"
           >
             Clear
           </button>
@@ -228,50 +225,60 @@ export function ModularCodeConverterTool({ meta }: Props) {
           <div className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
             Output Configuration Options
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {meta.optionsConfig.map((opt) => (
-              <div key={opt.id} className="flex flex-col gap-1.5">
-                <label htmlFor={`opt-${opt.id}`} className="text-xs font-medium text-fg">
-                  {opt.label}
-                </label>
-                {opt.type === "select" ? (
-                  <select
-                    id={`opt-${opt.id}`}
-                    value={options[opt.id]}
-                    onChange={(e) => setOptions({ ...options, [opt.id]: e.target.value })}
-                    className="bg-field border border-line rounded-lg px-2.5 py-1.5 text-xs text-fg focus:outline-none focus:border-accent"
-                  >
-                    {opt.options?.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                ) : opt.type === "boolean" ? (
-                  <label className="flex items-center gap-2 cursor-pointer h-8">
-                    <input
-                      type="checkbox"
-                      id={`opt-${opt.id}`}
-                      checked={Boolean(options[opt.id])}
-                      onChange={(e) => setOptions({ ...options, [opt.id]: e.target.checked })}
-                      className="rounded border-line text-accent focus:ring-accent"
-                    />
-                    <span className="text-xs text-muted">Enable .strict()</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5">
+            {meta.optionsConfig.map((opt) => {
+              // Custom responsive col-span to give the Null Handling select comfortable width
+              const colSpanClass =
+                opt.id === "nullHandling"
+                  ? "lg:col-span-4 sm:col-span-2"
+                  : opt.id === "strictMode"
+                  ? "lg:col-span-2 sm:col-span-1"
+                  : "lg:col-span-3 sm:col-span-1";
+
+              return (
+                <div key={opt.id} className={`flex flex-col gap-1.5 ${colSpanClass}`}>
+                  <label htmlFor={`opt-${opt.id}`} className="text-xs font-medium text-fg">
+                    {opt.label}
                   </label>
-                ) : (
-                  <input
-                    type="text"
-                    id={`opt-${opt.id}`}
-                    value={options[opt.id] || ""}
-                    onChange={(e) => setOptions({ ...options, [opt.id]: e.target.value })}
-                    className="bg-field border border-line rounded-lg px-2.5 py-1.5 text-xs text-fg focus:outline-none focus:border-accent"
-                  />
-                )}
-                {opt.description && (
-                  <span className="text-[10px] text-muted leading-tight">{opt.description}</span>
-                )}
-              </div>
-            ))}
+                  {opt.type === "select" ? (
+                    <select
+                      id={`opt-${opt.id}`}
+                      value={options[opt.id]}
+                      onChange={(e) => setOptions({ ...options, [opt.id]: e.target.value })}
+                      className="w-full bg-field border border-line rounded-lg px-2.5 py-1.5 text-xs text-fg focus:outline-none focus:border-accent font-mono cursor-pointer"
+                    >
+                      {opt.options?.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : opt.type === "boolean" ? (
+                    <label className="flex items-center gap-2 cursor-pointer h-[34px] px-1">
+                      <input
+                        type="checkbox"
+                        id={`opt-${opt.id}`}
+                        checked={Boolean(options[opt.id])}
+                        onChange={(e) => setOptions({ ...options, [opt.id]: e.target.checked })}
+                        className="rounded border-line text-accent focus:ring-accent"
+                      />
+                      <span className="text-xs text-muted">Enable .strict()</span>
+                    </label>
+                  ) : (
+                    <input
+                      type="text"
+                      id={`opt-${opt.id}`}
+                      value={options[opt.id] || ""}
+                      onChange={(e) => setOptions({ ...options, [opt.id]: e.target.value })}
+                      className="w-full bg-field border border-line rounded-lg px-2.5 py-1.5 text-xs text-fg focus:outline-none focus:border-accent font-mono"
+                    />
+                  )}
+                  {opt.description && (
+                    <span className="text-[10px] text-muted leading-tight">{opt.description}</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -304,7 +311,7 @@ export function ModularCodeConverterTool({ meta }: Props) {
           </div>
         </div>
 
-        {/* Right Panel: Output */}
+        {/* Right Panel: Output (Pre-populated on Server & SSR) */}
         <div className="flex flex-col rounded-xl border border-line bg-card overflow-hidden shadow-2xs">
           <div className="flex items-center justify-between px-3.5 py-2 border-b border-line bg-field/60 text-xs">
             <div className="flex items-center gap-2">
@@ -319,7 +326,7 @@ export function ModularCodeConverterTool({ meta }: Props) {
                 type="button"
                 onClick={handleCopy}
                 disabled={!output}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-accent text-white dark:text-[#050505] hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-accent text-white dark:text-[#050505] hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
                 {copied ? (
                   <>
@@ -338,7 +345,7 @@ export function ModularCodeConverterTool({ meta }: Props) {
                 type="button"
                 onClick={handleDownload}
                 disabled={!output}
-                className="p-1 rounded-md bg-field border border-line text-muted hover:text-fg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-1 rounded-md bg-field border border-line text-muted hover:text-fg disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 title="Download .ts file"
               >
                 <Download className="h-3.5 w-3.5" />
@@ -347,21 +354,15 @@ export function ModularCodeConverterTool({ meta }: Props) {
           </div>
 
           <div className="relative flex-1">
-            {engineLoading ? (
-              <div className="flex items-center justify-center h-[380px] text-muted text-xs">
-                Loading engine...
-              </div>
-            ) : (
-              <textarea
-                id={outputId}
-                readOnly
-                value={output}
-                placeholder="Generated schema will appear here..."
-                rows={18}
-                className="w-full h-full min-h-[380px] p-4 font-mono text-xs text-fg bg-transparent border-0 resize-y focus:outline-none leading-relaxed"
-                spellCheck={false}
-              />
-            )}
+            <textarea
+              id={outputId}
+              readOnly
+              value={output}
+              placeholder="Generated schema will appear here..."
+              rows={18}
+              className="w-full h-full min-h-[380px] p-4 font-mono text-xs text-fg bg-transparent border-0 resize-y focus:outline-none leading-relaxed"
+              spellCheck={false}
+            />
           </div>
         </div>
       </div>

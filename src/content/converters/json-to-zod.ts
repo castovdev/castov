@@ -3,7 +3,7 @@ import type { ConverterMeta } from "@/lib/converters/types";
 export const jsonToZodMeta: ConverterMeta = {
   slug: "json-to-zod",
   name: "JSON to Zod Schema",
-  title: "JSON to Zod Schema Converter — Client-Side Runtime Validator",
+  title: "JSON to Zod Schema Converter",
   metaDescription: "Convert raw JSON into strict, production-ready Zod schemas. Supports ISO datetime offsets, email, URLs, nullish options, and inferred TypeScript types in browser.",
   category: "JSON & Schemas",
   inputLanguage: "json",
@@ -11,6 +11,33 @@ export const jsonToZodMeta: ConverterMeta = {
   outputExtension: ".ts",
   isQualityApproved: true,
   isIndexed: true,
+
+  initialOutput: `// Target: Zod v4 (Stable)
+import { z } from "zod";
+
+export const UserSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  website: z.string().url(),
+  role: z.string(),
+  loginCount: z.number().int(),
+  isActive: z.boolean(),
+  createdAt: z.string().datetime({ offset: true }),
+  tags: z.array(z.string()),
+  profile: z.object({
+    avatarUrl: z.string().url(),
+    bio: z.unknown().nullable(),
+    twoFactorEnabled: z.boolean(),
+  }),
+  auditLog: z.array(z.object({
+    action: z.string(),
+    reason: z.string().optional(),
+    timestamp: z.string().datetime({ offset: true }),
+  })),
+});
+
+export type User = z.infer<typeof UserSchema>;
+`,
 
   defaultSample: JSON.stringify(
     {
@@ -48,12 +75,12 @@ export const jsonToZodMeta: ConverterMeta = {
       id: "zodVersion",
       label: "Target Zod Version",
       type: "select",
-      defaultValue: "v3",
+      defaultValue: "v4",
       options: [
+        { label: "Zod v4 (Stable)", value: "v4" },
         { label: "Zod v3 (Standard)", value: "v3" },
-        { label: "Zod v4 (Compatible)", value: "v4" },
       ],
-      description: "Target syntax for current Zod v3 or forward-compatible Zod v4",
+      description: "Target syntax for stable Zod v4 or standard Zod v3",
     },
     {
       id: "nullHandling",
@@ -61,11 +88,11 @@ export const jsonToZodMeta: ConverterMeta = {
       type: "select",
       defaultValue: "nullable",
       options: [
-        { label: "z.unknown().nullable() (Safe Default)", value: "nullable" },
+        { label: "z.unknown().nullable() (Safe)", value: "nullable" },
         { label: "z.null() (Strict)", value: "null" },
         { label: ".nullish() (Allow Null & Undefined)", value: "nullish" },
       ],
-      description: "How JSON null values are represented in the generated schema",
+      description: "How JSON null values are typed in schema",
     },
     {
       id: "strictMode",

@@ -139,7 +139,7 @@ export default async function CodeConverterPage({
 
         {/* Main Interactive Tool */}
         <section className="my-8" aria-label={modular.name}>
-          <ModularCodeConverterTool meta={modular} />
+          <ModularCodeConverterTool meta={modular} initialOutput={modular.initialOutput} />
         </section>
 
         <AdSlot placement="content-middle" />
