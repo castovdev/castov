@@ -21,3 +21,10 @@ npm token.png
 # Generated sample audit workspace & reports
 sample/
 packages/castov-cli/sample/
+
+# Local Arabic & internal documentation files
+CASTOV_TECHNICAL_DOCUMENTATION_AR.md
+CASTOV_DOCUMENTATION_AR.md
+CASTOV_COMPLETE_FEATURES_GUIDE_AR.md
+CASTOV_ENTERPRISE_AUDIT_REPORT_AR.md
+دليل_منصة_كاستوف_الشامل.md
