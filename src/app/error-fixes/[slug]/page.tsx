@@ -6,7 +6,6 @@ import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { FaqSection } from "@/components/faq-section";
 import { AdSlot } from "@/components/ad-slot";
-import { SponsorSlot } from "@/components/sponsor-slot";
 import { ErrorFixGeneratorTool } from "@/components/tools/error-fix-generator-tool";
 import { InstantTerminalFixBox } from "@/components/instant-terminal-fix-box";
 import {
@@ -177,8 +176,6 @@ export default async function ErrorFixPage({
           <FaqSection items={errorItem.faqs} headingId="error-faq" />
         </div>
       )}
-
-      <SponsorSlot context="devops" />
 
       {/* Related Error Fixes */}
       {relatedErrors.length > 0 && (

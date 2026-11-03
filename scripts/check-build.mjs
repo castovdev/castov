@@ -115,7 +115,7 @@ for (const path of paths) {
     "/", "/tools", "/guides", "/about", "/privacy", "/terms", "/contact",
     "/cli", "/extension", "/cheatsheets", "/http-status", "/cron",
     "/timezones", "/timestamps", "/resources", "/code", "/convert",
-    "/chrono-db", "/webhook-tester", "/sponsor", "/developer", "/canvas", "/ai", "/login",
+    "/chrono-db", "/webhook-tester", "/developer", "/canvas", "/ai", "/login",
     "/regex-patterns", "/error-fixes", "/tech-trends"
   ]);
   const isTool = !NON_TOOL_PATHS.has(path) &&

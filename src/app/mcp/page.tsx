@@ -23,7 +23,6 @@ import { websiteJsonLd, buildMetadata } from "@/lib/seo";
 import { McpConfigCopier } from "@/components/mcp-config-copier";
 import { McpLivePlayground } from "@/components/mcp-live-playground";
 import { McpStackBuilder } from "@/components/mcp-stack-builder";
-import { SponsorSlot } from "@/components/sponsor-slot";
 import { MCP_TOOLS_CATALOG, TOTAL_MCP_TOOLS_COUNT } from "@/lib/mcp-catalog";
 
 const CURRENT_VERSION = "1.5.0";
@@ -391,8 +390,6 @@ export default function McpServerPage() {
       <section className="mb-16">
         <McpStackBuilder />
       </section>
-
-      <SponsorSlot context="mcp" />
 
       {/* Why Castov MCP Architecture Cards */}
       <section className="mb-16">

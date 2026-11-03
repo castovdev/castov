@@ -4,7 +4,6 @@ import { VS_COMPARISONS } from "@/lib/vs-registry";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, techArticleJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { SponsorSlot } from "@/components/sponsor-slot";
 import { ArrowRight, CheckCircle2, ShieldCheck, Terminal, Cpu, Zap } from "lucide-react";
 
 export const metadata: Metadata = buildMetadata({
@@ -158,8 +157,6 @@ export default function VsIndexPage() {
           </p>
         </div>
       </section>
-
-      <SponsorSlot context="devops" />
 
       {/* FAQ Section */}
       <section className="space-y-4 pt-4 border-t border-line">

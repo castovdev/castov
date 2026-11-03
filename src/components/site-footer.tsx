@@ -8,7 +8,6 @@ import { FooterLiveTicker, FooterCliCopy, FooterNewsletterSection, BackToTopButt
 
 const COMPANY = [
   { href: "/about", label: "About Castov" },
-  { href: "/sponsor", label: "Sponsor & Advertise" },
   { href: "/contact", label: "Contact & Feedback" },
   { href: "/privacy", label: "Privacy Policy" },
   { href: "/terms", label: "Terms of Use" },
@@ -320,10 +319,6 @@ export function SiteFooter() {
             <Link href="/privacy" className="hover:text-fg transition-colors">Privacy Policy</Link>
             <span className="text-line">•</span>
             <Link href="/terms" className="hover:text-fg transition-colors">Terms</Link>
-            <span className="text-line">•</span>
-            <Link href="/sponsor" className="hover:text-fg transition-colors text-accent font-medium flex items-center gap-1">
-              <Heart className="w-3 h-3 fill-accent/20" /> Sponsor
-            </Link>
             <span className="text-line">•</span>
             <BackToTopButton />
           </div>

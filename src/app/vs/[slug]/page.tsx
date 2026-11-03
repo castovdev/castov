@@ -13,7 +13,6 @@ import {
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { FaqSection } from "@/components/faq-section";
-import { SponsorSlot } from "@/components/sponsor-slot";
 import {
   ArrowRight,
   CheckCircle2,
@@ -262,8 +261,6 @@ export default async function VsComparisonPage({
           ))}
         </div>
       </section>
-
-      <SponsorSlot context="devops" />
 
       {/* FAQ Section */}
       <FaqSection items={item.faqs} />

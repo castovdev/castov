@@ -4,7 +4,6 @@ import Link from "next/link";
 import { NETWORK_PORTS, getPortByNumber } from "@/lib/network-ports-registry";
 import { buildMetadata, breadcrumbJsonLd, faqJsonLd, howToJsonLd, softwareAppJsonLd, techArticleJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
-import { SponsorSlot } from "@/components/sponsor-slot";
 import { Terminal } from "lucide-react";
 
 export function generateStaticParams() {
@@ -210,8 +209,6 @@ sudo ufw allow ${info.port}/tcp`}
           </div>
         </div>
       </section>
-
-      <SponsorSlot context="network" />
 
       {/* FAQ Section */}
       <section className="bg-card border border-line rounded-2xl p-6 space-y-4">
