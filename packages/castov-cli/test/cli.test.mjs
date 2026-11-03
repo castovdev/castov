@@ -1192,7 +1192,7 @@ test("castov env-check and hook install/uninstall CLI commands", async () => {
     assert.match(hookHuskyNoForce.stdout, /Husky v9 detected \(\.husky\/_\)/);
     assert.match(hookHuskyNoForce.stdout, /Castov did NOT write any files automatically/);
     assert.match(hookHuskyNoForce.stdout, /\.husky\/pre-commit/);
-    assert.match(hookHuskyNoForce.stdout, /npx --no-install @castov\/cli env-check/);
+    assert.match(hookHuskyNoForce.stdout, /npx --no-install castov env-check/);
     assert.ok(!fsMod.existsSync(pathMod.join(huskyV9InternalDir, "pre-commit")));
 
     // With --force on local repo path (.husky/_ is inside tmpDir), it writes .husky/_/pre-commit

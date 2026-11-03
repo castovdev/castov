@@ -2,6 +2,13 @@
 
 All notable changes to `castov` CLI and MCP server are documented in this file.
 
+## [1.7.0] - 2026-11-03
+
+### Added
+- `castov env-check`: Local-first `.env` security scanner that detects client-side secret leaks (`NEXT_PUBLIC_*` containing secret/key/token patterns), missing keys between `.env` and `.env.example`, and empty required variables.
+- `castov hook install` & `castov hook uninstall`: Safe Git `pre-commit` hook manager with automatic backup (`pre-commit.castov.bak`), interactive confirmation (`--force` / `-y`), Git worktree/submodule `.git` file resolution, and non-destructive `core.hooksPath` / Husky v9 detection.
+- Extended MCP server schema converter tools (`castov_json_to_zod`, `castov_env_to_zod`, `castov_sql_to_prisma`).
+
 ## [1.6.0] - 2026-10-27
 
 ### Added

@@ -1372,7 +1372,7 @@ async function main(argv: string[]): Promise<void> {
             process.exitCode = 1;
             out.push(`\nTo avoid breaking your existing hook manager, Castov did NOT write any files automatically.`);
             out.push(`Add the following command manually to your active pre-commit hook (${bold(suggestedHookFile)}):`);
-            out.push(`  ${cyan("npx --no-install @castov/cli scan . && npx --no-install @castov/cli env-check .")}`);
+            out.push(`  ${cyan("npx --no-install castov scan . && npx --no-install castov env-check .")}`);
             if (isInsideRepo && !isGlobalHooksPath) {
               out.push(`\nOr pass ${bold("--force")} to write directly into the local repository hooks path (${bold(gitHooksDir)}).`);
             }
@@ -1384,7 +1384,7 @@ async function main(argv: string[]): Promise<void> {
             out.push(
               `${red("✖ Refusing to overwrite:")} ${bold("--force")} is only supported for local ${bold("core.hooksPath")} directories inside the repository (${bold(targetDir)}).`
             );
-            out.push(`Please add ${cyan("npx --no-install @castov/cli env-check .")} manually to ${bold(suggestedHookFile)}.`);
+            out.push(`Please add ${cyan("npx --no-install castov env-check .")} manually to ${bold(suggestedHookFile)}.`);
             break;
           }
         }
@@ -1435,7 +1435,7 @@ async function main(argv: string[]): Promise<void> {
           out.push(`${cyan("ℹ Backed up existing pre-commit hook")} to ${bold(backupPath)}`);
         }
 
-        const hookScript = `#!/bin/sh\n# Castov Local-First DevSecOps Pre-Commit Hook (https://castov.com)\necho "🛡️  Running Castov pre-commit secret & .env scan..."\nnpx --no-install @castov/cli scan . && npx --no-install @castov/cli env-check .\n`;
+        const hookScript = `#!/bin/sh\n# Castov Local-First DevSecOps Pre-Commit Hook (https://castov.com)\necho "🛡️  Running Castov pre-commit secret & .env scan..."\nnpx --no-install castov scan . && npx --no-install castov env-check .\n`;
         writeFileSync(preCommitPath, hookScript, { encoding: "utf8", mode: 0o755 });
         try {
           chmodSync(preCommitPath, 0o755);
