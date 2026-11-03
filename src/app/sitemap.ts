@@ -15,6 +15,7 @@ import { LLM_MODELS } from '@/lib/llm-specs-registry';
 import { HTTP_STATUS_CODES } from '@/lib/http-statuses';
 import { VS_COMPARISONS } from '@/lib/vs-registry';
 import { SITE } from '@/lib/site';
+import { BLOG_POSTS } from '@/content/blog';
 
 function getLastMod(_filePath: string) {
   // Using explicit dates or fallback to build time rather than dynamic filesystem access
@@ -46,6 +47,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/resources`, lastModified: getLastMod('src/app/resources/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/code`, lastModified: getLastMod('src/app/code/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/convert`, lastModified: getLastMod('src/app/convert/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/blog`, lastModified: getLastMod('src/app/blog/page.tsx'), changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/chrono-db`, lastModified: getLastMod('src/app/chrono-db/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/webhook-tester`, lastModified: getLastMod('src/app/webhook-tester/page.tsx'), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/tech-trends`, lastModified: getLastMod('src/app/tech-trends/page.tsx'), changeFrequency: 'daily', priority: 0.9 },
@@ -221,6 +223,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       });
     });
   }
+
+  BLOG_POSTS.forEach((post) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.publishedAt),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+  });
 
   const seen = new Set<string>();
   return sitemapEntries.filter((entry) => {

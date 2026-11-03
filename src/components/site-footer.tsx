@@ -41,6 +41,7 @@ const ECOSYSTEM = [
 ];
 
 const RESOURCES = [
+  { href: "/blog", label: "Engineering Blog (100 Posts)", badge: "New" },
   { href: "/directory", label: "Full Site Directory" },
   { href: "/tools", label: "All Tools Directory (61)" },
   { href: "/convert", label: "Code & Schema Converters" },

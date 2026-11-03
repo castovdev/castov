@@ -116,10 +116,11 @@ for (const path of paths) {
     "/cli", "/extension", "/cheatsheets", "/http-status", "/cron",
     "/timezones", "/timestamps", "/resources", "/code", "/convert",
     "/chrono-db", "/webhook-tester", "/developer", "/canvas", "/ai", "/login",
-    "/regex-patterns", "/error-fixes", "/tech-trends"
+    "/regex-patterns", "/error-fixes", "/tech-trends", "/blog"
   ]);
   const isTool = !NON_TOOL_PATHS.has(path) &&
     !path.startsWith("/guides/") &&
+    !path.startsWith("/blog/") &&
     !path.startsWith("/ai/") &&
     !path.startsWith("/chmod/") &&
     !path.startsWith("/http-status/") &&
