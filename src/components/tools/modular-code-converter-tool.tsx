@@ -20,6 +20,10 @@ const ENGINE_LOADERS: Record<string, () => Promise<{ convert: (input: string, op
   "yaml-to-json": () => import("@/lib/converters/engines/yaml-to-json"),
   "sql-to-prisma": () => import("@/lib/converters/engines/sql-to-prisma"),
   "env-to-zod": () => import("@/lib/converters/engines/env-to-zod"),
+  "sql-to-drizzle": () => import("@/lib/converters/engines/sql-to-drizzle"),
+  "webhook-hmac-debugger": () => import("@/lib/converters/engines/webhook-hmac-debugger"),
+  "curl-to-n8n": () => import("@/lib/converters/engines/curl-to-n8n"),
+  "har-sanitizer": () => import("@/lib/converters/engines/har-sanitizer"),
 };
 
 interface Props {
@@ -177,6 +181,7 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
   const publicSecretMatch = output.match(/PUBLIC SECRET WARNING \(([^)]+)\)/);
   const publicSecretKeys = publicSecretMatch ? publicSecretMatch[1] : null;
   const isEnvConverter = meta.slug === "env-to-zod";
+  const isHarSanitizer = meta.slug === "har-sanitizer";
 
   const handleToggleEnvExample = () => {
     setOptions((prev) => ({
@@ -426,6 +431,34 @@ export function ModularCodeConverterTool({ meta, initialOutput }: Props) {
           <div className="flex-1">
             <span className="font-bold">Client Secret Exposure Warning ({publicSecretKeys}): </span>
             Variables prefixed with <code className="font-mono">NEXT_PUBLIC_</code> are embedded directly into public browser JavaScript bundles. Never prefix secret keys, tokens, or passwords with <code className="font-mono">NEXT_PUBLIC_</code>.
+          </div>
+        </div>
+      )}
+
+      {meta.slug === "curl-to-n8n" && options.targetPlatform === "make-http" && (
+        <div
+          role="alert"
+          data-testid="make-experimental-warning"
+          className="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-bold">⚠️ Experimental / untested mode: </span>
+            Make.com HTTP Module Blueprint output is generated from the <code className="font-mono">http:ActionSendData</code> v3 schema specification and has not been verified against a live Make.com scenario canvas.
+          </div>
+        </div>
+      )}
+
+      {isHarSanitizer && (
+        <div
+          role="alert"
+          data-testid="har-manual-review-warning"
+          className="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-bold">⚠️ Security Warning — Always Review the File Manually Before Sharing: </span>
+            Automated redaction scrubs known headers, cookies, query tokens, and common secret formats, but cannot guarantee 100% removal of custom proprietary tokens, internal URLs, or business-specific PII inside raw payloads. Always inspect the sanitized output manually (<code className="font-mono">Ctrl+F</code>) before sending <code className="font-mono">.har</code> files to third parties.
           </div>
         </div>
       )}

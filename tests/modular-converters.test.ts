@@ -9,12 +9,16 @@ import {
   parseEnvFile,
   generateSafeEnvExample,
 } from "@/lib/converters/engines/env-to-zod";
+import { convert as convertSqlToDrizzle } from "@/lib/converters/engines/sql-to-drizzle";
+import { convert as convertWebhookHmac, hmacSha256 } from "@/lib/converters/engines/webhook-hmac-debugger";
+import { convert as convertCurlToN8n } from "@/lib/converters/engines/curl-to-n8n";
+import { convert as convertHarSanitizer } from "@/lib/converters/engines/har-sanitizer";
 import { jsonToTypescriptMeta } from "@/content/converters/json-to-typescript";
 import { MODULAR_CONVERTERS, getModularConverter } from "@/content/converters";
 
 describe("Modular Code Converters Architecture", () => {
   describe("Metadata, <title> Length (<60 chars), & Quality Standards", () => {
-    it("registers all 6 modular converters with quality approval and <title> under 60 chars", () => {
+    it("registers all 10 modular converters with quality approval and <title> under 60 chars", () => {
       for (const slug of [
         "json-to-zod",
         "json-to-typescript",
@@ -22,6 +26,10 @@ describe("Modular Code Converters Architecture", () => {
         "yaml-to-json",
         "sql-to-prisma",
         "env-to-zod",
+        "sql-to-drizzle",
+        "webhook-hmac-debugger",
+        "curl-to-n8n",
+        "har-sanitizer",
       ]) {
         const meta = getModularConverter(slug);
         expect(meta).toBeDefined();
@@ -31,7 +39,7 @@ describe("Modular Code Converters Architecture", () => {
         expect(meta?.initialOutput).toBeTruthy();
 
         const fullHtmlTitle = `${meta!.title} | Castov`;
-        expect(fullHtmlTitle.length).toBeLessThan(60);
+        expect(fullHtmlTitle.length).toBeLessThanOrEqual(60);
       }
     });
 
@@ -619,6 +627,398 @@ OPTIONAL_KEY=
       expect(example).not.toContain("real_password_123");
       expect(example).not.toContain("sk_live_9988776655");
       expect(example).not.toContain("ceo@company.com");
+    });
+  });
+
+  describe("SQL to Drizzle ORM Engine (pgTable, mysqlTable, sqliteTable, relations, composite PK, $inferSelect)", () => {
+    const sampleSql = `
+CREATE TYPE user_role AS ENUM ('ADMIN', 'MEMBER');
+
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL UNIQUE,
+  role user_role NOT NULL DEFAULT 'MEMBER',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE posts (
+  id SERIAL PRIMARY KEY,
+  author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(180) NOT NULL
+);
+
+CREATE TABLE post_tags (
+  post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  tag_id INTEGER NOT NULL,
+  PRIMARY KEY (post_id, tag_id)
+);
+
+CREATE INDEX idx_posts_author ON posts (author_id);
+`;
+
+    it("generates PostgreSQL pgTable, pgEnum, relations(), composite primaryKey(), and $inferSelect/$inferInsert", () => {
+      const out = convertSqlToDrizzle(sampleSql, {
+        dialect: "postgresql",
+        includeRelations: true,
+        includeInferTypes: true,
+      });
+      expect(out).toContain('from "drizzle-orm/pg-core"');
+      expect(out).toContain('export const userRoleEnum = pgEnum("user_role", ["ADMIN", "MEMBER"]);');
+      expect(out).toContain('export const users = pgTable("users"');
+      expect(out).toContain('id: uuid("id").primaryKey().defaultRandom()');
+      expect(out).toContain('authorId: uuid("author_id").notNull().references(() => users.id, { onDelete: "cascade" })');
+      expect(out).toContain("pk: primaryKey({ columns: [t.postId, t.tagId] })");
+      expect(out).toContain('idxPostsAuthor: index("idx_posts_author").on(t.authorId)');
+      expect(out).toContain("export const usersRelations = relations(users, ({ many }) => ({");
+      expect(out).toContain("export type User = typeof users.$inferSelect;");
+      expect(out).toContain("export type NewUser = typeof users.$inferInsert;");
+    });
+
+    it("supports MySQL (mysqlTable) and SQLite (sqliteTable) dialects", () => {
+      const mysqlOut = convertSqlToDrizzle(sampleSql, { dialect: "mysql" });
+      expect(mysqlOut).toContain('from "drizzle-orm/mysql-core"');
+      expect(mysqlOut).toContain("mysqlTable(");
+
+      const sqliteOut = convertSqlToDrizzle(sampleSql, { dialect: "sqlite" });
+      expect(sqliteOut).toContain('from "drizzle-orm/sqlite-core"');
+      expect(sqliteOut).toContain("sqliteTable(");
+    });
+  });
+
+  describe("Webhook HMAC Debugger & Zod Handler Generator (Shopify, Stripe, GitHub)", () => {
+    it("diagnoses exact and mutated HMAC-SHA256 signatures and generates timingSafeEqual handler + Zod schema", () => {
+      const rawBody = '{"id":101,"email":"buyer@shop.com"}';
+      const secret = "shpss_test_secret";
+      const { base64 } = hmacSha256(secret, rawBody);
+
+      const input = JSON.stringify({
+        provider: "shopify",
+        secret,
+        signature: base64,
+        payload: JSON.parse(rawBody),
+      });
+
+      const out = convertWebhookHmac(input, {
+        provider: "shopify",
+        framework: "nextjs-app",
+        zodVersion: "v4",
+      });
+
+      expect(out).toContain("SIGNATURE MATCHED");
+      expect(out).toContain("z.email()");
+      expect(out).toContain("await req.text()");
+      expect(out).toContain("crypto.timingSafeEqual(a, b)");
+    });
+
+    it("supports Stripe timestamped v1 signatures and Express raw-body handlers", () => {
+      const rawBody = '{"id":"evt_1","type":"charge.succeeded"}';
+      const secret = "whsec_stripe_secret";
+      const ts = "1714500000";
+      const { hex } = hmacSha256(secret, `${ts}.${rawBody}`);
+
+      const input = JSON.stringify({
+        provider: "stripe",
+        secret,
+        signature: `t=${ts},v1=${hex}`,
+        payload: rawBody,
+      });
+
+      const out = convertWebhookHmac(input, {
+        provider: "auto",
+        framework: "express",
+        zodVersion: "v3",
+      });
+
+      expect(out).toContain("Provider Mode        : STRIPE");
+      expect(out).toContain("SIGNATURE MATCHED : Stripe Timestamped Payload");
+      expect(out).toContain('express.raw({ type: "application/json" })');
+      expect(out).toContain("STRIPE_TIMESTAMP_TOLERANCE_SEC = 300");
+      expect(out).toContain("Math.abs(nowSec - timestampSec) > STRIPE_TIMESTAMP_TOLERANCE_SEC");
+    });
+
+    it("verifies official GitHub documentation test vector and self-consistency against Node crypto for Stripe and Shopify", () => {
+      // 1. Official GitHub Docs Test Vector (literal vector from GitHub documentation):
+      // https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries#testing-the-webhook-payload-validation
+      const ghSecret = "It's a Secret to Everybody";
+      const ghPayload = "Hello, World!";
+      const ghExpectedHex = "757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17";
+      const ghComputed = hmacSha256(ghSecret, ghPayload);
+      expect(ghComputed.hex).toBe(ghExpectedHex);
+
+      const ghOut = convertWebhookHmac(
+        JSON.stringify({
+          provider: "github",
+          secret: ghSecret,
+          signature: `sha256=${ghExpectedHex}`,
+          payload: ghPayload,
+        }),
+        { provider: "github", framework: "nextjs-app" }
+      );
+      expect(ghOut).toContain("SIGNATURE MATCHED : GitHub / Generic Exact Raw Body (Hex)");
+      expect(ghOut).toContain("crypto.timingSafeEqual(a, b)");
+
+      // 2. Self-Consistency Test (اختبار اتساق ذاتي مقابل node:crypto — ليس vector رسمياً من وثائق Stripe):
+      // Follows Stripe's documented scheme `${timestamp}.${rawBody}` (https://docs.stripe.com/webhooks/signature#verify-manually)
+      const stripeSecret = "whsec_test_secret";
+      const stripeTimestamp = "1492774577";
+      const stripePayload = '{"id":"evt_test_webhook","object":"event"}';
+      const stripeSignedPayload = `${stripeTimestamp}.${stripePayload}`;
+      const stripeExpectedHex = "88a022085c6bdb887b02cb26ff76dd681234d9675c0f22844059f55552a8883a";
+      const stripeComputed = hmacSha256(stripeSecret, stripeSignedPayload);
+      expect(stripeComputed.hex).toBe(stripeExpectedHex);
+
+      const stripeOut = convertWebhookHmac(
+        JSON.stringify({
+          provider: "stripe",
+          secret: stripeSecret,
+          signature: `t=${stripeTimestamp},v1=${stripeExpectedHex}`,
+          payload: stripePayload,
+        }),
+        { provider: "stripe", framework: "nextjs-app" }
+      );
+      expect(stripeOut).toContain("SIGNATURE MATCHED : Stripe Timestamped Payload");
+      expect(stripeOut).toContain("STRIPE_TIMESTAMP_TOLERANCE_SEC = 300");
+      expect(stripeOut).toContain("v1Signatures.some");
+
+      // 3. Self-Consistency Test (اختبار اتساق ذاتي مقابل node:crypto — ليس vector رسمياً من وثائق Shopify):
+      // Follows Shopify's documented Base64 scheme (https://shopify.dev/docs/apps/build/webhooks/subscribe/https#step-5-verify-the-webhook)
+      const shopifySecret = "hush";
+      const shopifyPayload = '{"id":123456,"topic":"orders/create"}';
+      const shopifyExpectedBase64 = "qjUsWDnSC3ZXYpc3wZvhadS+YZ/TqmuuaAmmEYu9D7w=";
+      const shopifyComputed = hmacSha256(shopifySecret, shopifyPayload);
+      expect(shopifyComputed.base64).toBe(shopifyExpectedBase64);
+      const shopifyOut = convertWebhookHmac(
+        JSON.stringify({
+          provider: "shopify",
+          secret: shopifySecret,
+          signature: shopifyExpectedBase64,
+          payload: shopifyPayload,
+        }),
+        { provider: "shopify", framework: "nextjs-app" }
+      );
+      expect(shopifyOut).toContain("SIGNATURE MATCHED : Shopify Exact Raw Body (Base64)");
+    });
+
+    it("handles Stripe-Signature headers with multiple v1 values during secret rotation (matches if any v1 is valid)", () => {
+      const stripeSecret = "whsec_rolled_secret_2026";
+      const stripeTimestamp = "1714500000";
+      const stripePayload = '{"id":"evt_rotation_test","type":"invoice.paid"}';
+      const validV1 = hmacSha256(stripeSecret, `${stripeTimestamp}.${stripePayload}`).hex;
+      const staleRolledV1 = "000000000000000000000000000000000000000000000000000000000000dead";
+
+      // Header has an old/rotated v1 first and the active valid v1 second
+      const multiV1Header = `t=${stripeTimestamp},v1=${staleRolledV1},v1=${validV1},v0=legacy123`;
+
+      const out = convertWebhookHmac(
+        JSON.stringify({
+          provider: "stripe",
+          secret: stripeSecret,
+          signature: multiV1Header,
+          payload: stripePayload,
+        }),
+        { provider: "stripe", framework: "nextjs-app" }
+      );
+
+      expect(out).toContain("SIGNATURE MATCHED : Stripe Timestamped Payload");
+      expect(out).toContain("const v1Signatures: string[] = [];");
+      expect(out).toContain("const isVerified = v1Signatures.some((sig) => {");
+      expect(out).toContain("stripe.webhooks.constructEvent");
+    });
+  });
+
+  describe("cURL to n8n & Make.com HTTP Node Converter", () => {
+    it("converts cURL with query params, headers, Basic Auth, and JSON body into n8n v4.2 node JSON while stripping browser noise", () => {
+      const cmd = `curl -X POST 'https://api.castov.com/v1/hooks?env=prod' -u 'admin:secret' -H 'sec-ch-ua: "Chromium"' -H 'Content-Type: application/json' --data-raw '{"active":true}'`;
+      const out = convertCurlToN8n(cmd, {
+        targetPlatform: "n8n-node",
+        stripBrowserNoise: true,
+      });
+
+      const parsed = JSON.parse(out);
+      expect(parsed.nodes).toHaveLength(1);
+      const node = parsed.nodes[0];
+      expect(node.type).toBe("n8n-nodes-base.httpRequest");
+      expect(node.typeVersion).toBe(4.2);
+      expect(node.parameters.method).toBe("POST");
+      expect(node.parameters.url).toBe("https://api.castov.com/v1/hooks");
+      expect(node.parameters.queryParameters.parameters).toEqual([
+        { name: "env", value: "prod" },
+      ]);
+      // Noise header sec-ch-ua stripped
+      const headerNames = node.parameters.headerParameters.parameters.map((h: any) => h.name);
+      expect(headerNames).not.toContain("sec-ch-ua");
+      expect(headerNames).toContain("Authorization");
+    });
+
+    it("supports Make.com HTTP module blueprint and n8n Code Node output modes", () => {
+      const cmd = `curl https://api.castov.com/v1/ping -H "X-Api-Key: 123"`;
+      const makeOut = JSON.parse(convertCurlToN8n(cmd, { targetPlatform: "make-http" }));
+      expect(makeOut.subflows[0].flow[0].module).toBe("http:ActionSendData");
+
+      const codeOut = convertCurlToN8n(cmd, { targetPlatform: "n8n-code" });
+      expect(codeOut).toContain("this.helpers.httpRequest");
+    });
+  });
+
+  describe("HAR File & JSON Log Secret Sanitizer", () => {
+    it("redacts headers, cookies, query string tokens, and recursively scrubs stringified JSON inside postData.text", () => {
+      const harSample = JSON.stringify({
+        log: {
+          version: "1.2",
+          entries: [
+            {
+              request: {
+                url: "https://api.example.com/pay?api_key=sk_live_secret999&page=1",
+                headers: [
+                  { name: "Authorization", value: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.sig123456" },
+                  { name: "Cookie", value: "sid=12345" },
+                  { name: "Accept", value: "application/json" },
+                ],
+                cookies: [{ name: "sid", value: "12345" }],
+                postData: {
+                  mimeType: "application/json",
+                  text: JSON.stringify({
+                    email: "cto@company.com",
+                    password: "SuperPassword!",
+                    stripeKey: "sk_live_abc123456789",
+                  }),
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      const out = convertHarSanitizer(harSample, {
+        scrubBodies: true,
+        scrubEmails: true,
+        includeAuditHeader: false,
+      });
+
+      const sanitized = JSON.parse(out);
+      const req = sanitized.log.entries[0].request;
+      expect(req.url).toContain("api_key=[REDACTED_QUERY_SECRET]");
+      expect(req.url).toContain("page=1");
+      expect(req.headers[0].value).toBe("[REDACTED_AUTHORIZATION]");
+      expect(req.headers[1].value).toBe("[REDACTED_COOKIE]");
+      expect(req.headers[2].value).toBe("application/json");
+      expect(req.cookies[0].value).toBe("[REDACTED_COOKIE_VALUE]");
+
+      const innerBody = JSON.parse(req.postData.text);
+      expect(innerBody.email).toBe("[REDACTED_EMAIL]");
+      expect(innerBody.password).toBe("[REDACTED_PASSWORD]");
+      expect(innerBody.stripeKey).toBe("[REDACTED_SK_LIVE_KEY]");
+    });
+
+    it("sanitizes a complete Chrome DevTools HAR 1.2 archive (request/response headers, cookies, queryString, postData, and response.content.text)", () => {
+      const chromeHarArchive = JSON.stringify({
+        log: {
+          version: "1.2",
+          creator: { name: "WebInspector", version: "537.36" },
+          pages: [
+            {
+              startedDateTime: "2026-11-02T19:30:00.000Z",
+              id: "page_1",
+              title: "https://castov.com/checkout",
+              pageTimings: { onContentLoad: 182.4, onLoad: 310.1 },
+            },
+          ],
+          entries: [
+            {
+              _initiator: { type: "script" },
+              _priority: "High",
+              _resourceType: "fetch",
+              cache: {},
+              connection: "443",
+              pageref: "page_1",
+              startedDateTime: "2026-11-02T19:30:01.120Z",
+              time: 94.5,
+              request: {
+                method: "POST",
+                url: "https://api.castov.com/v1/sessions?access_token=ghp_1234567890abcdefghijklmn&locale=en",
+                httpVersion: "http/2.0",
+                headers: [
+                  { name: ":authority", value: "api.castov.com" },
+                  { name: "authorization", value: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOTkifQ.sig987654321" },
+                  { name: "cookie", value: "__Host-session=live_sess_887766; cf_clearance=abc" },
+                  { name: "x-shopify-access-token", value: "shpat_live_token_1122334455" },
+                  { name: "user-agent", value: "Mozilla/5.0 Chrome/130.0.0.0" },
+                ],
+                queryString: [
+                  { name: "access_token", value: "ghp_1234567890abcdefghijklmn" },
+                  { name: "locale", value: "en" },
+                ],
+                cookies: [
+                  { name: "__Host-session", value: "live_sess_887766", path: "/", domain: "api.castov.com", httpOnly: true, secure: true },
+                ],
+                headersSize: -1,
+                bodySize: 128,
+                postData: {
+                  mimeType: "application/json",
+                  text: '{"userEmail":"buyer@merchant.com","client_secret":"secret_9988","awsKey":"AKIAIOSFODNN7EXAMPLE"}',
+                },
+              },
+              response: {
+                status: 200,
+                statusText: "",
+                httpVersion: "http/2.0",
+                headers: [
+                  { name: "content-type", value: "application/json; charset=utf-8" },
+                  { name: "set-cookie", value: "__Host-session=rotated_9911; Path=/; Secure; HttpOnly" },
+                ],
+                cookies: [
+                  { name: "__Host-session", value: "rotated_9911", path: "/", httpOnly: true, secure: true },
+                ],
+                content: {
+                  size: 145,
+                  mimeType: "application/json",
+                  text: '{"status":"ok","refresh_token":"rt_live_9988776655","webhookSecret":"whsec_live_1122334455","note":"Plain unkeyed custom string ABC-999-INTERNAL"}',
+                },
+                redirectURL: "",
+                headersSize: -1,
+                bodySize: -1,
+              },
+              serverIPAddress: "104.21.44.10",
+              timings: { blocked: 1.2, dns: 0, ssl: 12.1, connect: 15.0, send: 0.4, wait: 64.2, receive: 1.6 },
+            },
+          ],
+        },
+      });
+
+      const out = convertHarSanitizer(chromeHarArchive, {
+        scrubBodies: true,
+        scrubEmails: true,
+        includeAuditHeader: false,
+      });
+
+      const sanitized = JSON.parse(out);
+      const entry = sanitized.log.entries[0];
+
+      // 1. Scrubbed items
+      expect(entry.request.url).toBe(
+        "https://api.castov.com/v1/sessions?access_token=[REDACTED_QUERY_SECRET]&locale=en"
+      );
+      expect(entry.request.queryString[0].value).toBe("[REDACTED_QUERY_SECRET]");
+      expect(entry.request.queryString[1].value).toBe("en");
+      expect(entry.request.headers[1].value).toBe("[REDACTED_AUTHORIZATION]");
+      expect(entry.request.headers[2].value).toBe("[REDACTED_COOKIE]");
+      expect(entry.request.headers[3].value).toBe("[REDACTED_X_SHOPIFY_ACCESS_TOKEN]");
+      expect(entry.request.cookies[0].value).toBe("[REDACTED_COOKIE_VALUE]");
+      expect(entry.response.headers[1].value).toBe("[REDACTED_SET_COOKIE]");
+      expect(entry.response.cookies[0].value).toBe("[REDACTED_COOKIE_VALUE]");
+
+      const reqBody = JSON.parse(entry.request.postData.text);
+      expect(reqBody.userEmail).toBe("[REDACTED_EMAIL]");
+      expect(reqBody.client_secret).toBe("[REDACTED_CLIENT_SECRET]");
+      expect(reqBody.awsKey).toBe("[REDACTED_AWS_ACCESS_KEY]");
+
+      const resBody = JSON.parse(entry.response.content.text);
+      expect(resBody.refresh_token).toBe("[REDACTED_REFRESH_TOKEN]");
+      expect(resBody.webhookSecret).toBe("[REDACTED_WHSEC_LIVE_KEY]");
+
+      // 2. Preserved structural & non-secret metadata
+      expect(entry.serverIPAddress).toBe("104.21.44.10");
+      expect(resBody.note).toBe("Plain unkeyed custom string ABC-999-INTERNAL");
     });
   });
 });

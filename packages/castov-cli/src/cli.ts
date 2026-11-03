@@ -3,9 +3,9 @@ import { parseArgs } from "node:util";
 import { createRequire } from "node:module";
 import { randomBytes, createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync, writeFileSync, lstatSync, existsSync, mkdirSync, unlinkSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync, lstatSync, existsSync, mkdirSync, unlinkSync, chmodSync } from "node:fs";
 import { homedir } from "node:os";
-import { join, relative, extname } from "node:path";
+import { join, relative, extname, resolve, isAbsolute } from "node:path";
 import {
   castov,
   type HashAlgorithm,
@@ -470,6 +470,21 @@ ${bold("castov jwt")} — decode JWT header and payload locally (no verification
 ${bold("Usage")}
   castov jwt <token>
 `,
+
+  "env-check": `
+${bold("castov env-check")} — audit .env against .env.example and scan for NEXT_PUBLIC_ secret leaks
+
+${bold("Usage")}
+  castov env-check [directory]
+`,
+
+  hook: `
+${bold("castov hook")} — install or remove local Git pre-commit secret & .env protection hook
+
+${bold("Usage")}
+  castov hook install [directory] [--force | -y]
+  castov hook uninstall [directory]
+`,
 };
 
 // ---------------------------------------------------------------------------
@@ -683,6 +698,8 @@ async function main(argv: string[]): Promise<void> {
       "client-name": { type: "string" },
       quiet: { type: "boolean", short: "q" },
       "use-gitleaks": { type: "boolean" },
+      force: { type: "boolean", short: "f" },
+      yes: { type: "boolean", short: "y" },
     },
   });
 
@@ -1164,6 +1181,288 @@ async function main(argv: string[]): Promise<void> {
       break;
     }
 
+    case "env-check": {
+      const targetDir = positionals[0] || process.cwd();
+      const envPath = join(targetDir, ".env");
+      const examplePath = join(targetDir, ".env.example");
+
+      const parseKeys = (content: string): Array<{ key: string; value: string; line: number }> => {
+        const res: Array<{ key: string; value: string; line: number }> = [];
+        const lines = content.split(/\r?\n/);
+        lines.forEach((rawLine, idx) => {
+          const trimmed = rawLine.trim();
+          if (!trimmed || trimmed.startsWith("#")) return;
+          const m = trimmed.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+          if (m) {
+            res.push({ key: m[1], value: m[2].replace(/^['"]|['"]$/g, ""), line: idx + 1 });
+          }
+        });
+        return res;
+      };
+
+      out.push(`${bold("🛡️  Castov Local .env & DevSecOps Check")} (${targetDir})\n`);
+
+      if (!existsSync(envPath) && !existsSync(examplePath)) {
+        out.push(`${yellow("⚠ No .env or .env.example found in")} ${targetDir}`);
+        out.push(`Generate typed .env schemas & .env.example at: ${cyan("https://castov.com/convert/env-to-zod")}`);
+        break;
+      }
+
+      const envEntries = existsSync(envPath) ? parseKeys(readFileSync(envPath, "utf8")) : [];
+      const exampleEntries = existsSync(examplePath) ? parseKeys(readFileSync(examplePath, "utf8")) : [];
+
+      const envKeySet = new Set(envEntries.map((e) => e.key));
+      const exampleKeySet = new Set(exampleEntries.map((e) => e.key));
+
+      let issueCount = 0;
+
+      for (const entry of envEntries) {
+        if (
+          entry.key.startsWith("NEXT_PUBLIC_") &&
+          /(SECRET|PRIVATE|PASSWORD|PASSWD|WEBHOOK_SECRET|SERVICE_ROLE|DATABASE_URL)/i.test(entry.key)
+        ) {
+          issueCount++;
+          out.push(
+            `${red("✖ [CRITICAL]")} ${bold(entry.key)} (line ${entry.line}): Secret variable prefixed with NEXT_PUBLIC_ will leak to client browser bundle!`
+          );
+        } else if (
+          entry.key.startsWith("NEXT_PUBLIC_") &&
+          /^(sk_live_|rk_live_|whsec_|AKIA[0-9A-Z]{16}|ghp_)/i.test(entry.value)
+        ) {
+          issueCount++;
+          out.push(
+            `${red("✖ [CRITICAL]")} ${bold(entry.key)} (line ${entry.line}): Live credential value assigned to NEXT_PUBLIC_ client variable!`
+          );
+        }
+      }
+
+      if (existsSync(envPath) && existsSync(examplePath)) {
+        const missingInEnv = [...exampleKeySet].filter((k) => !envKeySet.has(k));
+        const undocumentedInExample = [...envKeySet].filter((k) => !exampleKeySet.has(k));
+
+        if (missingInEnv.length > 0) {
+          issueCount += missingInEnv.length;
+          out.push(`${yellow("⚠ Missing in .env (defined in .env.example):")} ${missingInEnv.join(", ")}`);
+        }
+        if (undocumentedInExample.length > 0) {
+          out.push(`${cyan("ℹ Undocumented in .env.example:")} ${undocumentedInExample.join(", ")}`);
+        }
+      }
+
+      for (const ex of exampleEntries) {
+        if (/^(sk_live_[0-9a-zA-Z]{16,}|AKIA[0-9A-Z]{16}|ghp_[0-9a-zA-Z]{20,})/.test(ex.value)) {
+          issueCount++;
+          out.push(
+            `${red("✖ [LEAK]")} ${bold(".env.example")} contains a live credential on line ${ex.line} (${ex.key})!`
+          );
+        }
+      }
+
+      if (issueCount === 0) {
+        out.push(`${green("✓ All .env checks passed!")} (${envEntries.length} variables inspected, 0 leaks found)`);
+      } else {
+        process.exitCode = 1;
+        out.push(`\n${red(`✖ Found ${issueCount} environment security/sync issue(s).`)}`);
+      }
+      out.push(`Validate & generate Zod/T3 Env schemas at: ${cyan("https://castov.com/convert/env-to-zod")}`);
+      break;
+    }
+
+    case "hook": {
+      const action = (positionals[0] || "install").toLowerCase();
+      const targetDir = resolve(positionals[1] || process.cwd());
+      const dotGitPath = join(targetDir, ".git");
+
+      if (!existsSync(dotGitPath)) {
+        throw new UsageError(`No .git directory or file found in "${targetDir}". Run "git init" first.`);
+      }
+
+      // 1. Resolve actual Git directory (handles .git file in git worktrees & submodules: `gitdir: ...`)
+      let resolvedGitDir = dotGitPath;
+      const dotGitStat = lstatSync(dotGitPath);
+      if (dotGitStat.isFile()) {
+        const dotGitContent = readFileSync(dotGitPath, "utf8").trim();
+        const match = dotGitContent.match(/^gitdir:\s*(.+)$/i);
+        if (!match || !match[1]) {
+          throw new UsageError(`Invalid .git file at "${dotGitPath}" (missing "gitdir:" pointer).`);
+        }
+        const gitDirTarget = match[1].trim();
+        resolvedGitDir = isAbsolute(gitDirTarget) ? gitDirTarget : resolve(targetDir, gitDirTarget);
+      }
+
+      // If this is a git worktree (e.g. .git/worktrees/<name>), commondir points to the shared main .git directory
+      let commonGitDir = resolvedGitDir;
+      const commonDirFile = join(resolvedGitDir, "commondir");
+      if (existsSync(commonDirFile) && lstatSync(commonDirFile).isFile()) {
+        const relCommon = readFileSync(commonDirFile, "utf8").trim();
+        if (relCommon) {
+          commonGitDir = isAbsolute(relCommon) ? relCommon : resolve(resolvedGitDir, relCommon);
+        }
+      }
+
+      // 2. Check `core.hooksPath` in local vs global/system git config
+      let localHooksPath = "";
+      let globalHooksPath = "";
+      try {
+        localHooksPath = execFileSync("git", ["-C", targetDir, "config", "--local", "--get", "core.hooksPath"], {
+          encoding: "utf8",
+          stdio: ["ignore", "pipe", "ignore"],
+        }).trim();
+      } catch {
+        // Fallback: inspect .git/config directly
+        const configFile = join(commonGitDir, "config");
+        if (existsSync(configFile)) {
+          const cfgText = readFileSync(configFile, "utf8");
+          const hooksPathMatch = cfgText.match(/^\s*hooksPath\s*=\s*(.+)$/m);
+          if (hooksPathMatch && hooksPathMatch[1]) {
+            localHooksPath = hooksPathMatch[1].trim().replace(/^["']|["']$/g, "");
+          }
+        }
+      }
+
+      try {
+        globalHooksPath = execFileSync("git", ["-C", targetDir, "config", "--global", "--get", "core.hooksPath"], {
+          encoding: "utf8",
+          stdio: ["ignore", "pipe", "ignore"],
+        }).trim();
+      } catch {
+        // Ignore if global core.hooksPath is not set
+      }
+
+      const customHooksPath = localHooksPath || globalHooksPath;
+      const isGlobalHooksPath = !localHooksPath && Boolean(globalHooksPath);
+
+      let gitHooksDir: string;
+      if (customHooksPath) {
+        const expandedHooksPath = customHooksPath.startsWith("~/") || customHooksPath.startsWith("~\\")
+          ? join(homedir(), customHooksPath.slice(2))
+          : customHooksPath;
+        gitHooksDir = isAbsolute(expandedHooksPath)
+          ? expandedHooksPath
+          : resolve(targetDir, expandedHooksPath);
+
+        const relToRepo = relative(targetDir, gitHooksDir);
+        const isInsideRepo =
+          Boolean(relToRepo) && !relToRepo.startsWith("..") && !isAbsolute(relToRepo);
+
+        // Suggest the user-editable hook path (e.g. `.husky/pre-commit` when core.hooksPath is `.husky/_` in Husky v9)
+        const normalizedCustom = customHooksPath.replace(/\\/g, "/").replace(/\/+$/, "");
+        const suggestedHookFile =
+          normalizedCustom === ".husky/_" || normalizedCustom.endsWith("/.husky/_")
+            ? normalizedCustom.slice(0, -2) + "/pre-commit"
+            : `${normalizedCustom}/pre-commit`;
+
+        out.push(`${yellow("⚠ Detected custom git core.hooksPath:")} ${bold(customHooksPath)} → ${bold(gitHooksDir)}`);
+
+        if (isGlobalHooksPath) {
+          out.push(
+            `${yellow("⚠ Warning:")} ${bold("core.hooksPath")} is configured at the ${bold("global")} Git level (~/.gitconfig). Modifying global hooks affects all repositories on your machine.`
+          );
+        }
+
+        if (normalizedCustom === ".husky/_" || normalizedCustom.endsWith("/.husky/_")) {
+          out.push(
+            `${yellow("⚠ Husky v9 detected (.husky/_):")} Husky v9 regenerates and overwrites ${bold(".husky/_/*")} whenever ${bold("npm install")} (the ${bold("prepare")} script: ${bold("husky")}) runs.`
+          );
+        }
+
+        if (action === "install") {
+          const forceRequested = Boolean(values.force || values.yes);
+          if (!forceRequested) {
+            process.exitCode = 1;
+            out.push(`\nTo avoid breaking your existing hook manager, Castov did NOT write any files automatically.`);
+            out.push(`Add the following command manually to your active pre-commit hook (${bold(suggestedHookFile)}):`);
+            out.push(`  ${cyan("npx --no-install @castov/cli scan . && npx --no-install @castov/cli env-check .")}`);
+            if (isInsideRepo && !isGlobalHooksPath) {
+              out.push(`\nOr pass ${bold("--force")} to write directly into the local repository hooks path (${bold(gitHooksDir)}).`);
+            }
+            break;
+          }
+
+          if (isGlobalHooksPath || !isInsideRepo) {
+            process.exitCode = 1;
+            out.push(
+              `${red("✖ Refusing to overwrite:")} ${bold("--force")} is only supported for local ${bold("core.hooksPath")} directories inside the repository (${bold(targetDir)}).`
+            );
+            out.push(`Please add ${cyan("npx --no-install @castov/cli env-check .")} manually to ${bold(suggestedHookFile)}.`);
+            break;
+          }
+        }
+      } else {
+        gitHooksDir = join(commonGitDir, "hooks");
+        if (dotGitStat.isFile()) {
+          out.push(`${cyan("ℹ Detected .git file (worktree/submodule):")} resolved hooks directory to ${bold(gitHooksDir)}`);
+        }
+      }
+
+      const preCommitPath = join(gitHooksDir, "pre-commit");
+      const backupPath = `${preCommitPath}.castov.bak`;
+
+      if (action === "install") {
+        if (!existsSync(gitHooksDir)) {
+          mkdirSync(gitHooksDir, { recursive: true });
+        }
+
+        if (existsSync(preCommitPath)) {
+          const existingContent = readFileSync(preCommitPath, "utf8");
+          if (existingContent.includes("Castov Local-First DevSecOps Pre-Commit Hook")) {
+            out.push(`${green("✓ Castov pre-commit hook is already installed")} at ${bold(preCommitPath)}`);
+            break;
+          }
+
+          let confirmed = Boolean(values.force || values.yes);
+          if (!confirmed && process.stdin.isTTY) {
+            const readline = await import("node:readline/promises");
+            const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+            try {
+              const ans = await rl.question(
+                yellow(`⚠ Existing pre-commit hook found at ${preCommitPath}. Back it up to pre-commit.castov.bak and overwrite? (y/N): `)
+              );
+              confirmed = /^y(es)?$/i.test(ans.trim());
+            } finally {
+              rl.close();
+            }
+          }
+
+          if (!confirmed) {
+            process.exitCode = 1;
+            out.push(`${yellow("⚠ Aborted:")} Existing pre-commit hook found at ${bold(preCommitPath)}.`);
+            out.push(`Pass ${bold("--force")} (or ${bold("-y")}) to automatically create a backup at ${bold("pre-commit.castov.bak")} and install.`);
+            break;
+          }
+
+          writeFileSync(backupPath, existingContent, { encoding: "utf8", mode: 0o755 });
+          out.push(`${cyan("ℹ Backed up existing pre-commit hook")} to ${bold(backupPath)}`);
+        }
+
+        const hookScript = `#!/bin/sh\n# Castov Local-First DevSecOps Pre-Commit Hook (https://castov.com)\necho "🛡️  Running Castov pre-commit secret & .env scan..."\nnpx --no-install @castov/cli scan . && npx --no-install @castov/cli env-check .\n`;
+        writeFileSync(preCommitPath, hookScript, { encoding: "utf8", mode: 0o755 });
+        try {
+          chmodSync(preCommitPath, 0o755);
+        } catch {
+          // Ignore chmod errors on Windows
+        }
+        out.push(`${green("✓ Installed Castov pre-commit hook")} at ${bold(preCommitPath)}`);
+        out.push(`Every commit will now be scanned locally for leaked secrets and NEXT_PUBLIC_ exposures.`);
+      } else if (action === "uninstall" || action === "remove") {
+        if (existsSync(preCommitPath)) {
+          unlinkSync(preCommitPath);
+          out.push(`${green("✓ Removed pre-commit hook")} from ${bold(preCommitPath)}`);
+          if (existsSync(backupPath)) {
+            const restored = readFileSync(backupPath, "utf8");
+            writeFileSync(preCommitPath, restored, { encoding: "utf8", mode: 0o755 });
+            unlinkSync(backupPath);
+            out.push(`${green("✓ Restored previous pre-commit hook")} from ${bold(backupPath)}`);
+          }
+        } else {
+          out.push(`No pre-commit hook found at ${preCommitPath}`);
+        }
+      } else {
+        throw new UsageError(`unknown action "${action}" for "castov hook". Expected "install" or "uninstall".`);
+      }
+      break;
+    }
+
     case "vault": {
       const subCommand = positionals[0];
       if (subCommand !== "pull") {
@@ -1598,6 +1897,48 @@ function generateTsInterfacesFromObject(
               token: { type: "string", description: "Encoded JWT string (header.payload.signature)" },
             },
             required: ["token"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_json_to_zod",
+          description: "Generate a deterministic Zod v4 or v3 validation schema from a JSON sample locally, inferring email, URL, ISO datetime, integer, and nested object types.",
+          annotations: { title: "JSON to Zod Schema Converter", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              json: { type: "string", description: "JSON string to convert into a Zod schema" },
+              zodVersion: { type: "string", enum: ["v4", "v3"], description: "Target Zod version ('v4' uses z.email()/z.url(), 'v3' uses z.string().email())" },
+              rootName: { type: "string", description: "Root schema variable name (default: 'schema')" },
+            },
+            required: ["json"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_env_to_zod",
+          description: "Convert a .env file content into a type-safe Zod v4/v3 schema or @t3-oss/env-nextjs env.ts configuration without exposing any secret values, and detect NEXT_PUBLIC_ secret leaks.",
+          annotations: { title: "ENV to Zod & T3 Env Converter", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              envContent: { type: "string", description: "Raw .env file content (KEY=VALUE lines)" },
+              mode: { type: "string", enum: ["zod-v4", "zod-v3", "t3-env", "env-example"], description: "Output mode (default: 'zod-v4')" },
+            },
+            required: ["envContent"],
+            additionalProperties: false,
+          },
+        },
+        {
+          name: "castov_sql_to_prisma",
+          description: "Convert SQL CREATE TABLE DDL statements into Prisma ORM models with inferred relations and native @db types.",
+          annotations: { title: "SQL DDL to Prisma Schema Converter", ...READONLY_ANNOTATIONS },
+          inputSchema: {
+            type: "object",
+            properties: {
+              sql: { type: "string", description: "SQL CREATE TABLE DDL statements" },
+            },
+            required: ["sql"],
             additionalProperties: false,
           },
         },
@@ -2078,6 +2419,143 @@ function generateTsInterfacesFromObject(
                 } catch (err: any) {
                   toolText = `Error: ${err?.message || "failed to inspect JWT"}`;
                   isError = true;
+                }
+              }
+            } else if (toolName === "castov_json_to_zod") {
+              if (typeof args.json !== "string" || !args.json.trim()) {
+                toolText = "Error: 'json' must be a non-empty JSON string.";
+                isError = true;
+              } else {
+                try {
+                  const parsed = JSON.parse(args.json.trim());
+                  const zv = args.zodVersion === "v3" ? "v3" : "v4";
+                  const rootName = typeof args.rootName === "string" && /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(args.rootName.trim())
+                    ? args.rootName.trim()
+                    : "schema";
+                  const inferZod = (val: unknown, depth = 0): string => {
+                    if (depth > 16) return "z.unknown()";
+                    if (val === null) return "z.null()";
+                    if (typeof val === "boolean") return "z.boolean()";
+                    if (typeof val === "number") return Number.isInteger(val) ? "z.number().int()" : "z.number()";
+                    if (typeof val === "string") {
+                      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return zv === "v4" ? "z.email()" : "z.string().email()";
+                      if (/^https?:\/\//i.test(val)) return zv === "v4" ? "z.url()" : "z.string().url()";
+                      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(val)) return zv === "v4" ? "z.iso.datetime()" : "z.string().datetime()";
+                      return "z.string()";
+                    }
+                    if (Array.isArray(val)) {
+                      if (val.length === 0) return "z.array(z.unknown())";
+                      return `z.array(${inferZod(val[0], depth + 1)})`;
+                    }
+                    if (typeof val === "object") {
+                      const entries = Object.entries(val as Record<string, unknown>);
+                      const pad = "  ".repeat(depth + 1);
+                      const closePad = "  ".repeat(depth);
+                      const lines = entries.map(([k, v]) => {
+                        const safeK = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(k) ? k : JSON.stringify(k);
+                        return `${pad}${safeK}: ${inferZod(v, depth + 1)},`;
+                      });
+                      return `z.object({\n${lines.join("\n")}\n${closePad}})`;
+                    }
+                    return "z.unknown()";
+                  };
+                  const codeOut = `import { z } from "zod";\n\nexport const ${rootName} = ${inferZod(parsed)};\n`;
+                  toolText = JSON.stringify({ success: true, zodVersion: zv, schemaCode: codeOut }, null, 2);
+                } catch (err: any) {
+                  toolText = `Error: Invalid JSON - ${err?.message || "parse error"}`;
+                  isError = true;
+                }
+              }
+            } else if (toolName === "castov_env_to_zod") {
+              if (typeof args.envContent !== "string" || !args.envContent.trim()) {
+                toolText = "Error: 'envContent' must be a non-empty string.";
+                isError = true;
+              } else {
+                const mode = typeof args.mode === "string" ? args.mode : "zod-v4";
+                const lines = args.envContent.split(/\r?\n/);
+                const entries: Array<{ key: string; zodExpr: string; warning?: string; placeholder: string }> = [];
+                for (const rawLine of lines) {
+                  const t = rawLine.trim();
+                  if (!t || t.startsWith("#")) continue;
+                  const m = t.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+                  if (!m) continue;
+                  const key = m[1];
+                  const val = m[2].replace(/^['"]|['"]$/g, "").trim();
+                  let zodExpr = "z.string().min(1)";
+                  let placeholder = "your_value_here";
+                  if (!val) {
+                    zodExpr = "z.string().optional()";
+                    placeholder = "";
+                  } else if (/^(true|false)$/i.test(val)) {
+                    zodExpr = mode === "zod-v3" ? "z.enum([\"true\", \"false\"]).transform((v) => v === \"true\")" : "z.stringbool()";
+                    placeholder = val.toLowerCase();
+                  } else if (/^-?\d+(\.\d+)?$/.test(val)) {
+                    zodExpr = "z.coerce.number()";
+                    placeholder = val;
+                  } else if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(val)) {
+                    zodExpr = mode === "zod-v3" ? "z.string().url()" : "z.url()";
+                    placeholder = "https://example.com";
+                  } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                    zodExpr = mode === "zod-v3" ? "z.string().email()" : "z.email()";
+                    placeholder = "user@example.com";
+                  }
+                  let warning: string | undefined;
+                  if (key.startsWith("NEXT_PUBLIC_") && /(SECRET|PRIVATE|PASSWORD|TOKEN|KEY)/i.test(key)) {
+                    warning = `SECURITY WARNING: ${key} is prefixed with NEXT_PUBLIC_ and may leak to the browser!`;
+                  }
+                  entries.push({ key, zodExpr, warning, placeholder });
+                }
+                const warnings = entries.filter((e) => e.warning).map((e) => e.warning!);
+                const schemaLines = entries.map((e) => `  ${e.key}: ${e.zodExpr},`);
+                const schemaCode = mode === "env-example"
+                  ? entries.map((e) => `${e.key}=${e.placeholder}`).join("\n")
+                  : `import { z } from "zod";\n\nexport const envSchema = z.object({\n${schemaLines.join("\n")}\n});\n`;
+                toolText = JSON.stringify({ success: true, mode, variableCount: entries.length, warnings, output: schemaCode }, null, 2);
+              }
+            } else if (toolName === "castov_sql_to_prisma") {
+              if (typeof args.sql !== "string" || !args.sql.trim()) {
+                toolText = "Error: 'sql' must be a non-empty SQL DDL string.";
+                isError = true;
+              } else {
+                const tableRegex = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?["`]?([A-Za-z0-9_]+)["`]?\s*\(([\s\S]*?)\);/gi;
+                const models: string[] = [];
+                let match: RegExpExecArray | null;
+                while ((match = tableRegex.exec(args.sql)) !== null) {
+                  const tableName = match[1];
+                  const body = match[2];
+                  const modelName = tableName.replace(/(^|_)([a-z])/g, (_m, _p1, c) => c.toUpperCase()).replace(/s$/, "");
+                  const colLines = body.split(/,\s*\n|,\r?\n/).map((l) => l.trim()).filter((l) => l && !/^(PRIMARY|FOREIGN|CONSTRAINT|UNIQUE|INDEX|KEY)\b/i.test(l));
+                  const fields: string[] = [];
+                  for (const colLine of colLines) {
+                    const cm = colLine.match(/^["`]?([A-Za-z0-9_]+)["`]?\s+([A-Za-z0-9_()]+)/);
+                    if (!cm) continue;
+                    const colName = cm[1];
+                    const rawType = cm[2].toUpperCase();
+                    const isPk = /PRIMARY\s+KEY/i.test(colLine);
+                    const isNotNull = /NOT\s+NULL/i.test(colLine) || isPk;
+                    const isUnique = /\bUNIQUE\b/i.test(colLine) && !isPk;
+                    let pType = "String";
+                    if (rawType.includes("INT") || rawType.includes("SERIAL")) pType = "Int";
+                    else if (rawType.includes("BOOL")) pType = "Boolean";
+                    else if (rawType.includes("TIME") || rawType.includes("DATE")) pType = "DateTime";
+                    else if (rawType.includes("JSON")) pType = "Json";
+                    else if (rawType.includes("DEC") || rawType.includes("NUM")) pType = "Decimal";
+                    const attrs: string[] = [];
+                    if (isPk) attrs.push("@id");
+                    if (rawType.includes("SERIAL") || /AUTO_INCREMENT/i.test(colLine)) attrs.push("@default(autoincrement())");
+                    if (/gen_random_uuid/i.test(colLine)) attrs.push("@default(uuid())");
+                    if (/\bNOW\(\)|CURRENT_TIMESTAMP/i.test(colLine)) attrs.push("@default(now())");
+                    if (isUnique) attrs.push("@unique");
+                    fields.push(`  ${colName} ${pType}${isNotNull ? "" : "?"}${attrs.length ? " " + attrs.join(" ") : ""}`);
+                  }
+                  fields.push(`\n  @@map("${tableName}")`);
+                  models.push(`model ${modelName} {\n${fields.join("\n")}\n}`);
+                }
+                if (models.length === 0) {
+                  toolText = "Error: No valid CREATE TABLE statements found in SQL input.";
+                  isError = true;
+                } else {
+                  toolText = JSON.stringify({ success: true, modelCount: models.length, prismaSchema: models.join("\n\n") }, null, 2);
                 }
               }
             } else {

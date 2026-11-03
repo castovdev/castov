@@ -359,6 +359,9 @@ test("castov mcp: protocol handshake and tools/list in framed mode", async (t) =
     "castov_json_to_ts_pipeline",
     "castov_cron_timezone_pipeline",
     "castov_jwt_inspect_pipeline",
+    "castov_json_to_zod",
+    "castov_env_to_zod",
+    "castov_sql_to_prisma",
   ]);
 });
 
@@ -369,7 +372,7 @@ test("castov mcp: handles ndjson mode and replies in ndjson", async (t) => {
   client.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) + "\n");
   const [res] = await promise;
   assert.equal(res.id, 1);
-  assert.equal(res.result.tools.length, 13);
+  assert.equal(res.result.tools.length, 16);
 });
 
 test("castov mcp: tools/call handles valid inputs correctly", async (t) => {
@@ -480,7 +483,7 @@ test("castov mcp: handles header sent byte-by-byte", async (t) => {
 
   const [res] = await promise;
   assert.equal(res.id, 801);
-  assert.equal(res.result.tools.length, 13);
+  assert.equal(res.result.tools.length, 16);
 });
 
 test("castov mcp: splits multi-byte UTF-8 emoji across chunk boundaries", async (t) => {
@@ -1071,4 +1074,163 @@ test("castov mcp: regression - client disconnect / broken pipe exits cleanly wit
   assert.equal(result.code, 0);
   assert.doesNotMatch(stderr, /write EPIPE/);
   assert.doesNotMatch(stderr, /UnhandledPromiseRejection/);
+});
+
+
+test("castov mcp: schema converter tools (json_to_zod, env_to_zod, sql_to_prisma)", async (t) => {
+  const { client, setTracked, timeoutMs } = createMcpHarness(t, 5000);
+  const promise = readNdjsonResponses(client, 3, timeoutMs, setTracked);
+
+  client.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 701,
+    method: "tools/call",
+    params: {
+      name: "castov_json_to_zod",
+      arguments: { json: '{"email":"dev@castov.com","url":"https://castov.com","count":5}', zodVersion: "v4", rootName: "userSchema" }
+    }
+  }) + "\n");
+
+  client.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 702,
+    method: "tools/call",
+    params: {
+      name: "castov_env_to_zod",
+      arguments: { envContent: "PORT=3000\nENABLE_CACHE=true\nNEXT_PUBLIC_STRIPE_SECRET=sk_test_123", mode: "zod-v4" }
+    }
+  }) + "\n");
+
+  client.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 703,
+    method: "tools/call",
+    params: {
+      name: "castov_sql_to_prisma",
+      arguments: { sql: "CREATE TABLE users (id SERIAL PRIMARY KEY, email VARCHAR(255) NOT NULL UNIQUE);" }
+    }
+  }) + "\n");
+
+  const [rZod, rEnv, rPrisma] = await promise;
+
+  const zodObj = JSON.parse(rZod.result.content[0].text);
+  assert.equal(zodObj.success, true);
+  assert.match(zodObj.schemaCode, /z\.email\(\)/);
+  assert.match(zodObj.schemaCode, /z\.url\(\)/);
+
+  const envObj = JSON.parse(rEnv.result.content[0].text);
+  assert.equal(envObj.success, true);
+  assert.equal(envObj.variableCount, 3);
+  assert.equal(envObj.warnings.length, 1);
+  assert.match(envObj.output, /z\.stringbool\(\)/);
+
+  const prismaObj = JSON.parse(rPrisma.result.content[0].text);
+  assert.equal(prismaObj.success, true);
+  assert.match(prismaObj.prismaSchema, /model User/);
+  assert.match(prismaObj.prismaSchema, /@id @default\(autoincrement\(\)\)/);
+});
+
+test("castov env-check and hook install/uninstall CLI commands", async () => {
+  const fsMod = await import("node:fs");
+  const osMod = await import("node:os");
+  const pathMod = await import("node:path");
+
+  const tmpDir = fsMod.mkdtempSync(pathMod.join(osMod.tmpdir(), "castov-devsecops-"));
+  try {
+    fsMod.mkdirSync(pathMod.join(tmpDir, ".git", "hooks"), { recursive: true });
+    fsMod.writeFileSync(pathMod.join(tmpDir, ".env"), "PORT=3000\nDATABASE_URL=postgresql://localhost:5432/db\n", "utf8");
+    fsMod.writeFileSync(pathMod.join(tmpDir, ".env.example"), "PORT=3000\nDATABASE_URL=postgresql://localhost:5432/db\n", "utf8");
+
+    const checkClean = run(["env-check", tmpDir]);
+    assert.equal(checkClean.status, 0);
+    assert.match(checkClean.stdout, /All \.env checks passed/);
+
+    // Introduce NEXT_PUBLIC_ secret leak
+    fsMod.writeFileSync(pathMod.join(tmpDir, ".env"), "NEXT_PUBLIC_API_SECRET=super_secret\n", "utf8");
+    const checkLeak = run(["env-check", tmpDir]);
+    assert.equal(checkLeak.status, 1);
+    assert.match(checkLeak.stdout, /NEXT_PUBLIC_API_SECRET/);
+
+    // Hook install & uninstall + existing hook backup/restore protection
+    const preCommitFile = pathMod.join(tmpDir, ".git", "hooks", "pre-commit");
+    const backupFile = `${preCommitFile}.castov.bak`;
+    fsMod.writeFileSync(preCommitFile, "#!/bin/sh\necho custom-user-hook\n", "utf8");
+
+    // 1. Without --force in non-TTY, must abort and NOT overwrite
+    const hookBlocked = run(["hook", "install", tmpDir]);
+    assert.equal(hookBlocked.status, 1);
+    assert.match(hookBlocked.stdout, /Aborted:.*Existing pre-commit hook found/);
+    assert.match(fsMod.readFileSync(preCommitFile, "utf8"), /custom-user-hook/);
+
+    // 2. With --force, backs up to pre-commit.castov.bak and installs
+    const hookForced = run(["hook", "install", tmpDir, "--force"]);
+    assert.equal(hookForced.status, 0);
+    assert.ok(fsMod.existsSync(backupFile));
+    assert.match(fsMod.readFileSync(backupFile, "utf8"), /custom-user-hook/);
+    assert.match(fsMod.readFileSync(preCommitFile, "utf8"), /Castov Local-First DevSecOps/);
+
+    // 3. Uninstall removes Castov hook and restores pre-commit.castov.bak
+    const hookUninstall = run(["hook", "uninstall", tmpDir]);
+    assert.equal(hookUninstall.status, 0);
+    assert.ok(!fsMod.existsSync(backupFile));
+    assert.match(fsMod.readFileSync(preCommitFile, "utf8"), /custom-user-hook/);
+
+    // 4. Husky v9 (`core.hooksPath = .husky/_`):
+    //    - Without --force: refuses to write any file automatically and prints manual instructions for `.husky/pre-commit`.
+    //    - With --force on local repo path: writes `.husky/_/pre-commit`, and simulates `npm install` (`prepare: husky`)
+    //      which overwrites `.husky/_/pre-commit` back to Husky's dispatcher (`#!/usr/bin/env sh\n. "$(dirname "$0")/h"`).
+    const huskyV9InternalDir = pathMod.join(tmpDir, ".husky", "_");
+    fsMod.writeFileSync(
+      pathMod.join(tmpDir, ".git", "config"),
+      "[core]\n\thooksPath = .husky/_\n",
+      "utf8"
+    );
+
+    const hookHuskyNoForce = run(["hook", "install", tmpDir]);
+    assert.equal(hookHuskyNoForce.status, 1);
+    assert.match(hookHuskyNoForce.stdout, /Detected custom git core\.hooksPath/);
+    assert.match(hookHuskyNoForce.stdout, /Husky v9 detected \(\.husky\/_\)/);
+    assert.match(hookHuskyNoForce.stdout, /Castov did NOT write any files automatically/);
+    assert.match(hookHuskyNoForce.stdout, /\.husky\/pre-commit/);
+    assert.match(hookHuskyNoForce.stdout, /npx --no-install @castov\/cli env-check/);
+    assert.ok(!fsMod.existsSync(pathMod.join(huskyV9InternalDir, "pre-commit")));
+
+    // With --force on local repo path (.husky/_ is inside tmpDir), it writes .husky/_/pre-commit
+    const hookHuskyForce = run(["hook", "install", tmpDir, "--force"]);
+    assert.equal(hookHuskyForce.status, 0);
+    assert.ok(fsMod.existsSync(pathMod.join(huskyV9InternalDir, "pre-commit")));
+    assert.match(fsMod.readFileSync(pathMod.join(huskyV9InternalDir, "pre-commit"), "utf8"), /Castov Local-First DevSecOps/);
+
+    // External path outside repo with --force MUST be rejected
+    const outsideHooksDir = fsMod.mkdtempSync(pathMod.join(osMod.tmpdir(), "castov-outside-hooks-"));
+    try {
+      fsMod.writeFileSync(
+        pathMod.join(tmpDir, ".git", "config"),
+        `[core]\n\thooksPath = ${outsideHooksDir.replace(/\\/g, "/")}\n`,
+        "utf8"
+      );
+      const hookOutsideForce = run(["hook", "install", tmpDir, "--force"]);
+      assert.equal(hookOutsideForce.status, 1);
+      assert.match(hookOutsideForce.stdout, /Refusing to overwrite:.*only supported for local core\.hooksPath directories inside the repository/);
+      assert.ok(!fsMod.existsSync(pathMod.join(outsideHooksDir, "pre-commit")));
+    } finally {
+      fsMod.rmSync(outsideHooksDir, { recursive: true, force: true });
+    }
+
+    // 5. Resolves `.git` as a file (git worktrees / submodules with `gitdir:` and `commondir`)
+    const worktreeDir = pathMod.join(tmpDir, "wt-feature");
+    const actualGitWorktreeMeta = pathMod.join(tmpDir, "real-git-dir", "worktrees", "wt-feature");
+    const sharedMainGitDir = pathMod.join(tmpDir, "real-git-dir");
+    fsMod.mkdirSync(worktreeDir, { recursive: true });
+    fsMod.mkdirSync(actualGitWorktreeMeta, { recursive: true });
+    fsMod.writeFileSync(pathMod.join(worktreeDir, ".git"), `gitdir: ../real-git-dir/worktrees/wt-feature\n`, "utf8");
+    fsMod.writeFileSync(pathMod.join(actualGitWorktreeMeta, "commondir"), `../..\n`, "utf8");
+
+    const hookWorktree = run(["hook", "install", worktreeDir]);
+    assert.equal(hookWorktree.status, 0);
+    assert.match(hookWorktree.stdout, /Detected \.git file \(worktree\/submodule\)/);
+    assert.ok(fsMod.existsSync(pathMod.join(sharedMainGitDir, "hooks", "pre-commit")));
+  } finally {
+    fsMod.rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
