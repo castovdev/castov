@@ -133,6 +133,16 @@ export default function ExtensionPage() {
             <Blocks className="w-5 h-5 text-indigo-400" />
             <span>Open VSX (Cursor &amp; Windsurf)</span>
           </a>
+          <a
+            href="https://addons.mozilla.org/en-US/firefox/addon/castov-secret-shield/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-secondary font-bold px-5 py-3 flex items-center gap-2 border-orange-500/30 hover:border-orange-500/60"
+          >
+            <ShieldAlert className="w-5 h-5 text-orange-400" />
+            <span>Firefox Add-on (Secret Shield)</span>
+            <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+          </a>
         </div>
       </div>
 
@@ -228,6 +238,56 @@ export default function ExtensionPage() {
           );
         })}
       </div>
+
+            {/* Featured Browser Extension: Castov Secret Shield for Firefox */}
+      <section className="mb-20">
+        <div className="card p-8 sm:p-10 border border-orange-500/30 rounded-3xl bg-gradient-to-r from-orange-500/10 via-card to-amber-500/10 shadow-lg">
+          <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
+            <div className="space-y-3 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-xs font-bold text-orange-400 uppercase tracking-wider">
+                <ShieldCheck className="w-4 h-4" />
+                <span>OFFICIAL MOZILLA FIREFOX ADD-ON</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-fg tracking-tight">
+                Castov Secret Shield for Firefox
+              </h2>
+              <p className="text-sm sm:text-base text-muted-fg leading-relaxed">
+                Stop accidental credential leaks into AI web interfaces. Castov Secret Shield runs 100% locally in your browser, automatically scanning and redacting API keys, database credentials, AWS tokens, and private SSH keys before they are sent to ChatGPT, Claude, DeepSeek, or Gemini.
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="text-xs px-2.5 py-1 rounded-md bg-bg border border-border text-fg font-mono">
+                  ✓ Real-time Paste Protection
+                </span>
+                <span className="text-xs px-2.5 py-1 rounded-md bg-bg border border-border text-fg font-mono">
+                  ✓ Zero-Telemetry &amp; Offline Regex
+                </span>
+                <span className="text-xs px-2.5 py-1 rounded-md bg-bg border border-border text-fg font-mono">
+                  ✓ Mozilla Add-ons Verified
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full sm:w-auto">
+              <a
+                href="https://addons.mozilla.org/en-US/firefox/addon/castov-secret-shield/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn bg-orange-600 hover:bg-orange-500 text-white font-bold px-6 py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-md shadow-orange-600/30 text-sm"
+              >
+                <span>Add to Firefox</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+              <a
+                href="/api/download/browser-extension"
+                className="btn btn-secondary text-xs font-semibold px-4 py-2.5 justify-center flex items-center gap-2"
+              >
+                <Download className="w-3.5 h-3.5 text-muted-fg" />
+                <span>Download Unpacked (.ZIP)</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Manual VSIX Installation & Offline Guide */}
       <section className="mb-20">

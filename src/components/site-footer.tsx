@@ -27,7 +27,9 @@ const TOP_TOOLS = [
 const ECOSYSTEM = [
   { href: "/mcp", label: "Castov MCP Server", badge: "Grade A" },
   { href: "/cli", label: "Castov CLI", badge: "v1.5.0" },
-  { href: "/extension", label: "VS Code Extensions Suite", badge: "13 Extensions" },
+  { href: "/extension", label: "VS Code Extensions Suite", badge: "13 Tools" },
+  { href: "https://addons.mozilla.org/en-US/firefox/addon/castov-secret-shield/", label: "Secret Shield (Firefox Add-on)", badge: "Firefox" },
+  { href: "https://marketplace.visualstudio.com/items?itemName=Castov.mcp-security-castov", label: "MCP Security (VS Code)", badge: "Marketplace" },
   { href: "/tech-trends", label: "Tech Pulse Radar", badge: "Live" },
   { href: "/time", label: "Timezone Pair Matrix", badge: "60+" },
   { href: "/ports", label: "Network Ports & CIDR", badge: "60+" },

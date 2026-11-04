@@ -46,6 +46,27 @@ export function SecretScannerTool() {
 
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col gap-6">
+      {/* Firefox Extension Recommendation Banner */}
+      <div className="p-4 rounded-xl border border-orange-500/25 bg-orange-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div className="space-y-0.5">
+          <div className="font-bold text-fg flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+            <span>Want automatic paste protection across ChatGPT, Claude &amp; Gemini?</span>
+          </div>
+          <p className="text-muted">
+            Install the official Castov Secret Shield add-on to intercept secrets directly in your browser.
+          </p>
+        </div>
+        <a
+          href="https://addons.mozilla.org/en-US/firefox/addon/castov-secret-shield/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn bg-orange-600 hover:bg-orange-500 text-white font-bold px-3 py-1.5 rounded-lg shrink-0 flex items-center gap-1 text-[11px] shadow-sm"
+        >
+          <span>Get Firefox Add-on</span>
+          <span className="text-[10px]">&rarr;</span>
+        </a>
+      </div>
       <div className="bg-card border border-line rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>

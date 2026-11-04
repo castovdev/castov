@@ -71,6 +71,13 @@ const FAQS = [
 
 const DIRECTORIES = [
   {
+    name: "VS Code Marketplace",
+    badge: "Official Extension",
+    desc: "Audit mcp.json, Claude Desktop configs, detect prompt injection, and secure MCP servers.",
+    href: "https://marketplace.visualstudio.com/items?itemName=Castov.mcp-security-castov",
+    badgeClass: "text-accent bg-accent/10 border-accent/20",
+  },
+  {
     name: "Glama MCP Registry",
     badge: "Grade A Certified",
     desc: "Audited for schema compliance, security annotations, and tool determinism.",

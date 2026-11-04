@@ -15,7 +15,7 @@ import {
   LucideIcon
 } from "lucide-react";
 
-type PlatformId = "docker" | "homebrew" | "openvsx" | "github-action";
+type PlatformId = "docker" | "homebrew" | "openvsx" | "github-action" | "firefox";
 
 interface PlatformConfig {
   id: PlatformId;
@@ -84,7 +84,21 @@ const PLATFORMS: PlatformConfig[] = [
       "Instant PR failure on leaked API secrets or corrupt CIDR",
       "Official GitHub Marketplace certified"
     ]
-  }
+  },
+  {
+    id: "firefox",
+    name: "Firefox Add-ons",
+    badge: "Secret Shield",
+    icon: ShieldCheck,
+    description: "Official Mozilla Firefox extension intercepting API keys and tokens before pasting into web AI interfaces.",
+    command: "Visit addons.mozilla.org -> Castov Secret Shield",
+    docLink: "https://addons.mozilla.org/en-US/firefox/addon/castov-secret-shield/",
+    features: [
+      "Client-side paste interception on ChatGPT, Claude, and Gemini",
+      "Zero-telemetry Shannon entropy and regex scanner",
+      "Official signed & audited Mozilla Add-on"
+    ]
+  },
 ];
 
 export function InstallationDistributionSection() {
