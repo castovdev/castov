@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   authors: [{ name: SITE.name }],
   formatDetection: { telephone: false, email: false, address: false },
   manifest: "/manifest.json",
+  verification: {
+    google: "fmlpplXMiGnpS3CGXj9Ui6pWJoi7bDa7ydjUfJaHXcg",
+  },
 };
 
 export const viewport: Viewport = {
