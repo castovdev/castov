@@ -16,6 +16,6 @@ export const config = {
      * - api/mock (public HTTP status mock endpoint, no session needed)
      * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico|api/mock|.*\\.(?:svg|png|jpg|jpeg|gif|webp|zip)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/mock|.*\\.(?:svg|png|jpg|jpeg|gif|webp|zip|html|txt|wasm|vsix)$).*)",
   ],
 };
