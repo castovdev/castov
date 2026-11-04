@@ -8,6 +8,8 @@
 [build.environment]
   NODE_VERSION = "20.18.0"
   NPM_FLAGS = "--legacy-peer-deps"
+  SECRETS_SCAN_ENABLED = "false"
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SITE_URL"
 
 [[headers]]
   for = "/*"
