@@ -11,7 +11,7 @@ import { PwaRegister } from "@/components/pwa-register";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE } from "@/lib/site";
 import "./globals.css";
-import { GoogleTagManager } from '@next/third-parties/google'
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: { default: `${SITE.name} – ${SITE.tagline}`, template: `%s | ${SITE.name}` },
@@ -20,9 +20,6 @@ export const metadata: Metadata = {
   authors: [{ name: SITE.name }],
   formatDetection: { telephone: false, email: false, address: false },
   manifest: "/manifest.json",
-  verification: {
-    google: "fmlpplXMiGnpS3CGXj9Ui6pWJoi7bDa7ydjUfJaHXcg",
-  },
 };
 
 export const viewport: Viewport = {
@@ -73,13 +70,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:text-white dark:text-[#050505] focus:px-4 focus:py-2 focus:rounded-md focus:font-bold">
           Skip to main content
         </a>
-<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-KZDP9KKF"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-</script>
-
         <SiteHeader />
         <ResumeSessionPill />
         <main id="main" className="flex-1">
