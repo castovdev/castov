@@ -73,7 +73,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:text-white dark:text-[#050505] focus:px-4 focus:py-2 focus:rounded-md focus:font-bold">
           Skip to main content
         </a>
-        export default function RootLayout({
+      import { GoogleTagManager } from '@next/third-parties/google'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
@@ -82,8 +85,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         {children}
+        <SpeedInsights />
+        <GoogleTagManager gtmId="GTM-KZDP9KKF" />
       </body>
-      <GoogleTagManager gtmId="GTM-KZDP9KKF" />
     </html>
   )
 }
