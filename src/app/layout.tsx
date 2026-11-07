@@ -73,24 +73,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:text-white dark:text-[#050505] focus:px-4 focus:py-2 focus:rounded-md focus:font-bold">
           Skip to main content
         </a>
-      import { GoogleTagManager } from '@next/third-parties/google'
-import { SpeedInsights } from '@vercel/speed-insights/next'
+<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-KZDP9KKF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <html lang="en">
-      <body>
-        {children}
-        <SpeedInsights />
-        <GoogleTagManager gtmId="GTM-KZDP9KKF" />
-      </body>
-    </html>
-  )
-}
         <SiteHeader />
         <ResumeSessionPill />
         <main id="main" className="flex-1">
