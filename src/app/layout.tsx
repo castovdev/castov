@@ -11,7 +11,7 @@ import { PwaRegister } from "@/components/pwa-register";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE } from "@/lib/site";
 import "./globals.css";
-
+import { GoogleTagManager } from '@next/third-parties/google'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: { default: `${SITE.name} – ${SITE.tagline}`, template: `%s | ${SITE.name}` },
@@ -73,6 +73,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:text-white dark:text-[#050505] focus:px-4 focus:py-2 focus:rounded-md focus:font-bold">
           Skip to main content
         </a>
+        export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+      </body>
+      <GoogleTagManager gtmId="GTM-KZDP9KKF" />
+    </html>
+  )
+}
         <SiteHeader />
         <ResumeSessionPill />
         <main id="main" className="flex-1">
