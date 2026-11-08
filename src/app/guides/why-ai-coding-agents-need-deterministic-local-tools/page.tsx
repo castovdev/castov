@@ -52,8 +52,8 @@ export default function ArticlePage() {
           Here is a lightweight pattern for a deterministic local execution wrapper that ensures inputs are validated before any system action occurs:
         </p>
 
-        <pre className="bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm">
-          <code>{`import { z } from 'zod';
+    <pre className="bg-gray-900 text-gray-100 dark:bg-gray-900 dark:text-gray-100 p-4 rounded-lg overflow-x-auto text-sm my-4 border border-gray-800">
+  <code>{`import { z } from 'zod';
 
 const ToolInputSchema = z.object({
   action: z.enum(['scan', 'verify', 'format']),
@@ -77,7 +77,7 @@ export async function executeLocalTool(rawInput: unknown) {
     executedAt: new Date().toISOString(),
   };
 }`}</code>
-        </pre>
+</pre>
 
         <h2 className="text-2xl font-semibold mt-8 mb-4">Conclusion & Next Steps</h2>
         <p>
