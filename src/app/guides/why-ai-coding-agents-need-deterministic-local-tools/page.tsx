@@ -12,7 +12,7 @@ export default function ArticlePage() {
   return (
     <article className="max-w-4xl mx-auto px-4 py-12 prose prose-invert">
       <h1 className="text-3xl font-bold mb-4">Why AI Coding Agents Need Deterministic Local Tools</h1>
-      <p className="text-gray-400 text-sm mb-8">Last verified: November 2026 • By Abdelmalik Benidir</p>
+      <p className="text-gray-400 text-sm mb-8">Last verified: November 2026 • By malik </p>
 
       <section className="space-y-6">
         <p>
