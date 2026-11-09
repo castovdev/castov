@@ -11,20 +11,21 @@ import { PinnedToolsTray } from "@/components/pinned-tools";
 import { InstallationDistributionSection } from "@/components/installation-distribution-section";
 import { HomeWelcomeBanner, HomeBottomCta, HomeBentoVaultCard, HomePinnedQuickBar } from "@/components/home-personalized-view";
 import { LiveTerminalPlayground } from "@/components/live-terminal-playground";
+import { SITE } from "@/lib/site"; // استيراد الثوابت الموحدة
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: "Castov | Developer Tools & MCP Server (100% Client-Side, Offline & CLI)",
-    description: "Fast, 100% client-side developer platform: Web + CLI + MCP Server for Cursor and Claude. Zero-data logging, JSON to TypeScript, Cron multi-timezone, and cryptographic pipelines.",
+    title: "Castov – Developer Tools, CLI & MCP Server",
+    description: "Free developer tools for your browser, terminal and AI editors: JSON, JWT, cron and timestamp utilities, plus a CLI and MCP server for Cursor and Claude.",
     path: "/",
   }),
   openGraph: {
     ...buildMetadata({
-      title: "Castov | Developer Tools & MCP Server (100% Client-Side, Offline & CLI)",
-      description: "Fast, 100% client-side developer platform: Web + CLI + MCP Server for Cursor and Claude. Zero-data logging, JSON to TypeScript, Cron multi-timezone, and cryptographic pipelines.",
+      title: "Castov – Developer Tools, CLI & MCP Server",
+      description: "Free developer tools for your browser, terminal and AI editors: JSON, JWT, cron and timestamp utilities, plus a CLI and MCP server for Cursor and Claude.",
       path: "/",
     }).openGraph,
-    title: "Castov | Developer Tools & MCP Server (100% Client-Side, Offline & CLI)",
+    title: "Castov – Developer Tools, CLI & MCP Server",
   },
 };
 
@@ -37,7 +38,7 @@ export default function HomePage() {
           faqJsonLd(HOME_FAQ),
           webApplicationJsonLd({
             name: "Castov Developer Platform",
-            description: "100% Client-Side Developer Tools, Native CLI, and MCP Server for Cursor & Claude. Zero-data logging, JSON to TypeScript, Cron, and cryptographic pipelines.",
+            description: "Local-first developer tools, native CLI, and MCP server for Cursor & Claude.",
             path: "/",
           }),
         ]}
@@ -45,21 +46,21 @@ export default function HomePage() {
 
       {/* --- HERO SECTION --- */}
       <section className="relative pt-28 pb-24 lg:pt-36 lg:pb-32 overflow-hidden border-b border-line">
-        {/* Subtle grid and ambient glow background for professional look */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-accent/20 blur-[100px] rounded-full opacity-50 pointer-events-none" />
 
         <div className="container relative mx-auto px-4 text-center max-w-5xl z-10">
+          {/* تصحيح الشارات المطلقة إلى الوصف الدقيق الآمن */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-field/90 backdrop-blur-md border border-emerald-500/30 text-xs font-mono mb-8 text-fg shadow-xs cursor-default">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-emerald-400 font-semibold">100% Client-Side</span>
+            <span className="text-emerald-400 font-semibold">Local-First</span>
             <span className="text-muted">•</span>
-            <span>Zero-Data Logging</span>
+            <span>No Input Uploaded</span>
             <span className="text-muted">•</span>
-            <span>Works 100% Offline</span>
+            <span>Offline-Capable</span>
           </div>
           
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-fg mb-6 leading-[1.12]">
@@ -70,8 +71,7 @@ export default function HomePage() {
           </h1>
           
           <p className="text-base sm:text-lg lg:text-xl text-muted max-w-3xl mx-auto mb-8 leading-relaxed">
-            All your mission-critical utilities executed locally in your browser, terminal, and AI agents.
-            Zero server tracking, sub-millisecond transforms, and seamless multi-stage pipelines.
+            Run your everyday developer utilities in the browser, the terminal and your AI editor. Your input is processed locally on your device, and anything that touches the network is clearly labeled.
           </p>
 
           {/* Fast Omnibox & Ecosystem Pill */}
@@ -94,12 +94,12 @@ export default function HomePage() {
           </div>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Link href="/tools" className="group flex items-center justify-center gap-2 bg-accent text-accent-fg px-8 py-3.5 rounded-xl font-bold text-base sm:text-lg hover:bg-accent-hover transition-all w-full sm:w-auto shadow-[0_0_20px_rgba(37,99,235,0.25)] hover:shadow-[0_0_25px_rgba(37,99,235,0.4)]">
-              Explore 61 Tools <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            <Link href="/tools" className="group flex items-center justify-center gap-2 bg-accent text-accent-fg px-8 py-3.5 rounded-xl font-bold text-base sm:text-lg hover:bg-accent-hover transition-all w-full sm:w-auto shadow-[0_0_20px_rgba(37,99,235,0.25)]">
+              Explore {SITE.webToolCount} Tools <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link href="/mcp" className="flex items-center justify-center gap-2 bg-card border border-accent/40 text-fg px-8 py-3.5 rounded-xl font-bold text-base sm:text-lg hover:bg-field transition-colors w-full sm:w-auto shadow-sm">
               <ShieldCheck size={18} className="text-emerald-400" />
-              <span>MCP Server (13 Tools)</span>
+              <span>MCP Server ({SITE.mcpToolCount} Tools)</span>
             </Link>
             <Link href="/cli" className="flex items-center justify-center gap-2 bg-card border border-line text-fg px-8 py-3.5 rounded-xl font-bold text-base sm:text-lg hover:bg-field transition-colors w-full sm:w-auto shadow-sm">
               <Terminal size={18} className="text-muted" />
@@ -107,14 +107,13 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Quick timestamp/date paste inspector */}
           <HeroQuickConvert />
           <HomeWelcomeBanner />
           <LiveTerminalPlayground />
         </div>
       </section>
 
-            {/* --- THE 5 COMPETITIVE WEAPONS GRID --- */}
+      {/* --- THE 5 COMPETITIVE WEAPONS GRID --- */}
       <section className="py-24 border-b border-line bg-card relative overflow-hidden">
         <div className="container mx-auto px-4 max-w-7xl relative z-10">
           <div className="text-center mb-16">
@@ -130,17 +129,17 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* 1. Zero-Data Logging */}
+            {/* 1. Local-First Processing */}
             <div className="bg-bg border border-line hover:border-emerald-500/40 p-7 rounded-3xl transition-all shadow-sm group">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-xl font-bold text-fg">Zero-Data Logging</h3>
+                <h3 className="text-xl font-bold text-fg">Local-First Processing</h3>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-semibold">WebCrypto</span>
               </div>
               <p className="text-sm text-muted leading-relaxed">
-                100% of cryptography, JWT inspection, JSON formatting, and timestamp parsing executes in local browser memory. Not a single keystroke is sent to external servers.
+                Formatting, JWT inspection, hashing and timestamp parsing run in your browser's memory. Your input is never uploaded to Castov servers. Features that need the network, like Env Vault and team sync, are clearly labeled.
               </p>
             </div>
 
@@ -168,7 +167,7 @@ export default function HomePage() {
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 font-semibold">Web • CLI • MCP</span>
               </div>
               <p className="text-sm text-muted leading-relaxed">
-                The exact same 13 utilities work on the Web, in your local terminal via <code className="text-fg bg-field px-1 rounded">castov</code>, and inside Cursor or Claude via our Grade-A certified Model Context Protocol server.
+                The same core utilities work on the web, in your terminal via <code className="text-fg bg-field px-1 rounded">castov</code>, and inside Cursor or Claude through our MCP server.
               </p>
             </div>
 
@@ -205,7 +204,7 @@ export default function HomePage() {
               <div>
                 <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tight mb-4 text-fg">Advanced Capabilities</h2>
                 <p className="text-muted text-lg">
-                  We didn't just build formatters. We built the architecture required by modern engineering teams.
+                   We didn't just build formatters. We built the architecture required by modern engineering teams.
                 </p>
               </div>
 
@@ -216,7 +215,7 @@ export default function HomePage() {
                 <div>
                   <h3 className="text-xl font-bold mb-2 group-hover:text-success transition-colors text-fg">P2P Multiplayer Canvas</h3>
                   <p className="text-muted leading-relaxed">
-                    A visual node-editor for building data pipelines. Connects peers in real-time using WebRTC and CRDTs (Yjs) with direct peer-to-peer data channels coordinated through public signaling servers (which may receive connection metadata). Workflow graphs, node configurations, and payload data are never stored on Castov servers.
+                    A visual node-editor for building data pipelines. Connects peers in real-time using WebRTC and CRDTs (Yjs) with direct peer-to-peer data channels coordinated through public signaling servers (which may receive connection metadata). Payloads are never stored on Castov servers.
                   </p>
                 </div>
               </div>
@@ -226,9 +225,9 @@ export default function HomePage() {
                   <ShieldCheck size={28} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-warning transition-colors text-fg">Steganography Environment Vaults</h3>
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-warning transition-colors text-fg">End-to-End Encrypted Env Vaults</h3>
                   <p className="text-muted leading-relaxed">
-                    End-to-end encrypted environment variables. We hide your secure AES keys inside standard image pixels (Steganography) for invisible sharing, entirely in your browser.
+                    Secure environment variables stored as encrypted ciphertext so teammates can retrieve them. We cannot read the contents.
                   </p>
                 </div>
               </div>
@@ -265,7 +264,7 @@ export default function HomePage() {
         </div>
       </section>
 
-{/* --- TOOLS CATEGORIES SECTION --- */}
+      {/* --- TOOLS CATEGORIES SECTION --- */}
       <section className="py-24 bg-card border-b border-line">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-16">
