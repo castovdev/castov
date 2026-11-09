@@ -13,15 +13,27 @@ function resolveSiteUrl(): string {
 
 export const SITE = {
   name: "Castov",
-  tagline: "Free Time & Timestamp Tools",
+  tagline: "Developer tools, CLI & MCP server",
   description:
-    "Free online Unix timestamp, epoch, ISO 8601 and time zone tools. The converters run in your browser: fast, private and no sign-up.",
+    "Free developer tools for your browser, terminal and AI editors: JSON, JWT, cron and timestamp utilities, plus a CLI and MCP server for Cursor and Claude.",
   url: resolveSiteUrl(),
   locale: "en_US",
   themeColor: "#0B1020",
+  mcpToolCount: 13,
+  webToolCount: 61,
+  logo: "https://castov.com/logo-512.png",
   /** Date used as `lastModified` in the sitemap. Update when content changes meaningfully. */
-  contentUpdated: "2026-09-20",
+  contentUpdated: "2026-11-09",
   contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "contact@castov.com",
+  sameAs: [
+    "https://github.com/castovdev/castov",
+    "https://x.com/castovdev",
+    "https://www.npmjs.com/package/castov",
+    "https://hub.docker.com/r/castovdev/castov",
+    "https://marketplace.visualstudio.com/items?itemName=Castov.mcp-security-castov",
+    "https://addons.mozilla.org/en-US/firefox/addon/castov-secret-shield/",
+    "https://instagram.com/castovdev",
+  ],
 } as const;
 
 export function absoluteUrl(path = "/"): string {
