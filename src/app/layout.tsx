@@ -1,4 +1,4 @@
-import type { Metadata, Vimport type { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { AdSenseScript } from "@/components/adsense-script";
@@ -10,8 +10,8 @@ import { KeyboardShortcutsModal } from "@/components/keyboard-shortcuts-modal";
 import { PwaRegister } from "@/components/pwa-register";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE } from "@/lib/site";
-import { siteGraph } from "@/lib/schema"; // استيراد الهيكلة الشاملة الجديدة
-import { JsonLd } from "@/components/JsonLd"; // مكون حقن الـ JSON-LD الآمن
+import { siteGraph } from "@/lib/schema";
+import { JsonLd } from "@/components/JsonLd";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -48,7 +48,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" data-theme="light" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-        {/* حقن الهيكلة الشاملة (Organization & SoftwareApplication & SiteNavigation) */}
         <JsonLd data={siteGraph} />
       </head>
       <body className="flex min-h-screen flex-col font-sans antialiased">
