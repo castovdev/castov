@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { BLOG_LEGACY_REDIRECTS } from "@/lib/blog-redirects";
 import Link from "next/link";
 import { BLOG_POSTS, getBlogPost } from "@/content/blog";
 import { Breadcrumb } from "@/components/breadcrumb";
@@ -38,7 +39,13 @@ export default async function BlogPostPage({
 }) {
   const { slug } = await params;
   const post = getBlogPost(slug);
-  if (!post) notFound();
+  if (!post) {
+    const legacyTarget = BLOG_LEGACY_REDIRECTS[slug];
+    if (legacyTarget) {
+      redirect(`/blog/${legacyTarget}`);
+    }
+    notFound();
+  }
 
   const breadcrumbs = [
     { name: "Home", href: "/" },

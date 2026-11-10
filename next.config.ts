@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { BLOG_LEGACY_REDIRECTS } from "./src/lib/blog-redirects";
 
 /**
  * Security headers that are safe for a fully static, script-light site.
@@ -46,7 +47,12 @@ const nextConfig: NextConfig = {
         source: '/tools/:tool',
         destination: '/:tool',
         permanent: true,
-      }
+      },
+      ...Object.entries(BLOG_LEGACY_REDIRECTS).map(([source, destination]) => ({
+        source: `/blog/${source}`,
+        destination: `/blog/${destination}`,
+        permanent: true,
+      }))
     ];
   }
 };

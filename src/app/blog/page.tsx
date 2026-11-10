@@ -6,7 +6,7 @@ import { buildMetadata, breadcrumbJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
 import { BookOpen, Sparkles, Shield, Cpu } from "lucide-react";
 
-const TITLE = "Engineering & Architecture Blog (100 Articles) | Castov";
+const TITLE = "Engineering & Architecture Blog | Castov";
 const DESCRIPTION =
   "Deep dives into local-first autonomous AI agents, zero-telemetry DevSecOps, Windows automation, Next.js architecture, SQLite internals, and high-performance developer utilities.";
 
@@ -39,7 +39,7 @@ export default function BlogIndexPage() {
           <BookOpen className="w-3.5 h-3.5" />
           <span>Castov Technical Engineering Library</span>
           <span className="bg-accent/20 px-1.5 py-0.2 rounded text-[10px] font-bold">
-            100 Articles
+            Definitive Pillar Guides
           </span>
         </div>
 

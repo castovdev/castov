@@ -35,7 +35,7 @@ export function BlogList({ posts, categories }: BlogListProps) {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <input
             type="text"
-            placeholder="Search across 100 engineering articles, tutorials, and security guides..."
+            placeholder="Search architectural deep-dives, DevSecOps tutorials, and security guides..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-line bg-card text-fg placeholder:text-muted/60 focus:outline-none focus:border-accent text-sm shadow-sm"
