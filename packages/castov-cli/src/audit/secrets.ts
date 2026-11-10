@@ -194,18 +194,18 @@ export const SECRET_PATTERNS: SecretPattern[] = [
     regex: /\b(?:sk|rk)_live_[0-9a-zA-Z]{24,}\b/,
     isKnownProvider: true,
   },
-  // 3. OpenAI API Key
-  {
-    name: "OpenAI API Key",
-    provider: "OpenAI",
-    regex: /\bsk-(?:proj-)?[a-zA-Z0-9_-]{32,}\b/,
-    isKnownProvider: true,
-  },
-  // 4. Anthropic API Key
+  // 3. Anthropic API Key (placed before OpenAI to prevent shadow matches)
   {
     name: "Anthropic API Key",
     provider: "Anthropic",
-    regex: /\bsk-ant-api03-[a-zA-Z0-9_-]{80,}\b/,
+    regex: /\bsk-ant-(?:api03-)?[a-zA-Z0-9_-]{32,}\b/,
+    isKnownProvider: true,
+  },
+  // 4. OpenAI API Key
+  {
+    name: "OpenAI API Key",
+    provider: "OpenAI",
+    regex: /\bsk-(?!ant-)(?:proj-|admin-)?[a-zA-Z0-9_-]{32,}\b/,
     isKnownProvider: true,
   },
   // 5. GitHub Personal Access Token / Fine-grained Token

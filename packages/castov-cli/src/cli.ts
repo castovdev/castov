@@ -1949,7 +1949,7 @@ function generateTsInterfacesFromObject(
       // ---------------------------------------------------------------------
       const MAX_HEADER_SIZE = 8192;           // 8 KiB max header limit
       const MAX_BODY_SIZE = 4 * 1024 * 1024;  // 4 MiB max payload limit
-      const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2024-11-05", "2025-03-26", "2025-06-18"]);
+      const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2024-11-05", "2025-03-26", "2025-06-18", "2026-07-28"]);
 
       type Mode = "ndjson" | "framed";
 
