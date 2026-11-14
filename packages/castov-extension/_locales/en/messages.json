@@ -7,20 +7,110 @@
     "message": "Intercepts and prevents pasting secrets into AI chat sites. Local and offline with zero network calls.",
     "description": "Description of the extension"
   },
+  "modalTitleSingle": {
+    "message": "1 Sensitive Secret Detected",
+    "description": "Modal title when 1 secret is detected"
+  },
+  "modalTitlePlural": {
+    "message": "$COUNT$ Sensitive Secrets Detected",
+    "description": "Modal title when multiple secrets are detected",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "modalSubtitle": {
+    "message": "Castov Secret Shield intercepted this paste to protect your credentials.",
+    "description": "Modal subtitle explaining interception"
+  },
+  "modalWarning": {
+    "message": "Secrets pasted into AI chats may be permanently logged in conversation history, system logs, or training data.",
+    "description": "Modal warning callout text"
+  },
+  "modalFooter": {
+    "message": "Castov Secret Shield • Zero Network • Local Only",
+    "description": "Modal footer brand text"
+  },
   "btnRedact": {
     "message": "Paste Redacted",
     "description": "Button to paste redacted text"
+  },
+  "btnRedactAria": {
+    "message": "Paste redacted text with secrets replaced by placeholders",
+    "description": "Accessible aria-label for Paste Redacted button"
   },
   "btnOriginal": {
     "message": "Paste Original",
     "description": "Button to paste original text without redaction"
   },
+  "btnOriginalTitle": {
+    "message": "Paste without redaction",
+    "description": "Tooltip title for Paste Original button"
+  },
+  "btnOriginalAria": {
+    "message": "Paste original unredacted text containing secrets",
+    "description": "Accessible aria-label for Paste Original button"
+  },
   "btnCancel": {
     "message": "Cancel",
     "description": "Button to cancel paste"
   },
-  "contextMenuDecode": {
-    "message": "Castov: Decode Selection",
-    "description": "Context menu title for decoding selected text"
+  "btnCancelAria": {
+    "message": "Cancel paste operation and close dialog",
+    "description": "Accessible aria-label for Cancel button"
+  },
+  "popupTitle": {
+    "message": "Castov Secret Shield",
+    "description": "Popup header title"
+  },
+  "popupTagline": {
+    "message": "AI Paste & Secret Leak Protection",
+    "description": "Popup header subtitle"
+  },
+  "popupPrivacyBadge": {
+    "message": "Offline Only",
+    "description": "Popup header privacy badge"
+  },
+  "popupWeeklyLabel": {
+    "message": "Secrets Blocked This Week",
+    "description": "Label under weekly blocked count"
+  },
+  "popupShieldTitle": {
+    "message": "Shield Protection",
+    "description": "Master protection toggle title"
+  },
+  "popupShieldDesc": {
+    "message": "Intercept paste events on AI chat websites",
+    "description": "Master protection toggle description"
+  },
+  "popupShieldAria": {
+    "message": "Toggle global shield protection",
+    "description": "Accessible aria-label for master shield toggle"
+  },
+  "popupCounterTitle": {
+    "message": "Local Counters",
+    "description": "Local counter toggle title"
+  },
+  "popupCounterDesc": {
+    "message": "Count blocked types locally (never values or URLs)",
+    "description": "Local counter toggle description"
+  },
+  "popupCounterAria": {
+    "message": "Toggle local anonymous secret counters",
+    "description": "Accessible aria-label for local counters toggle"
+  },
+  "popupSitesHeading": {
+    "message": "Protected AI Chat Websites",
+    "description": "Heading for per-site toggles section"
+  },
+  "popupFooterLink": {
+    "message": "castov.com ↗",
+    "description": "Footer link text"
+  },
+  "popupFooterPrivacy": {
+    "message": "Zero Network • Open Source",
+    "description": "Footer privacy summary"
   }
 }

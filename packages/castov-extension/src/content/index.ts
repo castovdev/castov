@@ -1,7 +1,7 @@
 /**
  * Castov Secret Shield - SafePaste Content Script
  *
- * Intercepts the `paste` event on AI chat sites in the capture phase.
+ * Intercepts the `paste` and `drop` events on AI chat sites in the capture phase.
  * Never stores, transmits, or logs secrets.
  */
 
@@ -16,8 +16,6 @@ import {
   restoreSelectionState,
 } from "./editor-injector";
 import { showSecretDetectedModal, ModalUserChoice } from "./shadow-modal";
-import { showDecodeTooltip } from "./decode-tooltip";
-import { UnifiedDecodeResult } from "../decoder";
 
 /**
  * Handles an intercepted clipboard paste event.
@@ -166,25 +164,12 @@ export async function initSafePaste(): Promise<() => void> {
     handleDropEvent(e).catch(() => {});
   };
 
-  const onMessage = (message: any) => {
-    if (message && message.type === "CASTOV_SHOW_DECODE_TOOLTIP" && message.data) {
-      showDecodeTooltip(message.data as UnifiedDecodeResult);
-    }
-  };
-
   window.addEventListener("paste", onPaste, true);
   window.addEventListener("drop", onDrop, true);
-
-  if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
-    chrome.runtime.onMessage.addListener(onMessage);
-  }
 
   return () => {
     window.removeEventListener("paste", onPaste, true);
     window.removeEventListener("drop", onDrop, true);
-    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
-      chrome.runtime.onMessage.removeListener(onMessage);
-    }
   };
 }
 

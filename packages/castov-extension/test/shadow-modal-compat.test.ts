@@ -10,7 +10,7 @@ import { handlePasteEvent, handleDropEvent } from "../src/content/index";
 import { SecretFinding } from "../src/detector/types";
 import { NormalizedFinding } from "../src/types/findings";
 
-describe("Castov Secret Shield - Shadow Modal V1 Compatibility & Security", () => {
+describe("Castov Secret Shield - Shadow Modal V1 Compatibility, Accessibility & i18n", () => {
   const sampleV1Finding: SecretFinding = {
     type: "AWS_KEY",
     label: "AWS Access Key",
@@ -36,6 +36,7 @@ describe("Castov Secret Shield - Shadow Modal V1 Compatibility & Security", () =
   afterEach(() => {
     const existing = document.getElementById("castov-secret-shield-modal-host");
     if (existing) existing.remove();
+    delete (globalThis as any).chrome;
     vi.restoreAllMocks();
   });
 
@@ -57,8 +58,8 @@ describe("Castov Secret Shield - Shadow Modal V1 Compatibility & Security", () =
     });
   });
 
-  describe("Verbatim V1 English Modal Baseline", () => {
-    it("renders exact legacy V1 text in English for single finding", async () => {
+  describe("Verbatim V1 English Modal Baseline & ARIA Attributes", () => {
+    it("renders exact legacy V1 text in English for single finding and sets accessible aria-labels", async () => {
       const modalPromise = showSecretDetectedModal({
         findings: [sampleV1Finding],
       });
@@ -75,10 +76,23 @@ describe("Castov Secret Shield - Shadow Modal V1 Compatibility & Security", () =
       expect(shadow.getElementById("modal-warning")!.textContent).toBe(
         "Secrets pasted into AI chats may be permanently logged in conversation history, system logs, or training data."
       );
-      expect(shadow.getElementById("btn-cancel")!.textContent).toBe("Cancel");
-      expect(shadow.getElementById("btn-original")!.textContent).toBe("Paste Original");
-      expect(shadow.getElementById("btn-original")!.getAttribute("title")).toBe("Paste without redaction");
-      expect(shadow.getElementById("btn-redact")!.textContent).toBe("Paste Redacted");
+
+      const btnCancel = shadow.getElementById("btn-cancel") as HTMLButtonElement;
+      const btnOriginal = shadow.getElementById("btn-original") as HTMLButtonElement;
+      const btnRedact = shadow.getElementById("btn-redact") as HTMLButtonElement;
+
+      expect(btnCancel.textContent).toBe("Cancel");
+      expect(btnCancel.getAttribute("aria-label")).toBe("Cancel paste operation and close dialog");
+
+      expect(btnOriginal.textContent).toBe("Paste Original");
+      expect(btnOriginal.getAttribute("title")).toBe("Paste without redaction");
+      expect(btnOriginal.getAttribute("aria-label")).toBe("Paste original unredacted text containing secrets");
+
+      expect(btnRedact.textContent).toBe("Paste Redacted");
+      expect(btnRedact.getAttribute("aria-label")).toBe(
+        "Paste redacted text with secrets replaced by placeholders"
+      );
+
       expect(shadow.getElementById("modal-footer")!.textContent).toBe(
         "Castov Secret Shield • Zero Network • Local Only"
       );
@@ -87,7 +101,6 @@ describe("Castov Secret Shield - Shadow Modal V1 Compatibility & Security", () =
       expect(shadow.innerHTML).not.toContain(sampleV1Finding.raw);
 
       // Click cancel to cleanup
-      const btnCancel = shadow.getElementById("btn-cancel") as HTMLButtonElement;
       btnCancel.click();
       const choice = await modalPromise;
       expect(choice).toBe("cancel");
@@ -107,6 +120,110 @@ describe("Castov Secret Shield - Shadow Modal V1 Compatibility & Security", () =
       btnRedact.click();
       const choice = await modalPromise;
       expect(choice).toBe("redacted");
+    });
+
+    it("routes all modal text and aria-labels through chrome.i18n.getMessage when available", async () => {
+      const getMessageMock = vi.fn((key: string, substitutions?: string | string[]) => {
+        if (key === "modalTitlePlural" && Array.isArray(substitutions)) {
+          return `${substitutions[0]} Sensitive Secrets Detected [i18n]`;
+        }
+        return `[i18n:${key}]`;
+      });
+      (globalThis as any).chrome = {
+        i18n: {
+          getMessage: getMessageMock,
+        },
+      };
+
+      const modalPromise = showSecretDetectedModal({
+        findings: [sampleV1Finding, sampleV1Finding],
+      });
+
+      const host = document.getElementById("castov-secret-shield-modal-host")!;
+      const shadow = host.shadowRoot!;
+
+      expect(shadow.getElementById("modal-title")!.textContent).toBe("2 Sensitive Secrets Detected [i18n]");
+      expect(shadow.getElementById("modal-subtitle")!.textContent).toBe("[i18n:modalSubtitle]");
+      expect(shadow.getElementById("modal-warning")!.textContent).toBe("[i18n:modalWarning]");
+      expect(shadow.getElementById("modal-footer")!.textContent).toBe("[i18n:modalFooter]");
+      expect(shadow.getElementById("btn-cancel")!.textContent).toBe("[i18n:btnCancel]");
+      expect(shadow.getElementById("btn-cancel")!.getAttribute("aria-label")).toBe("[i18n:btnCancelAria]");
+      expect(shadow.getElementById("btn-original")!.textContent).toBe("[i18n:btnOriginal]");
+      expect(shadow.getElementById("btn-original")!.getAttribute("aria-label")).toBe("[i18n:btnOriginalAria]");
+      expect(shadow.getElementById("btn-redact")!.textContent).toBe("[i18n:btnRedact]");
+      expect(shadow.getElementById("btn-redact")!.getAttribute("aria-label")).toBe("[i18n:btnRedactAria]");
+
+      const btnCancel = shadow.getElementById("btn-cancel") as HTMLButtonElement;
+      btnCancel.click();
+      await modalPromise;
+    });
+  });
+
+  describe("Keyboard Navigation, Focus Trap & Focus Restoration", () => {
+    it("traps focus with Tab and Shift+Tab, activates with Enter, and restores focus to previous element on close", async () => {
+      const promptInput = document.createElement("textarea");
+      document.body.appendChild(promptInput);
+      promptInput.focus();
+      expect(document.activeElement).toBe(promptInput);
+
+      const modalPromise = showSecretDetectedModal({
+        findings: [sampleV1Finding],
+      });
+
+      const host = document.getElementById("castov-secret-shield-modal-host")!;
+      const shadow = host.shadowRoot!;
+      const btnCancel = shadow.getElementById("btn-cancel") as HTMLButtonElement;
+      const btnOriginal = shadow.getElementById("btn-original") as HTMLButtonElement;
+      const btnRedact = shadow.getElementById("btn-redact") as HTMLButtonElement;
+
+      // Default focus is on Paste Redacted (index 2)
+      expect(shadow.activeElement).toBe(btnRedact);
+
+      // Tab from last button wraps around to first button (Cancel)
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+      expect(shadow.activeElement).toBe(btnCancel);
+
+      // Tab moves to Paste Original
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+      expect(shadow.activeElement).toBe(btnOriginal);
+
+      // Shift+Tab moves back to Cancel
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true })
+      );
+      expect(shadow.activeElement).toBe(btnCancel);
+
+      // Shift+Tab from first button wraps around to last button (Paste Redacted)
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true })
+      );
+      expect(shadow.activeElement).toBe(btnRedact);
+
+      // Pressing Enter on focused Paste Redacted button resolves with 'redacted'
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      const choice = await modalPromise;
+      expect(choice).toBe("redacted");
+
+      // Focus is restored to the previously focused promptInput
+      expect(document.activeElement).toBe(promptInput);
+      promptInput.remove();
+    });
+
+    it("restores focus to previous element when closed via Escape key", async () => {
+      const promptInput = document.createElement("textarea");
+      document.body.appendChild(promptInput);
+      promptInput.focus();
+
+      const modalPromise = showSecretDetectedModal({
+        findings: [sampleV1Finding],
+      });
+
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+      const choice = await modalPromise;
+      expect(choice).toBe("cancel");
+      expect(document.activeElement).toBe(promptInput);
+
+      promptInput.remove();
     });
   });
 

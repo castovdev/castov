@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Castov Secret Shield</title>
+  <title data-i18n="extName">Castov Secret Shield</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
@@ -51,17 +51,17 @@
           </svg>
         </div>
         <div>
-          <h1 class="app-title">Castov Secret Shield</h1>
-          <p class="app-tagline">AI Paste Protection & Local Decoder</p>
+          <h1 class="app-title" data-i18n="popupTitle">Castov Secret Shield</h1>
+          <p class="app-tagline" data-i18n="popupTagline">AI Paste &amp; Secret Leak Protection</p>
         </div>
       </div>
-      <span class="privacy-badge">Offline Only</span>
+      <span class="privacy-badge" data-i18n="popupPrivacyBadge">Offline Only</span>
     </header>
 
     <!-- Stats Hero Card -->
     <section class="card stats-card">
       <div class="stat-number" id="stat-weekly-count">0</div>
-      <div class="stat-label">Secrets Blocked This Week</div>
+      <div class="stat-label" data-i18n="popupWeeklyLabel">Secrets Blocked This Week</div>
       <div class="today-breakdown" id="today-breakdown" style="display: none;"></div>
     </section>
 
@@ -69,22 +69,22 @@
     <section class="card controls-card">
       <div class="control-row">
         <div>
-          <div class="control-title">Shield Protection</div>
-          <div class="control-desc">Intercept paste events on AI chat websites</div>
+          <div class="control-title" data-i18n="popupShieldTitle">Shield Protection</div>
+          <div class="control-desc" data-i18n="popupShieldDesc">Intercept paste events on AI chat websites</div>
         </div>
         <label class="switch">
-          <input type="checkbox" id="toggle-master-shield" checked />
+          <input type="checkbox" id="toggle-master-shield" data-i18n-aria="popupShieldAria" aria-label="Toggle global shield protection" checked />
           <span class="slider"></span>
         </label>
       </div>
 
       <div class="control-row">
         <div>
-          <div class="control-title">Local Counters</div>
-          <div class="control-desc">Count blocked types locally (never values or URLs)</div>
+          <div class="control-title" data-i18n="popupCounterTitle">Local Counters</div>
+          <div class="control-desc" data-i18n="popupCounterDesc">Count blocked types locally (never values or URLs)</div>
         </div>
         <label class="switch">
-          <input type="checkbox" id="toggle-counting" checked />
+          <input type="checkbox" id="toggle-counting" data-i18n-aria="popupCounterAria" aria-label="Toggle local anonymous secret counters" checked />
           <span class="slider"></span>
         </label>
       </div>
@@ -92,7 +92,7 @@
 
     <!-- Per-Site Toggles -->
     <section class="card sites-card">
-      <div class="section-heading">Protected AI Chat Websites</div>
+      <div class="section-heading" data-i18n="popupSitesHeading">Protected AI Chat Websites</div>
       <div class="sites-list" id="sites-list">
         <!-- Injected via popup.ts -->
       </div>
@@ -100,10 +100,10 @@
 
     <!-- Footer -->
     <footer class="footer">
-      <a href="https://castov.com" target="_blank" rel="noopener noreferrer" class="castov-link" id="link-castov">
+      <a href="https://castov.com" target="_blank" rel="noopener noreferrer" class="castov-link" id="link-castov" data-i18n="popupFooterLink">
         castov.com ↗
       </a>
-      <span class="footer-privacy">Zero Network • Open Source</span>
+      <span class="footer-privacy" data-i18n="popupFooterPrivacy">Zero Network • Open Source</span>
     </footer>
   </div>
 

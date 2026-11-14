@@ -8,7 +8,25 @@ const packageRoot = path.resolve(import.meta.dirname, "..");
 const outputDir = path.resolve(packageRoot, "store-assets");
 fs.mkdirSync(outputDir, { recursive: true });
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+function resolveChromeBinary() {
+  if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) {
+    return process.env.CHROME_PATH;
+  }
+  const winProgFiles = process.env["PROGRAMFILES"] || "C:\\Program Files";
+  const winProgFilesX86 = process.env["PROGRAMFILES(X86)"] || "C:\\Program Files (x86)";
+  const candidates = [
+    path.join(winProgFiles, "Google", "Chrome", "Application", "chrome.exe"),
+    path.join(winProgFilesX86, "Google", "Chrome", "Application", "chrome.exe"),
+    "/usr/bin/google-chrome",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return "google-chrome";
+}
+
+const CHROME_PATH = resolveChromeBinary();
 
 // Master Castov SVG Logo
 const LOGO_SVG = `
@@ -146,7 +164,7 @@ const LARGE_TILE_HTML = `<!DOCTYPE html>
     .platforms-supported {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       font-size: 12.5px;
       color: #94a3b8;
     }
@@ -159,7 +177,8 @@ const LARGE_TILE_HTML = `<!DOCTYPE html>
       border: 1px solid rgba(255, 255, 255, 0.08);
       padding: 3px 8px;
       border-radius: 6px;
-      font-size: 11.5px;
+      font-size: 11px;
+      font-family: ui-monospace, monospace;
       color: #f1f5f9;
       font-weight: 500;
     }
@@ -183,7 +202,6 @@ const LARGE_TILE_HTML = `<!DOCTYPE html>
       flex-direction: column;
       gap: 14px;
       transform: perspective(1000px) rotateY(-4deg) rotateX(2deg);
-      transition: transform 0.3s ease;
     }
 
     .modal-head {
@@ -236,7 +254,14 @@ const LARGE_TILE_HTML = `<!DOCTYPE html>
       font-size: 11.5px;
     }
     .finding-title { font-weight: 600; color: #334155; }
-    .finding-val { font-family: ui-monospace, monospace; color: #dc2626; font-weight: 700; }
+    .finding-val {
+      font-family: ui-monospace, monospace;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #0f172a;
+      font-weight: 700;
+    }
 
     .btn-row {
       display: flex;
@@ -257,13 +282,14 @@ const LARGE_TILE_HTML = `<!DOCTYPE html>
 
     .tag-ribbon {
       position: absolute;
-      top: -16px;
-      right: 20px;
+      top: -18px;
+      right: 24px;
+      z-index: 10;
       background: linear-gradient(135deg, #00b4f5, #2563eb);
       color: #ffffff;
       font-size: 11px;
       font-weight: 800;
-      padding: 4px 12px;
+      padding: 5px 14px;
       border-radius: 9999px;
       box-shadow: 0 4px 12px rgba(0, 180, 245, 0.4);
       letter-spacing: 0.05em;
@@ -280,7 +306,7 @@ const LARGE_TILE_HTML = `<!DOCTYPE html>
         ${LOGO_SVG}
       </div>
       <div class="brand-meta">
-        <span class="category-badge">Microsoft Edge & Chrome Extension</span>
+        <span class="category-badge">100% Local Browser Extension</span>
         <h1 class="brand-name">Castov Secret Shield</h1>
       </div>
     </div>
@@ -296,14 +322,13 @@ const LARGE_TILE_HTML = `<!DOCTYPE html>
     </div>
 
     <div class="platforms-supported">
-      <span>Supported AI Chats:</span>
+      <span>7 Protected AI Domains:</span>
       <div class="plat-tags">
-        <span class="plat-tag">Microsoft Copilot</span>
-        <span class="plat-tag">ChatGPT</span>
-        <span class="plat-tag">Claude</span>
-        <span class="plat-tag">Gemini</span>
-        <span class="plat-tag">DeepSeek</span>
-        <span class="plat-tag">Perplexity</span>
+        <span class="plat-tag">chatgpt.com</span>
+        <span class="plat-tag">claude.ai</span>
+        <span class="plat-tag">gemini.google.com</span>
+        <span class="plat-tag">chat.deepseek.com</span>
+        <span class="plat-tag">+3 more</span>
       </div>
     </div>
   </div>
@@ -327,11 +352,11 @@ const LARGE_TILE_HTML = `<!DOCTYPE html>
       <div class="findings-box">
         <div class="finding-item">
           <span class="finding-title">AWS Access Key ID</span>
-          <span class="finding-val">AKIA************MPLE</span>
+          <span class="finding-val">AKIA… (20 chars)</span>
         </div>
         <div class="finding-item">
           <span class="finding-title">Stripe Live Secret Key</span>
-          <span class="finding-val">sk_live_********************4a21</span>
+          <span class="finding-val">sk_l… (32 chars)</span>
         </div>
       </div>
 
@@ -425,7 +450,7 @@ const SMALL_TILE_HTML = `<!DOCTYPE html>
 </html>`;
 
 async function renderTiles() {
-  console.log("Generating promotional tiles for Microsoft Edge Add-ons...");
+  console.log("Generating promotional tiles (1400x560 and 440x280)...");
 
   // 1. Large Promotional Tile (1400 x 560)
   const largeHtmlPath = path.resolve(outputDir, "temp-large.html");

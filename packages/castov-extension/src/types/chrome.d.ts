@@ -52,4 +52,8 @@ declare namespace chrome {
     function sendMessage(tabId: number, message: any): Promise<any>;
     function query(queryInfo: { active?: boolean; currentWindow?: boolean }): Promise<Array<{ id?: number; url?: string }>>;
   }
+
+  namespace i18n {
+    function getMessage(messageName: string, substitutions?: string | string[]): string;
+  }
 }

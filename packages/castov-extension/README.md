@@ -1,10 +1,10 @@
 # Castov Secret Shield — Chrome Extension (Manifest V3)
 
-> Stops developers from pasting secrets into AI chat sites, plus a local offline decoder. 100% offline, zero network calls, zero telemetry.
+> Stops developers from pasting secrets into AI chat sites. 100% offline, zero network calls, zero telemetry.
 
 ---
 
-## Supported AI Platforms (Fixed List)
+## Supported AI Chat Domains (7 Explicit Hosts)
 1. `chatgpt.com`
 2. `chat.openai.com`
 3. `claude.ai`
@@ -17,30 +17,26 @@
 
 ## Features
 
-- **SafePaste (Core)**: Intercepts paste events (capture phase) on `textarea`, `input`, and `contenteditable`. Scans pasted clipboard text in $< 50\text{ ms}$ for 11+ credential types.
-- **Shadow-DOM Modal**: Completely isolated modal dialog with zero style leakage.
-  - "Paste redacted" (Default & focused): Replaces secrets with `[REDACTED:<TYPE>_<n>]`.
-  - "Paste original": Inserts original unredacted text.
-  - "Cancel": Aborts paste.
-- **Select-to-Decode**: Context menu on selected text:
-  - Decodes JWT (header, payload, expiration status).
-  - Decodes Unix Epoch Timestamps (seconds/milliseconds to UTC, Local, and relative time).
-  - Decodes Base64/Base64URL into readable UTF-8 text.
-- **Popup & Local Counter**: Weekly blocked count, master on/off switch, per-site toggles, and zero-network verification.
+- **SafePaste (Core Single Purpose)**: Intercepts `paste` and `drop` events (capture phase) on `textarea`, `input`, `contenteditable` (ProseMirror/Lexical), and Open Shadow DOM editors. Scans text locally in $< 50\text{ ms}$ for 11+ credential types.
+- **Isolated Shadow-DOM Modal**: Completely isolated modal dialog with zero style leakage and strict secret masking (`AKIA… (20 chars)`).
+  - **Paste Redacted** (Default & focused): Replaces secrets with `[REDACTED:<TYPE>_<n>]`.
+  - **Paste Original**: Inserts original unredacted text.
+  - **Cancel**: Aborts paste cleanly.
+- **Popup & Local Counter**: Weekly blocked count, daily category breakdown, master on/off switch, and independent per-site toggles stored locally in `chrome.storage.local`.
 
 ---
 
 ## Quick Start & Build
 
 ```bash
-# 1. Run all unit and DOM tests (54 automated tests)
-npx vitest run --config packages/castov-extension/vitest.config.ts
+# 1. Build and package the extension (creates dist/ and dist/castov-secret-shield-1.0.0.zip)
+npm --prefix packages/castov-extension run package
 
 # 2. Check TypeScript types
-npx tsc --project packages/castov-extension/tsconfig.json --noEmit
+npm --prefix packages/castov-extension run typecheck
 
-# 3. Build the extension package (creates dist/ and dist/castov-secret-shield.zip)
-node packages/castov-extension/scripts/build.mjs
+# 3. Run all unit, DOM, and bundle security tests
+npm --prefix packages/castov-extension test
 ```
 
 ---
@@ -52,11 +48,11 @@ node packages/castov-extension/scripts/build.mjs
 2. Enable **Developer mode** toggle in the top-right corner.
 3. Click the **Load unpacked** button in the top-left.
 4. Select the directory:
-   `e:\time\packages\castov-extension\dist`
+   `packages/castov-extension/dist`
 5. The extension "Castov Secret Shield" will now appear in your extensions list with version `1.0.0` and active status.
 
 ### Step 2: Test SafePaste Interception
-1. Copy the following sample text with an AWS access key:
+1. Copy the following sample text with a synthetic AWS access key:
    ```text
    Connecting to S3 bucket using AKIA1234567890ABCDEF in production.
    ```
@@ -65,26 +61,14 @@ node packages/castov-extension/scripts/build.mjs
 4. **Expected Result:**
    - The paste is intercepted and does NOT immediately appear in the chat prompt.
    - The Castov Secret Shield modal appears with:
-     - Badge showing "1 Sensitive Secret Detected"
+     - Heading showing "1 Sensitive Secret Detected"
      - Masked preview: `AKIA… (20 chars)`
      - Default focused button: **Paste Redacted**
 5. Hit `Enter` (or click "Paste Redacted"):
    - The text is inserted as: `Connecting to S3 bucket using [REDACTED:AWS_KEY_1] in production.`
    - Modern React/ProseMirror state is registered correctly.
 
-### Step 3: Test Select-to-Decode
-1. On any webpage, highlight a sample JWT or Unix timestamp, for example:
-   `1700000000`
-2. Right-click the selected text and choose **"Castov: Decode Selection"** from the context menu.
-3. **Expected Result:**
-   - An isolated Shadow-DOM card appears near your selection showing:
-     - Title: `Unix Timestamp Decoded`
-     - UTC: `2023-11-14T22:13:20.000Z`
-     - Local time and relative time duration
-     - Click **Copy Result** to copy the formatted UTC string to your clipboard.
-     - Press `Escape` or click the `✕` button to dismiss the card.
-
-### Step 4: Test the Popup & Controls
+### Step 3: Test the Popup & Per-Site Controls
 1. Click the Castov Secret Shield icon in your Chrome toolbar.
 2. Verify:
    - "Secrets Blocked This Week" reflects the blocked secrets.
@@ -98,5 +82,5 @@ node packages/castov-extension/scripts/build.mjs
 
 Our automated test suite enforces that:
 - `dist/` contains ZERO instances of `fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `eval`, or `new Function`.
-- Manifest permissions are strictly limited to `["storage", "contextMenus", "activeTab"]`.
+- Manifest permissions are strictly limited to `["storage"]` with no background service worker and no `<all_urls>`.
 - Content Security Policy enforces `connect-src 'none'`.

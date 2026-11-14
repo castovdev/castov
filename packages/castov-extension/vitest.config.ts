@@ -10,9 +10,10 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: "node",
+    environment: "jsdom",
     include: ["test/**/*.test.ts"],
     testTimeout: 10000,
     isolate: false,
+    pool: "threads",
   },
 });

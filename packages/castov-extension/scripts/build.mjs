@@ -1,8 +1,8 @@
 /**
  * Castov Secret Shield - Clean Bundler & Packager
  *
- * Builds content, background, and popup bundles using Vite without remote CDNs or evals.
- * Copies all static assets and produces an unpacked `dist/` and `dist/castov-secret-shield.zip`.
+ * Builds content and popup bundles using Vite without remote CDNs or evals.
+ * Copies all static assets and produces an unpacked `dist/` and `dist/castov-secret-shield-<version>.zip`.
  */
 
 import fs from "node:fs";
@@ -45,24 +45,7 @@ async function runBuild() {
     },
   });
 
-  // 2. Build Background Service Worker (ES module)
-  console.log("Building Background Service Worker...");
-  await build({
-    root: packageRoot,
-    build: {
-      outDir: distDir,
-      emptyOutDir: false,
-      lib: {
-        entry: path.resolve(packageRoot, "src/background/service-worker.ts"),
-        formats: ["es"],
-        fileName: () => "background.js",
-      },
-      minify: true,
-      sourcemap: false,
-    },
-  });
-
-  // 3. Build Popup Controller (ES module)
+  // 2. Build Popup Controller (ES module)
   console.log("Building Popup Controller...");
   await build({
     root: packageRoot,
@@ -79,19 +62,20 @@ async function runBuild() {
     },
   });
 
-  // 4. Copy Static Assets
+  // 3. Copy Static Assets
   console.log("Copying static assets to dist/...");
   fs.copyFileSync(path.resolve(packageRoot, "manifest.json"), path.join(distDir, "manifest.json"));
   fs.copyFileSync(path.resolve(packageRoot, "src/popup/popup.html"), path.join(distDir, "popup.html"));
   fs.copyFileSync(path.resolve(packageRoot, "src/popup/popup.css"), path.join(distDir, "popup.css"));
 
-  // Copy icons (PNG only)
+  // Copy only the 4 manifest icon PNGs (16, 32, 48, 128)
   const iconsDist = path.join(distDir, "icons");
   fs.mkdirSync(iconsDist, { recursive: true });
   const iconsSrc = path.resolve(packageRoot, "icons");
+  const allowedIcons = new Set(["icon16.png", "icon32.png", "icon48.png", "icon128.png"]);
   if (fs.existsSync(iconsSrc)) {
     for (const file of fs.readdirSync(iconsSrc)) {
-      if (file.endsWith(".png")) {
+      if (allowedIcons.has(file)) {
         fs.copyFileSync(path.join(iconsSrc, file), path.join(iconsDist, file));
       }
     }
@@ -105,9 +89,11 @@ async function runBuild() {
     copyFolderRecursiveSync(localesSrc, localesDist);
   }
 
-  // 5. Create ZIP Archive for distribution
-  console.log("Creating ZIP archive...");
-  await createZipArchive(distDir, path.join(distDir, "castov-secret-shield.zip"));
+  // 4. Create ZIP Archive for distribution
+  const manifestJson = JSON.parse(fs.readFileSync(path.resolve(packageRoot, "manifest.json"), "utf8"));
+  const zipFileName = `castov-secret-shield-${manifestJson.version}.zip`;
+  console.log(`Creating ZIP archive (${zipFileName})...`);
+  await createZipArchive(distDir, path.join(distDir, zipFileName));
 
   console.log("==> Build finished successfully! Output in:", distDir);
 }

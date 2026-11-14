@@ -8,7 +8,25 @@ const packageRoot = path.resolve(import.meta.dirname, "..");
 const outputDir = path.resolve(packageRoot, "store-assets");
 fs.mkdirSync(outputDir, { recursive: true });
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+function resolveChromeBinary() {
+  if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) {
+    return process.env.CHROME_PATH;
+  }
+  const winProgFiles = process.env["PROGRAMFILES"] || "C:\\Program Files";
+  const winProgFilesX86 = process.env["PROGRAMFILES(X86)"] || "C:\\Program Files (x86)";
+  const candidates = [
+    path.join(winProgFiles, "Google", "Chrome", "Application", "chrome.exe"),
+    path.join(winProgFilesX86, "Google", "Chrome", "Application", "chrome.exe"),
+    "/usr/bin/google-chrome",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return "google-chrome";
+}
+
+const CHROME_PATH = resolveChromeBinary();
 
 // Common SVG Logo
 const LOGO_SVG = `
@@ -27,14 +45,14 @@ const LOGO_SVG = `
 const SLIDES = [
   {
     filename: "screenshot-1-interception.png",
-    badge: "SAFEPARSE™ REAL-TIME CLIPBOARD INTERCEPTION",
+    badge: "SAFEPASTE™ REAL-TIME CLIPBOARD INTERCEPTION",
     title: "Stop Sensitive Secret Leaks in AI Chats",
     subtitle: "Intercepts credentials in < 50ms before they leave your clipboard",
     body: `
       <div class="browser-window">
         <div class="browser-header">
           <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-          <div class="address-bar"><span class="lock">🔒</span> https://copilot.microsoft.com</div>
+          <div class="address-bar"><span class="lock">🔒</span> https://ai-chat.example.com</div>
           <div class="browser-actions">
             <span class="ext-icon">${LOGO_SVG}</span>
           </div>
@@ -68,17 +86,17 @@ const SLIDES = [
               <div class="findings-container">
                 <div class="finding-row">
                   <span class="finding-badge">AWS Access Key ID</span>
-                  <span class="finding-masked">AKIA************MPLE</span>
+                  <span class="finding-masked">AKIA… (20 chars)</span>
                 </div>
                 <div class="finding-row">
                   <span class="finding-badge">Stripe Live Secret Key</span>
-                  <span class="finding-masked">sk_live_********************4a21</span>
+                  <span class="finding-masked">sk_l… (32 chars)</span>
                 </div>
               </div>
               <div class="actions">
                 <button class="btn btn-cancel">Cancel</button>
                 <button class="btn btn-orig">Paste Original</button>
-                <button class="btn btn-redact">Paste Redacted (Recommended)</button>
+                <button class="btn btn-redact">Paste Redacted</button>
               </div>
               <div class="footer-brand">
                 Castov Secret Shield • Zero Network • Local Only
@@ -98,37 +116,37 @@ const SLIDES = [
       <div class="browser-window">
         <div class="browser-header">
           <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-          <div class="address-bar"><span class="lock">🔒</span> https://chatgpt.com</div>
+          <div class="address-bar"><span class="lock">🔒</span> https://ai-chat.example.com</div>
           <div class="browser-actions"><span class="ext-icon">${LOGO_SVG}</span></div>
         </div>
         <div class="split-view">
           <div class="pane code-pane">
             <div class="pane-tag danger">⚠️ Raw Clipboard (Intercepted)</div>
             <pre class="code-box"><code>const config = {
-  dbUrl: <span class="tok-red">"postgres://admin:Sup3rS3cr3t@db.aws:5432/prod"</span>,
-  apiKey: <span class="tok-red">"sk-proj-998877665544332211"</span>,
-  awsKey: <span class="tok-red">"AKIAIOSFODNN7EXAMPLE"</span>
+  dbUrl: <span class="tok-red">"postgres://user:FAKE_PASS_0000@db.example:5432/app"</span>,
+  apiKey: <span class="tok-red">"sk-proj-FAKEFAKEFAKEFAKEFAKE00000000"</span>,
+  awsKey: <span class="tok-red">"AKIAFAKEFAKEFAKEFAKE"</span>
 };</code></pre>
             <div class="arrow-indicator">⬇️ SafePaste™ Redaction applied</div>
-            <div class="pane-tag success">🛡️ Safe Redacted Text (Sent to AI)</div>
+            <div class="pane-tag success">🛡️ Safe Redacted Text (Inserted Into Chat)</div>
             <pre class="code-box"><code>const config = {
-  dbUrl: <span class="tok-green">"[REDACTED:POSTGRES_URI_1]"</span>,
+  dbUrl: <span class="tok-green">"[REDACTED:DATABASE_URI_1]"</span>,
   apiKey: <span class="tok-green">"[REDACTED:OPENAI_KEY_1]"</span>,
   awsKey: <span class="tok-green">"[REDACTED:AWS_KEY_1]"</span>
 };</code></pre>
           </div>
           <div class="pane ai-pane">
-            <div class="pane-tag brand">🤖 AI Model Output</div>
+            <div class="pane-tag brand">🤖 AI Assistant Output</div>
             <div class="ai-reply-card">
               <p><strong>AI Assistant:</strong></p>
-              <p>Your configuration is structured correctly! To enable connection pooling for <code>POSTGRES_URI_1</code> in Node.js with high availability:</p>
+              <p>Your configuration is structured correctly! To enable connection pooling for <code>DATABASE_URI_1</code> in Node.js with high availability:</p>
               <pre class="code-box small"><code>import { Pool } from 'pg';
 const pool = new Pool({
   connectionString: config.dbUrl,
   max: 20,
   idleTimeoutMillis: 30000
 });</code></pre>
-              <div class="benefit-pill">✅ Zero credentials were leaked or saved to AI training servers.</div>
+              <div class="benefit-pill">✅ Zero credentials were leaked or saved to external servers.</div>
             </div>
           </div>
         </div>
@@ -138,13 +156,13 @@ const pool = new Pool({
   {
     filename: "screenshot-3-popup.png",
     badge: "TOTAL LOCAL CONTROL & ZERO TELEMETRY",
-    title: "Inspect Local Activity & Manage Site Toggles",
-    subtitle: "Built-in anonymous stats and granular per-domain shields",
+    title: "Inspect Local Activity & Manage Per-Site Shields",
+    subtitle: "Built-in anonymous counters and independent toggles for all 11 supported AI chat domains",
     body: `
       <div class="browser-window">
         <div class="browser-header">
           <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-          <div class="address-bar"><span class="lock">🔒</span> Microsoft Edge — Toolbar Extension Popup</div>
+          <div class="address-bar"><span class="lock">🔒</span> Browser Toolbar — Extension Popup Controls</div>
           <div class="browser-actions active-ext"><span class="ext-icon">${LOGO_SVG}</span></div>
         </div>
         <div class="popup-showcase-bg">
@@ -154,7 +172,7 @@ const pool = new Pool({
                 <div class="pop-logo">${LOGO_SVG}</div>
                 <div>
                   <div class="pop-name">Castov Secret Shield</div>
-                  <div class="pop-desc">AI Paste Protection & Local Decoder</div>
+                  <div class="pop-desc">AI Paste &amp; Secret Leak Protection</div>
                 </div>
               </div>
               <span class="offline-pill">Offline Only</span>
@@ -164,9 +182,9 @@ const pool = new Pool({
               <div class="pop-count">48</div>
               <div class="pop-label">Secrets Blocked This Week</div>
               <div class="cat-breakdown">
-                <span class="cat-pill">AWS: 16</span>
-                <span class="cat-pill">Stripe: 12</span>
-                <span class="cat-pill">OpenAI: 11</span>
+                <span class="cat-pill">AWS_KEY: 16</span>
+                <span class="cat-pill">STRIPE_KEY: 12</span>
+                <span class="cat-pill">OPENAI_KEY: 11</span>
                 <span class="cat-pill">JWT: 9</span>
               </div>
             </div>
@@ -176,35 +194,36 @@ const pool = new Pool({
               <div class="toggle-row">
                 <div>
                   <div class="toggle-title">Shield Protection</div>
-                  <div class="toggle-sub">Intercept paste on AI chat sites</div>
+                  <div class="toggle-sub">Intercept paste events on AI chat websites</div>
                 </div>
                 <div class="switch on"><span class="thumb"></span></div>
               </div>
               <div class="toggle-row">
                 <div>
-                  <div class="toggle-title">Local Anonymous Counter</div>
-                  <div class="toggle-sub">Keep private aggregate count</div>
+                  <div class="toggle-title">Local Counters</div>
+                  <div class="toggle-sub">Count blocked types locally (never values or URLs)</div>
                 </div>
                 <div class="switch on"><span class="thumb"></span></div>
               </div>
             </div>
 
-            <div class="pop-section-title">ACTIVE PLATFORMS</div>
+            <div class="pop-section-title">PROTECTED AI CHAT DOMAINS (7)</div>
             <div class="pop-card sites">
-              <div class="site-chip active"><span>Microsoft Copilot</span><span class="status-dot"></span></div>
-              <div class="site-chip active"><span>ChatGPT</span><span class="status-dot"></span></div>
-              <div class="site-chip active"><span>Claude.ai</span><span class="status-dot"></span></div>
-              <div class="site-chip active"><span>Google Gemini</span><span class="status-dot"></span></div>
-              <div class="site-chip active"><span>DeepSeek</span><span class="status-dot"></span></div>
-              <div class="site-chip active"><span>Perplexity</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>chatgpt.com</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>chat.openai.com</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>claude.ai</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>gemini.google.com</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>chat.deepseek.com</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>www.perplexity.ai</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>copilot.microsoft.com</span><span class="status-dot"></span></div>
             </div>
           </div>
 
           <div class="popup-callout">
             <h3>🔒 Complete Privacy Assurance</h3>
             <ul>
-              <li><strong>Zero Remote Calls:</strong> Enforced by Content Security Policy.</li>
-              <li><strong>Local Storage Only:</strong> Only integer counts are kept locally on device.</li>
+              <li><strong>Single Permission:</strong> Requests only <code>storage</code> for local preferences.</li>
+              <li><strong>Zero Remote Calls:</strong> Strictly enforced by <code>connect-src 'none'</code>.</li>
               <li><strong>No Secret Retention:</strong> Intercepted credentials are never written to disk.</li>
             </ul>
           </div>
@@ -213,53 +232,62 @@ const pool = new Pool({
     `,
   },
   {
-    filename: "screenshot-4-decode-tooltip.png",
-    badge: "LOCAL DEVELOPER UTILITY",
-    title: "Inspect & Decode Tokens Directly in Your Browser",
-    subtitle: "Select any JWT, timestamp, or Base64 payload without sending tokens to insecure websites",
+    filename: "screenshot-4-masked-preview.png",
+    badge: "STRICT SECRET MASKING & MULTI-SECRET DETECTION",
+    title: "Never Exposes Raw Credentials on Screen",
+    subtitle: "Displays only the first 4 characters and length while redacting multiple secrets in one paste",
     body: `
       <div class="browser-window">
         <div class="browser-header">
           <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-          <div class="address-bar"><span class="lock">🔒</span> https://github.com/developer/project</div>
+          <div class="address-bar"><span class="lock">🔒</span> https://ai-chat.example.com — Multi-Secret Paste Guard</div>
           <div class="browser-actions"><span class="ext-icon">${LOGO_SVG}</span></div>
         </div>
-        <div class="decode-scene">
-          <div class="code-view">
-            <p class="code-comment">// Inspecting authentication session payload:</p>
-            <p class="code-line">const token = <span class="selected-text">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfODg5MiIsIm5hbWUiOiJBbGV4IFZlcm1hIiwicm9sZSI6ImNsdXN0ZXItYWRtaW4iLCJpYXQiOjE3OTM0MDkyOTYsImV4cCI6MTc5MzQ1MjQ5Nn0.7a8f9c1..."</span>;</p>
-          </div>
-
-          <!-- Context Menu Simulation -->
-          <div class="context-menu">
-            <div class="ctx-item">Copy</div>
-            <div class="ctx-item">Search web for token</div>
-            <div class="ctx-divider"></div>
-            <div class="ctx-item active-ctx">
-              <span class="ctx-icon">🛡️</span>
-              <span><strong>Castov: Decode Selection</strong></span>
+        <div class="mask-scene">
+          <div class="mask-card-left">
+            <div class="pane-tag danger">📋 Pasted .env Snippet (4 Secrets Found)</div>
+            <pre class="code-box"><code>AWS_KEY=AKIAFAKEFAKEFAKEFAKE
+GITHUB_TOKEN=ghp_FAKE00000000000000000000000000000000
+DATABASE_URL=postgres://app:FAKE_SECRET_PASS@db.local:5432/main
+APP_SECRET=9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e</code></pre>
+            <div class="mask-rule-box">
+              <h4>🛡️ Strict Masking Rule</h4>
+              <p>Full secrets are never rendered in the DOM tree. Even during screen sharing or pair programming, onlookers only see safe masked previews: <code>first 4 chars + … (N chars)</code>.</p>
             </div>
-            <div class="ctx-item">Inspect</div>
           </div>
 
-          <!-- Decode Floating Tooltip -->
-          <div class="decode-tooltip">
-            <div class="tooltip-header">
-              <div class="tt-title">
-                <span class="tt-tag">JWT</span>
-                <span>Decoded Token Payload</span>
+          <div class="mask-card-right">
+            <div class="dialog compact-dialog">
+              <div class="dialog-header">
+                <div class="shield-badge">🛡️</div>
+                <div class="title-block">
+                  <h2>4 Sensitive Secrets Detected</h2>
+                  <p>Castov Secret Shield intercepted this paste to protect your credentials.</p>
+                </div>
               </div>
-              <span class="tt-status valid">✓ Valid Signature Format</span>
-            </div>
-            <pre class="tooltip-json"><code>{
-  <span class="jk">"sub"</span>: <span class="jv">"usr_8892"</span>,
-  <span class="jk">"name"</span>: <span class="jv">"Alex Verma"</span>,
-  <span class="jk">"role"</span>: <span class="jv">"cluster-admin"</span>,
-  <span class="jk">"exp"</span>: <span class="jn">1793452496</span> <span class="jc">// Valid (expires in 4h 12m)</span>
-}</code></pre>
-            <div class="tooltip-footer">
-              <span>Decoded 100% in-memory locally</span>
-              <button class="btn-copy">Copy Formatted JSON</button>
+              <div class="findings-container">
+                <div class="finding-row">
+                  <span class="finding-badge">AWS Access Key ID</span>
+                  <span class="finding-masked">AKIA… (20 chars)</span>
+                </div>
+                <div class="finding-row">
+                  <span class="finding-badge">GitHub Personal Access Token</span>
+                  <span class="finding-masked">ghp_… (40 chars)</span>
+                </div>
+                <div class="finding-row">
+                  <span class="finding-badge">Database Connection String</span>
+                  <span class="finding-masked">post… (50 chars)</span>
+                </div>
+                <div class="finding-row">
+                  <span class="finding-badge">.env High-Entropy Secret (APP_SECRET)</span>
+                  <span class="finding-masked">9f8e… (40 chars)</span>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-cancel">Cancel</button>
+                <button class="btn btn-orig">Paste Original</button>
+                <button class="btn btn-redact">Paste Redacted</button>
+              </div>
             </div>
           </div>
         </div>
@@ -268,59 +296,59 @@ const pool = new Pool({
   },
   {
     filename: "screenshot-5-supported-secrets.png",
-    badge: "11+ HIGH-ENTROPY DETECTORS & UNIVERSAL SUPPORT",
-    title: "Comprehensive Coverage for All Major Secrets & AI Platforms",
+    badge: "11+ HIGH-ENTROPY DETECTORS & EXPLICIT HOST SCOPING",
+    title: "Comprehensive Coverage for Secrets & AI Chat Domains",
     subtitle: "Built with optimized linear-time Regex and Shannon entropy detectors",
     body: `
       <div class="browser-window">
         <div class="browser-header">
           <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-          <div class="address-bar"><span class="lock">🔒</span> Castov Secret Shield Ecosystem Overview</div>
+          <div class="address-bar"><span class="lock">🔒</span> Castov Secret Shield — Supported Patterns &amp; Domains</div>
           <div class="browser-actions"><span class="ext-icon">${LOGO_SVG}</span></div>
         </div>
         <div class="matrix-scene">
           <div class="matrix-col">
-            <h3>🤖 Supported AI Chat Platforms</h3>
+            <h3>🌐 Explicitly Scoped AI Chat Domains (7)</h3>
             <div class="platform-grid">
-              <div class="plat-card"><span class="plat-icon">🔷</span><strong>Microsoft Copilot</strong><p>copilot.microsoft.com</p></div>
-              <div class="plat-card"><span class="plat-icon">🟢</span><strong>OpenAI ChatGPT</strong><p>chatgpt.com & chat.openai.com</p></div>
-              <div class="plat-card"><span class="plat-icon">🟣</span><strong>Anthropic Claude</strong><p>claude.ai</p></div>
-              <div class="plat-card"><span class="plat-icon">🔵</span><strong>Google Gemini</strong><p>gemini.google.com</p></div>
-              <div class="plat-card"><span class="plat-icon">🐳</span><strong>DeepSeek AI</strong><p>chat.deepseek.com</p></div>
-              <div class="plat-card"><span class="plat-icon">🌐</span><strong>Perplexity AI</strong><p>perplexity.ai</p></div>
+              <div class="plat-card"><span class="plat-icon">💬</span><strong>ChatGPT Domains</strong><p>chatgpt.com • chat.openai.com</p></div>
+              <div class="plat-card"><span class="plat-icon">💬</span><strong>Claude Domain</strong><p>claude.ai</p></div>
+              <div class="plat-card"><span class="plat-icon">💬</span><strong>Gemini Domain</strong><p>gemini.google.com</p></div>
+              <div class="plat-card"><span class="plat-icon">💬</span><strong>DeepSeek Domain</strong><p>chat.deepseek.com</p></div>
+              <div class="plat-card"><span class="plat-icon">💬</span><strong>Perplexity Domain</strong><p>www.perplexity.ai</p></div>
+              <div class="plat-card"><span class="plat-icon">💬</span><strong>Copilot Domain</strong><p>copilot.microsoft.com</p></div>
             </div>
           </div>
 
           <div class="matrix-col">
             <h3>🔑 Detected Sensitive Secret Patterns</h3>
             <div class="secret-list-grid">
-              <div class="sec-chip"><span class="sec-icon">☁️</span><div><strong>AWS Credentials</strong><p>AKIA... & Secret Keys</p></div></div>
-              <div class="sec-chip"><span class="sec-icon">🐙</span><div><strong>GitHub PATs</strong><p>Classic & Fine-grained</p></div></div>
-              <div class="sec-chip"><span class="sec-icon">💳</span><div><strong>Stripe Live Secrets</strong><p>sk_live_...</p></div></div>
-              <div class="sec-chip"><span class="sec-icon">🧠</span><div><strong>OpenAI & Claude API</strong><p>sk-..., sk-ant-...</p></div></div>
-              <div class="sec-chip"><span class="sec-icon">🔑</span><div><strong>SSH & PEM Keys</strong><p>RSA, EC, OpenSSH</p></div></div>
-              <div class="sec-chip"><span class="sec-icon">🗄️</span><div><strong>Database URIs</strong><p>Postgres, MySQL, Mongo</p></div></div>
-              <div class="sec-chip"><span class="sec-icon">📜</span><div><strong>JSON Web Tokens</strong><p>Auth Bearer & JWT</p></div></div>
-              <div class="sec-chip"><span class="sec-icon">🧪</span><div><strong>.env High Entropy</strong><p>Client-side Entropy Scan</p></div></div>
+              <div class="sec-chip"><span class="sec-icon">☁️</span><div><strong>AWS Access Keys</strong><p>AKIA / ASIA (20 chars)</p></div></div>
+              <div class="sec-chip"><span class="sec-icon">🐙</span><div><strong>GitHub Tokens</strong><p>ghp_... &amp; github_pat_...</p></div></div>
+              <div class="sec-chip"><span class="sec-icon">💳</span><div><strong>Stripe Live Keys</strong><p>sk_live_... &amp; rk_live_...</p></div></div>
+              <div class="sec-chip"><span class="sec-icon">🧠</span><div><strong>AI Provider Keys</strong><p>sk-proj-... &amp; sk-ant-...</p></div></div>
+              <div class="sec-chip"><span class="sec-icon">🔑</span><div><strong>SSH &amp; PEM Keys</strong><p>RSA, EC, OpenSSH, PKCS#8</p></div></div>
+              <div class="sec-chip"><span class="sec-icon">🗄️</span><div><strong>Database URIs</strong><p>Postgres, MySQL, Mongo, Redis</p></div></div>
+              <div class="sec-chip"><span class="sec-icon">📜</span><div><strong>JWT &amp; Bearer</strong><p>eyJ... &amp; Bearer Tokens</p></div></div>
+              <div class="sec-chip"><span class="sec-icon">🧪</span><div><strong>.env High Entropy</strong><p>Shannon Entropy &ge; 3.2 bits</p></div></div>
             </div>
           </div>
         </div>
         <div class="matrix-footer">
-          <span>🛡️ Open Source • Zero Network • Local Processing • Built for Microsoft Edge & Google Chrome</span>
+          <span>🛡️ Open Source • Zero Network • Local Processing • Single Purpose Paste Protection</span>
         </div>
       </div>
     `,
   },
   {
     filename: "screenshot-6-security-audit.png",
-    badge: "ENTERPRISE SECURITY & COMPLIANCE",
+    badge: "ENTERPRISE SECURITY & SINGLE-PURPOSE ARCHITECTURE",
     title: "Zero Network Connectivity Verified by Browser CSP",
-    subtitle: "Built with a mathematical zero-trust architecture — no data leaves your machine",
+    subtitle: "Built with a strict zero-trust architecture — no data ever leaves your machine",
     body: `
       <div class="browser-window">
         <div class="browser-header">
           <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-          <div class="address-bar"><span class="lock">🔒</span> Castov Secret Shield — Enterprise Privacy & Security Audit</div>
+          <div class="address-bar"><span class="lock">🔒</span> Castov Secret Shield — Privacy &amp; Security Architecture</div>
           <div class="browser-actions"><span class="ext-icon">${LOGO_SVG}</span></div>
         </div>
         <div class="audit-scene">
@@ -329,16 +357,16 @@ const pool = new Pool({
               <div class="audit-icon">🛡️</div>
               <h4>Content Security Policy</h4>
               <div class="code-line-mono">connect-src 'none'</div>
-              <p>Strictly enforced by the browser engine. The extension physically cannot make network requests or leak secrets.</p>
+              <p>Strictly enforced by the browser engine. The extension physically cannot make network requests or transmit data.</p>
               <span class="status-badge pass">✓ CSP VERIFIED</span>
             </div>
 
             <div class="audit-card">
               <div class="audit-icon">🔒</div>
-              <h4>Zero Remote Scripts</h4>
-              <div class="code-line-mono">script-src 'self'</div>
-              <p>Zero external CDNs, zero remote tracking scripts, and zero telemetry libraries. 100% packaged locally.</p>
-              <span class="status-badge pass">✓ LOCAL BUNDLE</span>
+              <h4>Minimal Permission Scope</h4>
+              <div class="code-line-mono">"permissions": ["storage"]</div>
+              <p>No &lt;all_urls&gt;, no tabs, no webRequest, and no background service worker. Scoped strictly to 7 AI chat hosts.</p>
+              <span class="status-badge pass">✓ LEAST PRIVILEGE</span>
             </div>
 
             <div class="audit-card">
@@ -353,7 +381,7 @@ const pool = new Pool({
               <div class="audit-icon">📦</div>
               <h4>Isolated Shadow DOM</h4>
               <div class="code-line-mono">attachShadow({ mode: 'open' })</div>
-              <p>Dialogs and tooltips live in an isolated Shadow Root so webpage scripts cannot tamper with or read dialog contents.</p>
+              <p>Warning dialogs render inside an isolated Shadow Root with textContent binding so host styles cannot bleed.</p>
               <span class="status-badge pass">✓ XSS IMMUNE</span>
             </div>
           </div>
@@ -372,8 +400,8 @@ const pool = new Pool({
               <span class="sum-label">Secrets Written to Disk</span>
             </div>
             <div class="summary-metric">
-              <span class="sum-num">100%</span>
-              <span class="sum-label">Local & Open Source</span>
+              <span class="sum-num">1</span>
+              <span class="sum-label">Permission (storage only)</span>
             </div>
           </div>
         </div>
@@ -559,6 +587,11 @@ body {
   flex-direction: column;
   gap: 16px;
 }
+.compact-dialog {
+  width: 100%;
+  padding: 22px 24px;
+  gap: 14px;
+}
 .dialog-header {
   display: flex;
   align-items: center;
@@ -608,7 +641,15 @@ body {
   font-size: 13px;
 }
 .finding-badge { font-weight: 600; color: #334155; }
-.finding-masked { font-family: ui-monospace, monospace; color: #dc2626; font-weight: 600; }
+.finding-masked {
+  font-family: ui-monospace, monospace;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 12px;
+}
 
 .actions {
   display: flex;
@@ -671,9 +712,11 @@ body {
   border-radius: 8px;
   padding: 14px;
   font-family: ui-monospace, monospace;
-  font-size: 12.5px;
+  font-size: 12px;
   color: #e2e8f0;
   line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 .code-box.small { font-size: 11.5px; }
 .tok-red { color: #f87171; background: rgba(239, 68, 68, 0.12); padding: 2px 4px; border-radius: 4px; }
@@ -715,7 +758,7 @@ body {
   background: #0b0f19;
 }
 .popup-box {
-  width: 360px;
+  width: 370px;
   background: #0b0f17;
   border: 1px solid #1e293b;
   border-radius: 16px;
@@ -790,7 +833,6 @@ body {
   background: #334155;
   border-radius: 9999px;
   position: relative;
-  transition: all 0.2s;
 }
 .switch.on { background: #2563eb; }
 .switch .thumb {
@@ -813,7 +855,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: 10.5px;
+  font-family: ui-monospace, monospace;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -832,125 +875,47 @@ body {
 .popup-callout li { font-size: 14px; color: #cbd5e1; line-height: 1.5; }
 .popup-callout strong { color: #ffffff; }
 
-/* Slide 4 Styles */
-.decode-scene {
+/* Slide 4 Styles (Masked Preview) */
+.mask-scene {
   flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  padding: 24px;
+  gap: 24px;
   background: #090e17;
-  padding: 30px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  align-items: center;
 }
-.code-view {
+.mask-card-left {
   background: #111827;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 24px;
-  font-family: ui-monospace, monospace;
-  font-size: 13px;
-  line-height: 1.6;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  justify-content: center;
 }
-.code-comment { color: #64748b; margin-bottom: 8px; }
-.code-line { color: #e2e8f0; }
-.selected-text {
-  background: rgba(56, 189, 248, 0.25);
+.mask-rule-box {
+  background: rgba(0, 180, 245, 0.08);
+  border: 1px solid rgba(0, 180, 245, 0.25);
+  border-radius: 10px;
+  padding: 14px;
+}
+.mask-rule-box h4 {
+  font-size: 14px;
   color: #38bdf8;
-  border: 1px dashed #38bdf8;
-  padding: 2px 4px;
-  border-radius: 4px;
+  margin-bottom: 6px;
 }
-
-.context-menu {
-  position: absolute;
-  top: 100px;
-  left: 280px;
-  width: 220px;
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  padding: 6px 0;
-  display: flex;
-  flex-direction: column;
-}
-.ctx-item {
-  padding: 7px 14px;
-  font-size: 12px;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.ctx-item.active-ctx {
-  background: #2563eb;
-  color: #ffffff;
-}
-.ctx-divider { height: 1px; background: #334155; margin: 4px 0; }
-
-.decode-tooltip {
-  margin-top: auto;
-  align-self: center;
-  width: 700px;
-  background: #0f172a;
-  border: 1px solid #334155;
-  border-top: 3px solid #00b4f5;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.tooltip-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.tt-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #f8fafc; }
-.tt-tag {
-  background: #00b4f5;
-  color: #050505;
-  font-size: 10.5px;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-.tt-status.valid {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #34d399;
-}
-.tooltip-json {
-  background: #030712;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-family: ui-monospace, monospace;
+.mask-rule-box p {
   font-size: 12.5px;
-  color: #e2e8f0;
+  color: #cbd5e1;
   line-height: 1.5;
 }
-.jk { color: #38bdf8; }
-.jv { color: #fde047; }
-.jn { color: #a78bfa; }
-.jc { color: #64748b; font-style: italic; }
-.tooltip-footer {
+.mask-card-right {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #64748b;
-}
-.btn-copy {
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #f8fafc;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
+  justify-content: center;
 }
 
 /* Slide 5 Styles */
@@ -1136,7 +1101,7 @@ async function renderSlides() {
     console.log(`✓ [${i + 1}/${SLIDES.length}] Generated ${slide.filename} (1280x800)`);
   }
 
-  console.log("All 5 store screenshots generated successfully!");
+  console.log("All 6 store screenshots generated successfully!");
 }
 
 renderSlides().catch((err) => {

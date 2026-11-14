@@ -4,9 +4,9 @@
  * Renders an isolated dialog inside a Shadow Root so:
  * 1. Host page styles (ChatGPT, Claude, Tailwind, etc.) cannot alter or break modal appearance.
  * 2. Extension styles cannot bleed into the host page.
- * 3. Default focus is set on "Paste redacted".
- * 4. Keyboard trap (Tab, Escape, Enter) for full accessibility.
- * 5. Full textContent safety against XSS.
+ * 3. Default focus is set on "Paste Redacted".
+ * 4. Keyboard trap (Tab, Shift+Tab, Escape, Enter) for full accessibility, restoring focus on close.
+ * 5. Full textContent safety against XSS and chrome.i18n support (_locales/en).
  * 6. Zero raw secret exposure in DOM tree.
  */
 
@@ -26,6 +26,25 @@ export interface ModalFindingItem {
 }
 
 const MODAL_HOST_ID = "castov-secret-shield-modal-host";
+
+/**
+ * Helper to resolve localized string via chrome.i18n.getMessage with safe English fallback.
+ */
+export function getI18nMessage(
+  key: string,
+  fallback: string,
+  substitutions?: string | string[]
+): string {
+  try {
+    if (typeof chrome !== "undefined" && chrome.i18n && typeof chrome.i18n.getMessage === "function") {
+      const msg = chrome.i18n.getMessage(key, substitutions);
+      if (msg) return msg;
+    }
+  } catch {
+    // Fallback to default English string
+  }
+  return fallback;
+}
 
 /**
  * Type guard to safely discriminate NormalizedFinding from SecretFinding.
@@ -49,6 +68,25 @@ export function adaptToModalFindingItem(
   };
 }
 
+/**
+ * Captures the currently focused element (piercing open shadow roots if applicable)
+ * so focus can be restored when the modal closes.
+ */
+function capturePreviouslyFocusedElement(): HTMLElement | null {
+  try {
+    if (typeof document !== "undefined") {
+      let active = document.activeElement as HTMLElement | null;
+      while (active && active.shadowRoot && active.shadowRoot.activeElement) {
+        active = active.shadowRoot.activeElement as HTMLElement | null;
+      }
+      return active;
+    }
+  } catch {
+    // Ignore focus capture errors
+  }
+  return null;
+}
+
 export function showSecretDetectedModal(options: ShowModalOptions): Promise<ModalUserChoice> {
   return new Promise((resolve) => {
     let isCleanedUp = false;
@@ -59,6 +97,7 @@ export function showSecretDetectedModal(options: ShowModalOptions): Promise<Moda
     let btnOriginal: HTMLButtonElement | null = null;
     let btnCancel: HTMLButtonElement | null = null;
     let itemsToRender: ModalFindingItem[] | null = null;
+    let previousActiveElement: HTMLElement | null = capturePreviouslyFocusedElement();
 
     let onKeyDown: ((e: KeyboardEvent) => void) | null = null;
     let onRedactClick: (() => void) | null = null;
@@ -90,11 +129,25 @@ export function showSecretDetectedModal(options: ShowModalOptions): Promise<Moda
         host.parentNode.removeChild(host);
       }
 
+      // Restore focus to the element that was active before the modal opened
+      try {
+        if (
+          previousActiveElement &&
+          typeof previousActiveElement.focus === "function" &&
+          previousActiveElement.isConnected
+        ) {
+          previousActiveElement.focus();
+        }
+      } catch {
+        // Ignore focus restoration errors
+      }
+
       // Break memory references
       if (itemsToRender) {
         itemsToRender.length = 0;
         itemsToRender = null;
       }
+      previousActiveElement = null;
       host = null;
       shadow = null;
       backdrop = null;
@@ -314,9 +367,9 @@ export function showSecretDetectedModal(options: ShowModalOptions): Promise<Moda
         </style>
 
         <div class="backdrop" id="backdrop">
-          <div class="dialog" id="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div class="dialog" id="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-subtitle">
             <div class="header">
-              <div class="icon-shield">🛡️</div>
+              <div class="icon-shield" aria-hidden="true">🛡️</div>
               <div class="title-block">
                 <h2 class="title" id="modal-title"></h2>
                 <p class="subtitle" id="modal-subtitle"></p>
@@ -338,27 +391,51 @@ export function showSecretDetectedModal(options: ShowModalOptions): Promise<Moda
         </div>
       `;
 
-      // Populate static text elements via textContent
+      // Populate all static text elements via chrome.i18n.getMessage and textContent
       const count = itemsToRender.length;
-      const titleText = count === 1 ? "1 Sensitive Secret Detected" : `${count} Sensitive Secrets Detected`;
+      const titleText =
+        count === 1
+          ? getI18nMessage("modalTitleSingle", "1 Sensitive Secret Detected")
+          : getI18nMessage("modalTitlePlural", `${count} Sensitive Secrets Detected`, [String(count)]);
 
       shadow.getElementById("modal-title")!.textContent = titleText;
-      shadow.getElementById("modal-subtitle")!.textContent =
-        "Castov Secret Shield intercepted this paste to protect your credentials.";
-      shadow.getElementById("modal-warning")!.textContent =
-        "Secrets pasted into AI chats may be permanently logged in conversation history, system logs, or training data.";
-      shadow.getElementById("modal-footer")!.textContent =
-        "Castov Secret Shield • Zero Network • Local Only";
+      shadow.getElementById("modal-subtitle")!.textContent = getI18nMessage(
+        "modalSubtitle",
+        "Castov Secret Shield intercepted this paste to protect your credentials."
+      );
+      shadow.getElementById("modal-warning")!.textContent = getI18nMessage(
+        "modalWarning",
+        "Secrets pasted into AI chats may be permanently logged in conversation history, system logs, or training data."
+      );
+      shadow.getElementById("modal-footer")!.textContent = getI18nMessage(
+        "modalFooter",
+        "Castov Secret Shield • Zero Network • Local Only"
+      );
 
       btnCancel = shadow.getElementById("btn-cancel") as HTMLButtonElement;
-      btnCancel.textContent = "Cancel";
+      const cancelLabel = getI18nMessage("btnCancel", "Cancel");
+      btnCancel.textContent = cancelLabel;
+      btnCancel.setAttribute(
+        "aria-label",
+        getI18nMessage("btnCancelAria", "Cancel paste operation and close dialog")
+      );
 
       btnOriginal = shadow.getElementById("btn-original") as HTMLButtonElement;
-      btnOriginal.textContent = "Paste Original";
-      btnOriginal.title = "Paste without redaction";
+      const originalLabel = getI18nMessage("btnOriginal", "Paste Original");
+      btnOriginal.textContent = originalLabel;
+      btnOriginal.title = getI18nMessage("btnOriginalTitle", "Paste without redaction");
+      btnOriginal.setAttribute(
+        "aria-label",
+        getI18nMessage("btnOriginalAria", "Paste original unredacted text containing secrets")
+      );
 
       btnRedact = shadow.getElementById("btn-redact") as HTMLButtonElement;
-      btnRedact.textContent = "Paste Redacted";
+      const redactLabel = getI18nMessage("btnRedact", "Paste Redacted");
+      btnRedact.textContent = redactLabel;
+      btnRedact.setAttribute(
+        "aria-label",
+        getI18nMessage("btnRedactAria", "Paste redacted text with secrets replaced by placeholders")
+      );
 
       backdrop = shadow.getElementById("backdrop") as HTMLDivElement;
 
@@ -385,7 +462,7 @@ export function showSecretDetectedModal(options: ShowModalOptions): Promise<Moda
 
       document.body.appendChild(host);
 
-      // Focus default button
+      // Focus default button ("Paste Redacted")
       btnRedact?.focus();
 
       onRedactClick = () => cleanup("redacted");
@@ -402,7 +479,7 @@ export function showSecretDetectedModal(options: ShowModalOptions): Promise<Moda
       btnCancel?.addEventListener("click", onCancelClick);
       backdrop?.addEventListener("click", onBackdropClick);
 
-      // Keyboard navigation: Escape cancels, Tab cycles buttons
+      // Keyboard navigation: Escape cancels, Enter activates focused button, Tab/Shift+Tab traps focus inside modal
       const focusableButtons = [btnCancel, btnOriginal, btnRedact];
 
       onKeyDown = (e: KeyboardEvent) => {
@@ -413,20 +490,44 @@ export function showSecretDetectedModal(options: ShowModalOptions): Promise<Moda
           return;
         }
 
+        if (e.key === "Enter") {
+          const activeEl = shadow?.activeElement as HTMLButtonElement | null;
+          if (activeEl === btnCancel) {
+            e.preventDefault();
+            e.stopPropagation();
+            cleanup("cancel");
+            return;
+          }
+          if (activeEl === btnOriginal) {
+            e.preventDefault();
+            e.stopPropagation();
+            cleanup("original");
+            return;
+          }
+          if (activeEl === btnRedact || !activeEl) {
+            e.preventDefault();
+            e.stopPropagation();
+            cleanup("redacted");
+            return;
+          }
+        }
+
         if (e.key === "Tab") {
-          const activeEl = shadow?.activeElement;
-          const currentIndex = focusableButtons.indexOf(activeEl as HTMLButtonElement);
+          e.preventDefault();
+          e.stopPropagation();
+          const activeEl = shadow?.activeElement as HTMLButtonElement | null;
+          const currentIndex = focusableButtons.indexOf(activeEl!);
 
           if (e.shiftKey) {
-            if (currentIndex <= 0) {
-              e.preventDefault();
-              focusableButtons[focusableButtons.length - 1]?.focus();
-            }
+            const prevIndex =
+              currentIndex <= 0 ? focusableButtons.length - 1 : currentIndex - 1;
+            focusableButtons[prevIndex]?.focus();
           } else {
-            if (currentIndex >= focusableButtons.length - 1) {
-              e.preventDefault();
-              focusableButtons[0]?.focus();
-            }
+            const nextIndex =
+              currentIndex === -1 || currentIndex >= focusableButtons.length - 1
+                ? 0
+                : currentIndex + 1;
+            focusableButtons[nextIndex]?.focus();
           }
         }
       };

@@ -19,10 +19,6 @@
       "128": "icons/icon128.png"
     }
   },
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
   "content_scripts": [
     {
       "matches": [
@@ -31,34 +27,15 @@
         "*://claude.ai/*",
         "*://gemini.google.com/*",
         "*://chat.deepseek.com/*",
-        "*://deepseek.com/*",
-        "*://www.deepseek.com/*",
         "*://www.perplexity.ai/*",
-        "*://copilot.microsoft.com/*",
-        "*://copilot.cloud.microsoft/*",
-        "*://copilot.com/*"
+        "*://copilot.microsoft.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_start"
     }
   ],
   "permissions": [
-    "storage",
-    "contextMenus",
-    "activeTab"
-  ],
-  "host_permissions": [
-    "*://chatgpt.com/*",
-    "*://chat.openai.com/*",
-    "*://claude.ai/*",
-    "*://gemini.google.com/*",
-    "*://chat.deepseek.com/*",
-    "*://deepseek.com/*",
-    "*://www.deepseek.com/*",
-    "*://www.perplexity.ai/*",
-    "*://copilot.microsoft.com/*",
-    "*://copilot.cloud.microsoft/*",
-    "*://copilot.com/*"
+    "storage"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'none'"

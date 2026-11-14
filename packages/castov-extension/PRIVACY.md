@@ -1,6 +1,6 @@
 # Privacy Policy — Castov Secret Shield
 
-**Effective Date:** October 28, 2026  
+**Effective Date:** November 14, 2026  
 **Commitment:** 100% Offline, Zero Network Calls, Zero Telemetry, Zero Data Collection.
 
 ---
@@ -11,7 +11,7 @@ Castov Secret Shield is designed from the ground up for software developers and 
 
 1. **Zero Network Connectivity**: The extension has NO permission to make network requests. Its Content Security Policy strictly enforces `connect-src 'none'`. It contains zero `fetch()`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, or external analytics scripts.
 2. **Zero Plaintext Storage**: The extension NEVER writes your secrets, tokens, clipboard contents, surrounding text, prompt bodies, or visited URLs to disk, `chrome.storage`, or logs.
-3. **Local & Ephemeral Processing**: Secret detection and decoding occur entirely in-memory on your local machine using fast, linear-time regular expressions. Once the paste dialog is closed, the text in memory is discarded.
+3. **Local & Ephemeral Processing**: Secret detection and redaction occur entirely in-memory on your local machine using fast, linear-time regular expressions. Once the paste dialog is closed, the text in memory is discarded.
 
 ---
 
@@ -20,7 +20,7 @@ Castov Secret Shield is designed from the ground up for software developers and 
 The extension uses `chrome.storage.local` exclusively on your computer for:
 
 1. **Aggregated Daily Counter**:
-   - Stores only integer counts grouped by secret category per calendar date (e.g., `{"2026-10-28": {"AWS_KEY": 2, "GITHUB_TOKEN": 1}}`).
+   - Stores only integer counts grouped by secret category per calendar date (e.g., `{"2026-11-14": {"AWS_KEY": 2, "GITHUB_TOKEN": 1}}`).
    - Entries older than 30 days are automatically deleted.
    - **No identifiers, no URLs, no text.**
 2. **User Preferences**:
@@ -32,27 +32,25 @@ If you disable local counting in the extension popup, **absolutely no counts are
 
 ---
 
-## 3. Permissions Requested & Why
+## 3. Permissions & Content Script Host Matches Requested & Why
 
 - **`storage`**: Used solely to persist your local toggle settings and the anonymous blocked counter on your device.
-- **`contextMenus`**: Used to provide the right-click "Castov: Decode Selection" menu for inspecting selected JWTs, timestamps, and Base64 strings.
-- **`activeTab`**: Allows the extension to display the floating decode tooltip on your active tab when you explicitly click the context menu.
-- **Host Permissions**: Limited strictly to 7 verified AI chat domains:
-  - `chatgpt.com`
-  - `chat.openai.com`
-  - `claude.ai`
-  - `gemini.google.com`
-  - `chat.deepseek.com`
-  - `www.perplexity.ai`
-  - `copilot.microsoft.com`
+- **Content Script Matches**: Limited strictly to 7 verified AI chat domains across 6 AI platforms:
+  1. `*://chatgpt.com/*` (OpenAI ChatGPT)
+  2. `*://chat.openai.com/*` (OpenAI ChatGPT Legacy)
+  3. `*://claude.ai/*` (Anthropic Claude)
+  4. `*://gemini.google.com/*` (Google Gemini)
+  5. `*://chat.deepseek.com/*` (DeepSeek Chat)
+  6. `*://www.perplexity.ai/*` (Perplexity AI)
+  7. `*://copilot.microsoft.com/*` (Microsoft Copilot)
 
 ---
 
 ## 4. What Is Strictly Forbidden in Our Codebase
 
 - ❌ NO `<all_urls>` permission.
-- ❌ NO `clipboardRead` background permission (clipboard data is read exclusively within the active user `paste` event).
-- ❌ NO `webRequest`, `cookies`, `history`, `identity`, or `tabs` browsing history permissions.
+- ❌ NO `clipboardRead` background permission (clipboard data is read exclusively within the active user `paste` or `drop` event).
+- ❌ NO `webRequest`, `cookies`, `history`, `identity`, `tabs`, `activeTab`, or `contextMenus` permissions.
 - ❌ NO dynamic evaluation (`eval`, `new Function`).
 - ❌ NO remote code or CDN dependencies.
 - ❌ NO analytics, telemetry, crash reporting, or user tracking.
@@ -69,4 +67,4 @@ The entire source code of Castov Secret Shield is open source. You can audit the
 npm test
 ```
 
-For questions or security disclosures: [security@castov.com](mailto:security@castov.com) or visit [castov.com](https://castov.com).
+For questions or security disclosures: [security@castov.com](mailto:security@castov.com) or visit [https://castov.com/privacy/secret-shield](https://castov.com/privacy/secret-shield).

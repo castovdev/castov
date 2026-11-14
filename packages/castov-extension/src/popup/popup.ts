@@ -16,7 +16,39 @@ import {
   ShieldSettings,
 } from "../storage/counter";
 
+function getPopupI18n(key: string, fallback: string): string {
+  try {
+    if (typeof chrome !== "undefined" && chrome.i18n && typeof chrome.i18n.getMessage === "function") {
+      const msg = chrome.i18n.getMessage(key);
+      if (msg) return msg;
+    }
+  } catch {
+    // Fallback to English text
+  }
+  return fallback;
+}
+
+export function applyPopupI18n(): void {
+  const elements = document.querySelectorAll<HTMLElement>("[data-i18n]");
+  for (const el of elements) {
+    const key = el.getAttribute("data-i18n");
+    if (key) {
+      el.textContent = getPopupI18n(key, el.textContent || "");
+    }
+  }
+
+  const ariaElements = document.querySelectorAll<HTMLElement>("[data-i18n-aria]");
+  for (const el of ariaElements) {
+    const key = el.getAttribute("data-i18n-aria");
+    if (key) {
+      el.setAttribute("aria-label", getPopupI18n(key, el.getAttribute("aria-label") || ""));
+    }
+  }
+}
+
 export async function initPopup(): Promise<void> {
+  applyPopupI18n();
+
   const [settings, weeklyCount, todayBreakdown] = await Promise.all([
     getSettings(),
     getWeeklyBlockedCount(),
@@ -48,9 +80,13 @@ function renderTodayBreakdown(breakdown: Record<string, number>): void {
   }
 
   container.style.display = "flex";
-  container.innerHTML = entries
-    .map(([type, count]) => `<span class="breakdown-pill">${type}: ${count}</span>`)
-    .join("");
+  container.replaceChildren();
+  for (const [type, count] of entries) {
+    const pill = document.createElement("span");
+    pill.className = "breakdown-pill";
+    pill.textContent = `${type}: ${count}`;
+    container.appendChild(pill);
+  }
 }
 
 function bindMasterControls(settings: ShieldSettings): void {
@@ -76,7 +112,7 @@ function renderSitesList(settings: ShieldSettings): void {
   const container = document.getElementById("sites-list");
   if (!container) return;
 
-  container.innerHTML = "";
+  container.replaceChildren();
 
   for (const site of AI_CHAT_SITES) {
     const isEnabled = settings.siteToggles[site.domain] ?? true;
@@ -84,18 +120,36 @@ function renderSitesList(settings: ShieldSettings): void {
     const row = document.createElement("div");
     row.className = "site-item";
 
-    row.innerHTML = `
-      <div>
-        <div class="site-name">${site.name}</div>
-        <div class="site-domain">${site.domain}</div>
-      </div>
-      <label class="switch">
-        <input type="checkbox" id="toggle-site-${site.id}" ${isEnabled ? "checked" : ""} />
-        <span class="slider"></span>
-      </label>
-    `;
+    const infoDiv = document.createElement("div");
+    const nameDiv = document.createElement("div");
+    nameDiv.className = "site-name";
+    nameDiv.textContent = site.name;
 
-    const input = row.querySelector("input") as HTMLInputElement;
+    const domainDiv = document.createElement("div");
+    domainDiv.className = "site-domain";
+    domainDiv.textContent = site.domain;
+
+    infoDiv.appendChild(nameDiv);
+    infoDiv.appendChild(domainDiv);
+
+    const label = document.createElement("label");
+    label.className = "switch";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.id = `toggle-site-${site.id}`;
+    input.checked = isEnabled;
+    input.setAttribute("aria-label", `Toggle protection for ${site.name} (${site.domain})`);
+
+    const slider = document.createElement("span");
+    slider.className = "slider";
+
+    label.appendChild(input);
+    label.appendChild(slider);
+
+    row.appendChild(infoDiv);
+    row.appendChild(label);
+
     input.addEventListener("change", async () => {
       const current = await getSettings();
       await updateSettings({
