@@ -31,7 +31,7 @@ All screenshots are rendered at the exact recommended Chrome Web Store resolutio
 | 2 | `screenshot-2-redaction.png` | `1280 × 800 px` | Side-by-side comparison of raw intercepted keys vs. `[REDACTED:<TYPE>_<n>]` placeholders | **Screenshots** (Slot 2) |
 | 3 | `screenshot-3-popup.png` | `1280 × 800 px` | Extension toolbar popup showing local weekly counter, global switches, and per-site toggles | **Screenshots** (Slot 3) |
 | 4 | `screenshot-4-masked-preview.png` | `1280 × 800 px` | Strict secret masking preview (`AKIA… (20 chars)`) protecting multi-secret `.env` pastes | **Screenshots** (Slot 4) |
-| 5 | `screenshot-5-supported-secrets.png` | `1280 × 800 px` | Overview of all 7 explicitly scoped AI chat domains and 11+ detected secret categories | **Screenshots** (Slot 5) |
+| 5 | `screenshot-5-supported-secrets.png` | `1280 × 800 px` | Overview of all 11 explicitly scoped AI chat domains and 11+ detected secret categories | **Screenshots** (Slot 5) |
 | 6 | `screenshot-6-security-audit.png` | `1280 × 800 px` | Zero-network CSP (`connect-src 'none'`), single `storage` permission, and Shadow DOM isolation | **Screenshots** (Optional / Alternate Slot) |
 
 ---
@@ -56,5 +56,5 @@ All screenshots are rendered at the exact recommended Chrome Web Store resolutio
 ## 6. Text & Privacy Policy Fields (See `../STORE_LISTING.md` and `../PRIVACY.md`)
 
 - **Title & Summary / Detailed Description / Category:** Copy from `../STORE_LISTING.md`.
-- **Single Purpose & Permission Justifications (`storage` + 7 host patterns):** Copy from Section 1 of `../STORE_LISTING.md` into the **Privacy practices** tab.
+- **Single Purpose & Permission Justifications (`storage` + 11 host patterns):** Copy from Section 1 of `../STORE_LISTING.md` into the **Privacy practices** tab.
 - **Privacy Policy URL:** Enter `https://castov.com/privacy/secret-shield` (rendered from `src/app/privacy/secret-shield/page.tsx` and `../PRIVACY.md`) in **Privacy practices > Privacy policy URL**.

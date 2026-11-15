@@ -322,13 +322,13 @@ const LARGE_TILE_HTML = `<!DOCTYPE html>
     </div>
 
     <div class="platforms-supported">
-      <span>7 Protected AI Domains:</span>
+      <span>11 Protected AI Domains:</span>
       <div class="plat-tags">
         <span class="plat-tag">chatgpt.com</span>
         <span class="plat-tag">claude.ai</span>
         <span class="plat-tag">gemini.google.com</span>
         <span class="plat-tag">chat.deepseek.com</span>
-        <span class="plat-tag">+3 more</span>
+        <span class="plat-tag">www.perplexity.ai</span>
       </div>
     </div>
   </div>

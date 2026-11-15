@@ -98,8 +98,12 @@ describe("Castov Secret Shield - Automated Bundle & Security Verification", () =
       "*://claude.ai/*",
       "*://gemini.google.com/*",
       "*://chat.deepseek.com/*",
+      "*://deepseek.com/*",
+      "*://www.deepseek.com/*",
       "*://www.perplexity.ai/*",
       "*://copilot.microsoft.com/*",
+      "*://copilot.cloud.microsoft/*",
+      "*://copilot.com/*",
     ];
     expect(manifest.content_scripts?.[0]?.matches).toEqual(approvedMatches);
 

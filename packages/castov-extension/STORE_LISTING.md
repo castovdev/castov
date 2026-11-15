@@ -19,11 +19,15 @@
 - `*://claude.ai/*`
 - `*://gemini.google.com/*`
 - `*://chat.deepseek.com/*`
+- `*://deepseek.com/*`
+- `*://www.deepseek.com/*`
 - `*://www.perplexity.ai/*`
 - `*://copilot.microsoft.com/*`
+- `*://copilot.cloud.microsoft/*`
+- `*://copilot.com/*`
 
 > **Justification:**  
-> "Content scripts are restricted strictly to these 7 verified AI chat domains (covering ChatGPT, Claude, Google Gemini, DeepSeek, Perplexity, and Microsoft Copilot) to intercept paste and drop events in the capture phase and prevent accidental leaks of sensitive credentials into prompts. Broad `<all_urls>` permissions are intentionally not requested."
+> "Content scripts are restricted strictly to these 11 verified AI chat domains (covering ChatGPT on `chatgpt.com` and `chat.openai.com`, Claude on `claude.ai`, Google Gemini on `gemini.google.com`, DeepSeek across `chat.deepseek.com`, `deepseek.com`, and `www.deepseek.com`, Perplexity on `www.perplexity.ai`, and Microsoft Copilot across `copilot.microsoft.com`, `copilot.cloud.microsoft`, and `copilot.com`) to intercept paste and drop events in the capture phase and prevent accidental leaks of sensitive credentials into prompts. Broad `<all_urls>` permissions are intentionally not requested."
 
 ---
 

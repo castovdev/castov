@@ -35,14 +35,18 @@ If you disable local counting in the extension popup, **absolutely no counts are
 ## 3. Permissions & Content Script Host Matches Requested & Why
 
 - **`storage`**: Used solely to persist your local toggle settings and the anonymous blocked counter on your device.
-- **Content Script Matches**: Limited strictly to 7 verified AI chat domains across 6 AI platforms:
+- **Content Script Matches**: Limited strictly to 11 verified AI chat domains across 6 AI platforms:
   1. `*://chatgpt.com/*` (OpenAI ChatGPT)
   2. `*://chat.openai.com/*` (OpenAI ChatGPT Legacy)
   3. `*://claude.ai/*` (Anthropic Claude)
   4. `*://gemini.google.com/*` (Google Gemini)
   5. `*://chat.deepseek.com/*` (DeepSeek Chat)
-  6. `*://www.perplexity.ai/*` (Perplexity AI)
-  7. `*://copilot.microsoft.com/*` (Microsoft Copilot)
+  6. `*://deepseek.com/*` (DeepSeek Web)
+  7. `*://www.deepseek.com/*` (DeepSeek WWW)
+  8. `*://www.perplexity.ai/*` (Perplexity AI)
+  9. `*://copilot.microsoft.com/*` (Microsoft Copilot)
+  10. `*://copilot.cloud.microsoft/*` (Microsoft 365 Copilot)
+  11. `*://copilot.com/*` (Microsoft Copilot Consumer)
 
 ---
 

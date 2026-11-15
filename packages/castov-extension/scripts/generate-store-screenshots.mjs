@@ -207,15 +207,19 @@ const pool = new Pool({
               </div>
             </div>
 
-            <div class="pop-section-title">PROTECTED AI CHAT DOMAINS (7)</div>
+            <div class="pop-section-title">PROTECTED AI CHAT DOMAINS (11)</div>
             <div class="pop-card sites">
               <div class="site-chip active"><span>chatgpt.com</span><span class="status-dot"></span></div>
               <div class="site-chip active"><span>chat.openai.com</span><span class="status-dot"></span></div>
               <div class="site-chip active"><span>claude.ai</span><span class="status-dot"></span></div>
               <div class="site-chip active"><span>gemini.google.com</span><span class="status-dot"></span></div>
               <div class="site-chip active"><span>chat.deepseek.com</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>deepseek.com</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>www.deepseek.com</span><span class="status-dot"></span></div>
               <div class="site-chip active"><span>www.perplexity.ai</span><span class="status-dot"></span></div>
               <div class="site-chip active"><span>copilot.microsoft.com</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>copilot.cloud.microsoft</span><span class="status-dot"></span></div>
+              <div class="site-chip active"><span>copilot.com</span><span class="status-dot"></span></div>
             </div>
           </div>
 
@@ -308,14 +312,14 @@ APP_SECRET=9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e</code></pre>
         </div>
         <div class="matrix-scene">
           <div class="matrix-col">
-            <h3>🌐 Explicitly Scoped AI Chat Domains (7)</h3>
+            <h3>🌐 Explicitly Scoped AI Chat Domains (11)</h3>
             <div class="platform-grid">
               <div class="plat-card"><span class="plat-icon">💬</span><strong>ChatGPT Domains</strong><p>chatgpt.com • chat.openai.com</p></div>
               <div class="plat-card"><span class="plat-icon">💬</span><strong>Claude Domain</strong><p>claude.ai</p></div>
               <div class="plat-card"><span class="plat-icon">💬</span><strong>Gemini Domain</strong><p>gemini.google.com</p></div>
-              <div class="plat-card"><span class="plat-icon">💬</span><strong>DeepSeek Domain</strong><p>chat.deepseek.com</p></div>
+              <div class="plat-card"><span class="plat-icon">💬</span><strong>DeepSeek Domains</strong><p>chat.deepseek.com • deepseek.com • www</p></div>
               <div class="plat-card"><span class="plat-icon">💬</span><strong>Perplexity Domain</strong><p>www.perplexity.ai</p></div>
-              <div class="plat-card"><span class="plat-icon">💬</span><strong>Copilot Domain</strong><p>copilot.microsoft.com</p></div>
+              <div class="plat-card"><span class="plat-icon">💬</span><strong>Copilot Domains</strong><p>copilot.microsoft.com • cloud • copilot.com</p></div>
             </div>
           </div>
 
@@ -365,7 +369,7 @@ APP_SECRET=9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e</code></pre>
               <div class="audit-icon">🔒</div>
               <h4>Minimal Permission Scope</h4>
               <div class="code-line-mono">"permissions": ["storage"]</div>
-              <p>No &lt;all_urls&gt;, no tabs, no webRequest, and no background service worker. Scoped strictly to 7 AI chat hosts.</p>
+              <p>No &lt;all_urls&gt;, no tabs, no webRequest, and no background service worker. Scoped strictly to 11 AI chat hosts.</p>
               <span class="status-badge pass">✓ LEAST PRIVILEGE</span>
             </div>
 
@@ -758,15 +762,15 @@ body {
   background: #0b0f19;
 }
 .popup-box {
-  width: 370px;
+  width: 390px;
   background: #0b0f17;
   border: 1px solid #1e293b;
   border-radius: 16px;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
-  padding: 20px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 .pop-header {
   display: flex;
@@ -847,15 +851,15 @@ body {
 .pop-card.sites {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 10px;
+  gap: 5px;
+  padding: 8px;
 }
 .site-chip {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 10.5px;
+  padding: 4px 8px;
+  font-size: 10px;
   font-family: ui-monospace, monospace;
   display: flex;
   align-items: center;

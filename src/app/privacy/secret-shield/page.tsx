@@ -59,15 +59,19 @@ export default function SecretShieldPrivacyPage() {
           <strong><code>storage</code>:</strong> Used solely to persist your local toggle settings and the anonymous blocked counter on your device.
         </li>
         <li>
-          <strong>Content Script Matches:</strong> Limited strictly to 7 verified AI chat domains across 6 AI platforms:
+          <strong>Content Script Matches:</strong> Limited strictly to 11 verified AI chat domains across 6 AI platforms (to intercept paste and drop events in the capture phase and prevent accidental leaks of sensitive credentials into prompts without requesting broad <code>&lt;all_urls&gt;</code> permissions):
           <ol>
             <li><code>*://chatgpt.com/*</code> (OpenAI ChatGPT)</li>
             <li><code>*://chat.openai.com/*</code> (OpenAI ChatGPT Legacy)</li>
             <li><code>*://claude.ai/*</code> (Anthropic Claude)</li>
             <li><code>*://gemini.google.com/*</code> (Google Gemini)</li>
             <li><code>*://chat.deepseek.com/*</code> (DeepSeek Chat)</li>
+            <li><code>*://deepseek.com/*</code> (DeepSeek Web)</li>
+            <li><code>*://www.deepseek.com/*</code> (DeepSeek WWW)</li>
             <li><code>*://www.perplexity.ai/*</code> (Perplexity AI)</li>
             <li><code>*://copilot.microsoft.com/*</code> (Microsoft Copilot)</li>
+            <li><code>*://copilot.cloud.microsoft/*</code> (Microsoft 365 Copilot)</li>
+            <li><code>*://copilot.com/*</code> (Microsoft Copilot Consumer)</li>
           </ol>
         </li>
       </ul>

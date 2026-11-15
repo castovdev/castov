@@ -27,8 +27,12 @@
         "*://claude.ai/*",
         "*://gemini.google.com/*",
         "*://chat.deepseek.com/*",
+        "*://deepseek.com/*",
+        "*://www.deepseek.com/*",
         "*://www.perplexity.ai/*",
-        "*://copilot.microsoft.com/*"
+        "*://copilot.microsoft.com/*",
+        "*://copilot.cloud.microsoft/*",
+        "*://copilot.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_start"

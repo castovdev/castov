@@ -1,7 +1,7 @@
 /**
  * Castov Secret Shield - AI Chat Site Configurations
  *
- * SafePaste is strictly scoped to these 7 verified AI chat site origins.
+ * SafePaste is strictly scoped to these 11 verified AI chat site origins.
  * Never match <all_urls> or unapproved external domains.
  */
 
@@ -44,6 +44,18 @@ export const AI_CHAT_SITES: readonly AISiteConfig[] = [
     hostPattern: "*://chat.deepseek.com/*",
   },
   {
+    id: "deepseek_main",
+    name: "DeepSeek (Web)",
+    domain: "deepseek.com",
+    hostPattern: "*://deepseek.com/*",
+  },
+  {
+    id: "deepseek_www",
+    name: "DeepSeek (WWW)",
+    domain: "www.deepseek.com",
+    hostPattern: "*://www.deepseek.com/*",
+  },
+  {
     id: "perplexity",
     name: "Perplexity AI",
     domain: "www.perplexity.ai",
@@ -54,6 +66,18 @@ export const AI_CHAT_SITES: readonly AISiteConfig[] = [
     name: "Microsoft Copilot",
     domain: "copilot.microsoft.com",
     hostPattern: "*://copilot.microsoft.com/*",
+  },
+  {
+    id: "copilot_cloud",
+    name: "Microsoft Copilot (M365)",
+    domain: "copilot.cloud.microsoft",
+    hostPattern: "*://copilot.cloud.microsoft/*",
+  },
+  {
+    id: "copilot_consumer",
+    name: "Microsoft Copilot (Consumer)",
+    domain: "copilot.com",
+    hostPattern: "*://copilot.com/*",
   },
 ] as const;
 

@@ -4,14 +4,18 @@
 
 ---
 
-## Supported AI Chat Domains (7 Explicit Hosts)
-1. `chatgpt.com`
-2. `chat.openai.com`
-3. `claude.ai`
-4. `gemini.google.com`
-5. `chat.deepseek.com`
-6. `www.perplexity.ai`
-7. `copilot.microsoft.com`
+## Supported AI Chat Domains (11 Explicit Hosts)
+1. `*://chatgpt.com/*` (`chatgpt.com`)
+2. `*://chat.openai.com/*` (`chat.openai.com`)
+3. `*://claude.ai/*` (`claude.ai`)
+4. `*://gemini.google.com/*` (`gemini.google.com`)
+5. `*://chat.deepseek.com/*` (`chat.deepseek.com`)
+6. `*://deepseek.com/*` (`deepseek.com`)
+7. `*://www.deepseek.com/*` (`www.deepseek.com`)
+8. `*://www.perplexity.ai/*` (`www.perplexity.ai`)
+9. `*://copilot.microsoft.com/*` (`copilot.microsoft.com`)
+10. `*://copilot.cloud.microsoft/*` (`copilot.cloud.microsoft`)
+11. `*://copilot.com/*` (`copilot.com`)
 
 ---
 

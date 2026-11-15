@@ -77,23 +77,43 @@ describe("Castov Secret Shield - Popup Interface & i18n", () => {
     expect(updated.enabled).toBe(false);
   });
 
-  it("renders all 7 AI chat sites with individual accessible toggles", async () => {
+  it("renders all 11 AI chat sites with individual accessible toggles", async () => {
     await initPopup();
 
     const siteItems = document.querySelectorAll(".site-item");
-    expect(siteItems.length).toBe(7);
+    expect(siteItems.length).toBe(11);
 
-    // Verify DeepSeek Chat toggle is present
+    // Verify all 3 deepseek toggles are present and distinct
     const deepseekChatToggle = document.getElementById("toggle-site-deepseek") as HTMLInputElement;
     expect(deepseekChatToggle).not.toBeNull();
     expect(deepseekChatToggle.checked).toBe(true);
     expect(deepseekChatToggle.getAttribute("aria-label")).toContain("chat.deepseek.com");
 
-    // Verify Microsoft Copilot toggle is present
+    const deepseekMainToggle = document.getElementById("toggle-site-deepseek_main") as HTMLInputElement;
+    expect(deepseekMainToggle).not.toBeNull();
+    expect(deepseekMainToggle.checked).toBe(true);
+    expect(deepseekMainToggle.getAttribute("aria-label")).toContain("deepseek.com");
+
+    const deepseekWwwToggle = document.getElementById("toggle-site-deepseek_www") as HTMLInputElement;
+    expect(deepseekWwwToggle).not.toBeNull();
+    expect(deepseekWwwToggle.checked).toBe(true);
+    expect(deepseekWwwToggle.getAttribute("aria-label")).toContain("www.deepseek.com");
+
+    // Verify all 3 copilot toggles are present and distinct
     const copilotToggle = document.getElementById("toggle-site-copilot") as HTMLInputElement;
     expect(copilotToggle).not.toBeNull();
     expect(copilotToggle.checked).toBe(true);
     expect(copilotToggle.getAttribute("aria-label")).toContain("copilot.microsoft.com");
+
+    const copilotCloudToggle = document.getElementById("toggle-site-copilot_cloud") as HTMLInputElement;
+    expect(copilotCloudToggle).not.toBeNull();
+    expect(copilotCloudToggle.checked).toBe(true);
+    expect(copilotCloudToggle.getAttribute("aria-label")).toContain("copilot.cloud.microsoft");
+
+    const copilotConsumerToggle = document.getElementById("toggle-site-copilot_consumer") as HTMLInputElement;
+    expect(copilotConsumerToggle).not.toBeNull();
+    expect(copilotConsumerToggle.checked).toBe(true);
+    expect(copilotConsumerToggle.getAttribute("aria-label")).toContain("copilot.com");
 
     // Toggle off ChatGPT
     const chatGptToggle = document.getElementById("toggle-site-chatgpt") as HTMLInputElement;

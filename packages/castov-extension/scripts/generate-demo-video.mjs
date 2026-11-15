@@ -555,7 +555,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
       const bullets = [
         { icon: '🔒', title: "Zero Network Connectivity (connect-src 'none')", desc: 'No fetch, no XHR, no WebSocket, no telemetry or remote servers.' },
         { icon: '🛡️', title: 'Single Permission: storage Only', desc: 'Stores only local toggle preferences and anonymous category counts.' },
-        { icon: '⚡', title: '7 Explicitly Scoped AI Chat Domains', desc: 'Toggle protection independently for each supported AI chat domain.' },
+        { icon: '⚡', title: '11 Explicitly Scoped AI Chat Domains', desc: 'Toggle protection independently for each supported AI chat domain.' },
         { icon: '👁️', title: 'Strict Secret Masking', desc: 'Never logs or renders full raw secrets in DOM or local storage.' }
       ];
 
