@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://www.castov.com">
+    <img src="./assets/castov-logo-horizontal.png" alt="Castov" width="260" />
+  </a>
+</p>
+
 # Castov GitHub Action 🛡️
 
 Fast, 100% offline secret scanning, port verification, and environment validation right inside your GitHub Actions CI/CD workflows.
